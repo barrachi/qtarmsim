@@ -4,3 +4,4 @@ ui/*.py
 .pydevproject
 .settings
 __pycache__
+resources/*_rc.py

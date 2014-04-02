@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
@@ -9,7 +9,7 @@
 
 
 import sys, os
-import prin_rc
+import resources.prin_rc as prin_rc
 from PyQt4 import QtCore, QtGui
 from ui.principal2 import Ui_MainWindow
 from op import Opciones
@@ -20,7 +20,6 @@ from va import Valor
 from co import Conso
 from im import Imprimir
 from ay import Ayuda
-
 
 
 ##Clase que define la ventana principal que hereda de la clase QMainWindow del módulo QtGui
@@ -530,7 +529,7 @@ class Principal(QtGui.QMainWindow):
         #Añade el estado de los registros guardado en el fichero reg al panel
         f = QtCore.QFile(":/dictionary/reg.txt")
         f.open(QtCore.QFile.ReadOnly)
-        self.registers.setText(QtCore.QString(f.readAll()))
+        self.registers.setText(QtCore.QTextStream(f).readAll())
         f.close()
         
         #Anyade el cuadro de edicion de texto al panel
@@ -551,7 +550,7 @@ class Principal(QtGui.QMainWindow):
 
         f = QtCore.QFile(":/dictionary/text.txt")
         f.open(QtCore.QFile.ReadOnly)
-        self.texto.setText(QtCore.QString(f.readAll()))
+        self.texto.setText(QtCore.QTextStream(f).readAll())
         f.close()
         self.dock2.setWidget(self.texto)
         self.dock2.setWhatsThis(self.tr("Panel de visualización de código, muestra las instrucciones del programa de usuario y del núcleo del sistema que se carga automáticamente cuando se inicia XSPIM"))
@@ -570,7 +569,7 @@ class Principal(QtGui.QMainWindow):
 
         f = QtCore.QFile(":/dictionary/data.txt")
         f.open(QtCore.QFile.ReadOnly)
-        self.data.setText(QtCore.QString(f.readAll()))
+        self.data.setText(QtCore.QTextStream(f).readAll())
         f.close()
         self.dock3.setWidget(self.data)
         self.dock3.setWhatsThis(self.tr("Panel de visualización de datos, muestra el contenido de la memoria"))
@@ -591,8 +590,8 @@ class Principal(QtGui.QMainWindow):
         self.mens.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.mens.setCurrentFont(fuente)
         f = QtCore.QFile(":/dictionary/mens.txt")
-        f.open(QtCore.QFile.ReadOnly)
-        self.mens.setText(QtCore.QString(f.readAll()))
+        f.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text)
+        self.mens.setText(QtCore.QTextStream(f).readAll())
         f.close()
         self.dock4.setWidget(self.mens)
         self.dock4.setWhatsThis(self.tr("Panel de visualización de mensajes, lo utiliza el simulador para informar de qué está haciendo y avisar de los errores que ocurran durante el ensamblado o ejecución de un programa"))

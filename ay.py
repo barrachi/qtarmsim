@@ -5,7 +5,7 @@
 #Construir la ventana que muestra la ayuda
 
 import sys, os
-import prin_rc
+import resources.prin_rc as prin_rc
 from PyQt4 import QtCore, QtGui, Qt
 from ui.ayuda import Ui_Ayuda
 

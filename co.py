@@ -7,7 +7,7 @@
 
 from PyQt4 import QtCore, QtGui, Qt
 from ui.consola import Ui_Consola
-import cons_rc
+import resources.cons_rc as cons_rc
 import sys
 
 ##Clase que define la consola que hereda de la clase QWidget del módulo QtGui
