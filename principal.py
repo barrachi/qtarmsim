@@ -8,10 +8,10 @@
 
 
 
-import sys,  os
+import sys, os
 import prin_rc
 from PyQt4 import QtCore, QtGui
-from principal2 import Ui_MainWindow
+from ui.principal2 import Ui_MainWindow
 from op import Opciones
 from ej import Ejecutar
 from mu import Multipasos

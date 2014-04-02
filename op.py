@@ -6,7 +6,7 @@
 
 import sys
 from PyQt4 import QtCore, QtGui, Qt
-from opciones import Ui_Opciones
+from ui.opciones import Ui_Opciones
 
 ##Clase que define el diálogo opciones que hereda de la clase QDialog del módulo QtGui
 class Opciones(QtGui.QDialog):

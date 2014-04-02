@@ -1,1 +1,6 @@
 documentacion
+ui/*.py
+.project
+.pydevproject
+.settings
+__pycache__

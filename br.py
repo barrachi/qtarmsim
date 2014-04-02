@@ -5,7 +5,7 @@
 
 import sys
 from PyQt4 import QtCore, QtGui, Qt
-from breakpo import Ui_Break
+from ui.breakpo import Ui_Break
 
 ##Clase que define el diálogo puntos de ruptura que hereda de la clase QDialog del módulo QtGui
 class Breakpoi(QtGui.QDialog):

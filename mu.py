@@ -6,7 +6,7 @@
 
 import sys
 from PyQt4 import QtCore, QtGui, Qt
-from multi import Ui_Multipasos
+from ui.multi import Ui_Multipasos
 
 ##Clase que define el diálogo múltiples pasos que hereda de la clase QDialog del módulo QtGui
 class Multipasos(QtGui.QDialog):

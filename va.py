@@ -6,7 +6,7 @@
 
 import sys
 from PyQt4 import QtCore, QtGui, Qt
-from value import Ui_Value
+from ui.value import Ui_Value
 
 ##Clase que define el diálogo asignar valor que hereda de la clase QDialog del módulo QtGui
 class Valor(QtGui.QDialog):

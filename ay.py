@@ -7,7 +7,7 @@
 import sys, os
 import prin_rc
 from PyQt4 import QtCore, QtGui, Qt
-from ayuda import Ui_Ayuda
+from ui.ayuda import Ui_Ayuda
 
 ##Clase que define la ventana de ayuda que hereda de la clase QWidget del módulo QtGui
 class Ayuda(QtGui.QWidget):

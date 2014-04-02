@@ -7,7 +7,7 @@
 
 import sys
 from PyQt4 import QtCore, QtGui, Qt
-from ejec import Ui_Ejecutar
+from ui.ejec import Ui_Ejecutar
 
 ##Clase que define el diálogo parámetros de ejecución que hereda de la clase QDialog del módulo QtGui
 class Ejecutar(QtGui.QDialog):

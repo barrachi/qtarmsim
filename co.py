@@ -5,13 +5,13 @@
 #Construir la consola de entrada salida
 
 
-import sys
-import cons_rc
 from PyQt4 import QtCore, QtGui, Qt
-from consola import Ui_Consola
+from ui.consola import Ui_Consola
+import cons_rc
+import sys
 
 ##Clase que define la consola que hereda de la clase QWidget del módulo QtGui
-class Conso(QtGui.QWidget):
+class Conso(QtGui.QMainWindow):
     ##Constructor de la consola
     def __init__(self,parent=None):
         QtGui.QMainWindow.__init__(self,parent)
