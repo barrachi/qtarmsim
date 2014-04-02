@@ -1,0 +1,67 @@
+<ui version="4.0" >
+ <class>Multipasos</class>
+ <widget class="QDialog" name="Multipasos" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>101</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Múltiples pasos</string>
+  </property>
+  <widget class="QLabel" name="pasoslabel" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>30</y>
+     <width>87</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Número de pasos:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="pasos" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>50</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="aceptarButton" >
+   <property name="geometry" >
+    <rect>
+     <x>280</x>
+     <y>20</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Aceptar</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancelarButton" >
+   <property name="geometry" >
+    <rect>
+     <x>280</x>
+     <y>60</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancelar</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

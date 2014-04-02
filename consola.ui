@@ -1,0 +1,19 @@
+<ui version="4.0" >
+ <class>Consola</class>
+ <widget class="QMainWindow" name="Consola" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>295</width>
+    <height>302</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string/>
+  </property>
+  <widget class="QWidget" name="centralWidget" />
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

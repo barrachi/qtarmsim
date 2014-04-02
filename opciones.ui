@@ -1,0 +1,119 @@
+<ui version="4.0" >
+ <class>Opciones</class>
+ <widget class="QDialog" name="Opciones" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Opciones</string>
+  </property>
+  <widget class="QPushButton" name="actionExplorar" >
+   <property name="geometry" >
+    <rect>
+     <x>280</x>
+     <y>130</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Explorar</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="Bare" >
+   <property name="geometry" >
+    <rect>
+     <x>41</x>
+     <y>51</y>
+     <width>99</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Bare mode</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="Quiet" >
+   <property name="geometry" >
+    <rect>
+     <x>146</x>
+     <y>51</y>
+     <width>99</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Quiet mode</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="Mapped" >
+   <property name="geometry" >
+    <rect>
+     <x>251</x>
+     <y>51</y>
+     <width>99</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Mapped I/O</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="Loadtrap" >
+   <property name="geometry" >
+    <rect>
+     <x>41</x>
+     <y>136</y>
+     <width>87</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Load trap file</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Directrap" >
+   <property name="geometry" >
+    <rect>
+     <x>134</x>
+     <y>135</y>
+     <width>133</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancelarButton" >
+   <property name="geometry" >
+    <rect>
+     <x>290</x>
+     <y>240</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancelar</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="buttonBox" >
+   <property name="geometry" >
+    <rect>
+     <x>190</x>
+     <y>240</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Aceptar</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

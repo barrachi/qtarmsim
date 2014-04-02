@@ -1,0 +1,410 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>630</width>
+    <height>547</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" />
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>630</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuArchivo" >
+    <property name="title" >
+     <string>Archivo</string>
+    </property>
+    <addaction name="actionAbrir" />
+    <addaction name="actionGuardar" />
+    <addaction name="separator" />
+    <addaction name="actionSalir" />
+   </widget>
+   <widget class="QMenu" name="menuEdicion" >
+    <property name="title" >
+     <string>Simulación</string>
+    </property>
+    <addaction name="actionLimpiar_Registros" />
+    <addaction name="actionReinicializar" />
+    <addaction name="actionRecargar" />
+    <addaction name="separator" />
+    <addaction name="actionEjecutar" />
+    <addaction name="actionParar" />
+    <addaction name="separator" />
+    <addaction name="actionEjecuci_n_pasos" />
+    <addaction name="actionEjecuci_n_multipasos" />
+    <addaction name="separator" />
+    <addaction name="actionPunto_de_corte" />
+    <addaction name="separator" />
+    <addaction name="actionFijar_valor" />
+    <addaction name="actionImprimir" />
+    <addaction name="separator" />
+    <addaction name="actionOpciones_2" />
+   </widget>
+   <widget class="QMenu" name="menuVer" >
+    <property name="title" >
+     <string>Ventana</string>
+    </property>
+    <addaction name="actionLimpiar_Consola" />
+    <addaction name="separator" />
+   </widget>
+   <widget class="QMenu" name="menuAyuda" >
+    <property name="title" >
+     <string>Ayuda</string>
+    </property>
+    <addaction name="actionTemas_de_ayuda" />
+    <addaction name="separator" />
+    <addaction name="actionSobre_spim" />
+   </widget>
+   <addaction name="menuArchivo" />
+   <addaction name="menuEdicion" />
+   <addaction name="menuVer" />
+   <addaction name="menuAyuda" />
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <widget class="QToolBar" name="fileToolBar" >
+   <property name="windowTitle" >
+    <string>Barra de herramientas</string>
+   </property>
+   <property name="toolButtonStyle" >
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <attribute name="toolBarArea" >
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak" >
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionAbrir" >
+   <property name="checkable" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>Abrir</string>
+   </property>
+   <property name="statusTip" >
+    <string>Abrir un archivo existente</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite especificar el nombre del fichero que debe ser cargado y ensamblado en memoria</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionGuardar" >
+   <property name="text" >
+    <string>Guardar log</string>
+   </property>
+   <property name="statusTip" >
+    <string>Guardar estado en archivo</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite guardar un log del estado actual de los segmentos de texto y datos, de los registros, los mensajes y la consola</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLimpiar_Registros" >
+   <property name="text" >
+    <string>Limpiar Registros</string>
+   </property>
+   <property name="statusTip" >
+    <string>Limpiar  registros</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Restaura al valor inicial el contenido de los registros</string>
+   </property>
+  </action>
+  <action name="actionReinicializar" >
+   <property name="text" >
+    <string>Reinicializar</string>
+   </property>
+   <property name="statusTip" >
+    <string>Limpiar registros y memoria</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Restaura a su valor incial el contenido de los registros y la memoria</string>
+   </property>
+  </action>
+  <action name="actionRecargar" >
+   <property name="text" >
+    <string>Recargar</string>
+   </property>
+   <property name="statusTip" >
+    <string>Recargar el archivo actual</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite ensamblar de nuevo el archivo actualmente ensamblado</string>
+   </property>
+  </action>
+  <action name="actionEjecutar" >
+   <property name="text" >
+    <string>Ejecutar</string>
+   </property>
+   <property name="statusTip" >
+    <string>Ejecutar programa</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Sirve para ejecutar el programa cargado en memoria. Antes de comenzar la ejecución un diálogo permite especificar la dirección de comienzo de la ejecución</string>
+   </property>
+   <property name="shortcut" >
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionParar" >
+   <property name="text" >
+    <string>Parar</string>
+   </property>
+   <property name="statusTip" >
+    <string>Detener la ejecución</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite detener la ejecución en curso</string>
+   </property>
+  </action>
+  <action name="actionEjecuci_n_pasos" >
+   <property name="text" >
+    <string>Ejecución pasos</string>
+   </property>
+   <property name="statusTip" >
+    <string>Ejecutar paso a paso</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite ejecutar el programa instrucción por instrucción</string>
+   </property>
+   <property name="shortcut" >
+    <string>F10</string>
+   </property>
+  </action>
+  <action name="actionEjecuci_n_multipasos" >
+   <property name="text" >
+    <string>Ejecución multipasos</string>
+   </property>
+   <property name="statusTip" >
+    <string>Ejecutar múltiples pasos</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Mediante un cuadro de diálogo se especifica el número de instrucciones que se deben ejecutar en cada paso</string>
+   </property>
+   <property name="shortcut" >
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="actionPunto_de_corte" >
+   <property name="text" >
+    <string>Puntos de ruptura</string>
+   </property>
+   <property name="statusTip" >
+    <string>Añadir punto de ruptura</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Sirve para introducir o borrar puntos de ruptura en la ejecución del programa. Un cuadro de diálogo permite añadir las direcciones de memoria en las que se desea detener la ejecución</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionOpciones" >
+   <property name="text" >
+    <string>Opciones</string>
+   </property>
+  </action>
+  <action name="actionFuente" >
+   <property name="text" >
+    <string>Fuente</string>
+   </property>
+  </action>
+  <action name="actionMensajes" >
+   <property name="checkable" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>Mensajes</string>
+   </property>
+  </action>
+  <action name="actionSegmento_de_texto" >
+   <property name="checkable" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>Segmento de texto</string>
+   </property>
+  </action>
+  <action name="actionSegmento_de_datos" >
+   <property name="checkable" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>Segmento de datos</string>
+   </property>
+  </action>
+  <action name="actionRegistros" >
+   <property name="checkable" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>Registros</string>
+   </property>
+  </action>
+  <action name="actionConsola" >
+   <property name="checkable" >
+    <bool>false</bool>
+   </property>
+   <property name="text" >
+    <string>Consola</string>
+   </property>
+   <property name="statusTip" >
+    <string>Consola</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Oculta o hace visible la consola</string>
+   </property>
+  </action>
+  <action name="actionLimpiar_Consola" >
+   <property name="text" >
+    <string>Limpiar Consola</string>
+   </property>
+   <property name="statusTip" >
+    <string>Limpiar Consola</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Limpia el contenido de la consola</string>
+   </property>
+  </action>
+  <action name="actionBarra_de_herramientas" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Barra de herramientas</string>
+   </property>
+   <property name="statusTip" >
+    <string>Barra de herramientas</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Oculta o hace visible la barra de herramientas</string>
+   </property>
+  </action>
+  <action name="actionBarra_de_estado" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="text" >
+    <string>Barra de estado</string>
+   </property>
+   <property name="statusTip" >
+    <string>Barra de estado</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Oculta o hace visible la barra de estado</string>
+   </property>
+  </action>
+  <action name="actionTemas_de_ayuda" >
+   <property name="text" >
+    <string>¿Qué es esto?</string>
+   </property>
+   <property name="statusTip" >
+    <string>¿Qué es esto?</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Activa la ayuda</string>
+   </property>
+  </action>
+  <action name="actionSobre_spim" >
+   <property name="text" >
+    <string>Sobre spim</string>
+   </property>
+   <property name="statusTip" >
+    <string>Sobre spim</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Imprime en el panel mensajes información sobre XSPIM</string>
+   </property>
+  </action>
+  <action name="actionSalir" >
+   <property name="text" >
+    <string>Salir</string>
+   </property>
+   <property name="statusTip" >
+    <string>Salir de la aplicación</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Se utiliza para terminar la sesión del simulador</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionFijar_valor" >
+   <property name="text" >
+    <string>Fijar valor</string>
+   </property>
+   <property name="statusTip" >
+    <string>Fijar valor</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite cambiar el contenido de un registro o una posición de memoria</string>
+   </property>
+  </action>
+  <action name="actionModo" >
+   <property name="text" >
+    <string>Modo</string>
+   </property>
+  </action>
+  <action name="actionImprimir" >
+   <property name="text" >
+    <string>Imprimir valor</string>
+   </property>
+   <property name="statusTip" >
+    <string>Imprimir valor</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite mostrar en el panel de mensajes el contenido de un rango de memoria o el valor asociado a las etiquetas globales</string>
+   </property>
+  </action>
+  <action name="actionOpciones_2" >
+   <property name="text" >
+    <string>Opciones</string>
+   </property>
+   <property name="statusTip" >
+    <string>Opciones</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Permite modificar el modo de funcionamiento de XSPIM y la ruta de la rutina de servicio de interrupción</string>
+   </property>
+  </action>
+  <action name="actionVista_incial" >
+   <property name="text" >
+    <string>Vista incial</string>
+   </property>
+   <property name="statusTip" >
+    <string>Vista inicial</string>
+   </property>
+   <property name="whatsThis" >
+    <string>Recupera la vista inicial del programa</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

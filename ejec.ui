@@ -1,0 +1,112 @@
+<ui version="4.0" >
+ <class>Ejecutar</class>
+ <widget class="QDialog" name="Ejecutar" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>172</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Parámatros de ejecución</string>
+  </property>
+  <widget class="QLineEdit" name="adress" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>50</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="toolTip" >
+    <string/>
+   </property>
+   <property name="inputMask" >
+    <string/>
+   </property>
+   <property name="text" >
+    <string>0x00000000</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="adresslabel" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>88</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Dirección de inicio:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="linelabel" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>80</y>
+     <width>98</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Línea de instrucción:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>100</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="undefcheckBox" >
+   <property name="geometry" >
+    <rect>
+     <x>20</x>
+     <y>130</y>
+     <width>161</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Buscar símbolos no definidos</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="aceptarButton" >
+   <property name="geometry" >
+    <rect>
+     <x>280</x>
+     <y>40</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Aceptar</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancelarButton" >
+   <property name="geometry" >
+    <rect>
+     <x>280</x>
+     <y>90</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Cancelar</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
