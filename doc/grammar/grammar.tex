@@ -1,0 +1,583 @@
+\documentclass[notitlepage,11pt,a4paper,final,twoside]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage[scale=0.7,marginparwidth=1.2in]{geometry}
+\usepackage{booktabs}
+\usepackage{rail}
+\usepackage{color}
+\usepackage{paralist}
+
+%======================================================================
+% Font and font encoding
+%----------------------------------------------------------------------
+\usepackage[T1]{fontenc}           % accentuated letters in pdf fonts
+\usepackage{lmodern}               % replacement for computer modern
+\usepackage[scaled=.8]{beramono}   % beramono monospaced font
+\usepackage{scalefnt}              % Allows font escalation
+%======================================================================
+
+
+%======================================================================
+% Colors
+%----------------------------------------------------------------------
+% From ``named colors'' palette:
+\definecolor{lightcyan1}{rgb}{0.88, 1   , 1}    % 224, 255, 255
+\definecolor{lightcyan2}{rgb}{0.82, 0.93, 0.93} % 209, 238, 238
+\definecolor{lightcyan3}{rgb}{0.7,  0.80, 0.80} % 180, 205, 205
+\definecolor{lightcyan4}{rgb}{0.48, 0.55, 0.55} % 122, 139, 139
+\definecolor{lightcyan5}{rgb}{0.27, 0.31, 0.31} %  69,  79,  79
+% Reserved words' color (in programs)
+\definecolor{codecolor}{rgb}{0,0,0.3}
+% Other colors
+\definecolor{green}{rgb}{0,.5,0}
+\definecolor{lightgray}{gray}{0.94}
+\definecolor{lightyellow}{rgb}{1, 0.99 , 0.92} 
+\definecolor{lightyellow1}{rgb}{0.9, 0.89 , 0.82}
+\definecolor{gray97}{gray}{.97}
+\definecolor{gray75}{gray}{.75}
+\definecolor{gray45}{gray}{.45}
+%======================================================================
+
+%======================================================================
+% Source code stuff
+%----------------------------------------------------------------------
+\usepackage{listings}
+\lstloadlanguages{C}      % C language
+\lstloadlanguages{TeX}    % Tex language (for text)
+\lstset{ %
+  frame=Ltb,
+  framerule=0pt,
+  framextopmargin=3pt,
+  framexbottommargin=3pt,
+  framexleftmargin=3pt,
+  framesep=0pt,
+  rulesep=.4pt,
+  backgroundcolor=\color{gray97},
+  rulesepcolor=\color{black},
+  % 
+  stringstyle=\ttfamily,
+  showstringspaces = true,
+  %
+  basicstyle=\ttfamily,
+  commentstyle=\color{gray45},
+  keywordstyle=\color{codecolor}\bfseries,
+  % 
+  numbers=left,
+  numbersep=7pt,
+  numberstyle=\tiny,
+  numberfirstline = false,
+  % 
+  belowcaptionskip = 0pt,
+  %
+  literate=
+  {á}{{\'a}}1
+  {é}{{\'e}}1
+  {í}{{\'i}}1
+  {ó}{{\'o}}1
+  {ú}{{\'u}}1
+  {ñ}{{\~n}}1
+  {Á}{{\'A}}1
+  {É}{{\'E}}1
+  {Í}{{\'I}}1
+  {Ó}{{\'O}}1
+  {Ú}{{\'U}}1
+  {Ñ}{{\~N}}1
+  {¡}{{!`}}1
+  {¿}{{?`}}1
+  {«}{{\guillemotleft{}}}1
+  {»}{{\guillemotright{}}}1
+}
+%======================================================================
+
+%======================================================================
+% Rail alias configuration
+%----------------------------------------------------------------------
+\railalias{CRNL}{\char"5Cr\char"5Cn}
+\railterm{CRNL}
+\railnontermfont{\ttfamily\upshape}
+%======================================================================
+
+
+\title{Borrador de una propuesta de \\
+  Descripción de la comunicación entre ¿qarmsim? y ¿armsim?}
+
+\author{Sergio Barrachina Mir y Germán Fabregat Llueca}
+
+% \date{20 de septiembre de 1999}
+
+
+\begin{document}
+
+\maketitle{}
+
+\tableofcontents
+
+\section{Introducción}
+
+El protocolo de comunicación mediante sockets descrito en este
+documento tiene por objeto regular la comunicación entre el simulador
+de ARM y la interfaz gráfica.
+
+El simulador hará las veces de servidor en la comunicación. Por lo
+tanto, deberá ponerse a la escucha en un determinado puerto y atender
+las peticiones que le vaya enviado la interfaz gráfica, respondiendo
+en caso necesario al simulador sobre el resultado de las acciones
+llevadas a cabo.
+
+La interfaz gráfica deberá conectarse al puerto en el que esté
+escuchando el simulador, le enviará las peticiones y recogerá las
+respuestas generadas por el simulador
+
+¿Cómo determinar el puerto en el que se lleva a cabo la comunicación?
+Puesto que el usuario ejecutará la interfaz gráfica, ésta puede
+encargarse de ejecutar a su vez una instancia del simulador,
+aprovechando para indicarle que debe ponerse a la escucha y en qué
+puerto debe hacerlo.
+
+Así pues, la interfaz gráfica deberá encargarse de encontrar algún
+puerto disponible en un determinado rango y de lanzar el simulador
+indicándole en qué puerto debe ponerse a la escucha.
+
+El simulador, a su vez, deberá proporcionar un parámetro de ejecución
+«\verb+-p PORT+», que utilizará para saber que debe ponerse a la
+escucha en el puerto indicado.
+
+
+\section{Peticiones de la interfaz al simulador}
+
+Una vez ejecutado el simulador, la interfaz abrirá una conexión con el
+puerto prefijado. Dicha conexión únicamente se cerrará cuando el
+usuario decida terminar la ejecución de la interfaz gráfica. La
+interfaz gráfica enviará un último comando, «\texttt{EXIT}», al
+simulador para indicarle que el usuario ha decidido cerrar el
+programa. El simulador, a su vez, debería finalizar su ejecución en
+cuanto reciba dicho comando de finalización, no sin antes liberar el
+puerto en el que estuviera escuchando.
+
+Cada una de las peticiones de la interfaz al simulador consistirá en
+una línea de texto finalizada con los caracteres «\verb|\r\n|»,
+emulando el funcionamiento de una conexión al simulador mediante el
+comando «\verb+telnet+». (Es decir, se podrá utilizar el comando
+«\verb|telnet|» para gobernar al simulador.)
+
+La información intercambiada deberá estar codificada en
+\texttt{UTF-8}.
+
+La Figura~\ref{fig:ordenes} muestra las ordenes que deberá ser capaz
+de atender el simulador.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{rail}
+  (
+    'SHOW' ('VERSION' | 'REGISTER' REGNAME
+                      | 'MEMORY' ('BYTE' | 'HALF' | 'WORD') 'AT' ADDRESS 
+                      | 'BREAKPOINTS' ) |
+    'DUMP' ('REGISTERS' | 'MEMORY' ADDRESS NBYTES) |
+    'DISASSEMBLE' ADDRESS NINSTS |
+    'RESET' ('REGISTERS' | 'MEMORY' ) |
+    'CLEAR' ('BREAKPOINTS' | 'BREAKPOINT' 'AT' ADDRESS) |
+    'SET'  (
+             ('REGISTER' REGNAME |
+              'MEMORY' ('BYTE' | 'HALF' | 'WORD') 'AT' ADDRESS ) 'WITH' HEXVALUE | 
+             ('BREAKPOINT' 'AT' ADDRESS)
+           ) |
+    'EXECUTE' ('ALL' | 'STEP' | 'SUBROUTINE') |
+    'ASSEMBLE' PATH
+  ) CRNL
+  \end{rail}
+  \caption{Sintaxis de los comandos soportados por el simulador}
+  \label{fig:ordenes}
+\end{figure}
+
+\section{Respuesta del simulador}
+
+La respuesta del simulador a la interfaz gráfica también se realizará
+por medio de líneas de texto terminadas con los caracteres
+«\verb|\r\n|».
+
+Las respuestas del simulador se pueden clasificar en tres tipos en
+función de la información que deba devolver a la interfaz gráfica:
+\begin{description}
+\item[Respuesta simple.] El simulador recibe la orden, ejecuta la
+  acción y tan solo debe devolver una respuesta para indicar que ha
+  completado la acción. Esta respuesta constará de una única línea con
+  la palabra «\texttt{OK}».
+\item[Respuesta con un número de líneas determinado.] El simulador
+  debe proporcionar una respuesta relacionada con la acción llevada a
+  cabo y ésta consta de un número de líneas conocido de antemano.
+\item[Respuesta con un número de líneas variable.] El simulador debe
+  proporcionar una respuesta, pero el número de líneas de la respuesta
+  depende del resultado de la acción llevada a cabo.
+\end{description}
+
+Para los dos primeros casos no es necesario hacer nada especial. El
+simulador ejecuta la acción y dependiendo del tipo en el que se
+enmarque la acción, devolverá una única línea con el texto
+«\texttt{OK}», o devolverá un número de líneas prefijado. La interfaz
+gráfica, a su vez, ya sabe qué debe esperar en cada uno de estos
+casos.
+
+Para las respuestas que pertenezcan al tercer tipo, se debe enviar una
+última línea con el texto «\verb+EOF+» para que la interfaz gráfica
+sepa que no debe esperar más líneas de respuesta.
+
+Las respuestas del simulador también pueden clasificarse según
+dependan o no del resultado de una acción. Así, habrán acciones que se
+llevarán a cabo sin problemas, p.e., mostrar la versión del simulador,
+y acciones que por el contrario sí que podrían fallar, p.e., ensamblar
+un determinado programa. Las acciones que no pueden fallar tienen una
+única respuesta, mientras que las acciones que pueden fallar pueden
+proporcionar dos respuestas distintas dependiendo del resultado de la
+acción.
+
+\section{Descripción de los comandos soportados y su respuesta}
+
+\subsection{Comandos «\texttt{SHOW}»}
+
+\subsubsection{SHOW VERSION}
+
+El comando «\texttt{SHOW VERSION}» muestra información sobre la
+versión del simulador. La interfaz gráfica mostrará la respuesta a
+dicho comando en la ventana de mensajes. También se mostrará en el
+cuadro de diálogo correspondiente a «\verb|Acerca de...|».
+
+
+La respuesta al comando «\texttt{SHOW VERSION}» estará formada por un
+número de líneas no determinado, por lo que deberá indicarse que se ha
+concluido la respuesta por medio de una línea con el texto
+«\texttt{EOF}». La gramática de la respuesta será por tanto:
+
+\begin{rail}
+ ( (TEXT CRNL) + () ) "EOF" CRNL
+\end{rail}
+
+A continuación se muestra un ejemplo de posible respuesta:
+\begin{lstlisting}
+ARMSIM version 1.0
+(c) 2014 Germán Fabregat Llueca
+EOF
+\end{lstlisting}
+
+
+\subsubsection{SHOW REGISTER REGNAME}
+
+El comando «\texttt{SHOW REGISTER REGNAME}», donde «\texttt{REGNAME}»
+es el nombre del registro que se quiere consultar, «\texttt{r0}» a
+«\texttt{r15}», etc. Se utiliza para consultar el contenido en
+hexadecimal del registro indicado. La respuesta a dicho comando será
+una única línea con el nombre del registro consultado seguido del
+contenido en hexadecimal de dicho registro (separados por «: »). Por
+ejemplo:
+\begin{lstlisting}
+r3: 0x0001234
+\end{lstlisting}
+
+
+\subsubsection{SHOW MEMORY (BYTE|HALF|WORD) AT ADDRESS}
+
+El comando «\texttt{SHOW MEMORY (BYTE|HALF|WORD) AT ADDRESS}», donde
+«\texttt{ADDRESS}» es una posición de memoria expresada en
+hexadecimal, sirve para consultar el contenido de la posición de
+memoria indicada. La respuesta a dicho comando será una única línea
+con la dirección de memoria consultada y con el contenido en
+hexadecimal de dicha posición de memoria (separados por «:
+»). Naturalmente, dependiendo del tipo de dato indicado se devolverá
+el byte, la media palabra, o la palabra que se encuentre en dicha
+posición de memoria.
+
+Por ejemplo, la respuesta a «\texttt{SHOW MEMORY HALF AT 0x10010004}»
+sería tal que así:
+\begin{lstlisting}
+0x1001004: 0x1234
+\end{lstlisting}
+
+\subsubsection{SHOW BREAKPOINTS}
+
+El comando «\texttt{SHOW BREAKPOINTS}» se utiliza para consultar en
+qué direcciones de memoria se han establecido puntos de ruptura. La
+respuesta a dicho comando constará de tantas líneas como puntos de
+ruptura, seguidas de una última línea con el texto «\texttt{EOF}». Por
+ejemplo:
+\begin{lstlisting}
+0x00400024
+0x00400100
+0x00400104
+0x00400106
+EOF
+\end{lstlisting}
+
+\subsection{Comandos «\texttt{DUMP}»}
+
+\subsubsection{DUMP REGISTERS}
+
+El comando «\texttt{DUMP REGISTERS}» proporciona el volcado del
+contenido de todos los registros del procesador. La respuesta
+presentará la siguiente forma (con tantas líneas como registros
+soportados):
+
+\begin{rail}
+  (REGNAME ': ' HEXVALUE CRNL) +
+\end{rail}
+
+Donde la primera línea mostrará el nombre contenido en hexadecimal del
+registro \texttt{r0} (separados por «\texttt{: }»), la segunda línea,
+el nombre y contenido del registro \texttt{r1}, y así
+sucesivamente. Por ejemplo:
+
+\begin{lstlisting}
+r1: 0x00000000
+r2: 0x12345678
+\end{lstlisting}
+
+\hspace{6ex}$\vdots$
+
+\lstset{firstnumber=14}
+\begin{lstlisting}
+r14: 0x24000000
+r15: 0x0040003E
+\end{lstlisting}
+\lstset{firstnumber=1}
+
+\subsubsection{DUMP MEMORY ADDRESS NBYTES}
+
+El comando «\texttt{DUMP MEMORY ADDRESS NBYTES}» proporciona el
+volcado del contenido de memoria comenzando en la dirección
+«\texttt{ADDRESS}» con un tamaño de «\texttt{NBYTES}». Cada byte se
+mostrará en hexadecimal en una línea separada, por lo que la respuesta
+constará de «\texttt{NBYTES}» líneas.
+
+Es responsabilidad de la interfaz gráfica asegurarse de que todas las
+direcciones de memoria que vayan a proporcionarse estén dentro del
+rango permitido de direcciones de memoria.
+
+\subsection{Comando «\texttt{DISASSEMBLE}»}
+
+\subsubsection{DISASSEMBLE ADDRESS NINSTS}
+\label{sec:disassemble}
+
+El comando «\texttt{DISASSEMBLE ADDRESS NINSTS}» proporciona el
+desensamblado de «\texttt{N}» instrucciones comenzando a partir de la
+que se encuentra en la dirección «\texttt{ADDRESS}».
+
+La respuesta constará de tantas líneas como instrucciones se hayan
+indicado en el parámetro «\texttt{NINSTS}». Es responsabilidad de la
+interfaz gráfica asegurarse de que el rango de instrucciones a
+desensamblar está contenido en el rango de direcciones de memoria
+posibles.
+
+Cada línea de la respuesta tendrá la sintaxis mostrada a
+continuación. En el caso de que una posición de memoria pueda ser
+correctamente desensamblada, se devolverá el camino~1. En el caso de
+que no pueda ser desensamblada, el camino~2.
+
+\begin{rail}
+ '[' ADDR ']' HEX16
+  (
+    [1]  HEX16? MACHINE ( () | ';' N ASM) | 
+    [2] 'NOT AN INSTRUCTION'
+  ) CRNL
+\end{rail}
+
+Donde:
+\begin{description}
+\item[ADDR] Es la dirección de memoria desensamblada.
+\item[HEX16] Es la instrucción codificada en hexadecimal con
+  16~bits. Puesto que la longitud de las instrucciones es variable,
+  aquellas que ocupen 32~bits proporcionarán los segundos 16~bits de
+  la instrucción en otro número hexadecimal.
+\item[MACHINE] Es el desensamblado de la instrucción.
+\item[N] Es el número de línea en el código fuente que ha dado pie a
+  esta instrucción.
+\item[ASM] Es la instrucción en el código fuente.
+\end{description}
+
+\subsection{Comandos «\texttt{RESET}»}
+
+\subsubsection{RESET REGISTERS}
+
+El comando «\texttt{RESET REGISTERS}» se utiliza para restituir a
+todos los registros a su estado inicial.
+
+Como respuesta se proporciona una única línea con el texto
+«\texttt{OK}».
+
+\subsubsection{RESET MEMORY}
+
+El comando «\texttt{RESET MEMORY}» se utiliza para restaurar a sus
+valores iniciales toda la memoria del simulador.
+
+Como respuesta se proporciona una única línea con el texto
+«\texttt{OK}».
+
+
+\subsection{Comandos «\texttt{CLEAR}»}
+
+\subsubsection{CLEAR BREAKPOINTS}
+
+El comando «\texttt{CLEAR BREAKPOINTS}» se utiliza para borrar todos
+los puntos de ruptura fijados anteriormente.
+
+Como respuesta se proporciona una única línea con el texto
+«\texttt{OK}».
+
+\subsubsection{CLEAR BREAKPOINT AT ADDRESS}
+
+El comando «\texttt{CLEAR BREAKPOINT AT ADDRESS}» se utiliza para
+eliminar el punto de ruptura fijado en la dirección
+«\texttt{ADDRESS}».
+
+Como respuesta se proporciona una única línea con el texto
+«\texttt{OK}».
+
+Nota: el simulador contesta siempre con «\texttt{OK}», aunque el punto
+de ruptura especificado no estuviera previamente fijado.
+
+\subsection{Comandos «\texttt{SET}»}
+
+\subsubsection{SET REGISTER REGNAME WITH HEXVALUE}
+
+El comando «\texttt{SET REGISTER REGNAME WITH HEXVALUE}», donde
+«\texttt{REGNAME}» es el nombre de uno de los registros soportados por
+el simulador, sirve para sobreescribir el contenido del registro
+«\texttt{REGNAME}» con el valor en hexadecimal indicado por el
+parámetro «\texttt{HEXVALUE}».
+
+Como respuesta se proporciona una única línea con el texto
+«\texttt{OK}».
+
+\subsubsection{SET MEMORY (BYTE|HALF|WORD) AT ADDRESS WITH HEXVALUE}
+
+El comando «\texttt{SET MEMORY (BYTE|HALF|WORD) AT ADDRESS WITH
+  HEXVALUE}», sirve para sobreescribir el contenido de la posición de
+memoria «\texttt{ADDRESS}» con el valor en hexadecimal indicado por el
+parámetro «HEXVALUE». Naturalmente, «\texttt{HEXVALUE}» será un número
+hexadecimal de 8, 16, o 32~bits, dependiendo de si se ha especificado
+«\texttt{BYTE}», «\texttt{HALF}» o «\texttt{WORD}» en el comando,
+respectivamente.
+
+Como respuesta se proporciona una única línea con el texto
+«\texttt{OK}».
+
+\subsubsection{SET BREAKPOINT AT ADDRESS}
+
+El comando «\texttt{SET BREAKPOINT AT ADDRESS}», sirve para fijar un
+punto de ruptura en la posición de memoria «\texttt{ADDRESS}».
+
+Como respuesta se proporciona una única línea con el texto
+«\texttt{OK}».
+
+
+\subsection{Comando «\texttt{EXECUTE}»}
+
+\subsubsection{EXECUTE (ALL|STEP|SUBROUTINE)}
+
+El comando «\texttt{EXECUTE (ALL|STEP|SUBROUTINE)}» se utiliza para
+indicar al simulador que ejecute una secuencia de instrucciones
+empezando por la referenciada por el registro «\texttt{PC}».
+
+La ejecución de una instrucción puede detenerse por alguna de las
+siguientes condiciones de parada:
+\begin{itemize}
+\item El valor leído de memoria no pueda desensamblarse correctamente.
+\item Se alcance un punto de ruptura.
+\item Se alcance el final del programa.
+\end{itemize}
+
+El funcionamiento del comando «\texttt{EXECUTE}» depende del término
+que le acompañe. Para cada uno de los términos posibles, el
+funcionamiento es el siguiente:
+\begin{description}
+\item[\texttt{ALL}] Se ejecutan todas las instrucciones posibles hasta
+  que se alcance cualquiera de las condiciones de parada descritas
+  anteriormente.
+\item[\texttt{STEP}] Tan solo se ejecuta una instrucción.
+\item[\texttt{SUBROUTINE}] Si la instrucción en curso es una llamada a
+  una subrutina, se ejecutan todas las instrucciones de la subrutina,
+  salvo que se encuentre alguna de las condiciones de parada descritas
+  anteriormente.
+\end{description}
+
+Una vez ejecutadas las instrucciones que correspondan, se devolverá
+una respuesta formada por las siguientes partes:
+
+\begin{rail}
+  RESULTCODE CRNL DISASSEMBLE CRNL STATUSLINES
+\end{rail}
+
+La primera línea de la respuesta mostrará uno de los siguientes
+términos:
+\begin{itemize}
+\item «\texttt{SUCCESS}», si se ha podido ejecutar dicha instrucción;
+\item «\texttt{ERROR}», si se ha producido un error al intentar
+  ejecutar dicha instrucción;
+\item «\texttt{BREAKPOINT REACHED}», si se ha alcanzado un punto de
+  ruptura; o
+\item «\texttt{END OF PROGRAM}», si se ha alcanzado el final del
+  programa.
+\end{itemize}
+
+La segunda línea de la respuesta mostrará el desensamblado de la
+última instrucción que se ha intentado ejecutar con el mismo formato
+que el devuelto por el comando «\texttt{DISASSEMBLE}». La descripción
+detallada de dicha sintaxis se puede consultar en el
+Apartado~\ref{sec:disassemble}. A modo de recordatorio, ésta era:
+
+\begin{rail}
+ '[' ADDR ']' HEX16
+  (
+    [1]  HEX16? MACHINE ( () | ';' N ASM) | 
+    [2] 'NOT AN INSTRUCTION'
+  ) CRNL
+\end{rail}
+
+Las siguientes líneas mostrarán los registros afectados, si los
+hubiera, las posiciones de memoria afectadas, si las hubiera, y el
+motivo del error, en el caso de que se haya producido uno.
+
+En cuanto a los registros y posiciones de memoria afectadas, puesto
+que el objetivo es el de mostrar gráficamente qué registros y
+posiciones de memoria se han visto afectadas, cualquier registro o
+posición de memoria afectado deberá incluirse en la lista devuelta a
+la interfaz gráfica, aunque el nuevo valor sea el mismo que el que ya
+tenía.
+
+Por otro lado, en el caso de que la instrucción no hubiera podido
+ejecutarse, la información sobre el motivo del error será simplemente
+una secuencia de líneas de texto, con una última línea con el texto
+«\texttt{EOF}». Hay que tener en cuenta que la información que se
+proporcione sobre el error se reproducirá tal cual en la ventana de
+mensajes de la interfaz gráfica, por lo que en el caso de que no se
+pueda ejecutar una determinada instrucción debería proporcionarse
+información lo más completa posible sobre el motivo por el que no se
+ha podido ejecutar dicha instrucción.
+
+La sintaxis detallada de la parte final de la respuesta, en la que se
+muestran los registros y posiciones de memoria afectados, así como en
+su caso, el motivo del error, es la siguiente:
+\begin{rail}
+StatusLines:
+('AFFECTED REGISTERS' CRNL ( ( NAME ': ' HEX32 CRNL ) + () ) ) ? \\
+('AFFECTED MEMORY' CRNL ( ( ADDR ': ' HEX8 CRNL ) + () ) ) ? \\
+('ERROR MESSAGE' CRNL ( ( ERRORLINE CRNL ) + () ) ) ? \\
+'EOF' CRNL
+\end{rail}
+
+
+
+\subsection{Comando «\texttt{ASSEMBLE}»}
+
+\subsubsection{ASSEMBLE PATH}
+
+El comando «\texttt{ASSEMBLE PATH}» sirve para indicarle al simulador
+que debe compilar el fichero que se encuentra en «\texttt{PATH}».
+
+POR DETERMINAR.
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#for f in *.dot; do
+#    dot -Tpdf ${f} > ${f%.dot}.pdf
+#done
+
+pdflatex grammar
+rail grammar
+pdflatex grammar
