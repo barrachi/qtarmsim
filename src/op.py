@@ -10,7 +10,7 @@ from ui.opciones import Ui_Opciones
 
 ##Clase que define el diálogo opciones que hereda de la clase QDialog del módulo QtGui
 class Opciones(QtGui.QDialog):
-    opci=[0, 0, 0, 0]
+    options=[0, 0, 0, 0]
     ##Constructor del diálogo opciones
     def __init__(self,parent=None):
         QtGui.QDialog.__init__(self,parent)
@@ -18,15 +18,15 @@ class Opciones(QtGui.QDialog):
         self.ui.setupUi(self)
         self.createActions()
         padre=self.parentWidget()
-        self.opci=[0, 0, 0, 0]
+        self.options=[0, 0, 0, 0]
         #Por defecto Loadtrap esta activado
-        if padre.opci[0]==1:
+        if padre.options[0]==1:
             self.ui.Loadtrap.setCheckState(QtCore.Qt.Checked)
-        if padre.opci[1]==1:
+        if padre.options[1]==1:
             self.ui.Bare.setCheckState(QtCore.Qt.Checked)
-        if padre.opci[2]==1:
+        if padre.options[2]==1:
             self.ui.Quiet.setCheckState(QtCore.Qt.Checked)
-        if padre.opci[3]==1:
+        if padre.options[3]==1:
             self.ui.Mapped.setCheckState(QtCore.Qt.Checked)
         #Llamada que introduce la direccion por defecto
         self.ui.Directrap.setText(parent.pathini)
@@ -90,11 +90,11 @@ class Opciones(QtGui.QDialog):
         if self.ui.Loadtrap.isChecked() :
             self.ui.Directrap.setDisabled(False)
             self.ui.actionExplorar.setDisabled(False)
-            self.opci[0]=1
+            self.options[0]=1
         else:
             self.ui.Directrap.setDisabled(True)
             self.ui.actionExplorar.setDisabled(True)
-            self.opci[0]=0
+            self.options[0]=0
 
     ##Método asociado a buttonBox, botón de aceptar
     #
@@ -103,7 +103,7 @@ class Opciones(QtGui.QDialog):
         padre=self.parentWidget()
         #La variable pathini tendra el valor escrito en el lineEdit Directrap
         padre.pathini=self.ui.Directrap.text()
-        padre.opci=self.opci
+        padre.options=self.options
         self.accept()
     
     ##Método asociado a Bare
@@ -111,27 +111,27 @@ class Opciones(QtGui.QDialog):
     #Activa o desactiva la opción de Máquina básica
     def bar(self):
         if self.ui.Bare.isChecked() :
-            self.opci[1]=1
+            self.options[1]=1
         else:
-            self.opci[1]=0
+            self.options[1]=0
     
     ##Método asociado a Quiet
     #
     #Activa o desactiva la opción de Modo silencioso
     def qui(self):
         if self.ui.Quiet.isChecked() :
-            self.opci[2]=1
+            self.options[2]=1
         else:
-            self.opci[2]=0
+            self.options[2]=0
     
     ##Método asociado a Mapped
     #
     #Activa o desactiva la opción de E/S Mapeada
     def map(self):
         if self.ui.Mapped.isChecked() :
-            self.opci[3]=1
+            self.options[3]=1
         else:
-            self.opci[3]=0
+            self.options[3]=0
     
     ##Método para asociar signals de los botones del diálogo y slots
     def createActions(self):
@@ -161,6 +161,6 @@ class Opciones(QtGui.QDialog):
         
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    opci=Opciones()
-    opci.show()
+    optionsw = Opciones()
+    optionsw.show()
     sys.exit(app.exec_())

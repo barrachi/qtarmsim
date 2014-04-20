@@ -5,3 +5,7 @@ ui/*.py
 .settings
 __pycache__
 resources/*_rc.py
+doc/grammar/*.pdf
+doc/grammar/*.rai
+doc/grammar/*.rao
+doc/doxygen

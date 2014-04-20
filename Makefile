@@ -6,10 +6,25 @@ UIOBJS:=$(UISRCS:%.ui=%.py)
 QRSRCS:=$(wildcard resources/*.qrc)
 QROBJS:=$(QRSRCS:%.qrc=%_rc.py)
 
-all: ${UIOBJS} ${QROBJS}
+TSSRCS:=$(wildcard languages/*.ts)
+TSOBJS:=$(TSSRCS:%.ts=%.qm)
+
+all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 
 %.py : %.ui
 	pyuic4 -o $@ $<
 
 %_rc.py : %.qrc
 	pyrcc4 -py3 -o $@ $<
+
+%.qm : %.ts
+	lrelease qtarmsim.pro
+
+clean:
+	find ./ -type f -name "*.pyc" -exec rm -f {} \; 2>/dev/null
+	find ./ -type d -name "__pycache__" -exec rm -rf {} \; 2>/dev/null
+
+linguist:
+	@ \
+	pylupdate4 qtarmsim.pro; \
+	echo "Now you can run 'linguist languages/qtarmsim_es.ts'"

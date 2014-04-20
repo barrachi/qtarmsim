@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>Ayuda</class>
- <widget class="QWidget" name="Ayuda" >
+ <class>Help</class>
+ <widget class="QWidget" name="Help" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Ayuda</string>
+   <string>Help</string>
   </property>
  </widget>
  <resources/>
