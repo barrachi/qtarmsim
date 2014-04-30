@@ -31,22 +31,22 @@
 
 
 from PyQt4 import QtCore, QtGui
-from src.help import HelpWindow
 from src.br import Breakpoi
 from src.co import Conso
 from src.ej import Ejecutar
+from src.help import HelpWindow
 from src.im import Imprimir
 from src.mu import Multipasos
 from src.op import Opciones
+from src.simplearmeditor import SimpleARMEditor
 from src.tablemodelregisters import TableModelRegisters
-from ui.mainwindow import Ui_MainWindow
 from src.va import Valor
+from ui.mainwindow import Ui_MainWindow
+import os
 import resources.main_rc as main_rc
 import signal
 import sys
-import os
-from PyQt4 import Qsci
-from src.simplearmeditor import SimpleARMEditor
+from src.tablemodelmemory import TableModelMemory
 
 __version__ = "0.1"
 
@@ -79,7 +79,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
         # Set the application icon, title and size
         self.setWindowIcon(QtGui.QIcon(":/images/spi.bmp"))
-        self.resize(500, 400)
+        self.resize(800, 600)
 
         # Breakpoint dialog initialization
         self.br = Breakpoi(self)
@@ -119,6 +119,12 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         tableModelRegisters = TableModelRegisters()
         self.ui.tableViewRegisters.setModel(tableModelRegisters)
         self.ui.tableViewRegisters.resizeColumnsToContents()
+        #self.ui.dockWidgetContentsRegisters.resize(800,100)
+        #self.ui.dockWidgetRegisters.resize(800,200)
+
+        tableModelMemory = TableModelMemory()
+        self.ui.tableViewMemory.setModel(tableModelMemory)
+        self.ui.tableViewMemory.resizeColumnsToContents()
         
             
     def connectActions(self):

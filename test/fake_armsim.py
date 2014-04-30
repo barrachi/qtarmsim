@@ -7,7 +7,7 @@
 import sys
 import getopt
 import string
-from mysocket import MySocket
+from src.mysocket import MySocket
 
 PORT = 0
 
@@ -46,8 +46,26 @@ def getopts():
         ERROR("a port number must be specified.")
 
 
-REGISTERS = ["0x00000000"]*16
-MEMORY = ["0x00"]*10000
+_REGISTERS = {
+    'r0': "0x00000000",
+    'r1': "0x00000000",
+    'r2': "0x00000000",
+    'r3': "0x00000000",
+    'r4': "0x00000000",
+    'r5': "0x00000000",
+    'r6': "0x00000000",
+    'r7': "0x00000000",
+    'PC': "0x00000000",
+    'SP': "0x00000000",
+    'LR': "0x00000000",
+    'CPSR': "0x00000000",
+    }
+REGISTERS = _REGISTERS.copy()
+
+_MEMORY = ["0x00"]*10000
+MEMORY = _MEMORY[:]
+
+OK = 'OK'
 
 def do_SHOW_VERSION(args, socket):
     print("Showing version information")
@@ -56,7 +74,7 @@ def do_SHOW_VERSION(args, socket):
     socket.send_line("EOF")
 
 def do_SHOW_REGISTER(args, socket):
-    reg = int(args[2])
+    reg = args[2]
     print("Showing contents of register {}".format(reg))
     socket.send_line(REGISTERS[reg])
     
@@ -84,10 +102,14 @@ def do_SET_MEMORY(args, socket):
     print("Setting memory[{}] to {}".format(pos, value))
     MEMORY[pos] = value
 
-def do_CLEAR_REGISTERS(args, socket):
-    for reg in range(0,16):
-        REGISTERS[reg]="0x00000000"
-        
+def do_RESET_REGISTERS(args, socket):
+    REGISTERS = _REGISTERS.copy()
+    socket.send_line(OK)
+
+def do_RESET_MEMORY(args, socket):
+    MEMORY = _MEMORY[:]
+    socket.send_line(OK)
+
 def main():
     "Main part of the application"
     getopts()

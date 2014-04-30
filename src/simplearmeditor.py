@@ -63,7 +63,7 @@ class SimpleARMEditor(QsciScintilla):
         self.SendScintilla(QsciScintilla.SCI_SETHSCROLLBAR, 0)
 
         # Not too small
-        self.setMinimumSize(600, 450)
+        #self.setMinimumSize(400, 300)
 
     
     def on_margin_clicked(self, nmargin, nline, modifiers):

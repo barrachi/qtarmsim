@@ -7,10 +7,10 @@
 import sys
 import getopt
 import string
-from mysocket import MySocket
+from src.mysocket import MySocket
 import unittest
 
-PORT = 8011
+PORT = 8010
 
 def myhelp():
     print("""Usage: test_armsim.py
@@ -43,23 +43,33 @@ def getopts():
 
 
 mysocket = MySocket()
+OK = 'OK'
+reg_names = ['r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7',
+             'PC', 'SP', 'LR', 'CPSR']
 
 class TestCommunication(unittest.TestCase):
 
     def setUp(self):
         "This gets executed before each test"
-        mysocket.send_line("CLEAR REGISTERS")
-        mysocket.send_line("CLEAR MEMORY")
+        mysocket.send_line("RESET REGISTERS")
+        mysocket.send_line("RESET MEMORY")
         pass
 
-    def test_clear_registers(self):
-        "CLEAR REGISTERS should reset all registers."
-        for reg in range(16):
-            mysocket.send_line("SET REGISTER {} 0x00000005".format(reg)) 
-        mysocket.send_line("CLEAR REGISTERS")
-        for reg in range(16):
-            mysocket.send_line("SHOW REGISTER {}".format(reg))
-            self.assertEqual(mysocket.receive_line(), "0x00000000")
+    def test_reset_registers(self):
+        "RESET REGISTERS should reset all registers to their initial value."
+        for reg_name in reg_names:
+            mysocket.send_line("SET REGISTER {} 0x12345678".format(reg_name)) 
+        mysocket.send_line("RESET REGISTERS")
+        self.assertEqual(mysocket.receive_line(), OK)
+        # Check that r0 is reset to 0x00000000
+        mysocket.send_line("SHOW REGISTER {}".format('r0'))
+        self.assertEqual(mysocket.receive_line(), "r0: 0x00000000")
+        # Check that all the registers have a value different of 0x12345678
+        for reg_name in reg_names:
+            mysocket.send_line("SHOW REGISTER {}".format(reg_name))
+            answer = mysocket.receive_line()
+            (reg, value) = answer.split(": ")
+            self.assertNotEqual(value, "0x00000000")
         
 
     def test_dump_registers(self):
@@ -70,16 +80,13 @@ class TestCommunication(unittest.TestCase):
         mysocket.send_line("SET REGISTER 1 0x00000005")
         mysocket.send_line("SHOW REGISTER 1")
         line = mysocket.receive_line()
-        self.assertEqual(line, "0x00000000")
+        self.assertEqual(line, "0x00000004")
 
-    def test_show_register_0(self):
-        "SHOW REGISTER 0 should return value 0x00000000 after CLEAR REGISTERS"
-        mysocket.send_line("SHOW REGISTER 0")
+    def test_show_register_r0(self):
+        "SHOW REGISTER r0 should return value 0x00000000 after RESET REGISTERS"
+        mysocket.send_line("SHOW REGISTER r0")
         line = mysocket.receive_line()
-        self.assertEqual(line, "0x00000000")
-
-        # should raise an exception for an immutable sequence
-        #self.assertRaises(TypeError, random.shuffle, (1,2,3))
+        self.assertEqual(line, "r0: 0x00000000")
 
     def test_show_version(self):
         "SHOW VERSION should return one or more lines ended by an EOF line."
@@ -94,16 +101,6 @@ class TestCommunication(unittest.TestCase):
         "This gets executed after each test"
         pass
         
-    # def test_choice(self):
-    #     element = random.choice(self.seq)
-    #     self.assertTrue(element in self.seq)
-
-    # def test_sample(self):
-    #     with self.assertRaises(ValueError):
-    #         random.sample(self.seq, 20)
-    #     for element in random.sample(self.seq, 5):
-    #         self.assertTrue(element in self.seq)
-
 
 if __name__ == '__main__':
     getopts()
