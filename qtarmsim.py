@@ -60,9 +60,6 @@ except AttributeError:
 class QtArmSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ArmSim application."
     
-    # Vector que almacena el valor por defecto de las opciones del simulador
-    #options = [1, 0, 0, 0]
-
     def __init__(self, parent=None):
         # Call super.__init__()
         super(QtArmSimMainWindow, self).__init__()
@@ -96,31 +93,52 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         "Method called when the window is ready to be shown"
         super(QtArmSimMainWindow, self).show(*args, **kwargs)
         # restore actions have to be called after the window is shown
-        self.restoreActions()
+        self.checkShowActions()
         
         
     def extendUi(self):
         "Extends the Ui with new objects and links the table views with their models"
-        
         # Add text editor based on QsciScintilla
         self.ui.textEditSource = SimpleARMEditor(self.ui.tabSource)
         self.ui.textEditSource.setToolTip(_fromUtf8(""))
         self.ui.textEditSource.setWhatsThis(_fromUtf8(""))
         self.ui.textEditSource.setObjectName(_fromUtf8("textEditSource"))
         self.ui.verticalLayoutSource.addWidget(self.ui.textEditSource)
-
         # Link tableViewRegisters with tableModelRegisters
         tableModelRegisters = TableModelRegisters()
         self.ui.tableViewRegisters.setModel(tableModelRegisters)
         self.ui.tableViewRegisters.resizeColumnsToContents()
-        #self.ui.dockWidgetContentsRegisters.resize(800,100)
-        #self.ui.dockWidgetRegisters.resize(800,200)
-
+        # Link tableViewMemory with tableModelMemory
         tableModelMemory = TableModelMemory()
         self.ui.tableViewMemory.setModel(tableModelMemory)
         self.ui.tableViewMemory.resizeColumnsToContents()
         
             
+    def readSettings(self):
+        "Reads the settings from the settings file"
+        self.settings = QtCore.QSettings("UJI", "QtArmSim")
+        self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
+        self.restoreState(self.settings.value("windowState", self.initialWindowState))
+        
+    def defaultGeometry(self):
+        "Resizes main window to 800x600 and returns the geometry"
+        self.resize(800, 600)
+        return self.saveGeometry()
+        
+    def checkShowActions(self):
+        "Modifies the checked state of the show/hide actions depending on their widgets visibility"
+        self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
+        self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
+        self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
+        self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
+        self.ui.actionShow_Stack.setChecked(self.ui.dockWidgetStack.isVisible())
+        self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
+        
+ 
+    #################################################################################
+    # Actions and events
+    #################################################################################
+
     def connectActions(self):
         "Connects the actions with their correspondent methods"
         # Automatically assign actions to methods using the actions names
@@ -142,29 +160,6 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.ui.dockWidgetMessages.installEventFilter(self)
 
 
-    def readSettings(self):
-        # Reads the settings
-        self.settings = QtCore.QSettings("UJI", "QtArmSim")
-        self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
-        self.restoreState(self.settings.value("windowState", self.defaultWindowState()))
-        
-    def defaultGeometry(self):        
-        self.resize(800, 600)
-        return self.saveGeometry()
-    
-    def defaultWindowState(self):
-        # If there is no state, save the default one
-        return self.saveState()
-    
-    def restoreActions(self):
-        self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
-        self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
-        self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
-        self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
-        self.ui.actionShow_Stack.setChecked(self.ui.dockWidgetStack.isVisible())
-        self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
-        
- 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
             if source is self.ui.dockWidgetRegisters:
@@ -276,7 +271,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.restoreState(self.initialWindowState)
         # status bar is not automatically restored, restore it manually
         self.ui.statusBar.setVisible(True)
-        self.restoreActions()
+        self.checkShowActions()
         
             
     ## Acción asociada a actionOpciones2

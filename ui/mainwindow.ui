@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>847</width>
+    <width>880</width>
     <height>597</height>
    </rect>
   </property>
@@ -87,7 +87,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>847</width>
+     <width>880</width>
      <height>21</height>
     </rect>
    </property>
@@ -128,9 +128,9 @@
     <addaction name="actionAbout_Qt_ArmSim"/>
     <addaction name="actionAbout_ArmSim"/>
    </widget>
-   <widget class="QMenu" name="menu_Settings">
+   <widget class="QMenu" name="menu_Window">
     <property name="title">
-     <string>&amp;Settings</string>
+     <string>&amp;Window</string>
     </property>
     <addaction name="actionShow_Statusbar"/>
     <addaction name="actionShow_Toolbar"/>
@@ -159,7 +159,7 @@
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
    <addaction name="menuRun"/>
-   <addaction name="menu_Settings"/>
+   <addaction name="menu_Window"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
