@@ -1,11 +1,12 @@
-documentacion
-ui/*.py
+.bzr
 .project
 .pydevproject
 .settings
 __pycache__
-resources/*_rc.py
+doc/doxygen
 doc/grammar/*.pdf
 doc/grammar/*.rai
 doc/grammar/*.rao
-doc/doxygen
+resources/*_rc.py
+ui/*.py
+*.pyc
