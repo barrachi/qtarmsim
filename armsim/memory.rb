@@ -93,4 +93,15 @@ class Memory
   def access(type, dir, data = nil)
     (b = find_block(dir)) == nil ? nil : b.access(type, dir - b.origen, data)
   end
+
+  #reset
+  #------
+  #Propaga el reset a todas las memorias
+  def reset
+    @data.each do |b|
+      b.reset
+    end
+  end
 end
+
+

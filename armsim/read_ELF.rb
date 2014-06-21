@@ -361,8 +361,8 @@ class ELF_File < File
     dataend = bssdir > END_DATA ? bssdir : END_DATA
     data += [0] * (dataend - @wks_orig['.bss'] + 1)
     #creamos los dos bloques y los devolvemos en un array
-    bcode = Memory_block.new(@wks_orig['.text'],0, 0, 'ROM').fill_from_file(code)
-    bdata = Memory_block.new(@wks_orig['.data'],0, 0, 'RAM').fill_from_file(data)
+    bcode = Memory_block.new(@wks_orig['.text'],0, 0, 'ROM').fill_from_array(code)
+    bdata = Memory_block.new(@wks_orig['.data'],0, 0, 'RAM').fill_from_array(data)
     p symbolTable
     p bcode
     p bdata

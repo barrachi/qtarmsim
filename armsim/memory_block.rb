@@ -117,7 +117,7 @@ class Memory_block
   #(rellena con 0)
   # @param [Array] input
   # @return [Memory_block]
-  def fill_from_file(input)
+  def fill_from_array(input)
     @data = input.dup
     t = @data.length
     rm = t % ALIGN
@@ -160,5 +160,12 @@ class Memory_block
     list.keys.each do |key|
       @accesses[key] = list[key]
     end
+  end
+
+  #reset
+  #-----
+  #De momento pone a 0
+  def reset
+    self.fill_from_val(0)
   end
 end

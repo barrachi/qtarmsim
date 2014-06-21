@@ -133,7 +133,7 @@ dump_memory = Proc.new { |entrada|
     res = ""
     dir = entrada[0]
     0.upto(entrada[1] - 1) do
-      res = res + "0x%02X\r\n" % $server.proc.memory_byte(dir)
+      res = res + "0x%08X: 0x%02X\r\n" % [dir, $server.proc.memory_byte(dir)]
       dir = dir + 1
     end
     #res = res + "EOF\r\n"
@@ -151,7 +151,15 @@ reset_registers = Proc.new { |entrada|
   if $server.proc.nil?
     res = Errores[:sistema]
   else
+    regs = Array.new
+    nr = 0
     estado = ThumbII_Defs.reset
+    estado[:usr_regs].each do |val|
+      regs << nr
+      regs << val
+      nr = nr + 1
+    end
+    estado[:usr_regs] = regs
     $server.proc.update(estado)
     res = "OK\r\n"
   end
@@ -165,7 +173,7 @@ reset_registers = Proc.new { |entrada|
 # @return [String]
 
 reset_memory = Proc.new { |entrada|
-  #TODO
+  $server.proc.memory.reset
   res = "OK\r\n"
 }
 
