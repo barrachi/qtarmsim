@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>600</height>
+    <width>847</width>
+    <height>597</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -47,6 +47,12 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidgetCode">
+      <property name="minimumSize">
+       <size>
+        <width>600</width>
+        <height>400</height>
+       </size>
+      </property>
       <property name="tabPosition">
        <enum>QTabWidget::South</enum>
       </property>
@@ -81,7 +87,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>847</width>
      <height>21</height>
     </rect>
    </property>
@@ -194,7 +200,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>20</width>
+     <width>86</width>
      <height>108</height>
     </size>
    </property>
@@ -368,6 +374,12 @@
       <widget class="QTextEdit" name="textEditMessages">
        <property name="enabled">
         <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
        <property name="maximumSize">
         <size>
