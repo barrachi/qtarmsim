@@ -47,6 +47,9 @@ import resources.main_rc as main_rc
 import signal
 import sys
 from src.tablemodelmemory import TableModelMemory
+import time
+from src.mysocket import MySocket
+import subprocess
 
 __version__ = "0.1"
 
@@ -56,77 +59,97 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+
 class QtArmSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ArmSim application."
     
-    # Vector que almacena el valor por defecto de las opciones del simulador
-    options = [1, 0, 0, 0]
-
     def __init__(self, parent=None):
-        
         # Call super.__init__()
         super(QtArmSimMainWindow, self).__init__()
-        
         # Initialize variables
         self.fileName = ''
-
         # Load the user interface
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-         
         # Extends the Ui
         self.extendUi()
-
         # Set the application icon, title and size
         self.setWindowIcon(QtGui.QIcon(":/images/spi.bmp"))
-        self.resize(800, 600)
-
         # Breakpoint dialog initialization
         self.br = Breakpoi(self)
         # Breakpoints list
         self.ptosrup = QtGui.QListWidget(self.br)
-        
-        # Console window initialization
+        # Console and help windows initialization
         self.consoleWindow = Conso()
-        self.consoleWindow.move(self.x() + 600, self.y())
-
-        # Help window initialization
         self.helpWindow = HelpWindow()
-        self.helpWindow.move(self.x() + 600, self.y())
-        
         # Connect actions
         self.connectActions()
-
-        # Print initial message on the Messages Window and print "Ready" on the statusBar 
-        self.ui.textEditMessages.append(self.initial_message())
+        # Print welcome message on the Messages Window and "Ready" on the statusBar 
+        self.ui.textEditMessages.append(self.welcome_message())
         self.statusBar().showMessage(self.tr("Ready"))
+        # Saves the initial WindowState of the interface
+        self.initialWindowState = self.saveState()
+        # Read the settings
+        self.readSettings()
+        # Create socket and set current_armsim_port to None
+        self.mysocket = MySocket()
+        self.armsim_pid = None
+        self.armsim_current_port = None
+        self.armsim_about_message = ""
 
-        # Saves the initial state of the interface
-        self.state = self.saveState(1)
+    def show(self, *args, **kwargs):
+        "Method called when the window is ready to be shown"
+        super(QtArmSimMainWindow, self).show(*args, **kwargs)
+        # restore actions have to be called after the window is shown
+        self.checkShowActions()
         
-
+        
     def extendUi(self):
-        "Extends the Ui with new objects and link table view with their models"
-        
+        "Extends the Ui with new objects and links the table views with their models"
         # Add text editor based on QsciScintilla
         self.ui.textEditSource = SimpleARMEditor(self.ui.tabSource)
         self.ui.textEditSource.setToolTip(_fromUtf8(""))
         self.ui.textEditSource.setWhatsThis(_fromUtf8(""))
         self.ui.textEditSource.setObjectName(_fromUtf8("textEditSource"))
         self.ui.verticalLayoutSource.addWidget(self.ui.textEditSource)
-
         # Link tableViewRegisters with tableModelRegisters
         tableModelRegisters = TableModelRegisters()
         self.ui.tableViewRegisters.setModel(tableModelRegisters)
         self.ui.tableViewRegisters.resizeColumnsToContents()
-        #self.ui.dockWidgetContentsRegisters.resize(800,100)
-        #self.ui.dockWidgetRegisters.resize(800,200)
-
+        # Link tableViewMemory with tableModelMemory
         tableModelMemory = TableModelMemory()
         self.ui.tableViewMemory.setModel(tableModelMemory)
         self.ui.tableViewMemory.resizeColumnsToContents()
         
             
+    def readSettings(self):
+        "Reads the settings from the settings file"
+        self.settings = QtCore.QSettings("UJI", "QtArmSim")
+        self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
+        self.restoreState(self.settings.value("windowState", self.initialWindowState))
+        self.command_path = os.path.dirname(os.path.realpath(__file__))
+        self.armsim_command = self.settings.value("armSimCommand", os.path.join(self.command_path, "armsim", "server.rb"))
+        self.armsim_port = self.settings.value("armSimPort", 8010)
+        
+    def defaultGeometry(self):
+        "Resizes main window to 800x600 and returns the geometry"
+        self.resize(800, 600)
+        return self.saveGeometry()
+        
+    def checkShowActions(self):
+        "Modifies the checked state of the show/hide actions depending on their widgets visibility"
+        self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
+        self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
+        self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
+        self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
+        self.ui.actionShow_Stack.setChecked(self.ui.dockWidgetStack.isVisible())
+        self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
+        
+ 
+    #################################################################################
+    # Actions and events
+    #################################################################################
+
     def connectActions(self):
         "Connects the actions with their correspondent methods"
         # Automatically assign actions to methods using the actions names
@@ -161,6 +184,10 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         return super(QtArmSimMainWindow, self).eventFilter(source, event)
 
         
+    #################################################################################
+    # File menu actions
+    #################################################################################
+
     def setFileName(self, fileName):
         "Sets the filename and updates the window title accordingly"
         self.fileName = fileName
@@ -177,10 +204,10 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             self.setFileName(fileName)
             
          
-    def doSafe(self):
+    def doSave(self):
         "Saves the current ARM assembler file"
         if self.fileName == '':
-            return self.saveAs()
+            return self.doSave_As()
         else:
             return self.saveFile(self.fileName)
 
@@ -188,7 +215,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
     def doSave_As(self):
         "Saves the ARM assembler file with a new specified name"
         fileName = self.fileName
-        if fileName =='':
+        if fileName == '':
             fileName = os.path.join(QtCore.QDir.currentPath(), self.tr("untitled.s"))
         fileName = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"), fileName, self.tr("ARM assembler file(*.s *.asm)"))
         if fileName == '':
@@ -199,27 +226,13 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
     def saveFile(self, fileName):
         "Saves the contents of the source editor on the given file name"
-        # Llamada que crea un fichero con el nombre que pasamos como argumento
-        file = QtCore.QFile(fileName)
-        if not file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+        asm_file = QtCore.QFile(fileName)
+        if not asm_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
             QtGui.QMessageBox.warning(self, self.tr("Error"),
-                    self.tr("No se puede escribir %1:\n%2.").arg(fileName).arg(file.errorString()))
+                    self.tr("Could not write to file '{0}':\n{1}.").format(fileName, asm_file.errorString()))
             return False
-        
-        # Escribimos la información de los distintos paneles en el fichero .out
-        #----------------------------------------------- a = QtCore.QByteArray()
-        #--------------------------------- a.insert(0, self.tr("Regitros:\n\n"))
-        #--------------------- a.insert (a.size(), self.registers.toPlainText())
-        #--------------- a.insert(a.size(), self.tr("\nSegmento de Datos:\n\n"))
-        #--------------------------- a.insert(a.size(), self.data.toPlainText())
-        #--------------- a.insert(a.size(), self.tr("\nSegmento de Texto:\n\n"))
-        #-------------------------- a.insert(a.size(), self.texto.toPlainText())
-        #---------------------- a.insert(a.size(), self.tr("\n\nMensajes:\n\n"))
-        #--------------------------- a.insert(a.size(), self.mens.toPlainText())
-        #----------------------- a.insert(a.size(), self.tr("\n\nConsola:\n\n"))
-        #-------------- a.insert(a.size(), self.consoleWindow.consolEdit.text())
-        #--------------------------------------------------------- file.write(a)
-
+        asm_file.write(self.ui.textEditSource.text())
+        asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         self.setFileName(fileName)
         return True
@@ -229,61 +242,48 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.close()
         
 
-    def doShow_Statusbar(self):
-        if self.ui.statusBar.isVisible():
-            self.ui.statusBar.setHidden(True)
-            self.ui.actionShow_Statusbar.setChecked(False)
+    #################################################################################
+    # Settings menu actions
+    #################################################################################
+    
+    def _doShow(self, widget, action):
+        if widget.isVisible():
+            widget.setHidden(True)
         else:
-            self.ui.statusBar.setVisible(True)
-            self.ui.actionShow_Statusbar.setChecked(True)
-
+            widget.setVisible(True)
+        action.setChecked(widget.isVisible())
+        
+    def doShow_Statusbar(self):
+        "Shows or hides the status bar"
+        self._doShow(self.ui.statusBar, self.ui.actionShow_Statusbar)
 
     def doShow_Toolbar(self):
-        if self.ui.toolBar.isVisible():
-            self.ui.toolBar.setHidden(True)
-            self.ui.actionShow_Toolbar.setChecked(False)
-        else:
-            self.ui.toolBar.setVisible(True)
-            self.ui.actionShow_Toolbar.setChecked(True)
-    
+        "Shows or hides the tool bar"
+        self._doShow(self.ui.toolBar, self.ui.actionShow_Toolbar)
     
     def doShow_Registers(self):
         "Shows or hides the registers dock widget"
-        if self.ui.dockWidgetRegisters.isVisible():
-            self.ui.dockWidgetRegisters.setHidden(True)
-            self.ui.actionShow_Registers.setChecked(False)
-        else:
-            self.ui.dockWidgetRegisters.setVisible(True)
-            self.ui.actionShow_Registers.setChecked(True)
-            
+        self._doShow(self.ui.dockWidgetRegisters, self.ui.actionShow_Registers)
 
     def doShow_Memory(self):
         "Shows or hides the Memory dock widget"
-        if self.ui.dockWidgetMemory.isVisible():
-            self.ui.dockWidgetMemory.setHidden(True)
-            self.ui.actionShow_Memory.setChecked(False)
-        else:
-            self.ui.dockWidgetMemory.setVisible(True)
-            self.ui.actionShow_Memory.setChecked(True)
-            
+        self._doShow(self.ui.dockWidgetMemory, self.ui.actionShow_Memory)
 
     def doShow_Stack(self):
         "Shows or hides the Stack dock widget"
-        if self.ui.dockWidgetStack.isVisible():
-            self.ui.dockWidgetStack.setHidden(True)
-            self.ui.actionShow_Stack.setChecked(False)
-        else:
-            self.ui.dockWidgetStack.setVisible(True)
-            self.ui.actionShow_Stack.setChecked(True)
+        self._doShow(self.ui.dockWidgetStack, self.ui.actionShow_Stack)
             
     def doShow_Messages(self):
         "Shows or hides the Messages dock widget"
-        if self.ui.dockWidgetMessages.isVisible():
-            self.ui.dockWidgetMessages.setHidden(True)
-            self.ui.actionShow_Messages.setChecked(False)
-        else:
-            self.ui.dockWidgetMessages.setVisible(True)
-            self.ui.actionShow_Messages.setChecked(True)
+        self._doShow(self.ui.dockWidgetMessages, self.ui.actionShow_Messages)
+
+    def doRestore_Default_Layout(self):
+        "Restores the initial layout"
+        self.restoreState(self.initialWindowState)
+        # status bar is not automatically restored, restore it manually
+        self.ui.statusBar.setVisible(True)
+        self.checkShowActions()
+        
             
     ## Acción asociada a actionOpciones2
     #
@@ -299,53 +299,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         im = Imprimir(self)
         im.exec_()
 
-    
-    ## Acción asociada a actionMensajes
-    #
-    # Función para ocultar o hacer visible el panel de mensajes
-    def mensajes(self):
-        #=======================================================================
-        # if self.dock4.isVisible():
-        #     self.dock4.setVisible(False)
-        #     self.ui.actionMensajes.setChecked(0)
-        # else:
-        #     self.dock4.setVisible(True)
-        #     self.ui.actionMensajes.setChecked(1)
-        #=======================================================================
-        pass
-
-    
-    ## Acción asociada a actionRegistros
-    #
-    # Función para ocultar o hacer visible el panel de registros
-    def registros(self):
-        #=======================================================================
-        # if self.dock1.isVisible():
-        #     self.dock1.setVisible(False)
-        #     self.ui.actionRegistros.setChecked(0)
-        # else:
-        #     self.dock1.setVisible(True)
-        #     self.ui.actionRegistros.setChecked(1)
-        #=======================================================================
-        pass
-
-    ## Acción asociada a actionSegmento_de_texto
-    #
-    # Función para ocultar o hacer visible el panel de segmento de texto
-    def segmento_de_texto(self):
-        if self.dock3.isVisible():
-            self.dock3.setVisible(False)
-            self.ui.actionSegmento_de_texto.setChecked(0)
-        else:
-            self.dock3.setVisible(True)
-            self.ui.actionSegmento_de_texto.setChecked(1)
-
         
-    ## Acción asociada a actionSegmento_de_datos
-    #
-    # Función para ocultar o hacer visible el panel de segmento de datos
-    #def segmento_de_datos(self):
-    
     ## Acción asociada a actionEjecutar
     #
     # Abre el diálogo de parámetros de ejecución del simulador
@@ -387,20 +341,6 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         para = QtGui.QMessageBox.warning(self, self.tr("Detener ejecución"),
                             self.tr("Quieres detener la ejecución del programa?"), QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
                             
-    ## Acción asociada a actionBarra_de_herramientas
-    #
-    # Función para ocultar o hacer visible la barra de herramientas
-            
-    ## Acción asociada a actionBarra_de_estado
-    #
-    # Función para ocultar o hacer visible la barra de estado 
-    def barraE(self):
-        if self.ui.statusbar.isVisible():
-            self.ui.statusbar.setHidden(1)
-            self.actionBarra_de_estado.setChecked(0)
-        else:
-            self.ui.statusbar.setVisible(1)
-            self.actionBarra_de_estado.setChecked(1)
     
     ## Acción asociada a actionLimpiar_Consola
     #
@@ -408,24 +348,8 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
     def conso_clear(self):
         self.mens.append(self.tr("Limpiando consola"))
         self.consoleWindow.consolEdit.clear()
-        
-    ## Acción asociada a actionVista_inicial
-    #
-    # Función para restaurar la disposición por defecto de la ventana principal
-    def recuperar(self):
-        if self.ui.statusbar.isVisible() != True:
-            self.ui.statusbar.setVisible(1)
-            self.actionBarra_de_estado.setChecked(1)
-        if self.dock1.isVisible() != True:
-            self.dock1.setVisible(1)
-        if self.dock2.isVisible() != True:
-            self.dock2.setVisible(1)
-        if self.dock3.isVisible() != True:
-            self.dock3.setVisible(1)
-        if self.dock4.isVisible() != True:
-            self.dock4.setVisible(1)
-        self.restoreState(self.state, 1)
-        
+
+
         
     ## Acción asociada a actionLimpiar_registros
     #
@@ -447,41 +371,41 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.mens.append(self.tr("Restaurando contenidos de registros y memoria"))
         
     def closeEvent(self, event):
-        "Called when the main window has been closed. Performs clean up actions."
+        "Called when the main window has been closed. Saves state and performs clean up actions."
+        self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("windowState", self.saveState())
+        # Close connection and socket
+        self.mysocket.close_connection()
+        self.mysocket.close_socket()
+        # Close windows
         self.consoleWindow.close()
         self.helpWindow.close()
         event.accept()
 
-    ## Método para redefinir los eventos que se producen tras restaurar la ventana principal
-    #
-    # Se restauran todas las ventanas abiertas de la aplicación
+
     def showEvent(self, event):
-        event.accept()
+        "Method called when the show event is received"
+        super(QtArmSimMainWindow, self).showEvent(event)
         if self.consoleWindow.isVisible() == True:
             self.consoleWindow.showNormal()
         if self.helpWindow.isVisible() == True:
             self.helpWindow.showNormal()
-    ## Método para redefinir los eventos que se producen tras minimizar la ventana principal
-    #
-    # Se minimizan todas las ventanas abiertas de la aplicación
+            
     def hideEvent(self, event):
-        event.accept()
+        "Method called when the hide event is received, minimizes the other app windows"
+        super(QtArmSimMainWindow, self).hideEvent(event)
         if self.consoleWindow.isVisible() == True:
             self.consoleWindow.showMinimized()
         if self.helpWindow.isVisible() == True:
             self.helpWindow.showMinimized()
 
 
-    ## Acción asociada a actionTemas_de_ayuda
-    #
-    # Activa el modo ¿Qué es esto?
-    def whats_This(self):
+    def doWhats_This(self):
         "Activates the What's This? mode"
         QtGui.QWhatsThis.enterWhatsThisMode()
-        self.whatsThisButton.setChecked(1)
 
 
-    def initial_message(self):
+    def welcome_message(self):
         return "<b>Qt ArmSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014 Sergio Barrachina Mir<br></br>\n" + \
                  self.tr("Based on the graphical frontend for Spim developed by Gloria Edo Piñana on 2008.<br></br>\n")
@@ -491,34 +415,106 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                  "(c) 2014 Sergio Barrachina Mir\n\n" + \
                  self.tr("Based on the graphical frontend for Spim\ndeveloped by Gloria Edo Piñana on 2008.")
     
-    def about_Qt_ArmSim(self):
-        "About Qt ArmSim dialog"
+    def doAbout_Qt_ArmSim(self):
+        "Shows the About Qt ArmSim dialog"
         QtGui.QMessageBox.about(self,
                                 self.tr("About Qt ArmSim"),
                                 self.about_message(),
                                 )
 
-    def about_ArmSim(self):
-        "About Qt ArmSim dialog"
+    def doAbout_ArmSim(self):
+        "Shows the About ArmSim dialog"
         QtGui.QMessageBox.about(self,
                                 self.tr("About ArmSim"),
-                                self.tr("Version") + " " + "0.1" + "\n\n" +
-                                "(c) 2014 Germán Fabregat Llueca")
+                                self.armsim_about_message)
         
-    ## Acción asociada a actionAyuda
-    #
-    # Abre una nueva ventana para consultar los distintos temas de ayuda sobre la aplicación
-    def help(self):
-        #self.helpWindow = HelpWindow()
-        self.helpWindow.setVisible(1)
-    
-
-
+    def doHelp(self):
+        "Shows the Help window"
+        self.helpWindow.setVisible(True)
 
     
+    #################################################################################
+    # Communication with ArmSim
+    #################################################################################
 
-        
-if __name__ == "__main__":
+    def read_armsim_version(self):
+        self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
+        self.mysocket.send_line("SHOW VERSION")
+        line = ''
+        armsim_version_lines = []
+        while line != 'EOF':
+            line = self.mysocket.receive_line()
+            armsim_version_lines.append(line)
+        if line != 'EOF': # timeout occurred
+            return ""
+        else:
+            self.armsim_about_message = "\n".join(armsim_version_lines[:-1])
+            return self.armsim_about_message
+    
+    def connectToArmSim(self):
+        if not os.path.exists(self.armsim_command):
+            QtGui.QMessageBox.warning(self, self.tr("ArmSim not found"),
+                    self.tr("ArmSim command not found.\n\n"
+                            "Please go to the 'Configure QtArmSim' entry\n"
+                            "on the Window menu, and set its path.\n"))
+            return False
+        # Search if armsim is already listening in a port in the range [self.armsim_port, self.armsim_port+10[
+        current_port = None
+        for port in range(self.armsim_port, self.armsim_port+10):
+            try:
+                self.mysocket.connect_to(port)
+            except ConnectionRefusedError:
+                continue
+            if self.read_armsim_version():
+                current_port = port
+                break
+        # If no current port, then launch armsim and connect to it
+        if not current_port:
+            self.armsim_pid = subprocess.Popen(["ruby",
+                                                self.armsim_command, 
+                                                str(self.armsim_port)],
+                                               cwd = os.path.dirname(self.armsim_command)
+                                               ).pid
+            if self.armsim_pid:
+                chances = 3
+                while chances:
+                    try:
+                        self.mysocket.connect_to(self.armsim_port)
+                        break
+                    except ConnectionRefusedError:
+                        # Sleep half a second while the server gets ready
+                        time.sleep(.5)
+                        chances -= 1
+                if chances == 0:
+                    QtGui.QMessageBox.warning(self, self.tr("Connection Refused"),
+                                              self.tr("\nArmSim refused to open a connection at the port {}.\n").format(self.armsim_port))
+                    return False
+                if self.read_armsim_version():
+                    current_port = port
+        # If current port
+        if current_port:
+            self.armsim_current_port = current_port
+            self.ui.textEditMessages.append("<b>ArmSim version info</b><br/>")
+            self.ui.textEditMessages.append(self.armsim_about_message)
+            self.ui.textEditMessages.append("<br/>")
+            return True
+        else:
+            return False
+
+        #=======================================================================
+        # numFiles = 5
+        # progress = QtGui.QProgressDialog("Copying files...", "Abort Copy", 0, numFiles, self)
+        # progress.setWindowModality(QtCore.Qt.WindowModal)
+        # for i in range(numFiles):
+        #     progress.setValue(i)
+        #     if progress.wasCanceled():
+        #         break
+        #     time.sleep(1)
+        #     # ... copy one file
+        # progress.setValue(numFiles)
+        #=======================================================================
+            
+def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     # Create the application
@@ -526,5 +522,9 @@ if __name__ == "__main__":
     # Create the main window and show it
     mainwindow = QtArmSimMainWindow()
     mainwindow.show()
+    mainwindow.connectToArmSim()
     # Enter the mainloop of the application
     sys.exit(app.exec_())
+    
+if __name__ == "__main__":
+    main()

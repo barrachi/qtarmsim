@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>600</height>
+    <width>880</width>
+    <height>597</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -47,6 +47,12 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidgetCode">
+      <property name="minimumSize">
+       <size>
+        <width>600</width>
+        <height>400</height>
+       </size>
+      </property>
       <property name="tabPosition">
        <enum>QTabWidget::South</enum>
       </property>
@@ -54,17 +60,23 @@
        <number>0</number>
       </property>
       <widget class="QWidget" name="tabSource">
+       <property name="whatsThis">
+        <string>The Source Code tab is used to edit the assembler source code that is going to be simmulated</string>
+       </property>
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Source Code</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutSource"/>
       </widget>
-      <widget class="QWidget" name="tabAssembler">
+      <widget class="QWidget" name="tabArmSim">
+       <property name="whatsThis">
+        <string>The ArmSim tab is used to inspect and simmulate the ARM machine code generated after assembling the source code</string>
+       </property>
        <property name="accessibleName">
         <string/>
        </property>
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>ArmSim</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
@@ -81,7 +93,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>880</width>
      <height>21</height>
     </rect>
    </property>
@@ -122,9 +134,9 @@
     <addaction name="actionAbout_Qt_ArmSim"/>
     <addaction name="actionAbout_ArmSim"/>
    </widget>
-   <widget class="QMenu" name="menu_Settings">
+   <widget class="QMenu" name="menu_Window">
     <property name="title">
-     <string>&amp;Settings</string>
+     <string>&amp;Window</string>
     </property>
     <addaction name="actionShow_Statusbar"/>
     <addaction name="actionShow_Toolbar"/>
@@ -153,7 +165,7 @@
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
    <addaction name="menuRun"/>
-   <addaction name="menu_Settings"/>
+   <addaction name="menu_Window"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -184,6 +196,8 @@
    <addaction name="separator"/>
    <addaction name="actionRun"/>
    <addaction name="actionStep"/>
+   <addaction name="separator"/>
+   <addaction name="actionWhats_This"/>
   </widget>
   <widget class="QDockWidget" name="dockWidgetRegisters">
    <property name="sizePolicy">
@@ -194,12 +208,15 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>20</width>
+     <width>86</width>
      <height>108</height>
     </size>
    </property>
    <property name="toolTip">
-    <string>Shows the contents of the registers</string>
+    <string/>
+   </property>
+   <property name="whatsThis">
+    <string>The Registers dock shows the contents of the registers</string>
    </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -271,7 +288,10 @@
     </size>
    </property>
    <property name="toolTip">
-    <string>Shows the disassembled code</string>
+    <string/>
+   </property>
+   <property name="whatsThis">
+    <string>The Memory dock shows the disassembled code</string>
    </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -317,7 +337,10 @@
     </size>
    </property>
    <property name="toolTip">
-    <string>Shows the memory dump</string>
+    <string/>
+   </property>
+   <property name="whatsThis">
+    <string>The Stack dock shows the stack memory dump</string>
    </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -353,6 +376,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidgetMessages">
+   <property name="whatsThis">
+    <string>The Messages dock shows Qt ArmSim and ArmSim messages</string>
+   </property>
    <property name="allowedAreas">
     <set>Qt::BottomDockWidgetArea</set>
    </property>
@@ -368,6 +394,12 @@
       <widget class="QTextEdit" name="textEditMessages">
        <property name="enabled">
         <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
        <property name="maximumSize">
         <size>
@@ -390,6 +422,9 @@
    </widget>
   </widget>
   <action name="actionWhats_This">
+   <property name="icon">
+    <iconset theme="system-help"/>
+   </property>
    <property name="text">
     <string>What's &amp;This?</string>
    </property>
@@ -398,6 +433,9 @@
    </property>
    <property name="whatsThis">
     <string>Activa la ayuda</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F1</string>
    </property>
   </action>
   <action name="actionAbout_Qt_ArmSim">
@@ -424,6 +462,9 @@
    </property>
    <property name="text">
     <string>Qt ArmSim &amp;Help</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
   <action name="actionAbout_ArmSim">
@@ -526,7 +567,7 @@
   </action>
   <action name="actionRun">
    <property name="icon">
-    <iconset theme="run">
+    <iconset theme="media-playback-start">
      <normaloff/>
     </iconset>
    </property>
@@ -538,6 +579,9 @@
    </property>
   </action>
   <action name="actionStep">
+   <property name="icon">
+    <iconset theme="media-playback-pause"/>
+   </property>
    <property name="text">
     <string>&amp;Step</string>
    </property>
