@@ -47,6 +47,9 @@ import resources.main_rc as main_rc
 import signal
 import sys
 from src.tablemodelmemory import TableModelMemory
+import time
+from src.mysocket import MySocket
+import subprocess
 
 __version__ = "0.1"
 
@@ -88,6 +91,11 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.initialWindowState = self.saveState()
         # Read the settings
         self.readSettings()
+        # Create socket and set current_armsim_port to None
+        self.mysocket = MySocket()
+        self.armsim_pid = None
+        self.armsim_current_port = None
+        self.armsim_about_message = ""
 
     def show(self, *args, **kwargs):
         "Method called when the window is ready to be shown"
@@ -119,6 +127,9 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.settings = QtCore.QSettings("UJI", "QtArmSim")
         self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
         self.restoreState(self.settings.value("windowState", self.initialWindowState))
+        self.command_path = os.path.dirname(os.path.realpath(__file__))
+        self.armsim_command = self.settings.value("armSimCommand", os.path.join(self.command_path, "armsim", "server.rb"))
+        self.armsim_port = self.settings.value("armSimPort", 8010)
         
     def defaultGeometry(self):
         "Resizes main window to 800x600 and returns the geometry"
@@ -363,9 +374,14 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         "Called when the main window has been closed. Saves state and performs clean up actions."
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
+        # Close connection and socket
+        self.mysocket.close_connection()
+        self.mysocket.close_socket()
+        # Close windows
         self.consoleWindow.close()
         self.helpWindow.close()
         event.accept()
+
 
     def showEvent(self, event):
         "Method called when the show event is received"
@@ -410,14 +426,94 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         "Shows the About ArmSim dialog"
         QtGui.QMessageBox.about(self,
                                 self.tr("About ArmSim"),
-                                self.tr("Version") + " " + "0.1" + "\n\n" +
-                                "(c) 2014 Germán Fabregat Llueca")
+                                self.armsim_about_message)
         
     def doHelp(self):
         "Shows the Help window"
         self.helpWindow.setVisible(True)
 
-        
+    
+    #################################################################################
+    # Communication with ArmSim
+    #################################################################################
+
+    def read_armsim_version(self):
+        self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
+        self.mysocket.send_line("SHOW VERSION")
+        line = ''
+        armsim_version_lines = []
+        while line != 'EOF':
+            line = self.mysocket.receive_line()
+            armsim_version_lines.append(line)
+        if line != 'EOF': # timeout occurred
+            return ""
+        else:
+            self.armsim_about_message = "\n".join(armsim_version_lines[:-1])
+            return self.armsim_about_message
+    
+    def connectToArmSim(self):
+        if not os.path.exists(self.armsim_command):
+            QtGui.QMessageBox.warning(self, self.tr("ArmSim not found"),
+                    self.tr("ArmSim command not found.\n\n"
+                            "Please go to the 'Configure QtArmSim' entry\n"
+                            "on the Window menu, and set its path.\n"))
+            return False
+        # Search if armsim is already listening in a port in the range [self.armsim_port, self.armsim_port+10[
+        current_port = None
+        for port in range(self.armsim_port, self.armsim_port+10):
+            try:
+                self.mysocket.connect_to(port)
+            except ConnectionRefusedError:
+                continue
+            if self.read_armsim_version():
+                current_port = port
+                break
+        # If no current port, then launch armsim and connect to it
+        if not current_port:
+            self.armsim_pid = subprocess.Popen(["ruby",
+                                                self.armsim_command, 
+                                                str(self.armsim_port)],
+                                               cwd = os.path.dirname(self.armsim_command)
+                                               ).pid
+            if self.armsim_pid:
+                chances = 3
+                while chances:
+                    try:
+                        self.mysocket.connect_to(self.armsim_port)
+                        break
+                    except ConnectionRefusedError:
+                        # Sleep half a second while the server gets ready
+                        time.sleep(.5)
+                        chances -= 1
+                if chances == 0:
+                    QtGui.QMessageBox.warning(self, self.tr("Connection Refused"),
+                                              self.tr("\nArmSim refused to open a connection at the port {}.\n").format(self.armsim_port))
+                    return False
+                if self.read_armsim_version():
+                    current_port = port
+        # If current port
+        if current_port:
+            self.armsim_current_port = current_port
+            self.ui.textEditMessages.append("<b>ArmSim version info</b><br/>")
+            self.ui.textEditMessages.append(self.armsim_about_message)
+            self.ui.textEditMessages.append("<br/>")
+            return True
+        else:
+            return False
+
+        #=======================================================================
+        # numFiles = 5
+        # progress = QtGui.QProgressDialog("Copying files...", "Abort Copy", 0, numFiles, self)
+        # progress.setWindowModality(QtCore.Qt.WindowModal)
+        # for i in range(numFiles):
+        #     progress.setValue(i)
+        #     if progress.wasCanceled():
+        #         break
+        #     time.sleep(1)
+        #     # ... copy one file
+        # progress.setValue(numFiles)
+        #=======================================================================
+            
 def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -426,6 +522,7 @@ def main():
     # Create the main window and show it
     mainwindow = QtArmSimMainWindow()
     mainwindow.show()
+    mainwindow.connectToArmSim()
     # Enter the mainloop of the application
     sys.exit(app.exec_())
     
