@@ -319,7 +319,7 @@
         <bool>true</bool>
        </property>
        <attribute name="horizontalHeaderVisible">
-        <bool>false</bool>
+        <bool>true</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
@@ -364,8 +364,11 @@
        <property name="lineWidth">
         <number>0</number>
        </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
        <attribute name="horizontalHeaderVisible">
-        <bool>false</bool>
+        <bool>true</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>

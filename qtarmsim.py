@@ -59,6 +59,8 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+RAM_LOWER = 0x20070000
+RAM_UPPER = 0x2007083F
 
 class QtArmSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ArmSim application."
@@ -120,6 +122,10 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         tableModelMemory = TableModelMemory()
         self.ui.tableViewMemory.setModel(tableModelMemory)
         self.ui.tableViewMemory.resizeColumnsToContents()
+        # Link tableViewStack with tableModelMemory
+        tableModelStack = TableModelMemory()
+        self.ui.tableViewStack.setModel(tableModelStack)
+        self.ui.tableViewStack.resizeColumnsToContents()
         
             
     def readSettings(self):
@@ -408,12 +414,12 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
     def welcome_message(self):
         return "<b>Qt ArmSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014 Sergio Barrachina Mir<br></br>\n" + \
-                 self.tr("Based on the graphical frontend for Spim developed by Gloria Edo Piñana on 2008.<br></br>\n")
+                 self.tr("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n")
 
     def about_message(self):
         return self.tr("Version") + " " + __version__ + "\n\n" + \
                  "(c) 2014 Sergio Barrachina Mir\n\n" + \
-                 self.tr("Based on the graphical frontend for Spim\ndeveloped by Gloria Edo Piñana on 2008.")
+                 self.tr("Based on the graphical frontend for Spim\ndeveloped on 2008 by Gloria Edo Piñana.")
     
     def doAbout_Qt_ArmSim(self):
         "Shows the About Qt ArmSim dialog"
@@ -437,8 +443,8 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
     # Communication with ArmSim
     #################################################################################
 
-    def read_armsim_version(self):
-        self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
+    def readArmSimVersion(self):
+        "Gets the ArmSim Version. This method also serves to test that we are speaking to ArmSim and not to another server."
         self.mysocket.send_line("SHOW VERSION")
         line = ''
         armsim_version_lines = []
@@ -450,6 +456,37 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         else:
             self.armsim_about_message = "\n".join(armsim_version_lines[:-1])
             return self.armsim_about_message
+    
+    def updateRegisters(self):
+        "Updates the registers dock upon ArmSim data."
+        self.mysocket.send_line("DUMP REGISTERS")
+        registers_model = self.ui.tableViewRegisters.model()
+        for i in range(registers_model.rowCount(self.ui.tableViewRegisters)):
+            line = self.mysocket.receive_line()
+            (reg_name, reg_value) = line.split(": ")  # @UnusedVariable reg_name
+            registers_model.setRegister(i, reg_value)
+
+    def updateMemory(self):
+        "Updates the stack dock upon ArmSim data."
+        nbytes = int( (RAM_UPPER - RAM_LOWER)/4 )*4
+        self.mysocket.send_line("DUMP MEMORY 0x{0:0{1}X} {2}".format(RAM_LOWER, 8, nbytes))
+        stack_model = self.ui.tableViewStack.model()
+        stack_model.clearMemoryData
+        stack_model.appendMemoryRange(RAM_LOWER, RAM_UPPER)
+        for address in range(RAM_LOWER, RAM_LOWER + nbytes, 4):
+            (a, byte0) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+            (a, byte1) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+            (a, byte2) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+            (a, byte3) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+            stack_model.setMemoryWord("0x{0:0{1}X}".format(address, 8),
+                                      "0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
+            print("0x{0:0{1}X}".format(address, 8))
+            
+        # @todo: set scroll in stack table view
+        #self.mysocket.send_line("SHOW REGISTER r13")
+        #line = self.mysocket.receive_line()
+        #(reg_name, reg_value) = line.split(": ")  # @UnusedVariable reg_name
+
     
     def connectToArmSim(self):
         if not os.path.exists(self.armsim_command):
@@ -463,9 +500,10 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         for port in range(self.armsim_port, self.armsim_port+10):
             try:
                 self.mysocket.connect_to(port)
+                self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
             except ConnectionRefusedError:
                 continue
-            if self.read_armsim_version():
+            if self.readArmSimVersion():
                 current_port = port
                 break
         # If no current port, then launch armsim and connect to it
@@ -480,6 +518,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 while chances:
                     try:
                         self.mysocket.connect_to(self.armsim_port)
+                        self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
                         break
                     except ConnectionRefusedError:
                         # Sleep half a second while the server gets ready
@@ -489,7 +528,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                     QtGui.QMessageBox.warning(self, self.tr("Connection Refused"),
                                               self.tr("\nArmSim refused to open a connection at the port {}.\n").format(self.armsim_port))
                     return False
-                if self.read_armsim_version():
+                if self.readArmSimVersion():
                     current_port = port
         # If current port
         if current_port:
@@ -520,9 +559,11 @@ def main():
     # Create the application
     app = QtGui.QApplication(sys.argv)
     # Create the main window and show it
-    mainwindow = QtArmSimMainWindow()
-    mainwindow.show()
-    mainwindow.connectToArmSim()
+    main_window = QtArmSimMainWindow()
+    main_window.show()
+    if main_window.connectToArmSim():
+        main_window.updateRegisters()
+        main_window.updateMemory()
     # Enter the mainloop of the application
     sys.exit(app.exec_())
     
