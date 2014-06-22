@@ -43,8 +43,9 @@ def getopts():
 
 OK = 'OK'
 EOF = 'EOF'
-reg_names = ['r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7',
-             'PC', 'SP', 'LR', 'CPSR']
+#reg_names = ['r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7',
+#             'PC', 'SP', 'LR', 'CPSR']
+reg_names = ['r{}'.format(x) for x in range(16)]
 
 class CommunicationTestCase(unittest.TestCase):
 
@@ -134,66 +135,66 @@ class CommunicationTestCase(unittest.TestCase):
     #===========================================================================
     
     def test_show_memory_byte(self):
-        "SHOW MEMORY BYTE AT 0x00000020 should return '0x00000020: 0x00' after RESET MEMORY"
-        self.mysocket.send_line("SHOW MEMORY BYTE AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x00")
+        "SHOW MEMORY BYTE AT 0x20070020 should return '0x20070020: 0x00' after RESET MEMORY"
+        self.mysocket.send_line("SHOW MEMORY BYTE AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x00")
 
     def test_show_memory_half(self):
-        "SHOW MEMORY HALF AT 0x00000020 should return '0x00000020: 0x0000' after RESET MEMORY"
-        self.mysocket.send_line("SHOW MEMORY HALF AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x0000")
+        "SHOW MEMORY HALF AT 0x20070020 should return '0x20070020: 0x0000' after RESET MEMORY"
+        self.mysocket.send_line("SHOW MEMORY HALF AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x0000")
 
     def test_show_memory_word(self):
-        "SHOW MEMORY WORD AT 0x00000020 should return '0x00000020: 0x00000000' after RESET MEMORY"
-        self.mysocket.send_line("SHOW MEMORY WORD AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x00000000")
+        "SHOW MEMORY WORD AT 0x20070020 should return '0x20070020: 0x00000000' after RESET MEMORY"
+        self.mysocket.send_line("SHOW MEMORY WORD AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x00000000")
 
     def test_set_memory_byte(self):
-        "SET MEMORY BYTE AT 0x00000020 WITH 0X10 should overwrite that byte with 0x10 and return OK."
-        self.mysocket.send_line("SET MEMORY BYTE AT 0x00000020 WITH 0x10")
+        "SET MEMORY BYTE AT 0x20070020 WITH 0X10 should overwrite that byte with 0x10 and return OK."
+        self.mysocket.send_line("SET MEMORY BYTE AT 0x20070020 WITH 0x10")
         self.assertEqual(self.mysocket.receive_line(), OK)
-        self.mysocket.send_line("SHOW MEMORY BYTE AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x10")
+        self.mysocket.send_line("SHOW MEMORY BYTE AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x10")
 
     def test_set_memory_half(self):
-        "SET MEMORY HALF AT 0x00000020 WITH 0X1020 should overwrite that half with 0x1020 and return OK."
-        self.mysocket.send_line("SET MEMORY HALF AT 0x00000020 WITH 0x1020")
+        "SET MEMORY HALF AT 0x20070020 WITH 0X1020 should overwrite that half with 0x1020 and return OK."
+        self.mysocket.send_line("SET MEMORY HALF AT 0x20070020 WITH 0x1020")
         self.assertEqual(self.mysocket.receive_line(), OK)
-        self.mysocket.send_line("SHOW MEMORY HALF AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x1020")
+        self.mysocket.send_line("SHOW MEMORY HALF AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x1020")
 
     def test_set_memory_word(self):
-        "SET MEMORY WORD AT 0x00000020 WITH 0X10203040 should overwrite that word with 0x10203040 and return OK."
-        self.mysocket.send_line("SET MEMORY WORD AT 0x00000020 WITH 0x10203040")
+        "SET MEMORY WORD AT 0x20070020 WITH 0X10203040 should overwrite that word with 0x10203040 and return OK."
+        self.mysocket.send_line("SET MEMORY WORD AT 0x20070020 WITH 0x10203040")
         self.assertEqual(self.mysocket.receive_line(), OK)
-        self.mysocket.send_line("SHOW MEMORY WORD AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x10203040")
+        self.mysocket.send_line("SHOW MEMORY WORD AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x10203040")
 
     def test_endianess(self):
         "Check that little-endian is being used for storing halfs and words."
-        self.mysocket.send_line("SET MEMORY BYTE AT 0x00000020 WITH 0x10")
+        self.mysocket.send_line("SET MEMORY BYTE AT 0x20070020 WITH 0x10")
         self.assertEqual(self.mysocket.receive_line(), OK)
-        self.mysocket.send_line("SET MEMORY BYTE AT 0x00000021 WITH 0x20")
+        self.mysocket.send_line("SET MEMORY BYTE AT 0x20070021 WITH 0x20")
         self.assertEqual(self.mysocket.receive_line(), OK)
-        self.mysocket.send_line("SET MEMORY BYTE AT 0x00000022 WITH 0x30")
+        self.mysocket.send_line("SET MEMORY BYTE AT 0x20070022 WITH 0x30")
         self.assertEqual(self.mysocket.receive_line(), OK)
-        self.mysocket.send_line("SET MEMORY BYTE AT 0x00000023 WITH 0x40")
+        self.mysocket.send_line("SET MEMORY BYTE AT 0x20070023 WITH 0x40")
         self.assertEqual(self.mysocket.receive_line(), OK)
-        self.mysocket.send_line("SHOW MEMORY HALF AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x1020")
-        self.mysocket.send_line("SHOW MEMORY WORD AT 0x00000020")
-        self.assertEqual(self.mysocket.receive_line(), "0x00000020: 0x10203040")
+        self.mysocket.send_line("SHOW MEMORY HALF AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x1020")
+        self.mysocket.send_line("SHOW MEMORY WORD AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x10203040")
 
     def test_reset_memory(self):
         "RESET MEMORY should reset all the memory to its initial value."
-        for pos in range(20):
+        for pos in range(537329664, 537329664+20): # From 0x20070000
             hex_pos = "0x{0:0{1}X}".format(pos, 8)
             self.mysocket.send_line("SET MEMORY BYTE AT {} WITH {}".format(hex_pos, "0xA0"))
             self.assertEqual(self.mysocket.receive_line(), OK)
         self.mysocket.send_line("RESET MEMORY")
         self.assertEqual(self.mysocket.receive_line(), OK)
         # Check that the read bytes a value different of 0xA0
-        for pos in range(20):
+        for pos in range(537329664, 537329664+20):
             hex_pos = "0x{0:0{1}X}".format(pos, 8)
             self.mysocket.send_line("SHOW MEMORY BYTE AT {}".format(hex_pos))
             answer = self.mysocket.receive_line()
@@ -202,8 +203,8 @@ class CommunicationTestCase(unittest.TestCase):
 
     def test_dump_memory(self):
         "DUMP MEMORY start_address nbytes should return the value of the nbytes from start_address."
-        self.mysocket.send_line("DUMP MEMORY 0x00000000 20")
-        for pos in range(20):
+        self.mysocket.send_line("DUMP MEMORY 0x20070000 20")
+        for pos in range(537329664, 537329664+20): # From 0x20070000
             hex_pos = "0x{0:0{1}X}".format(pos, 8)
             self.assertEqual(self.mysocket.receive_line(), "{}: 0x00".format(hex_pos))
         self.assertRaises(socket.timeout, self.mysocket.receive_line)
@@ -280,9 +281,26 @@ def suite():
     '''
     # To check specific tests, change manual_suite to True and add as addTest
     # lines are required.
-    manual_suite = False
+    manual_suite = True
     if manual_suite:
         suite = unittest.TestSuite()
+        suite.addTest(CommunicationTestCase('test_show_version'))
+        suite.addTest(CommunicationTestCase('test_show_register_r0'))
+        suite.addTest(CommunicationTestCase('test_set_register_r1'))
+        
+        #suite.addTest(CommunicationTestCase('test_reset_registers'))
+        #suite.addTest(CommunicationTestCase('test_show_memory_byte'))
+        #suite.addTest(CommunicationTestCase('test_show_memory_half'))
+        #suite.addTest(CommunicationTestCase('test_show_memory_word'))
+        #suite.addTest(CommunicationTestCase('test_endianess'))
+        #suite.addTest(CommunicationTestCase('test_reset_memory'))
+
+        suite.addTest(CommunicationTestCase('test_dump_registers'))
+        suite.addTest(CommunicationTestCase('test_set_memory_byte'))
+        suite.addTest(CommunicationTestCase('test_set_memory_half'))
+        suite.addTest(CommunicationTestCase('test_set_memory_word'))
+        
+        suite.addTest(CommunicationTestCase('test_dump_memory'))
         suite.addTest(CommunicationTestCase('test_breakpoints'))
         return suite
     else:
