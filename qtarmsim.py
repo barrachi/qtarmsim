@@ -519,7 +519,6 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 (a, byte2) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
                 (a, byte3) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
                 words.append("0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
-                print(i)
             tableModelMemory.loadWords(words)
 
     
