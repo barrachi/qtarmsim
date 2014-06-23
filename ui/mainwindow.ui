@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>880</width>
-    <height>597</height>
+    <height>716</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -142,7 +142,6 @@
     <addaction name="actionShow_Toolbar"/>
     <addaction name="actionShow_Registers"/>
     <addaction name="actionShow_Memory"/>
-    <addaction name="actionShow_Stack"/>
     <addaction name="actionShow_Messages"/>
     <addaction name="separator"/>
     <addaction name="actionRestore_Default_Layout"/>
@@ -263,16 +262,28 @@
        <property name="lineWidth">
         <number>0</number>
        </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
+       <property name="showGrid">
+        <bool>false</bool>
+       </property>
        <property name="gridStyle">
-        <enum>Qt::DotLine</enum>
+        <enum>Qt::SolidLine</enum>
        </property>
        <attribute name="horizontalHeaderVisible">
         <bool>false</bool>
        </attribute>
        <attribute name="verticalHeaderVisible">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderCascadingSectionResizes">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderStretchLastSection">
         <bool>false</bool>
        </attribute>
       </widget>
@@ -284,7 +295,7 @@
    <property name="minimumSize">
     <size>
      <width>180</width>
-     <height>108</height>
+     <height>172</height>
     </size>
    </property>
    <property name="toolTip">
@@ -303,76 +314,25 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContentsMemory">
-    <layout class="QVBoxLayout" name="verticalLayout_3">
+    <layout class="QVBoxLayout" name="dockWidgetMemoryLayout">
      <item>
-      <widget class="MyQTableView" name="tableViewMemory">
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="lineWidth">
+      <widget class="QToolBox" name="toolBoxMemory">
+       <property name="currentIndex">
         <number>0</number>
        </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <attribute name="horizontalHeaderVisible">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="dockWidgetStack">
-   <property name="minimumSize">
-    <size>
-     <width>180</width>
-     <height>108</height>
-    </size>
-   </property>
-   <property name="toolTip">
-    <string/>
-   </property>
-   <property name="whatsThis">
-    <string>The Stack dock shows the stack memory dump</string>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
-   </property>
-   <property name="windowTitle">
-    <string>Stack</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContentsStack">
-    <layout class="QVBoxLayout" name="verticalLayout_4">
-     <item>
-      <widget class="MyQTableView" name="tableViewStack">
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="lineWidth">
-        <number>0</number>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <attribute name="horizontalHeaderVisible">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
+       <widget class="QWidget" name="page_3">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>156</width>
+          <height>460</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Page 1</string>
+        </attribute>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -391,7 +351,7 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContentsMessages">
+   <widget class="QWidget" name="dockWidgetMessagesContents">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QTextEdit" name="textEditMessages">
@@ -426,7 +386,9 @@
   </widget>
   <action name="actionWhats_This">
    <property name="icon">
-    <iconset theme="system-help"/>
+    <iconset theme="system-help">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>What's &amp;This?</string>
@@ -583,7 +545,9 @@
   </action>
   <action name="actionStep">
    <property name="icon">
-    <iconset theme="media-playback-pause"/>
+    <iconset theme="media-playback-pause">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>&amp;Step</string>
@@ -642,17 +606,6 @@
    </property>
    <property name="text">
     <string>Show &amp;Memory</string>
-   </property>
-  </action>
-  <action name="actionShow_Stack">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show &amp;Stack</string>
    </property>
   </action>
   <action name="actionRestore_Default_Layout">

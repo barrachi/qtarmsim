@@ -27,14 +27,19 @@ class TableModelRegisters(QAbstractTableModel):
         return len(self.registers_data)
 
     def columnCount(self, parent):
-        return len(self.registers_data[0])
+        return 1
 
     def data(self, index, role):
         if not index.isValid():
             return None
         elif role != Qt.DisplayRole:
             return None
-        return self.registers_data[index.row()][index.column()]
+        return self.registers_data[index.row()][1]
+
+    def headerData(self, section, orientation, role = Qt.DisplayRole):
+        if role == Qt.DisplayRole and orientation == Qt.Vertical:
+            return self.registers_data[section][0]
+        return QAbstractTableModel.headerData(self, section, orientation, role)
 
     def setRegister(self, i, value):
         self.registers_data[i][1] = value

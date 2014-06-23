@@ -50,6 +50,7 @@ from src.tablemodelmemory import TableModelMemory
 import time
 from src.mysocket import MySocket
 import subprocess
+import re
 
 __version__ = "0.1"
 
@@ -118,14 +119,17 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         tableModelRegisters = TableModelRegisters()
         self.ui.tableViewRegisters.setModel(tableModelRegisters)
         self.ui.tableViewRegisters.resizeColumnsToContents()
-        # Link tableViewMemory with tableModelMemory
-        tableModelMemory = TableModelMemory()
-        self.ui.tableViewMemory.setModel(tableModelMemory)
-        self.ui.tableViewMemory.resizeColumnsToContents()
-        # Link tableViewStack with tableModelMemory
-        tableModelStack = TableModelMemory()
-        self.ui.tableViewStack.setModel(tableModelStack)
-        self.ui.tableViewStack.resizeColumnsToContents()
+
+        #=======================================================================
+        # # Link tableViewMemory with tableModelMemory
+        # tableModelMemory = TableModelMemory()
+        # self.ui.tableViewMemory.setModel(tableModelMemory)
+        # self.ui.tableViewMemory.resizeColumnsToContents()
+        # # Link tableViewStack with tableModelMemory
+        # tableModelStack = TableModelMemory()
+        # self.ui.tableViewStack.setModel(tableModelStack)
+        # self.ui.tableViewStack.resizeColumnsToContents()
+        #=======================================================================
         
             
     def readSettings(self):
@@ -148,7 +152,6 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
         self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
         self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
-        self.ui.actionShow_Stack.setChecked(self.ui.dockWidgetStack.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
         
  
@@ -173,9 +176,8 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
-        self.ui.dockWidgetStack.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
-
+        # self.ui.tableViewMemory.installEventFilter(self)
 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
@@ -183,10 +185,10 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 self.ui.actionShow_Registers.setChecked(False)
             elif source is self.ui.dockWidgetMemory:
                 self.ui.actionShow_Memory.setChecked(False)
-            elif source is self.ui.dockWidgetStack:
-                self.ui.actionShow_Stack.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
                 self.ui.actionShow_Messages.setChecked(False)
+        if (event.type() == QtCore.QEvent.LayoutRequest and isinstance(source, QtGui.QTableView)): 
+            source.resizeColumnsToContents()
         return super(QtArmSimMainWindow, self).eventFilter(source, event)
 
         
@@ -275,10 +277,6 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         "Shows or hides the Memory dock widget"
         self._doShow(self.ui.dockWidgetMemory, self.ui.actionShow_Memory)
 
-    def doShow_Stack(self):
-        "Shows or hides the Stack dock widget"
-        self._doShow(self.ui.dockWidgetStack, self.ui.actionShow_Stack)
-            
     def doShow_Messages(self):
         "Shows or hides the Messages dock widget"
         self._doShow(self.ui.dockWidgetMessages, self.ui.actionShow_Messages)
@@ -466,26 +464,63 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             (reg_name, reg_value) = line.split(": ")  # @UnusedVariable reg_name
             registers_model.setRegister(i, reg_value)
 
+
     def updateMemory(self):
-        "Updates the stack dock upon ArmSim data."
-        nbytes = int( (RAM_UPPER - RAM_LOWER)/4 )*4
-        self.mysocket.send_line("DUMP MEMORY 0x{0:0{1}X} {2}".format(RAM_LOWER, 8, nbytes))
-        stack_model = self.ui.tableViewStack.model()
-        stack_model.clearMemoryData
-        stack_model.appendMemoryRange(RAM_LOWER, RAM_UPPER)
-        for address in range(RAM_LOWER, RAM_LOWER + nbytes, 4):
-            (a, byte0) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
-            (a, byte1) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
-            (a, byte2) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
-            (a, byte3) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
-            stack_model.setMemoryWord("0x{0:0{1}X}".format(address, 8),
-                                      "0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
-            print("0x{0:0{1}X}".format(address, 8))
-            
-        # @todo: set scroll in stack table view
-        #self.mysocket.send_line("SHOW REGISTER r13")
-        #line = self.mysocket.receive_line()
-        #(reg_name, reg_value) = line.split(": ")  # @UnusedVariable reg_name
+        "Updates the memory dock upon ArmSim data."
+        self.mysocket.send_line("SYSINFO MEMORY")
+        memory_lines = []
+        line = self.mysocket.receive_line()
+        while line != 'EOF':
+            memory_lines.append(line)
+            line = self.mysocket.receive_line()
+        if line != 'EOF': # timeout occurred
+            return ""
+
+        for i in range(self.ui.toolBoxMemory.count()):
+            self.ui.toolBoxMemory.removeItem(i)
+
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Courier"))
+
+        expr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
+        for line in memory_lines:
+            memtype, hex_start, hex_end = expr.search(line).groups()
+            # Toolbox page and vertical layout
+            page = QtGui.QWidget()
+            vertical_layout = QtGui.QVBoxLayout(page)
+            # TableView
+            tableView = QtGui.QTableView(page)
+            tableView.installEventFilter(self)
+            tableView.setFont(font)
+            tableView.setFrameShape(QtGui.QFrame.NoFrame)
+            tableView.setFrameShadow(QtGui.QFrame.Plain)
+            tableView.setLineWidth(0)
+            tableView.setShowGrid(False)
+            tableView.setAlternatingRowColors(True)
+            tableView.horizontalHeader().setVisible(False)
+            tableView.verticalHeader().setVisible(True)
+            # tableModelMemory
+            tableModelMemory = TableModelMemory()
+            tableView.setModel(tableModelMemory)
+            tableModelMemory.appendMemoryRange(memtype, hex_start, hex_end)
+            # tableView.resizeColumnsToContents()
+            # Add tableView to the vertical layout and the page to the toolBox 
+            vertical_layout.addWidget(tableView)
+            self.ui.toolBoxMemory.addItem(page, _fromUtf8("{} {}".format(memtype, hex_start)))
+            # Dump memory
+            start = int(hex_start, 16)
+            end = int(hex_end, 16)
+            nbytes = int( (end - start)/4 )*4
+            self.mysocket.send_line("DUMP MEMORY {} {}".format(hex_start, nbytes))
+            words = []
+            for i in range(int(nbytes/4)): # @UnusedVariable i
+                (a, byte0) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+                (a, byte1) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+                (a, byte2) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+                (a, byte3) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+                words.append("0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
+                print(i)
+            tableModelMemory.loadWords(words)
 
     
     def connectToArmSim(self):
