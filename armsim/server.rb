@@ -427,6 +427,17 @@ execute = Proc.new { |entrada|
   res
 }
 
+#sysinfo_memory
+#--------------
+#Devuelve la información de la memoria.
+# @param [Array] entrada
+# @return [String]
+
+sysinfo_memory = Proc.new { |entrada|
+  res = $server.proc.memory.to_s + "EOF\r\n"
+}
+
+
 #assemble
 #--------
 #Ensambla y carga un fichero. To be continued
@@ -474,12 +485,16 @@ Set = { 'REGISTER' => [1, set_register, [:regname, 'WITH', :hexvalue]],
         'BREAKPOINT' => [1, set_breakpoint, ['AT', :address]]
 }
 
+Sysinfo = { 'MEMORY' => [1, sysinfo_memory, []]
+}
+
 Ordenes = {'SHOW' => [0, Show],
            'DUMP' => [0, Dump],
            'DISASSEMBLE' => [1, disassemble, [:address, :ninst]],
            'RESET' => [0, Reset],
            'CLEAR' => [0, Clear],
            'SET' => [0, Set],
+           'SYSINFO' => [0, Sysinfo],
            'EXECUTE' => [1, execute, [:keyword]],
            'ASSEMBLE' => [1, assemble, [:path]],
            'EXIT' => [1, exit, []]

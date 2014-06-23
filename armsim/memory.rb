@@ -37,7 +37,7 @@ class Memory
   def to_s
     res = ''
     @data.each do |b|
-      res += b.to_s + "\n"
+      res += b.to_s + "\r\n"
     end
     return res
   end

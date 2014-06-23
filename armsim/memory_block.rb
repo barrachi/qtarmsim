@@ -49,7 +49,7 @@ class Memory_block
   #Nos una cadena con los datos del bloque: su inicio, final y descripción.
   # @return [String]
   def to_s
-    "%08X - %08X  :" % [@origen, @origen + @tam - 1] + @desc
+    Memory_Defs::MEMORY_NAMES[@tipo] + ": 0x%08X - 0x%08X # " % [@origen, @origen + @tam - 1] + @desc
   end
 
   #<=>

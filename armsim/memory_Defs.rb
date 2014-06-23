@@ -193,4 +193,6 @@ module Memory_Defs
 
   MEMORY_TYPES = {ram_le: RAM_LE, rom_le: ROM_LE, ram_be: RAM_BE, rom_be: ROM_BE}
 
+  MEMORY_NAMES =  {ram_le: 'RAM', rom_le: 'ROM', ram_be: 'RAM', rom_be: 'ROM'}
+
 end
