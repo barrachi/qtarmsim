@@ -39,12 +39,21 @@ class Instruction
       @words = @words[0..size-1]
     end
   end
+
   #to_s
   #----
   #Formatea en bonito la instrucción, siguiendo las normas del ensamblador de la arquitectura
   # @return [String]
   def to_s
     ThumbII_Defs.to_s(@type, @operands, @address)
+  end
+
+  #kind
+  #----
+  #Devuelve el tipo de operación, más general
+  #que type
+  def kind
+    ThumbII_Defs::SET[@type][1]
   end
 
   #execute

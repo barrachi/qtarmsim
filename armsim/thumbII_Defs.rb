@@ -1830,7 +1830,7 @@ module ThumbII_Defs
   #-------
   #Almacena multiples words a partir de una dirección -4
   #desde los registros de la lista. El SP
-  #se actualiza con el valor de la última dirección ecrita
+  #se actualiza con el valor de la última dirección escrita
   #Si leemos aquí de memoria, ¿qué pasa con las excepciones?
   #No modifica los flags
   #Simbolos: f1 para la lista de direcciones fuente, d1 para la lista de valores,
@@ -1857,6 +1857,7 @@ module ThumbII_Defs
       fnt << dir
       dir -= 4
     end
+    dest.reverse!
     data = {f1: fnt, d1: dest, f2: dir + 4, d2: base}
   }
 

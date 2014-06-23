@@ -144,12 +144,53 @@ module Memory_Defs
     data[dir] = (word >> 24) & 0xff
   }
 
-  # Hash de funciones de acceso básicas little endian
-  ACCESSES_LE = {rb: read_byte, rh: read_half_le, rw: read_word_le,
-              wb: write_byte, wh: write_half_le, ww: write_word_le}
+  #nothing
+  #-------
+  #Escrituras para ROM: nada
+  # @param [Array] data
+  # @param [Integer] dir
+  # @param [Integer] word
+  # @return [nil] en caso de error. Ver
+  nothing = Proc.new {|data, dir, word|
+  }
 
-  # Hash de funciones de acceso básicas big endian
-  ACCESSES_BE = {rb: read_byte, rh: read_half_be, rw: read_word_be,
-                 wb: write_byte, wh: write_half_be, ww: write_word_be}
+  ############################
+  # Funciones basicas de reset
+  # ROM o RAM
+  ############################
+
+  #ram_reset
+  #---------
+  #Reset para la RAM. La llena con el valor
+  # predefinido
+  # @param [MemoryBlock] block
+  ram_reset = Proc.new {|block|
+    block.fill_from_val
+  }
+
+  #rom_reset
+  #---------
+  #Reset para la ROM. No hace nada
+  # @param [MemoryBlock] block
+  rom_reset = Proc.new {|block|
+  }
+
+  # Hash de funciones de acceso básicas little endian para ram
+  RAM_LE = {rb: read_byte, rh: read_half_le, rw: read_word_le,
+              wb: write_byte, wh: write_half_le, ww: write_word_le, reset: ram_reset}
+
+  # Hash de funciones de acceso básicas little endian para rom
+  ROM_LE = {rb: read_byte, rh: read_half_le, rw: read_word_le,
+            wb: nothing, wh: nothing, ww: nothing, reset: rom_reset}
+
+  # Hash de funciones de acceso básicas big endian para ram
+  RAM_BE = {rb: read_byte, rh: read_half_be, rw: read_word_be,
+                 wb: write_byte, wh: write_half_be, ww: write_word_be, reset: ram_reset}
+
+  # Hash de funciones de acceso básicas big endian para rom
+  ROM_BE = {rb: read_byte, rh: read_half_be, rw: read_word_be,
+            wb: nothing, wh: nothing, ww: nothing, reset: rom_reset}
+
+  MEMORY_TYPES = {ram_le: RAM_LE, rom_le: ROM_LE, ram_be: RAM_BE, rom_be: ROM_BE}
 
 end

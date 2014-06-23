@@ -34,13 +34,14 @@ class Memory_block
   # @param [Integer] tam
   # @param [Integer] val
   # @param [String] desc
-  def initialize(orig = 0, tam = 1024, val = 0, desc = '')
+  def initialize(orig = 0, tam = 1024, tipo = :ram_le, val = 0, desc = '')
     @origen = orig - orig % ALIGN
     @tam = tam - tam % ALIGN
-    @data = val
+    @val = val
     @desc = desc
+    @tipo = tipo
     @accesses = Hash.new
-    set_accesses
+    set_accesses(tipo)
   end
 
   #to_s
@@ -146,7 +147,7 @@ class Memory_block
   #Genera los datos del bloque de memoria con un valor constante.
   # @param [Integer] val
   # @return [Memory_block]
-  def fill_from_val(val = @data)
+  def fill_from_val(val = @val)
     @data = Array.new(@tam, val)
     return self
   end
@@ -155,8 +156,9 @@ class Memory_block
   #-------------
   #Modifica la lista de funciones de acceso según la lista que se pasa,
   #creando accesos nuevos o modificando los existentes
-  # @param [Hash] list
-  def set_accesses(list = Memory_Defs::ACCESSES_LE)
+  # @param [Symbol] tipo
+  def set_accesses(tipo)
+    list = Memory_Defs::MEMORY_TYPES[tipo]
     list.keys.each do |key|
       @accesses[key] = list[key]
     end
@@ -166,6 +168,6 @@ class Memory_block
   #-----
   #De momento pone a 0
   def reset
-    self.fill_from_val(0)
+    @accesses[:reset].call(self)
   end
 end

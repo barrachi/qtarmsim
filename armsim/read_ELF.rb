@@ -2,7 +2,7 @@ require_relative 'memory_Defs'
 require_relative 'memory_block'
 
 
-ACESSES = Memory_Defs::ACCESSES_LE
+ACESSES = Memory_Defs::RAM_LE
 ELFCLASS = ['Invalid object', '32 bit object', '64 bit object']
 ELFDATA = ['Invalid data', 'LSB data', 'MSB data']
 ELFVERSION = ['Invalid version', 'Current version']
@@ -361,8 +361,8 @@ class ELF_File < File
     dataend = bssdir > END_DATA ? bssdir : END_DATA
     data += [0] * (dataend - @wks_orig['.bss'] + 1)
     #creamos los dos bloques y los devolvemos en un array
-    bcode = Memory_block.new(@wks_orig['.text'],0, 0, 'ROM').fill_from_array(code)
-    bdata = Memory_block.new(@wks_orig['.data'],0, 0, 'RAM').fill_from_array(data)
+    bcode = Memory_block.new(@wks_orig['.text'],0, :rom_le, 0, 'ROM').fill_from_array(code)
+    bdata = Memory_block.new(@wks_orig['.data'],0, :ram_le, 0, 'RAM').fill_from_array(data)
     p symbolTable
     p bcode
     p bdata

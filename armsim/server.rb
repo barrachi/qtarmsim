@@ -11,7 +11,11 @@ Errores = { orden: "Orden no reconocida\r\n",
             args:  "Argumentos erroneos\r\n",
             sistema: "Error del sistema\r\n",
             rango: "Fuera de rango\r\n",
-            vacio: "No hay datos\r\n"
+            vacio: "No hay datos\r\n",
+            noexec: "Instrucion indefinida o impredecible\r\n",
+            call: "No es subrutina\r\nSe ejecuta STEP\r\n",
+            end: "Se intenta ejecutar al final del programa\r\n",
+            breakpoint: "Se ejecuta desde direccion de breakpoint\r\nEl breakpoint se ignora\r\n"
 }
 
 ###########################################
@@ -33,7 +37,7 @@ def gen_disassemble(dir)
   inst = $server.coder.decode([word, word2], dir)
   dir = dir + 2 if inst.size == 2
   res = res + "0x%04X " % word2 if inst.size == 2
-  res = res + inst.to_s
+  res = res +  (inst.kind == :und || inst.kind == :unp ? 'NOT AN ISTRUCTION' : inst.to_s)
   return [res, inst]
 end
 
@@ -268,6 +272,19 @@ disassemble = Proc.new { |entrada|
   if $server.proc.nil?
     res = Errores[:sistema]
   else
+    case entrada[0]
+      when 'BYTE'
+        $server.proc.memory.access(:wb, entrada[2], entrada[4])
+        res = "OK\r\n"
+      when 'HALF'
+        $server.proc.memory.access(:wh, entrada[2], entrada[4])
+        res = "OK\r\n"
+      when 'WORD'
+        $server.proc.memory.access(:ww, entrada[2], entrada[4])
+        res = "OK\r\n"
+      else
+        res = Errores[:args]
+    end
     res = ""
     proc = $server.proc
     dir = entrada[0]
@@ -289,18 +306,47 @@ disassemble = Proc.new { |entrada|
 
 execute = Proc.new { |entrada|
   if $server.proc.nil?
-      res = Errores[:sistema]
+      res =  Errores[:sistema]
   else
-      regs = Array.new
-      mem = Array.new
-      pc = $server.proc.reg(ThumbII_Defs::PC)
-      dos = gen_disassemble(pc)
+    kinds_noexec = [:und, :ump]
+    kinds_end = [:wfe, :wfi]
+    kinds_subr = [:blx]
+    regs = Array.new
+    mem = Array.new
+
+    pc = $server.proc.reg(ThumbII_Defs::PC)
+    dos = gen_disassemble(pc)
+
+    case entrada[0]
+      when 'STEP'
+        sigue = lambda {false}
+      when 'SUBROUTINE'
+        if kinds_subr.find_index(dos[1].kind).nil?
+          sigue = lambda {false}
+          terror = Errores[:call]
+        end
+      when 'ALL'
+        sigue = lambda {true}
+      else
+        res = Errores[:args]
+    end
+
+    res = "ERROR\r\n" +  + dos[0] + "\r\n" + Errores[:noexec] + "EOF\r\n" unless kinds_noexec.find_index(dos[1].kind).nil?
+    res = "ERROR\r\n" +  + dos[0] + "\r\n" + Errores[:end] + "EOF\r\n" unless kinds_end.find_index(dos[1].kind).nil?
+    terror = Errores[:breakpoint] unless $server.breakpoints.find_index(pc).nil?
+
+    if res.nil?
       mod = $server.proc.execute(dos[1])
       nregs = mod[:usr_regs] != nil ? mod[:usr_regs].length / 2 : 0
       nmem = mod[:memory] != nil ? mod[:memory][1].length : 0
       if nregs > 0
         0.upto(nregs - 1) do |ind|
-          regs << mod[:usr_regs][2 * ind]
+          r = mod[:usr_regs][2 * ind]
+          regs << r
+          if sigue.nil? && r == ThumbII_Defs::LR
+            pcold = mod[:usr_regs][2 * ind + 1]
+            sigue = lambda {pcold != pc}
+          end
         end
         regs.uniq!
         regs.sort!
@@ -319,7 +365,49 @@ execute = Proc.new { |entrada|
         mem.uniq!
         mem.sort!
       end
-      res = "SUCCESS\r\n" + dos[0] + "\r\n"
+      while sigue.call
+        pc = $server.proc.reg(ThumbII_Defs::PC)
+        dos = gen_disassemble(pc)
+        if !kinds_noexec.find_index(dos[1].kind).nil?
+          res = "ERROR\r\n"
+          terror = Errores[:noexec]
+          break
+        end
+        if !kinds_end.find_index(dos[1].kind).nil?
+          res = "END OF PROGRAM\r\n"
+          break
+        end
+        if !$server.breakpoints.find_index(pc).nil?
+          res = "BREAKPOINT REACHED\r\n"
+          break
+        end
+        mod = $server.proc.execute(dos[1])
+        nregs = mod[:usr_regs] != nil ? mod[:usr_regs].length / 2 : 0
+        nmem = mod[:memory] != nil ? mod[:memory][1].length : 0
+        if nregs > 0
+          0.upto(nregs - 1) do |ind|
+            regs << mod[:usr_regs][2 * ind]
+          end
+          regs.uniq!
+          regs.sort!
+        end
+        if nmem > 0
+          bytes = case mod[:memory][0]
+                  when :wb then 0
+                  when :wh then 1
+                  when :ww then 3
+                end
+          mod[:memory][1].each do |par|
+            0.upto(bytes) do |idx|
+              mem << par[0] + idx
+            end
+          end
+          mem.uniq!
+          mem.sort!
+        end
+      end
+      res = (terror.nil? ? "SUCCESS\r\n" : "ERROR\r\n") if res.nil?
+      res = res + dos[0] + "\r\n"
       if regs.length > 0
         res = res + "AFFECTED REGISTERS\r\n"
         regs.each do |nreg|
@@ -330,9 +418,11 @@ execute = Proc.new { |entrada|
         res = res + "AFFECTED MEMORY\r\n"
         mem.each do |pos|
           res = res + "0x%08X: 0x%02X\r\n" % [pos, $server.proc.memory_byte(pos)]
-        end
+         end
       end
+      res = res + terror unless terror.nil?
       res = res + "EOF\r\n"
+    end
   end
   res
 }
