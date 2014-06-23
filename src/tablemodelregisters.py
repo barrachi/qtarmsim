@@ -43,4 +43,7 @@ class TableModelRegisters(QAbstractTableModel):
 
     def setRegister(self, i, value):
         self.registers_data[i][1] = value
+        self.dataChanged.emit(self.createIndex(i, 0), self.createIndex(i, 0))
         
+    def getRegister(self, i):
+        return self.registers_data[i][1]

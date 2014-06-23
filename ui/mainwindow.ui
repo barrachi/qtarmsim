@@ -57,7 +57,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabSource">
        <property name="whatsThis">
@@ -78,11 +78,7 @@
        <attribute name="title">
         <string>ArmSim</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QTextEdit" name="textEditAssembler"/>
-        </item>
-       </layout>
+       <layout class="QVBoxLayout" name="verticalLayoutArmSim"/>
       </widget>
      </widget>
     </item>
@@ -326,7 +322,7 @@
           <x>0</x>
           <y>0</y>
           <width>156</width>
-          <height>460</height>
+          <height>344</height>
          </rect>
         </property>
         <attribute name="label">

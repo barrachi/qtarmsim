@@ -10,3 +10,6 @@ doc/grammar/*.rao
 resources/*_rc.py
 ui/*.py
 *.pyc
+*.aux
+*.log
+*.toc

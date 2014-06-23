@@ -86,6 +86,22 @@ class MySocket:
         if len(lines)>1:
             self.pending_lines = lines[1:]
         return lines[0]
+
+    def receive_lines_till_eof(self):
+        """
+        Receives lines until a line with the EOF word is received.
+        
+        @return: An array with the received lines or an empty array if a timeout occurs
+        """    
+        lines = []
+        line = self.receive_line()
+        while line != 'EOF':
+            lines.append(line)
+            line = self.receive_line()
+        if line == 'EOF': 
+            return lines
+        else: # timeout occurred
+            return []
     
     def send_line(self, msg):
         self.conn.sendall(bytes(msg, self.ENCODING)+b'\r\n')

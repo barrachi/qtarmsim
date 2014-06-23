@@ -52,6 +52,7 @@ from src.mysocket import MySocket
 import subprocess
 import re
 
+
 __version__ = "0.1"
 
 try:
@@ -59,9 +60,6 @@ try:
 except AttributeError:
     def _fromUtf8(s):
         return s
-
-RAM_LOWER = 0x20070000
-RAM_UPPER = 0x2007083F
 
 class QtArmSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ArmSim application."
@@ -109,15 +107,19 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         
     def extendUi(self):
         "Extends the Ui with new objects and links the table views with their models"
-        # Add text editor based on QsciScintilla
+        # Add text editor based on QsciScintilla to tabSource
         self.ui.textEditSource = SimpleARMEditor(self.ui.tabSource)
-        self.ui.textEditSource.setToolTip(_fromUtf8(""))
-        self.ui.textEditSource.setWhatsThis(_fromUtf8(""))
         self.ui.textEditSource.setObjectName(_fromUtf8("textEditSource"))
         self.ui.verticalLayoutSource.addWidget(self.ui.textEditSource)
+        
+        # Add text editor based on QsciScintilla to tabArmSim
+        self.ui.textEditArmSim = SimpleARMEditor(self.ui.tabArmSim, disassemble=True)
+        self.ui.textEditArmSim.setObjectName(_fromUtf8("textEditArmSim"))
+        self.ui.verticalLayoutArmSim.addWidget(self.ui.textEditArmSim)
+        
         # Link tableViewRegisters with tableModelRegisters
-        tableModelRegisters = TableModelRegisters()
-        self.ui.tableViewRegisters.setModel(tableModelRegisters)
+        self.tableModelRegisters = TableModelRegisters()
+        self.ui.tableViewRegisters.setModel(self.tableModelRegisters)
         self.ui.tableViewRegisters.resizeColumnsToContents()
 
         #=======================================================================
@@ -251,7 +253,79 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         
 
     #################################################################################
-    # Settings menu actions
+    # Run menu actions
+    #################################################################################
+
+    def doStep(self):
+        if not self.armsim_current_port:
+            return
+        self.mysocket.send_line("EXECUTE STEP")
+        lines = self.mysocket.receive_lines_till_eof()
+        result = lines[0]
+        mode = "DUMP"
+        for line in lines[1:]:
+            if line == "AFFECTED REGISTERS":
+                mode = line
+                continue
+            elif line == "AFFECTED MEMORY":
+                mode = line
+                continue
+            elif line == "ERROR MESSAGE":
+                mode = line
+                self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
+                continue
+            if mode == "DUMP":
+                self.ui.textEditMessages.append(line)
+            if mode == "AFFECTED REGISTERS":
+                (reg_name, reg_value) = line.split(": ")
+                reg_number = int(reg_name[1:])
+                self.tableModelRegisters.setRegister(reg_number, reg_value)
+            elif mode == "AFFECTED MEMORY":
+                pass
+            elif mode == "ERROR MESSAGE":
+                self.ui.textEditMessages.append(line)
+        self.highlight_pc_line()
+        
+        
+    def highlight_pc_line(self):
+        PC = self.tableModelRegisters.getRegister(15)
+        if self.ui.textEditArmSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
+            (line, index) = self.ui.textEditArmSim.getCursorPosition()  # @UnusedVariable index
+            self.ui.textEditArmSim.setFocus()
+            self.ui.textEditArmSim.setCursorPosition(line, 0)
+            self.ui.textEditArmSim.ensureLineVisible(line)
+            
+#===============================================================================
+# 
+#         virtual void ensureLineVisible (int line)
+#         
+#         virtual void QsciScintilla::setCursorPosition    (    int     line,
+# int     index 
+# )         [virtual, slot]
+#===============================================================================
+
+
+#===============================================================================
+# SUCCESS
+# [0x00001000] 0xB580 push {r7, lr}
+# AFFECTED REGISTERS
+# r13: 0x20070778
+# r15: 0x00001002
+# AFFECTED MEMORY
+# 0x20070778: 0x00
+# 0x20070779: 0x00
+# 0x2007077A: 0x00
+# 0x2007077B: 0x00
+# 0x2007077C: 0x00
+# 0x2007077D: 0x00
+# 0x2007077E: 0x00
+# 0x2007077F: 0x00
+# EOF
+#===============================================================================
+
+
+    #################################################################################
+    # Window menu actions
     #################################################################################
     
     def _doShow(self, widget, action):
@@ -444,16 +518,9 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
     def readArmSimVersion(self):
         "Gets the ArmSim Version. This method also serves to test that we are speaking to ArmSim and not to another server."
         self.mysocket.send_line("SHOW VERSION")
-        line = ''
-        armsim_version_lines = []
-        while line != 'EOF':
-            line = self.mysocket.receive_line()
-            armsim_version_lines.append(line)
-        if line != 'EOF': # timeout occurred
-            return ""
-        else:
-            self.armsim_about_message = "\n".join(armsim_version_lines[:-1])
-            return self.armsim_about_message
+        armsim_version_lines = self.mysocket.receive_lines_till_eof()
+        self.armsim_about_message = "\n".join(armsim_version_lines[:-1])
+        return self.armsim_about_message
     
     def updateRegisters(self):
         "Updates the registers dock upon ArmSim data."
@@ -467,21 +534,16 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
     def updateMemory(self):
         "Updates the memory dock upon ArmSim data."
+        # Get memory info
         self.mysocket.send_line("SYSINFO MEMORY")
-        memory_lines = []
-        line = self.mysocket.receive_line()
-        while line != 'EOF':
-            memory_lines.append(line)
-            line = self.mysocket.receive_line()
-        if line != 'EOF': # timeout occurred
-            return ""
-
+        memory_lines = self.mysocket.receive_lines_till_eof()
+        # Remove previous memory pages on toolBoxMemory
         for i in range(self.ui.toolBoxMemory.count()):
             self.ui.toolBoxMemory.removeItem(i)
-
+        # Set courier font
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier"))
-
+        # Process memory info
         expr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
         for line in memory_lines:
             memtype, hex_start, hex_end = expr.search(line).groups()
@@ -503,11 +565,11 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             tableModelMemory = TableModelMemory()
             tableView.setModel(tableModelMemory)
             tableModelMemory.appendMemoryRange(memtype, hex_start, hex_end)
-            # tableView.resizeColumnsToContents()
+            # @todelete: tableView.resizeColumnsToContents()
             # Add tableView to the vertical layout and the page to the toolBox 
             vertical_layout.addWidget(tableView)
             self.ui.toolBoxMemory.addItem(page, _fromUtf8("{} {}".format(memtype, hex_start)))
-            # Dump memory
+            # Dump memory from ArmSim
             start = int(hex_start, 16)
             end = int(hex_end, 16)
             nbytes = int( (end - start)/4 )*4
@@ -520,6 +582,15 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 (a, byte3) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
                 words.append("0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
             tableModelMemory.loadWords(words)
+            # if memtype == ROM then load the program into the ArmSim tab
+            if memtype == 'ROM':
+                n_insts = int(nbytes/2)-1
+                self.mysocket.send_line("DISASSEMBLE {} {}".format(hex_start, n_insts))
+                armsim_lines = []
+                for i in range(n_insts):
+                    armsim_lines.append(self.mysocket.receive_line())
+                self.ui.textEditArmSim.setText('\n'.join(armsim_lines))
+                self.highlight_pc_line()
 
     
     def connectToArmSim(self):

@@ -71,8 +71,8 @@ class QsciLexerARM(QsciLexerCustom):
         # this matters if the source contains non-ascii characters and
         # a multi-byte encoding is used (e.g. utf-8)
         source = ''
-        if end > editor.length():
-            end = editor.length()
+        if end >= editor.length():
+            end = editor.length()-1
         if end > start:
             source = bytearray(end - start)
             editor.SendScintilla(editor.SCI_GETTEXTRANGE, start, end, source)
