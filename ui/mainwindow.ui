@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string notr="true">Qt ArmSim</string>
+   <string notr="true">Qt ARMSim</string>
   </property>
   <property name="tabShape">
    <enum>QTabWidget::Rounded</enum>
@@ -49,7 +49,7 @@
      <widget class="QTabWidget" name="tabWidgetCode">
       <property name="minimumSize">
        <size>
-        <width>600</width>
+        <width>400</width>
         <height>400</height>
        </size>
       </property>
@@ -68,7 +68,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutSource"/>
       </widget>
-      <widget class="QWidget" name="tabArmSim">
+      <widget class="QWidget" name="tabARMSim">
        <property name="whatsThis">
         <string>The ArmSim tab is used to inspect and simmulate the ARM machine code generated after assembling the source code</string>
        </property>
@@ -76,9 +76,9 @@
         <string/>
        </property>
        <attribute name="title">
-        <string>ArmSim</string>
+        <string>ARMSim</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayoutArmSim"/>
+       <layout class="QVBoxLayout" name="verticalLayoutARMSim"/>
       </widget>
      </widget>
     </item>

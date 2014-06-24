@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 ###########################################################################
-#  Qt ArmSim -- a Qt graphical interface to armsim                        #
+#  Qt ARMSim -- a Qt graphical interface to ARMSim                        #
 #  ---------------------------------------------------------------------  #
 #    begin                : 2014-04-02                                    #
 #    copyright            : (C) 2014 by Sergio Barrachina Mir             #
@@ -61,12 +61,12 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
-class QtArmSimMainWindow(QtGui.QMainWindow):
-    "Main window of the Qt ArmSim application."
+class QtARMSimMainWindow(QtGui.QMainWindow):
+    "Main window of the Qt ARMSim application."
     
     def __init__(self, parent=None):
         # Call super.__init__()
-        super(QtArmSimMainWindow, self).__init__()
+        super(QtARMSimMainWindow, self).__init__()
         # Initialize variables
         self.fileName = ''
         # Load the user interface
@@ -75,7 +75,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         # Extends the Ui
         self.extendUi()
         # Set the application icon, title and size
-        self.setWindowIcon(QtGui.QIcon(":/images/spi.bmp"))
+        self.setWindowIcon(QtGui.QIcon(":/images/logo.svg"))
         # Breakpoint dialog initialization
         self.br = Breakpoi(self)
         # Breakpoints list
@@ -92,7 +92,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.initialWindowState = self.saveState()
         # Read the settings
         self.readSettings()
-        # Create socket and set current_armsim_port to None
+        # Create socket and set current_armSim_port to None
         self.mysocket = MySocket()
         self.armsim_pid = None
         self.armsim_current_port = None
@@ -100,7 +100,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
     def show(self, *args, **kwargs):
         "Method called when the window is ready to be shown"
-        super(QtArmSimMainWindow, self).show(*args, **kwargs)
+        super(QtARMSimMainWindow, self).show(*args, **kwargs)
         # restore actions have to be called after the window is shown
         self.checkShowActions()
         
@@ -112,10 +112,10 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.ui.textEditSource.setObjectName(_fromUtf8("textEditSource"))
         self.ui.verticalLayoutSource.addWidget(self.ui.textEditSource)
         
-        # Add text editor based on QsciScintilla to tabArmSim
-        self.ui.textEditArmSim = SimpleARMEditor(self.ui.tabArmSim, disassemble=True)
-        self.ui.textEditArmSim.setObjectName(_fromUtf8("textEditArmSim"))
-        self.ui.verticalLayoutArmSim.addWidget(self.ui.textEditArmSim)
+        # Add text editor based on QsciScintilla to tabARMSim
+        self.ui.textEditARMSim = SimpleARMEditor(self.ui.tabARMSim, disassemble=True)
+        self.ui.textEditARMSim.setObjectName(_fromUtf8("textEditARMSim"))
+        self.ui.verticalLayoutARMSim.addWidget(self.ui.textEditARMSim)
         
         # Link tableViewRegisters with tableModelRegisters
         self.tableModelRegisters = TableModelRegisters()
@@ -139,12 +139,12 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             
     def readSettings(self):
         "Reads the settings from the settings file"
-        self.settings = QtCore.QSettings("UJI", "QtArmSim")
+        self.settings = QtCore.QSettings("UJI", "QtARMSim")
         self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
         self.restoreState(self.settings.value("windowState", self.initialWindowState))
         self.command_path = os.path.dirname(os.path.realpath(__file__))
-        self.armsim_command = self.settings.value("armSimCommand", os.path.join(self.command_path, "armsim", "server.rb"))
-        self.armsim_port = self.settings.value("armSimPort", 8010)
+        self.armsim_command = self.settings.value("ARMSimCommand", os.path.join(self.command_path, "armsim", "server.rb"))
+        self.armsim_port = self.settings.value("ARMSimPort", 8010)
         
     def defaultGeometry(self):
         "Resizes main window to 800x600 and returns the geometry"
@@ -194,7 +194,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 self.ui.actionShow_Messages.setChecked(False)
         if (event.type() == QtCore.QEvent.LayoutRequest and isinstance(source, QtGui.QTableView)): 
             source.resizeColumnsToContents()
-        return super(QtArmSimMainWindow, self).eventFilter(source, event)
+        return super(QtARMSimMainWindow, self).eventFilter(source, event)
 
         
     #################################################################################
@@ -204,7 +204,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
     def setFileName(self, fileName):
         "Sets the filename and updates the window title accordingly"
         self.fileName = fileName
-        self.setWindowTitle("Qt ArmSim - {}".format(self.fileName))
+        self.setWindowTitle("Qt ARMSim - {}".format(self.fileName))
     
     
     def doOpen(self):
@@ -295,11 +295,11 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         
     def highlight_pc_line(self):
         PC = self.tableModelRegisters.getRegister(15)
-        if self.ui.textEditArmSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
-            (line, index) = self.ui.textEditArmSim.getCursorPosition()  # @UnusedVariable index
-            self.ui.textEditArmSim.setFocus()
-            self.ui.textEditArmSim.setCursorPosition(line, 0)
-            self.ui.textEditArmSim.ensureLineVisible(line)
+        if self.ui.textEditARMSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
+            (line, index) = self.ui.textEditARMSim.getCursorPosition()  # @UnusedVariable index
+            self.ui.textEditARMSim.setFocus()
+            self.ui.textEditARMSim.setCursorPosition(line, 0)
+            self.ui.textEditARMSim.ensureLineVisible(line)
             
 #===============================================================================
 # 
@@ -458,7 +458,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         "Called when the main window has been closed. Saves state and performs clean up actions."
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
-        # Send EXIT command to ArmSim
+        # Send EXIT command to ARMSim
         if self.armsim_current_port:
             self.mysocket.send_line("EXIT")
         # Close connection and socket
@@ -473,7 +473,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
     def showEvent(self, event):
         "Method called when the show event is received"
-        super(QtArmSimMainWindow, self).showEvent(event)
+        super(QtARMSimMainWindow, self).showEvent(event)
         if self.consoleWindow.isVisible() == True:
             self.consoleWindow.showNormal()
         if self.helpWindow.isVisible() == True:
@@ -481,7 +481,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             
     def hideEvent(self, event):
         "Method called when the hide event is received, minimizes the other app windows"
-        super(QtArmSimMainWindow, self).hideEvent(event)
+        super(QtARMSimMainWindow, self).hideEvent(event)
         if self.consoleWindow.isVisible() == True:
             self.consoleWindow.showMinimized()
         if self.helpWindow.isVisible() == True:
@@ -494,7 +494,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
 
     def welcome_message(self):
-        return "<b>Qt ArmSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
+        return "<b>Qt ARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014 Sergio Barrachina Mir<br></br>\n" + \
                  self.tr("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n")
 
@@ -503,17 +503,17 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                  "(c) 2014 Sergio Barrachina Mir\n\n" + \
                  self.tr("Based on the graphical frontend for Spim\ndeveloped on 2008 by Gloria Edo Piñana.")
     
-    def doAbout_Qt_ArmSim(self):
-        "Shows the About Qt ArmSim dialog"
+    def doAbout_Qt_ARMSim(self):
+        "Shows the About Qt ARMSim dialog"
         QtGui.QMessageBox.about(self,
-                                self.tr("About Qt ArmSim"),
+                                self.tr("About Qt ARMSim"),
                                 self.about_message(),
                                 )
 
-    def doAbout_ArmSim(self):
-        "Shows the About ArmSim dialog"
+    def doAbout_ARMSim(self):
+        "Shows the About ARMSim dialog"
         QtGui.QMessageBox.about(self,
-                                self.tr("About ArmSim"),
+                                self.tr("About ARMSim"),
                                 self.armsim_about_message)
         
     def doHelp(self):
@@ -522,18 +522,18 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
     
     #################################################################################
-    # Communication with ArmSim
+    # Communication with ARMSim
     #################################################################################
 
-    def readArmSimVersion(self):
-        "Gets the ArmSim Version. This method also serves to test that we are speaking to ArmSim and not to another server."
+    def readARMSimVersion(self):
+        "Gets the ARMSim Version. This method also serves to test that we are speaking to ARMSim and not to another server."
         self.mysocket.send_line("SHOW VERSION")
         armsim_version_lines = self.mysocket.receive_lines_till_eof()
         self.armsim_about_message = "\n".join(armsim_version_lines)
         return self.armsim_about_message
     
     def updateRegisters(self):
-        "Updates the registers dock upon ArmSim data."
+        "Updates the registers dock upon ARMSim data."
         self.mysocket.send_line("DUMP REGISTERS")
         registers_model = self.ui.tableViewRegisters.model()
         for i in range(registers_model.rowCount(self.ui.tableViewRegisters)):
@@ -544,7 +544,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
 
 
     def updateMemory(self):
-        "Updates the memory dock upon ArmSim data."
+        "Updates the memory dock upon ARMSim data."
         # Get memory info
         self.mysocket.send_line("SYSINFO MEMORY")
         memory_lines = self.mysocket.receive_lines_till_eof()
@@ -579,39 +579,40 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             # Add tableView to the vertical layout and the page to the toolBox 
             vertical_layout.addWidget(tableView)
             self.ui.toolBoxMemory.addItem(page, _fromUtf8("{} {}".format(memtype, hex_start)))
-            # Dump memory from ArmSim
+            # Dump memory from ARMSim
             start = int(hex_start, 16)
             end = int(hex_end, 16)
             nbytes = int( (end - start)/4 )*4
             self.mysocket.send_line("DUMP MEMORY {} {}".format(hex_start, nbytes))
             words = []
-            for i in range(int(nbytes/4)): # @UnusedVariable i
-                (a, byte0) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
-                (a, byte1) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
-                (a, byte2) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
-                (a, byte3) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
+            lines = self.mysocket.receive_lines_till_eof()
+            for i in range(int(len(lines)/4)): # @UnusedVariable i
+                (a, byte0) = lines[i*4+0].split(": ")  # @UnusedVariable a
+                (a, byte1) = lines[i*4+1].split(": ")  # @UnusedVariable a
+                (a, byte2) = lines[i*4+2].split(": ")  # @UnusedVariable a
+                (a, byte3) = lines[i*4+3].split(": ")  # @UnusedVariable a
                 words.append("0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
             tableModel.loadWords(words)
-            # if memtype == ROM then load the program into the ArmSim tab
+            # if memtype == ROM then load the program into the ARMSim tab
             if memtype == 'ROM':
                 n_insts = int(nbytes/2)-1
                 self.mysocket.send_line("DISASSEMBLE {} {}".format(hex_start, n_insts))
                 armsim_lines = []
                 for i in range(n_insts):
                     armsim_lines.append(self.mysocket.receive_line())
-                self.ui.textEditArmSim.setText('\n'.join(armsim_lines))
+                self.ui.textEditARMSim.setText('\n'.join(armsim_lines))
                 self.highlight_pc_line()
         self.tableModelMemory.clearHistory()
 
     
-    def connectToArmSim(self):
+    def connectToARMSim(self):
         if not os.path.exists(self.armsim_command):
-            QtGui.QMessageBox.warning(self, self.tr("ArmSim not found"),
-                    self.tr("ArmSim command not found.\n\n"
-                            "Please go to the 'Configure QtArmSim' entry\n"
+            QtGui.QMessageBox.warning(self, self.tr("ARMSim not found"),
+                    self.tr("ARMSim command not found.\n\n"
+                            "Please go to the 'Configure QtARMSim' entry\n"
                             "on the Window menu, and set its path.\n"))
             return False
-        # Search if armsim is already listening in a port in the range [self.armsim_port, self.armsim_port+10[
+        # Search if ARMSim is already listening in a port in the range [self.armsim_port, self.armsim_port+10[
         current_port = None
         for port in range(self.armsim_port, self.armsim_port+10):
             try:
@@ -619,7 +620,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
             except ConnectionRefusedError:
                 continue
-            if self.readArmSimVersion():
+            if self.readARMSimVersion():
                 current_port = port
                 break
         # If no current port, then launch armsim and connect to it
@@ -642,9 +643,9 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                         chances -= 1
                 if chances == 0:
                     QtGui.QMessageBox.warning(self, self.tr("Connection Refused"),
-                                              self.tr("\nArmSim refused to open a connection at the port {}.\n").format(self.armsim_port))
+                                              self.tr("\nARMSim refused to open a connection at the port {}.\n").format(self.armsim_port))
                     return False
-                if self.readArmSimVersion():
+                if self.readARMSimVersion():
                     current_port = port
         # If current port
         if current_port:
@@ -675,9 +676,9 @@ def main():
     # Create the application
     app = QtGui.QApplication(sys.argv)
     # Create the main window and show it
-    main_window = QtArmSimMainWindow()
+    main_window = QtARMSimMainWindow()
     main_window.show()
-    if main_window.connectToArmSim():
+    if main_window.connectToARMSim():
         main_window.updateRegisters()
         main_window.updateMemory()
     # Enter the mainloop of the application

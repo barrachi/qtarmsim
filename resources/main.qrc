@@ -6,7 +6,7 @@
         <file>images/runProject.png</file> 
         <file>images/break.png</file>
         <file>images/breakpointToggle.png</file>
-        <file>images/spi.bmp</file>
+        <file>images/logo.svg</file>
         
     </qresource>
     <qresource prefix="">
