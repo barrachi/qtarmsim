@@ -47,9 +47,9 @@ class MySocket:
         if self.verbose:
             print('Connected with ' + addr[0] + ':' + str(addr[1]))
         
-    def connect_to(self, port):
+    def connect_to(self, port, server="localhost"):
         "Used by a client to establish a connection to the specified port."
-        self.sock.connect(("localhost", port))
+        self.sock.connect((server, port))
         self.conn = self.sock
         
     def get_lines(self):

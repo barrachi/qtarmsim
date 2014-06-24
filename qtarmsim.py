@@ -10,7 +10,7 @@
 #  ---------------------------------------------------------------------  #
 #                                                                         #
 # This application is based on a previous work of Gloria Edo Piñana who   #
-# developed the graphical part of a graphical interface to the SPIM       #
+# developed the graphical part of a Qt graphical interface to the SPIM    #
 # simulator in 2008.                                                      #
 #                                                                         #
 ###########################################################################
@@ -30,7 +30,16 @@
 ###########################################################################
 
 
+import os
+import re
+import signal
+import sys
+import time
+
 from PyQt4 import QtCore, QtGui
+
+import resources.main_rc as main_rc
+from src.armsimconnector import ARMSimConnector
 from src.br import Breakpoi
 from src.co import Conso
 from src.ej import Ejecutar
@@ -39,18 +48,10 @@ from src.im import Imprimir
 from src.mu import Multipasos
 from src.op import Opciones
 from src.simplearmeditor import SimpleARMEditor
+from src.tablemodelmemory import TableModelMemory
 from src.tablemodelregisters import TableModelRegisters
 from src.va import Valor
 from ui.mainwindow import Ui_MainWindow
-import os
-import resources.main_rc as main_rc
-import signal
-import sys
-from src.tablemodelmemory import TableModelMemory
-import time
-from src.mysocket import MySocket
-import subprocess
-import re
 
 
 __version__ = "0.1"
@@ -92,11 +93,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.initialWindowState = self.saveState()
         # Read the settings
         self.readSettings()
-        # Create socket and set current_armSim_port to None
-        self.mysocket = MySocket()
-        self.armsim_pid = None
-        self.armsim_current_port = None
-        self.armsim_about_message = ""
 
     def show(self, *args, **kwargs):
         "Method called when the window is ready to be shown"
@@ -525,40 +521,47 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     # Communication with ARMSim
     #################################################################################
 
-    def readARMSimVersion(self):
-        "Gets the ARMSim Version. This method also serves to test that we are speaking to ARMSim and not to another server."
-        self.mysocket.send_line("SHOW VERSION")
-        armsim_version_lines = self.mysocket.receive_lines_till_eof()
-        self.armsim_about_message = "\n".join(armsim_version_lines)
-        return self.armsim_about_message
-    
     def updateRegisters(self):
         "Updates the registers dock upon ARMSim data."
-        self.mysocket.send_line("DUMP REGISTERS")
         registers_model = self.ui.tableViewRegisters.model()
-        for i in range(registers_model.rowCount(self.ui.tableViewRegisters)):
-            line = self.mysocket.receive_line()
-            (reg_name, reg_value) = line.split(": ")  # @UnusedVariable reg_name
-            registers_model.setRegister(i, reg_value)
+        for (reg, hex_value) in self.simmulator.getRegisters():
+            registers_model.setRegister(reg, hex_value)
         registers_model.clearHistory()
 
 
+    def getMemoryBanks(self):
+        """
+        Gets the memory banks available at the simmulator.
+        
+        @return: An array of tuples as (memory type, hexadecimal start address, hexadeciman end address).
+        """
+        self.mysocket.send_line("SYSINFO MEMORY")
+        lines = self.mysocket.receive_lines_till_eof()
+
+        self.re_membanksexpr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
+        memory_banks = []
+        for line in range(len(lines)):
+            try:
+                (memtype, hex_start, hex_end) = self.re_membanksexpr.search(line).groups()
+            except AttributeError:
+                print("ERROR: ")
+                raise
+            memory_banks.append(())
+
     def updateMemory(self):
         "Updates the memory dock upon ARMSim data."
-        # Get memory info
-        self.mysocket.send_line("SYSINFO MEMORY")
-        memory_lines = self.mysocket.receive_lines_till_eof()
+
         # Remove previous memory pages on toolBoxMemory
         for i in range(self.ui.toolBoxMemory.count()):
             self.ui.toolBoxMemory.removeItem(i)
         # Set courier font
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier"))
+
+        
         # Process memory info
         self.tableModelMemory.clear()
-        expr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
-        for line in memory_lines:
-            memtype, hex_start, hex_end = expr.search(line).groups()
+        for (memtype, hex_start, hex_end) in self.simmulator.getMemoryBanks():
             # Toolbox page and vertical layout
             page = QtGui.QWidget()
             vertical_layout = QtGui.QVBoxLayout(page)
@@ -612,63 +615,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                             "Please go to the 'Configure QtARMSim' entry\n"
                             "on the Window menu, and set its path.\n"))
             return False
-        # Search if ARMSim is already listening in a port in the range [self.armsim_port, self.armsim_port+10[
-        current_port = None
-        for port in range(self.armsim_port, self.armsim_port+10):
-            try:
-                self.mysocket.connect_to(port)
-                self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
-            except ConnectionRefusedError:
-                continue
-            if self.readARMSimVersion():
-                current_port = port
-                break
-        # If no current port, then launch armsim and connect to it
-        if not current_port:
-            self.armsim_pid = subprocess.Popen(["ruby",
-                                                self.armsim_command, 
-                                                str(self.armsim_port)],
-                                               cwd = os.path.dirname(self.armsim_command)
-                                               ).pid
-            if self.armsim_pid:
-                chances = 3
-                while chances:
-                    try:
-                        self.mysocket.connect_to(self.armsim_port)
-                        self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
-                        break
-                    except ConnectionRefusedError:
-                        # Sleep half a second while the server gets ready
-                        time.sleep(.5)
-                        chances -= 1
-                if chances == 0:
-                    QtGui.QMessageBox.warning(self, self.tr("Connection Refused"),
-                                              self.tr("\nARMSim refused to open a connection at the port {}.\n").format(self.armsim_port))
-                    return False
-                if self.readARMSimVersion():
-                    current_port = port
-        # If current port
-        if current_port:
-            self.armsim_current_port = current_port
-            self.ui.textEditMessages.append("<b>ArmSim version info</b><br/>")
-            self.ui.textEditMessages.append(self.armsim_about_message)
-            self.ui.textEditMessages.append("<br/>")
-            return True
-        else:
+        self.simmulator = ARMSimConnector(self.armsim_command, self.armsim_port)
+        errmsg = self.simmulator.connect()
+        if errmsg:
+            QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "\n{}\n".format(errmsg))
             return False
-
-        #=======================================================================
-        # numFiles = 5
-        # progress = QtGui.QProgressDialog("Copying files...", "Abort Copy", 0, numFiles, self)
-        # progress.setWindowModality(QtCore.Qt.WindowModal)
-        # for i in range(numFiles):
-        #     progress.setValue(i)
-        #     if progress.wasCanceled():
-        #         break
-        #     time.sleep(1)
-        #     # ... copy one file
-        # progress.setValue(numFiles)
-        #=======================================================================
+        self.ui.textEditMessages.append("<b>ArmSim version info</b><br/>")
+        self.ui.textEditMessages.append(self.simmulator.getVersion())
+        self.ui.textEditMessages.append("<br/>")
+        return True
             
 def main():
     # Make CTRL+C work
@@ -680,7 +635,7 @@ def main():
     main_window.show()
     if main_window.connectToARMSim():
         main_window.updateRegisters()
-        main_window.updateMemory()
+        #main_window.updateMemory()
     # Enter the mainloop of the application
     sys.exit(app.exec_())
     
