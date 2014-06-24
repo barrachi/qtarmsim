@@ -262,6 +262,8 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
     def doStep(self):
         if not self.armsim_current_port:
             return
+        self.tableModelRegisters.stepHistory()
+        self.tableModelMemory.stepHistory()
         self.mysocket.send_line("EXECUTE STEP")
         lines = self.mysocket.receive_lines_till_eof()
         result = lines[0]
@@ -527,7 +529,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         "Gets the ArmSim Version. This method also serves to test that we are speaking to ArmSim and not to another server."
         self.mysocket.send_line("SHOW VERSION")
         armsim_version_lines = self.mysocket.receive_lines_till_eof()
-        self.armsim_about_message = "\n".join(armsim_version_lines[:-1])
+        self.armsim_about_message = "\n".join(armsim_version_lines)
         return self.armsim_about_message
     
     def updateRegisters(self):
@@ -538,6 +540,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             line = self.mysocket.receive_line()
             (reg_name, reg_value) = line.split(": ")  # @UnusedVariable reg_name
             registers_model.setRegister(i, reg_value)
+        registers_model.clearHistory()
 
 
     def updateMemory(self):
@@ -598,6 +601,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                     armsim_lines.append(self.mysocket.receive_line())
                 self.ui.textEditArmSim.setText('\n'.join(armsim_lines))
                 self.highlight_pc_line()
+        self.tableModelMemory.clearHistory()
 
     
     def connectToArmSim(self):

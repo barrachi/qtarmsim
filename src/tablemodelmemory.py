@@ -2,6 +2,7 @@
 
 from PyQt4.QtCore import Qt, QAbstractTableModel
 from PyQt4.Qt import SIGNAL
+from PyQt4 import QtGui
 
 class Memory():
     
@@ -58,15 +59,23 @@ class Memory():
     
     
 class TableModelMemory(QAbstractTableModel):
+
+    q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
+    q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
+    
+    q_font_last = QtGui.QFont("Courier", weight=100)
  
     def __init__(self, parent = None):
         if parent == None:
+            self._parent = None
             self.memory_banks = []
             self.total_row_count = 0
-            self._parent = None
         else:
-            self.memory = None
             self._parent = parent
+            self.memory = None
+            self.previously_modified_words = []
+            self.modified_words = []
+    
         super(TableModelMemory, self).__init__(parent)
         
     def rowCount(self, parent):
@@ -82,11 +91,16 @@ class TableModelMemory(QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid():
             return None
-        elif role != Qt.DisplayRole:
-            return None
-        if self.memory:
+        elif role == Qt.DisplayRole and self.memory:
             return self.memory.loadWordByIndex(index.row())
-        return None
+        elif role == Qt.BackgroundRole and self.modified_words.count(index.row()):
+            return self.q_brush_last
+        elif role == Qt.BackgroundRole and self.previously_modified_words.count(index.row()):
+            return self.q_brush_previous
+        elif role == Qt.FontRole and self.modified_words.count(index.row()):
+            return self.q_font_last
+        else:
+            return None
     
     def headerData(self, section, orientation, role = Qt.DisplayRole):
         if role == Qt.DisplayRole and orientation == Qt.Vertical:
@@ -121,6 +135,7 @@ class TableModelMemory(QAbstractTableModel):
         else:
             self.memory.storeByte(address, byte)
             row = self.memory.addressToIndex(address)
+            self.modified_words.append(row)
             self.dataChanged.emit(self.createIndex(row, 0), self.createIndex(row, 0))
              
                         
@@ -131,3 +146,22 @@ class TableModelMemory(QAbstractTableModel):
         if self._parent == None:
             self.memory_banks.clear()
             self.total_row_count = 0
+
+    def clearHistory(self):
+        if self._parent == None:
+            for memory_bank in self.memory_banks:
+                memory_bank[2].clearHistory()
+        else:
+            self.previously_modified_words.clear()
+            self.modified_words.clear()
+        
+    def stepHistory(self):
+        if self._parent == None:
+            for memory_bank in self.memory_banks:
+                memory_bank[2].stepHistory()
+        else:
+            copy_of_previous = self.previously_modified_words[:]
+            self.previously_modified_words = self.modified_words[:]
+            self.modified_words.clear()
+            for address in copy_of_previous + self.previously_modified_words:
+                self.dataChanged.emit(self.createIndex(address, 0), self.createIndex(address, 0))
