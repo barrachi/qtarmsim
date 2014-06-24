@@ -15,7 +15,8 @@ Errores = { orden: "Orden no reconocida\r\n",
             noexec: "Instrucion indefinida o impredecible\r\n",
             call: "No es subrutina\r\nSe ejecuta STEP\r\n",
             end: "Se intenta ejecutar al final del programa\r\n",
-            breakpoint: "Se ejecuta desde direccion de breakpoint\r\nEl breakpoint se ignora\r\n"
+            breakpoint: "Se ejecuta desde direccion de breakpoint\r\nEl breakpoint se ignora\r\n",
+            nomem: "Se intenta ejecutar fuera de la memoria\r\n"
 }
 
 ###########################################
@@ -33,6 +34,7 @@ def gen_disassemble(dir)
   res = "[0x%08X] " % dir
   word = $server.proc.memory_half(dir)
   word2 = $server.proc.memory_half(dir + 2)
+  return nil if word.nil? || word2.nil?
   res = res + "0x%04X " % word
   inst = $server.coder.decode([word, word2], dir)
   dir = dir + 2 if inst.size == 2
@@ -137,10 +139,12 @@ dump_memory = Proc.new { |entrada|
     res = ""
     dir = entrada[0]
     0.upto(entrada[1] - 1) do
+      word = $server.proc.memory_byte(dir)
+      break if word.nil?
       res = res + "0x%08X: 0x%02X\r\n" % [dir, $server.proc.memory_byte(dir)]
       dir = dir + 1
     end
-    #res = res + "EOF\r\n"
+    res = res + "EOF\r\n"
   end
   res
 }
@@ -272,28 +276,17 @@ disassemble = Proc.new { |entrada|
   if $server.proc.nil?
     res = Errores[:sistema]
   else
-    case entrada[0]
-      when 'BYTE'
-        $server.proc.memory.access(:wb, entrada[2], entrada[4])
-        res = "OK\r\n"
-      when 'HALF'
-        $server.proc.memory.access(:wh, entrada[2], entrada[4])
-        res = "OK\r\n"
-      when 'WORD'
-        $server.proc.memory.access(:ww, entrada[2], entrada[4])
-        res = "OK\r\n"
-      else
-        res = Errores[:args]
-    end
     res = ""
     proc = $server.proc
     dir = entrada[0]
     0.upto(entrada[1] - 1) do
       dos = gen_disassemble(dir)
+      break if dos.nil?
       res = res + dos[0] + "\r\n"
       dir = dir + 2
       dir = dir + 2 if dos[1].size == 2
     end
+    res = res + "EOF\r\n"
   end
   res
 }
@@ -316,25 +309,27 @@ execute = Proc.new { |entrada|
 
     pc = $server.proc.reg(ThumbII_Defs::PC)
     dos = gen_disassemble(pc)
-
-    case entrada[0]
-      when 'STEP'
-        sigue = lambda {false}
-      when 'SUBROUTINE'
-        if kinds_subr.find_index(dos[1].kind).nil?
+    if dos.nil?
+      res = "ERROR\r\n" + Errores[:nomem] + "EOF\r\n"
+    else
+      case entrada[0]
+        when 'STEP'
           sigue = lambda {false}
-          terror = Errores[:call]
-        end
-      when 'ALL'
-        sigue = lambda {true}
-      else
-        res = Errores[:args]
+        when 'SUBROUTINE'
+          if kinds_subr.find_index(dos[1].kind).nil?
+            sigue = lambda {false}
+            terror = Errores[:call]
+          end
+        when 'ALL'
+          sigue = lambda {true}
+        else
+          res = Errores[:args]
+      end
+
+      res = "ERROR\r\n" + dos[0] + "\r\n" + Errores[:noexec] + "EOF\r\n" unless kinds_noexec.find_index(dos[1].kind).nil?
+      res = "ERROR\r\n" + dos[0] + "\r\n" + Errores[:end] + "EOF\r\n" unless kinds_end.find_index(dos[1].kind).nil?
+      terror = Errores[:breakpoint] unless $server.breakpoints.find_index(pc).nil?
     end
-
-    res = "ERROR\r\n" +  + dos[0] + "\r\n" + Errores[:noexec] + "EOF\r\n" unless kinds_noexec.find_index(dos[1].kind).nil?
-    res = "ERROR\r\n" +  + dos[0] + "\r\n" + Errores[:end] + "EOF\r\n" unless kinds_end.find_index(dos[1].kind).nil?
-    terror = Errores[:breakpoint] unless $server.breakpoints.find_index(pc).nil?
-
     if res.nil?
       mod = $server.proc.execute(dos[1])
       nregs = mod[:usr_regs] != nil ? mod[:usr_regs].length / 2 : 0
@@ -368,6 +363,10 @@ execute = Proc.new { |entrada|
       while sigue.call
         pc = $server.proc.reg(ThumbII_Defs::PC)
         dos = gen_disassemble(pc)
+        if dos.nil?
+          terror = Errores[:nomem]
+          break
+        end
         if !kinds_noexec.find_index(dos[1].kind).nil?
           res = "ERROR\r\n"
           terror = Errores[:noexec]
