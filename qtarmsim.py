@@ -122,6 +122,9 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         self.ui.tableViewRegisters.setModel(self.tableModelRegisters)
         self.ui.tableViewRegisters.resizeColumnsToContents()
 
+        # tableModelMemory
+        self.tableModelMemory = TableModelMemory()
+
         #=======================================================================
         # # Link tableViewMemory with tableModelMemory
         # tableModelMemory = TableModelMemory()
@@ -281,7 +284,8 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 reg_number = int(reg_name[1:])
                 self.tableModelRegisters.setRegister(reg_number, reg_value)
             elif mode == "AFFECTED MEMORY":
-                pass
+                (mem_address, byte) = line.split(": ")
+                self.tableModelMemory.setByte(mem_address, byte)
             elif mode == "ERROR MESSAGE":
                 self.ui.textEditMessages.append(line)
         self.highlight_pc_line()
@@ -452,12 +456,16 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         "Called when the main window has been closed. Saves state and performs clean up actions."
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
+        # Send EXIT command to ArmSim
+        if self.armsim_current_port:
+            self.mysocket.send_line("EXIT")
         # Close connection and socket
         self.mysocket.close_connection()
         self.mysocket.close_socket()
         # Close windows
         self.consoleWindow.close()
         self.helpWindow.close()
+        # Accept event
         event.accept()
 
 
@@ -544,6 +552,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier"))
         # Process memory info
+        self.tableModelMemory.clear()
         expr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
         for line in memory_lines:
             memtype, hex_start, hex_end = expr.search(line).groups()
@@ -561,11 +570,9 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
             tableView.setAlternatingRowColors(True)
             tableView.horizontalHeader().setVisible(False)
             tableView.verticalHeader().setVisible(True)
-            # tableModelMemory
-            tableModelMemory = TableModelMemory()
-            tableView.setModel(tableModelMemory)
-            tableModelMemory.appendMemoryRange(memtype, hex_start, hex_end)
-            # @todelete: tableView.resizeColumnsToContents()
+            tableModel = TableModelMemory(self.tableModelMemory)
+            tableView.setModel(tableModel)
+            tableModel.appendMemoryRange(memtype, hex_start, hex_end)
             # Add tableView to the vertical layout and the page to the toolBox 
             vertical_layout.addWidget(tableView)
             self.ui.toolBoxMemory.addItem(page, _fromUtf8("{} {}".format(memtype, hex_start)))
@@ -581,7 +588,7 @@ class QtArmSimMainWindow(QtGui.QMainWindow):
                 (a, byte2) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
                 (a, byte3) = self.mysocket.receive_line().split(": ")  # @UnusedVariable a
                 words.append("0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
-            tableModelMemory.loadWords(words)
+            tableModel.loadWords(words)
             # if memtype == ROM then load the program into the ArmSim tab
             if memtype == 'ROM':
                 n_insts = int(nbytes/2)-1

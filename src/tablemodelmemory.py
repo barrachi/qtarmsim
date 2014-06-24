@@ -31,8 +31,8 @@ class Memory():
         
     def addressToIndex(self, address):
         "Given an hexadecimal address, it returns the corresponding index"
-        address = int(address, 16)
-        return int(address/4) - self.start
+        address_n = int(address, 16)
+        return int((address_n - self.start)/4)
     
     def loadWord(self, address):
         index = self.addressToIndex(address)
@@ -40,7 +40,17 @@ class Memory():
 
     def storeWord(self, address, word):
         index = self.addressToIndex(address)
-        return self.storeWordByIndex(index, word)
+        self.storeWordByIndex(index, word)
+    
+    def storeByte(self, address, byte):
+        index = self.addressToIndex(address)
+        word = self.loadWordByIndex(index)
+        address_n = int(address, 16)
+        pos = 3 - address_n % 4
+        word_bytes = [word[2:4], word[4:6], word[6:8], word[8:10]]
+        word_bytes[pos] = byte[2:]
+        word = "0x" + "".join(word_bytes)
+        self.storeWordByIndex(index, word)
     
     def loadWords(self, words):
         for i in range(len(words)):
@@ -49,11 +59,22 @@ class Memory():
     
 class TableModelMemory(QAbstractTableModel):
  
+    def __init__(self, parent = None):
+        if parent == None:
+            self.memory_banks = []
+            self.total_row_count = 0
+            self._parent = None
+        else:
+            self.memory = None
+            self._parent = parent
+        super(TableModelMemory, self).__init__(parent)
+        
     def rowCount(self, parent):
-        try:
+        if self.memory:
             return self.memory.length
-        except AttributeError:
-            return 0
+        if self._parent == None:
+            return self.total_row_count
+        return 0
 
     def columnCount(self, parent):
         return 1
@@ -63,24 +84,50 @@ class TableModelMemory(QAbstractTableModel):
             return None
         elif role != Qt.DisplayRole:
             return None
-        return self.memory.loadWordByIndex(index.row())
-
+        if self.memory:
+            return self.memory.loadWordByIndex(index.row())
+        return None
+    
     def headerData(self, section, orientation, role = Qt.DisplayRole):
         if role == Qt.DisplayRole and orientation == Qt.Vertical:
             return self.memory.indexToAddress(section)
         return QAbstractTableModel.headerData(self, section, orientation, role)
     
     def appendMemoryRange(self, memtype, start, end):
-        self.emit(SIGNAL("layoutAboutToBeChanged()")) 
+        self.emit(SIGNAL("layoutAboutToBeChanged()"))
+        if not self._parent:
+            raise RuntimeError("This method can not be called from a root TableModelMemory")
         self.memory = Memory(memtype, start, end)
+        self._parent.memory_banks.append([self.memory.start, self.memory.end, self])
+        self._parent.total_row_count += self.memory.length
         self.emit(SIGNAL("layoutChanged()"))
         # self.dataChanged.emit(self.createIndex(0, 0), self.createIndex(self.rowCount(0), self.columnCount(0)))
         # self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.createIndex(0, 0), self.createIndex(self.rowCount(0), self.columnCount(0)))
     
     def loadWords(self, words):
+        if not self._parent:
+            raise RuntimeError("This method can not be called from a root TableModelMemory")
         self.emit(SIGNAL("layoutAboutToBeChanged()")) 
         self.memory.loadWords(words)     
         self.emit(SIGNAL("layoutChanged()"))
 
+    def setByte(self, address, byte):
+        if self._parent == None:
+            address_n = int(address, 16)
+            for memory_bank in self.memory_banks:
+                if memory_bank[0] <= address_n <= memory_bank[1]:
+                    memory_bank[2].setByte(address, byte)
+                    break
+        else:
+            self.memory.storeByte(address, byte)
+            row = self.memory.addressToIndex(address)
+            self.dataChanged.emit(self.createIndex(row, 0), self.createIndex(row, 0))
+             
+                        
     #def setMemoryWord(self, address, value):
     #    self.memory_data[address] = value
+
+    def clear(self):
+        if self._parent == None:
+            self.memory_banks.clear()
+            self.total_row_count = 0
