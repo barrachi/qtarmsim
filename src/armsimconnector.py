@@ -38,6 +38,8 @@ class ARMSimConnector():
         self.version = None
         # Regular expressions
         self.re_regexpr = re.compile("r([0-9]+): (0[xX][0-9a-fA-F]+)")
+        self.re_membanksexpr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
+        self.re_memexpr = re.compile("(0[xX][0-9a-fA-F]+): (0[xX][0-9a-fA-F]+)")
         
     def connect(self):
         """
@@ -118,3 +120,62 @@ class ARMSimConnector():
                 raise
             registers.append((int(reg), hex_value))
         return registers
+
+
+    def getMemoryBanks(self):
+        """
+        Gets the memory banks available at the simulator.
+        
+        @return: An array of tuples as (memory type, hexadecimal start address, hexadecimal end address).
+        """
+        self.mysocket.send_line("SYSINFO MEMORY")
+        lines = self.mysocket.receive_lines_till_eof()
+
+        memory_banks = []
+        for line in lines:
+            try:
+                (memtype, hex_start, hex_end) = self.re_membanksexpr.search(line).groups()
+            except AttributeError:
+                print("ERROR: Could not parse memory bank from '{}'".format(line))
+                raise
+            memory_banks.append((memtype, hex_start, hex_end))
+        return memory_banks
+
+
+    def getMemory(self, hex_start, nbytes):
+        """
+        Gets nbytes at most from memory starting at hex_start.
+        
+        @return: An array of pairs of the form (hexadecimal memory address, hexadecimal byte).
+        """
+        self.mysocket.send_line("DUMP MEMORY {} {}".format(hex_start, nbytes))
+        lines = self.mysocket.receive_lines_till_eof()
+        memory_bytes = []
+        for line in lines:
+            try:
+                (hex_address, hex_byte) = self.re_memexpr.search(line).groups()
+            except AttributeError:
+                print("ERROR: Could not parse memory byte from '{}'".format(line))
+                raise
+            memory_bytes.append((hex_address, hex_byte))
+        return memory_bytes
+            
+
+    def getDisassemble(self, hex_start, ninsts):
+        """
+        Gets the disassemble of ninsts instructions at most starting at hex_start memory address.
+        
+        @return: An array of lines with a disassembled instruction in each.
+        """
+        self.mysocket.send_line("DISASSEMBLE {} {}".format(hex_start, ninsts))
+        return self.mysocket.receive_lines_till_eof()
+
+
+    def getExecuteStep(self):
+        """
+        Gets the disassemble of ninsts instructions at most starting at hex_start memory address.
+        
+        @return: An array of lines with a disassembled instruction in each.
+        """
+        self.mysocket.send_line("EXECUTE STEP")
+        lines = self.mysocket.receive_lines_till_eof()

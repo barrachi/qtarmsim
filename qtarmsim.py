@@ -260,8 +260,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             return
         self.tableModelRegisters.stepHistory()
         self.tableModelMemory.stepHistory()
-        self.mysocket.send_line("EXECUTE STEP")
-        lines = self.mysocket.receive_lines_till_eof()
+        lines = self.simulator.getExecuteStep()
         result = lines[0]
         mode = "DUMP"
         for line in lines[1:]:
@@ -524,44 +523,22 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def updateRegisters(self):
         "Updates the registers dock upon ARMSim data."
         registers_model = self.ui.tableViewRegisters.model()
-        for (reg, hex_value) in self.simmulator.getRegisters():
+        for (reg, hex_value) in self.simulator.getRegisters():
             registers_model.setRegister(reg, hex_value)
         registers_model.clearHistory()
 
 
-    def getMemoryBanks(self):
-        """
-        Gets the memory banks available at the simmulator.
-        
-        @return: An array of tuples as (memory type, hexadecimal start address, hexadeciman end address).
-        """
-        self.mysocket.send_line("SYSINFO MEMORY")
-        lines = self.mysocket.receive_lines_till_eof()
-
-        self.re_membanksexpr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
-        memory_banks = []
-        for line in range(len(lines)):
-            try:
-                (memtype, hex_start, hex_end) = self.re_membanksexpr.search(line).groups()
-            except AttributeError:
-                print("ERROR: ")
-                raise
-            memory_banks.append(())
-
     def updateMemory(self):
         "Updates the memory dock upon ARMSim data."
-
-        # Remove previous memory pages on toolBoxMemory
+        # Remove previous memory pages on memory toolBox
         for i in range(self.ui.toolBoxMemory.count()):
             self.ui.toolBoxMemory.removeItem(i)
         # Set courier font
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier"))
-
-        
         # Process memory info
         self.tableModelMemory.clear()
-        for (memtype, hex_start, hex_end) in self.simmulator.getMemoryBanks():
+        for (memtype, hex_start, hex_end) in self.simulator.getMemoryBanks():
             # Toolbox page and vertical layout
             page = QtGui.QWidget()
             vertical_layout = QtGui.QVBoxLayout(page)
@@ -579,35 +556,36 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             tableModel = TableModelMemory(self.tableModelMemory)
             tableView.setModel(tableModel)
             tableModel.appendMemoryRange(memtype, hex_start, hex_end)
-            # Add tableView to the vertical layout and the page to the toolBox 
+            # Add tableView to the vertical layout, and the page to the toolBox 
             vertical_layout.addWidget(tableView)
             self.ui.toolBoxMemory.addItem(page, _fromUtf8("{} {}".format(memtype, hex_start)))
             # Dump memory from ARMSim
             start = int(hex_start, 16)
             end = int(hex_end, 16)
             nbytes = int( (end - start)/4 )*4
-            self.mysocket.send_line("DUMP MEMORY {} {}".format(hex_start, nbytes))
+            word = []
             words = []
-            lines = self.mysocket.receive_lines_till_eof()
-            for i in range(int(len(lines)/4)): # @UnusedVariable i
-                (a, byte0) = lines[i*4+0].split(": ")  # @UnusedVariable a
-                (a, byte1) = lines[i*4+1].split(": ")  # @UnusedVariable a
-                (a, byte2) = lines[i*4+2].split(": ")  # @UnusedVariable a
-                (a, byte3) = lines[i*4+3].split(": ")  # @UnusedVariable a
-                words.append("0x{3}{2}{1}{0}".format(byte0[2:], byte1[2:], byte2[2:], byte3[2:]))
+            for (address, byte) in self.simulator.getMemory(hex_start, nbytes):  # @UnusedVariable address
+                word.append(byte[2:])
+                if len(word) == 4:
+                    words.append('0x{}{}{}{}'.format(word[3], word[2], word[1], word[0]))
+                    word.clear()
+            # Form a word from the last 1-3 bytes read, if any 
+            if len(word):
+                while len(word) < 4:
+                    word.append('00')
+                words.append('0x{}{}{}{}'.format(word[3], word[2], word[1], word[0]))
+            # load words in table model
             tableModel.loadWords(words)
             # if memtype == ROM then load the program into the ARMSim tab
             if memtype == 'ROM':
-                n_insts = int(nbytes/2)-1
-                self.mysocket.send_line("DISASSEMBLE {} {}".format(hex_start, n_insts))
-                armsim_lines = []
-                for i in range(n_insts):
-                    armsim_lines.append(self.mysocket.receive_line())
+                ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
+                armsim_lines = self.simulator.getDisassemble(hex_start, ninsts)
                 self.ui.textEditARMSim.setText('\n'.join(armsim_lines))
                 self.highlight_pc_line()
         self.tableModelMemory.clearHistory()
 
-    
+
     def connectToARMSim(self):
         if not os.path.exists(self.armsim_command):
             QtGui.QMessageBox.warning(self, self.tr("ARMSim not found"),
@@ -615,13 +593,13 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                             "Please go to the 'Configure QtARMSim' entry\n"
                             "on the Window menu, and set its path.\n"))
             return False
-        self.simmulator = ARMSimConnector(self.armsim_command, self.armsim_port)
-        errmsg = self.simmulator.connect()
+        self.simulator = ARMSimConnector(self.armsim_command, self.armsim_port)
+        errmsg = self.simulator.connect()
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "\n{}\n".format(errmsg))
             return False
         self.ui.textEditMessages.append("<b>ArmSim version info</b><br/>")
-        self.ui.textEditMessages.append(self.simmulator.getVersion())
+        self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
         return True
             
@@ -635,7 +613,7 @@ def main():
     main_window.show()
     if main_window.connectToARMSim():
         main_window.updateRegisters()
-        #main_window.updateMemory()
+        main_window.updateMemory()
     # Enter the mainloop of the application
     sys.exit(app.exec_())
     
