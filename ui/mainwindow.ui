@@ -231,7 +231,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_6">
      <item>
-      <widget class="MyQTableView" name="tableViewRegisters">
+      <widget class="MyQTreeView" name="treeViewRegisters">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -264,24 +264,6 @@
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
-       <property name="showGrid">
-        <bool>false</bool>
-       </property>
-       <property name="gridStyle">
-        <enum>Qt::SolidLine</enum>
-       </property>
-       <attribute name="horizontalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderCascadingSectionResizes">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderStretchLastSection">
-        <bool>false</bool>
-       </attribute>
       </widget>
      </item>
     </layout>
@@ -709,9 +691,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MyQTableView</class>
-   <extends>QTableView</extends>
-   <header>src.myqtableview.h</header>
+   <class>MyQTreeView</class>
+   <extends>QTreeView</extends>
+   <header>src.myqtreeview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

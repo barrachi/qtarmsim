@@ -113,8 +113,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         
         # Link tableViewRegisters with tableModelRegisters
         self.tableModelRegisters = TableModelRegisters()
-        self.ui.tableViewRegisters.setModel(self.tableModelRegisters)
-        self.ui.tableViewRegisters.resizeColumnsToContents()
+        self.ui.treeViewRegisters.setModel(self.tableModelRegisters)
+        #self.ui.treeViewRegisters.resizeColumnsToContents()
 
         # tableModelMemory
         self.tableModelMemory = TableModelMemory()
@@ -504,7 +504,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def updateRegisters(self):
         "Updates the registers dock upon ARMSim data."
-        registers_model = self.ui.tableViewRegisters.model()
+        registers_model = self.ui.treeViewRegisters.model()
         for (reg, hex_value) in self.simulator.getRegisters():
             registers_model.setRegister(reg, hex_value)
         registers_model.clearHistory()
@@ -518,6 +518,36 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Set courier font
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier"))
+        
+        model = QtGui.QStandardItemModel()
+        item0 = QtGui.QStandardItem("1 first item");
+        item1 = QtGui.QStandardItem("2 second item");
+        item3 = QtGui.QStandardItem("3 third item");
+        item4 = QtGui.QStandardItem("4 forth item");
+        item5 = QtGui.QStandardItem("5");
+        item6 = QtGui.QStandardItem("6");
+        item7 = QtGui.QStandardItem("7");
+        
+        model.appendRow(item0);
+        item0.appendRow([item3, item5]);
+        item0.appendRow([item4, item6]);
+        item1.appendRow([item7, ])
+        model.appendRow(item1);
+        
+        model.setColumnCount(2)
+        
+        page = QtGui.QWidget()
+        vertical_layout = QtGui.QVBoxLayout(page)
+        treeView = QtGui.QTreeView(page)
+        treeView.setModel(model)
+        treeView.setRootIndex(model.indexFromItem(item1))
+        
+        vertical_layout.addWidget(treeView)
+        self.ui.toolBoxMemory.addItem(page, _fromUtf8("Yep"))
+        
+        return
+   
+    
         # Process memory info
         self.tableModelMemory.clear()
         for (memtype, hex_start, hex_end) in self.simulator.getMemoryBanks():
