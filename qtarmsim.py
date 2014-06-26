@@ -31,10 +31,8 @@
 
 
 import os
-import re
 import signal
 import sys
-import time
 
 from PyQt4 import QtCore, QtGui
 
@@ -260,31 +258,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             return
         self.tableModelRegisters.stepHistory()
         self.tableModelMemory.stepHistory()
-        lines = self.simulator.getExecuteStep()
-        result = lines[0]
-        mode = "DUMP"
-        for line in lines[1:]:
-            if line == "AFFECTED REGISTERS":
-                mode = line
-                continue
-            elif line == "AFFECTED MEMORY":
-                mode = line
-                continue
-            elif line == "ERROR MESSAGE":
-                mode = line
-                self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
-                continue
-            if mode == "DUMP":
-                self.ui.textEditMessages.append(line)
-            if mode == "AFFECTED REGISTERS":
-                (reg_name, reg_value) = line.split(": ")
-                reg_number = int(reg_name[1:])
-                self.tableModelRegisters.setRegister(reg_number, reg_value)
-            elif mode == "AFFECTED MEMORY":
-                (mem_address, byte) = line.split(": ")
-                self.tableModelMemory.setByte(mem_address, byte)
-            elif mode == "ERROR MESSAGE":
-                self.ui.textEditMessages.append(line)
+        response = self.simulator.getExecuteStep()
+        self.ui.textEditMessages.append(response.assembly_line)
+        for (reg_number, reg_value) in response.registers:
+            self.tableModelRegisters.setRegister(reg_number, reg_value)
+        for (hex_address, hex_byte) in response.memory:
+            self.tableModelMemory.setByte(hex_address, hex_byte)
+        if response.errmsg:
+            self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
+            self.ui.textEditMessages.append("\n".join(response.errmsg))
         self.highlight_pc_line()
         
         
@@ -417,7 +399,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     #
     # Función para parar la ejecución en curso
     def parar(self):
-        para = QtGui.QMessageBox.warning(self, self.tr("Detener ejecución"),
+        QtGui.QMessageBox.warning(self, self.tr("Detener ejecución"),
                             self.tr("Quieres detener la ejecución del programa?"), QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
                             
     

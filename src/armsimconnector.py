@@ -24,6 +24,17 @@ import time
 
 from src.mysocket import MySocket
 
+## Execute response container
+class ExecuteResponse():
+
+    def __init__(self):
+        self.result = ""
+        self.assembly_line = ""
+        self.registers = []
+        self.memory = []
+        self.errmsg = []
+
+
 
 class ARMSimConnector():
     
@@ -101,6 +112,19 @@ class ARMSimConnector():
             self.version = "\n".join(version_lines)
             return self.version
     
+    def parseRegister(self, line):
+        """
+        Parses a line with register content information.
+        
+        @return: A pair (register number, hexadecimal content). 
+        """
+        try:
+            (reg, hex_value) = self.re_regexpr.search(line).groups()
+        except AttributeError:
+            print("ERROR: Could not parse register from '{}'!".format(line))
+            raise
+        return (int(reg), hex_value) 
+    
     def getRegisters(self):
         """
         Gets all the registers from ARMSim.
@@ -113,12 +137,7 @@ class ARMSimConnector():
         registers = []
         for i in range(16):  # @UnusedVariable i
             line = self.mysocket.receive_line()
-            try:
-                (reg, hex_value) = self.re_regexpr.search(line).groups()
-            except AttributeError:
-                print("ERROR: Register not found at '{}'!".format(line))
-                raise
-            registers.append((int(reg), hex_value))
+            registers.append(self.parseRegister(line))
         return registers
 
 
@@ -142,6 +161,19 @@ class ARMSimConnector():
         return memory_banks
 
 
+    def parseMemory(self, line):
+        """
+        Parses a line with memory content information.
+        
+        @return: A pair (hexadecimal address, hexadecimal byte content) 
+        """
+        try:
+            (hex_address, hex_byte) = self.re_memexpr.search(line).groups()
+        except AttributeError:
+            print("ERROR: Could not parse memory byte from '{}'".format(line))
+            raise
+        return ((hex_address, hex_byte))
+    
     def getMemory(self, hex_start, nbytes):
         """
         Gets nbytes at most from memory starting at hex_start.
@@ -152,12 +184,7 @@ class ARMSimConnector():
         lines = self.mysocket.receive_lines_till_eof()
         memory_bytes = []
         for line in lines:
-            try:
-                (hex_address, hex_byte) = self.re_memexpr.search(line).groups()
-            except AttributeError:
-                print("ERROR: Could not parse memory byte from '{}'".format(line))
-                raise
-            memory_bytes.append((hex_address, hex_byte))
+            memory_bytes.append(self.parseMemory(line))
         return memory_bytes
             
 
@@ -173,9 +200,25 @@ class ARMSimConnector():
 
     def getExecuteStep(self):
         """
-        Gets the disassemble of ninsts instructions at most starting at hex_start memory address.
+        Gets the execute step response.
         
-        @return: An array of lines with a disassembled instruction in each.
+        @return: An ExecuteResponse object.
         """
         self.mysocket.send_line("EXECUTE STEP")
         lines = self.mysocket.receive_lines_till_eof()
+        response = ExecuteResponse()
+        response.result = lines[0]
+        response.assembly_line = lines[1]
+        mode = ""
+        for line in lines[2:]:
+            if line in ("AFFECTED REGISTERS", 
+                        "AFFECTED MEMORY",
+                        "ERROR MESSAGE"):
+                mode = line
+                continue
+            if mode == "AFFECTED REGISTERS":
+                response.registers.append(self.parseRegister(line))
+            elif mode == "AFFECTED MEMORY":
+                response.memory.append(self.parseMemory(line))
+            elif mode == "ERROR MESSAGE":
+                response.errmsg.append(line)
