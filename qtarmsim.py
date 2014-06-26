@@ -47,7 +47,7 @@ from src.mu import Multipasos
 from src.op import Opciones
 from src.simplearmeditor import SimpleARMEditor
 from src.tablemodelmemory import TableModelMemory
-from src.tablemodelregisters import TableModelRegisters
+from src.treemodelregisters import TreeModelRegisters
 from src.va import Valor
 from ui.mainwindow import Ui_MainWindow
 
@@ -112,8 +112,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.verticalLayoutARMSim.addWidget(self.ui.textEditARMSim)
         
         # Link tableViewRegisters with tableModelRegisters
-        self.tableModelRegisters = TableModelRegisters()
-        self.ui.treeViewRegisters.setModel(self.tableModelRegisters)
+        self.treeModelRegisters = TreeModelRegisters()
+        self.ui.treeViewRegisters.setModel(self.treeModelRegisters)
         #self.ui.treeViewRegisters.resizeColumnsToContents()
 
         # tableModelMemory
