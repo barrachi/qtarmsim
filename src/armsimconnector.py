@@ -98,6 +98,14 @@ class ARMSimConnector():
         self.current_port = self.port
         return None
 
+    def disconnect(self):
+        """
+        Closes the socket. See also sendExit().
+        """
+        self.mysocket.close_connection()
+        self.mysocket.close_socket()
+        self.connected = False
+        
     def getVersion(self):
         """
         Gets the ARMSim Version. This method is also used to confirm that we are speaking to ARMSim and not to another server.
@@ -222,3 +230,11 @@ class ARMSimConnector():
                 response.memory.append(self.parseMemory(line))
             elif mode == "ERROR MESSAGE":
                 response.errmsg.append(line)
+        return response
+
+    def sendExit(self):
+        """
+        Sends exit command.
+        """
+        self.mysocket.send_line("EXIT")
+        

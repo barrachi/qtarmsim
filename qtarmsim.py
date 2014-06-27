@@ -43,11 +43,11 @@ from src.co import Conso
 from src.ej import Ejecutar
 from src.help import HelpWindow
 from src.im import Imprimir
+from src.memorymodel import MemoryModel
 from src.mu import Multipasos
 from src.op import Opciones
+from src.registersmodel import RegistersModel
 from src.simplearmeditor import SimpleARMEditor
-from src.tablemodelmemory import TableModelMemory
-from src.treemodelregisters import TreeModelRegisters
 from src.va import Valor
 from ui.mainwindow import Ui_MainWindow
 
@@ -111,24 +111,18 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.textEditARMSim.setObjectName(_fromUtf8("textEditARMSim"))
         self.ui.verticalLayoutARMSim.addWidget(self.ui.textEditARMSim)
         
-        # Link tableViewRegisters with tableModelRegisters
-        self.treeModelRegisters = TreeModelRegisters()
-        self.ui.treeViewRegisters.setModel(self.treeModelRegisters)
-        #self.ui.treeViewRegisters.resizeColumnsToContents()
+        # Link tableViewRegisters with registersModel
+        self.registersModel = RegistersModel()
+        self.registersModel.setupModelData()
+        self.ui.treeViewRegisters.setModel(self.registersModel)
+        self.ui.treeViewRegisters.expandAll()
+        self.ui.treeViewRegisters.resizeColumnToContents(0)
+        self.ui.treeViewRegisters.resizeColumnToContents(1)
 
-        # tableModelMemory
-        self.tableModelMemory = TableModelMemory()
+        # memoryModel
+        self.memoryModel = MemoryModel()
+        self.ui.treeViewMemory.setModel(self.memoryModel)
 
-        #=======================================================================
-        # # Link tableViewMemory with tableModelMemory
-        # tableModelMemory = TableModelMemory()
-        # self.ui.tableViewMemory.setModel(tableModelMemory)
-        # self.ui.tableViewMemory.resizeColumnsToContents()
-        # # Link tableViewStack with tableModelMemory
-        # tableModelStack = TableModelMemory()
-        # self.ui.tableViewStack.setModel(tableModelStack)
-        # self.ui.tableViewStack.resizeColumnsToContents()
-        #=======================================================================
         
             
     def readSettings(self):
@@ -254,16 +248,16 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     #################################################################################
 
     def doStep(self):
-        if not self.armsim_current_port:
+        if not self.simulator.connected:
             return
-        self.tableModelRegisters.stepHistory()
-        self.tableModelMemory.stepHistory()
+        self.registersModel.stepHistory()
+        self.memoryModel.stepHistory()
         response = self.simulator.getExecuteStep()
         self.ui.textEditMessages.append(response.assembly_line)
         for (reg_number, reg_value) in response.registers:
-            self.tableModelRegisters.setRegister(reg_number, reg_value)
+            self.registersModel.setRegister(reg_number, reg_value)
         for (hex_address, hex_byte) in response.memory:
-            self.tableModelMemory.setByte(hex_address, hex_byte)
+            self.memoryModel.setByte(hex_address, hex_byte)
         if response.errmsg:
             self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
             self.ui.textEditMessages.append("\n".join(response.errmsg))
@@ -271,7 +265,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         
         
     def highlight_pc_line(self):
-        PC = self.tableModelRegisters.getRegister(15)
+        PC = self.registersModel.getRegister(15)
         if self.ui.textEditARMSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
             (line, index) = self.ui.textEditARMSim.getCursorPosition()  # @UnusedVariable index
             self.ui.textEditARMSim.setFocus()
@@ -436,11 +430,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
         # Send EXIT command to ARMSim
-        if self.armsim_current_port:
-            self.mysocket.send_line("EXIT")
-        # Close connection and socket
-        self.mysocket.close_connection()
-        self.mysocket.close_socket()
+        if self.simulator.connected:
+            self.simulator.sendExit()
+            self.simulator.disconnect()
         # Close windows
         self.consoleWindow.close()
         self.helpWindow.close()
@@ -512,90 +504,27 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def updateMemory(self):
         "Updates the memory dock upon ARMSim data."
-        # Remove previous memory pages on memory toolBox
-        for i in range(self.ui.toolBoxMemory.count()):
-            self.ui.toolBoxMemory.removeItem(i)
-        # Set courier font
-        font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Courier"))
-        
-        model = QtGui.QStandardItemModel()
-        item0 = QtGui.QStandardItem("1 first item");
-        item1 = QtGui.QStandardItem("2 second item");
-        item3 = QtGui.QStandardItem("3 third item");
-        item4 = QtGui.QStandardItem("4 forth item");
-        item5 = QtGui.QStandardItem("5");
-        item6 = QtGui.QStandardItem("6");
-        item7 = QtGui.QStandardItem("7");
-        
-        model.appendRow(item0);
-        item0.appendRow([item3, item5]);
-        item0.appendRow([item4, item6]);
-        item1.appendRow([item7, ])
-        model.appendRow(item1);
-        
-        model.setColumnCount(2)
-        
-        page = QtGui.QWidget()
-        vertical_layout = QtGui.QVBoxLayout(page)
-        treeView = QtGui.QTreeView(page)
-        treeView.setModel(model)
-        treeView.setRootIndex(model.indexFromItem(item1))
-        
-        vertical_layout.addWidget(treeView)
-        self.ui.toolBoxMemory.addItem(page, _fromUtf8("Yep"))
-        
-        return
-   
-    
         # Process memory info
-        self.tableModelMemory.clear()
+        self.memoryModel.clear()
         for (memtype, hex_start, hex_end) in self.simulator.getMemoryBanks():
-            # Toolbox page and vertical layout
-            page = QtGui.QWidget()
-            vertical_layout = QtGui.QVBoxLayout(page)
-            # TableView
-            tableView = QtGui.QTableView(page)
-            tableView.installEventFilter(self)
-            tableView.setFont(font)
-            tableView.setFrameShape(QtGui.QFrame.NoFrame)
-            tableView.setFrameShadow(QtGui.QFrame.Plain)
-            tableView.setLineWidth(0)
-            tableView.setShowGrid(False)
-            tableView.setAlternatingRowColors(True)
-            tableView.horizontalHeader().setVisible(False)
-            tableView.verticalHeader().setVisible(True)
-            tableModel = TableModelMemory(self.tableModelMemory)
-            tableView.setModel(tableModel)
-            tableModel.appendMemoryRange(memtype, hex_start, hex_end)
-            # Add tableView to the vertical layout, and the page to the toolBox 
-            vertical_layout.addWidget(tableView)
-            self.ui.toolBoxMemory.addItem(page, _fromUtf8("{} {}".format(memtype, hex_start)))
-            # Dump memory from ARMSim
+            # Dump memory
             start = int(hex_start, 16)
             end = int(hex_end, 16)
-            nbytes = int( (end - start)/4 )*4
-            word = []
-            words = []
-            for (address, byte) in self.simulator.getMemory(hex_start, nbytes):  # @UnusedVariable address
-                word.append(byte[2:])
-                if len(word) == 4:
-                    words.append('0x{}{}{}{}'.format(word[3], word[2], word[1], word[0]))
-                    word.clear()
-            # Form a word from the last 1-3 bytes read, if any 
-            if len(word):
-                while len(word) < 4:
-                    word.append('00')
-                words.append('0x{}{}{}{}'.format(word[3], word[2], word[1], word[0]))
-            # load words in table model
-            tableModel.loadWords(words)
+            nbytes = end - start
+            membytes = []
+            for (hex_address, hex_byte) in self.simulator.getMemory(hex_start, nbytes):  # @UnusedVariable address
+                membytes.append(hex_byte)
+            self.memoryModel.appendMemoryBank(memtype, hex_start, membytes)
+            #self.ui.treeViewMemory.expandAll()
+            self.ui.treeViewMemory.resizeColumnToContents(0)
+            self.ui.treeViewMemory.resizeColumnToContents(1)
             # if memtype == ROM then load the program into the ARMSim tab
             if memtype == 'ROM':
                 ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
                 armsim_lines = self.simulator.getDisassemble(hex_start, ninsts)
                 self.ui.textEditARMSim.setText('\n'.join(armsim_lines))
                 self.highlight_pc_line()
-        self.tableModelMemory.clearHistory()
+        self.memoryModel.clearHistory()
 
 
     def connectToARMSim(self):

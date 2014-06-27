@@ -1,0 +1,138 @@
+# -*- coding: utf-8 -*-
+
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import Qt
+
+from .simpletreemodel import TreeModel, TreeItem
+
+class MemoryBank():
+    
+    def __init__(self, memtype, start, nbytes):
+        """Initializes the memory bank class.
+        
+        @param start: The starting address in hexadecimal.
+        @param end: The last address in hexadecimal.
+        @param memtype: The memory type, one of RAM or ROM.  
+        """
+        self.memtype = memtype
+        self.start = int(start, 16)
+        self.end = self.start + nbytes
+        if nbytes % 4:
+            self.end += 4 - nbytes % 4
+        self.length = int((self.end-self.start)/4) + 1
+
+    def addressToIndex(self, hex_address):
+        "Given an hexadecimal hex_address, it returns the corresponding index"
+        int_address = int(hex_address, 16)
+        return int((int_address - self.start)/4)
+    
+
+class MemoryModel(TreeModel):
+
+    memory_banks = []
+    
+    previously_modified_words = []
+    modified_words = []
+    q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
+    q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
+    q_font_last = QtGui.QFont("Courier", weight=100)
+
+    def __init__(self, parent=None):
+        super(MemoryModel, self).__init__(parent)
+        self.rootItem = TreeItem(("Address", "Value"))
+
+    #============================================================================
+    # def data(self, index, role):
+    #  if not index.isValid():
+    #      return None
+    #  elif role == Qt.DisplayRole and self.memory:
+    #      return self.memory.loadWordByIndex(index.row())
+    #  elif role == Qt.BackgroundRole and self.modified_words.count(index.row()):
+    #      return self.q_brush_last
+    #  elif role == Qt.BackgroundRole and self.previously_modified_words.count(index.row()):
+    #      return self.q_brush_previous
+    #  elif role == Qt.FontRole and self.modified_words.count(index.row()):
+    #      return self.q_font_last
+    #  else:
+    #      return None
+    #============================================================================
+ 
+
+
+    def appendMemoryBank(self, memtype, hex_start, membytes):
+        self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
+        self.memory_banks.append(MemoryBank(memtype, hex_start, len(membytes)))
+        memory_bank_item = TreeItem(("{} {}".format(memtype, hex_start), ""), self.rootItem)
+        self.rootItem.appendChild(memory_bank_item)
+        word = []
+        address = self.memory_banks[-1].start
+        for byte in membytes:
+            word.append(byte[2:])
+            if len(word) == 4:
+                hex_address = "0x{0:0{1}X}".format(address, 8)
+                hex_word = '0x{}{}{}{}'.format(word[3], word[2], word[1], word[0])
+                memory_item = TreeItem([hex_address, hex_word], memory_bank_item)
+                memory_bank_item.appendChild(memory_item)
+                word.clear()
+                address += 4
+        # Form the last word with the remaining 1-3 membytes, if any 
+        if len(word):
+            while len(word) < 4:
+                word.append('00')
+            hex_address = "0x{0:0{1}X}".format(address, 8) 
+            hex_word = '0x{}{}{}{}'.format(word[3], word[2], word[1], word[0])
+            memory_item = TreeItem([hex_address, hex_word], memory_bank_item)
+            memory_bank_item.appendChild(memory_item)
+        self.emit(QtCore.SIGNAL("layoutChanged()"))
+
+
+    def getMemoryBank(self, hex_address):
+        int_address = int(hex_address, 16)
+        mb_row = 0
+        for memory_bank in self.memory_banks:
+            if memory_bank.start <= int_address <= memory_bank.end:
+                return (mb_row, memory_bank)
+            mb_row += 1
+        return (-1, None)
+    
+    def setByte(self, hex_address, hex_byte):
+        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
+        memory_row = memory_bank.addressToIndex(hex_address)
+        print(mb_row, memory_row)
+        memory_item = self.rootItem.child(mb_row).child(memory_row)
+        hex_word = memory_item.data(1)
+        pos = 3 - int(hex_address, 16) % 4
+        word_bytes = [hex_word[2:4], hex_word[4:6], hex_word[6:8], hex_word[8:10]]
+        word_bytes[pos] = hex_byte[2:]
+        hex_word = "0x" + "".join(word_bytes)
+        memory_item.setData(1, hex_word)
+        self.modified_words.append((mb_row, memory_row))
+        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 0, self.rootItem.child(mb_row)))
+
+    def setWord(self, hex_address, hex_word):
+        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
+        memory_row = memory_bank.addressToIndex(hex_address)
+        memory_item = self.rootItem.child(mb_row).child(memory_row)
+        memory_item.setData(1, hex_word)
+        self.modified_words.append((mb_row, memory_row))
+        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 0, self.rootItem.child(mb_row)))
+
+    def getWord(self, hex_address):
+        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
+        memory_row = memory_bank.addressToIndex(hex_address)
+        memory_item = self.rootItem.child(mb_row).child(memory_row)
+        return memory_item.data(1)
+    
+    def clear(self):
+        self.memory_banks.clear()
+
+    def clearHistory(self):
+        self.previously_modified_words.clear()
+        self.modified_words.clear()
+        
+    def stepHistory(self):
+        copy_of_previous = self.previously_modified_words[:]
+        self.previously_modified_words = self.modified_words[:]
+        self.modified_words.clear()
+        for (mb_row, memory_row) in copy_of_previous + self.previously_modified_words:
+            self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 0, self.rootItem.child(mb_row)))

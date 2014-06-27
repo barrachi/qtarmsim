@@ -235,19 +235,10 @@
        <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
        <property name="font">
         <font>
-         <family>Courier</family>
+         <family>Courier 10 Pitch</family>
         </font>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
@@ -257,9 +248,6 @@
        </property>
        <property name="lineWidth">
         <number>0</number>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
@@ -294,23 +282,24 @@
    <widget class="QWidget" name="dockWidgetContentsMemory">
     <layout class="QVBoxLayout" name="dockWidgetMemoryLayout">
      <item>
-      <widget class="QToolBox" name="toolBoxMemory">
-       <property name="currentIndex">
+      <widget class="MyQTreeView" name="treeViewMemory">
+       <property name="font">
+        <font>
+         <family>Courier 10 Pitch</family>
+        </font>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="lineWidth">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="page_3">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>156</width>
-          <height>344</height>
-         </rect>
-        </property>
-        <attribute name="label">
-         <string>Page 1</string>
-        </attribute>
-       </widget>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>
