@@ -35,11 +35,32 @@ class MemoryModel(TreeModel):
     modified_words = []
     q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
-    q_font_last = QtGui.QFont("Courier", weight=100)
+    q_font_last = QtGui.QFont("Courier 10 Pitch", weight=100)
 
     def __init__(self, parent=None):
         super(MemoryModel, self).__init__(parent)
         self.rootItem = TreeItem(("Address", "Value"))
+
+    def data(self, index, role):
+        if not index.isValid():
+            return None
+        item = index.internalPointer()
+        # Memory bank
+        if item.parent() == self.rootItem:
+            if role != QtCore.Qt.DisplayRole:
+                return None
+            return item.data(index.column())
+        # Register
+        if role == Qt.DisplayRole:
+            return item.data(index.column())
+        elif role == Qt.BackgroundRole and self.modified_words.count((index.parent().row(), index.row())):
+            return self.q_brush_last
+        elif role == Qt.BackgroundRole and self.previously_modified_words.count((index.parent().row(), index.row())):
+            return self.q_brush_previous
+        elif role == Qt.FontRole and self.modified_words.count((index.parent().row(), index.row())):
+            return self.q_font_last
+        else:
+            return None
 
     #============================================================================
     # def data(self, index, role):
@@ -98,7 +119,6 @@ class MemoryModel(TreeModel):
     def setByte(self, hex_address, hex_byte):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
         memory_row = memory_bank.addressToIndex(hex_address)
-        print(mb_row, memory_row)
         memory_item = self.rootItem.child(mb_row).child(memory_row)
         hex_word = memory_item.data(1)
         pos = 3 - int(hex_address, 16) % 4

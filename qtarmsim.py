@@ -170,7 +170,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
-        # self.ui.tableViewMemory.installEventFilter(self)
+        #self.ui.treeViewRegisters.installEventFilter(self)
+        #self.ui.treeViewMemory.installEventFilter(self)
 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
@@ -180,8 +181,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.ui.actionShow_Memory.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
                 self.ui.actionShow_Messages.setChecked(False)
-        if (event.type() == QtCore.QEvent.LayoutRequest and isinstance(source, QtGui.QTableView)): 
-            source.resizeColumnsToContents()
+        #if (event.type() == QtCore.QEvent.LayoutRequest and isinstance(source, QtGui.QTableView)): 
+        #    source.resizeColumnsToContents()
         return super(QtARMSimMainWindow, self).eventFilter(source, event)
 
         
