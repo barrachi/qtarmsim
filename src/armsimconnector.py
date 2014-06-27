@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 ###########################################################################
 #                                                                         #
-#  This file is part of Qt ARMSim, (C) 2014 by Sergio Barrachina Mir.     #
+#  This file is part of Qt ARMSim.                                        #
 #                                                                         #
-#  Qt ARMSim is free software; you can redistribute it and/or modify      #
+#  Qt ARMSim is free software: you can redistribute it and/or modify      #
 #  it under the terms of the GNU General Public License as published by   #
-#  the Free Software Foundation; either version 2 of the License, or      #
+#  the Free Software Foundation; either version 3 of the License, or      #
 #  (at your option) any later version.                                    #
 #                                                                         #
 #  This program is distributed in the hope that it will be useful, but    #
@@ -23,6 +22,7 @@ import subprocess
 import time
 
 from src.mysocket import MySocket
+
 
 ## Execute response container
 class ExecuteResponse():

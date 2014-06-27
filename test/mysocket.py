@@ -1,8 +1,25 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import socket
+###########################################################################
+#                                                                         #
+#  This file is part of Qt ARMSim.                                        #
+#                                                                         #
+#  Qt ARMSim is free software: you can redistribute it and/or modify      #
+#  it under the terms of the GNU General Public License as published by   #
+#  the Free Software Foundation; either version 3 of the License, or      #
+#  (at your option) any later version.                                    #
+#                                                                         #
+#  This program is distributed in the hope that it will be useful, but    #
+#  WITHOUT ANY WARRANTY; without even the implied warranty of             #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      #
+#  General Public License for more details.                               #
+#                                                                         #
+###########################################################################
+
 import signal
+import socket
+import sys
+
 
 class MySocket:
     
@@ -47,9 +64,9 @@ class MySocket:
         if self.verbose:
             print('Connected with ' + addr[0] + ':' + str(addr[1]))
         
-    def connect_to(self, port):
+    def connect_to(self, port, server="localhost"):
         "Used by a client to establish a connection to the specified port."
-        self.sock.connect(("localhost", port))
+        self.sock.connect((server, port))
         self.conn = self.sock
         
     def get_lines(self):
@@ -86,6 +103,22 @@ class MySocket:
         if len(lines)>1:
             self.pending_lines = lines[1:]
         return lines[0]
+
+    def receive_lines_till_eof(self):
+        """
+        Receives lines until a line with the EOF word is received.
+        
+        @return: An array with the received lines or an empty array if a timeout occurs
+        """    
+        lines = []
+        line = self.receive_line()
+        while line != 'EOF':
+            lines.append(line)
+            line = self.receive_line()
+        if line == 'EOF': 
+            return lines
+        else: # timeout occurred
+            return []
     
     def send_line(self, msg):
         self.conn.sendall(bytes(msg, self.ENCODING)+b'\r\n')
