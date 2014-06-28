@@ -73,10 +73,11 @@ class RegistersModel(TreeModel):
         else:
             return None
 
-    def setRegister(self, i, value):
-        self.rootItem.child(0).child(i).setData(1, value)
-        self.modified_registers.append(i)
-        self.dataChanged.emit(self.createIndex(i, 0, self.rootItem.child(0)), self.createIndex(i, 0, self.rootItem.child(0)))
+    def setRegister(self, reg, value):
+        self.rootItem.child(0).child(reg).setData(1, value)
+        self.modified_registers.append(reg)
+        self.dataChanged.emit(self.createIndex(reg, 0, self.rootItem.child(0)),
+                              self.createIndex(reg, 1, self.rootItem.child(0)))
         
     def getRegister(self, i):
         return self.rootItem.child(0).child(i).data(1)
