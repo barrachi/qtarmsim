@@ -357,7 +357,7 @@ class ELF_File < File
       end
     end
     #Completamos los dos arrays
-    code += @sections[@wks['.rodata']].data
+    code += @sections[@wks['.rodata']].data unless @sections[@wks['.rodata']].data.nil?
     dataend = bssdir > END_DATA ? bssdir : END_DATA
     data += [0] * (dataend - @wks_orig['.bss'] + 1)
     #creamos los dos bloques y los devolvemos en un array

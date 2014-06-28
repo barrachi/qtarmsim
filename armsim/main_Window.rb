@@ -8,6 +8,10 @@ require_relative 'memory_block'
 require_relative 'read_ELF'
 include Wx
 
+GCC = 'C:\Users\German\Documents\GitHub\Arduino\build\windows\work\hardware\tools\g++_arm_none_eabi\bin\arm-none-eabi-gcc.exe'
+CL1 = '-mcpu=cortex-m1 -mthumb -c'
+CL3 = '-mcpu=cortex-m1 -mthumb -c'
+
 class MainWindow < Frame
 
   #initialize

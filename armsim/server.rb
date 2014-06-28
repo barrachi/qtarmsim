@@ -1,4 +1,5 @@
 require 'socket'
+require 'shell'
 require_relative 'thumbII_Defs'
 require_relative 'instruction'
 require_relative 'coder'
@@ -6,6 +7,10 @@ require_relative 'core'
 require_relative 'memory'
 require_relative 'memory_block'
 require_relative 'read_ELF'
+
+GCC = 'C:\Users\German\Documents\GitHub\Arduino\build\windows\work\hardware\tools\g++_arm_none_eabi\bin\arm-none-eabi-gcc.exe'
+CL1 = '-mcpu=cortex-m1 -mthumb -c'
+CL3 = '-mcpu=cortex-m1 -mthumb -c'
 
 Errores = { orden: "Orden no reconocida\r\n",
             args:  "Argumentos erroneos\r\n",
@@ -16,7 +21,10 @@ Errores = { orden: "Orden no reconocida\r\n",
             call: "No es subrutina\r\nSe ejecuta STEP\r\n",
             end: "Se intenta ejecutar al final del programa\r\n",
             breakpoint: "Se ejecuta desde direccion de breakpoint\r\nEl breakpoint se ignora\r\n",
-            nomem: "Se intenta ejecutar fuera de la memoria\r\n"
+            nomem: "Se intenta ejecutar fuera de la memoria\r\n",
+            path: "El directorio no existe o no es correcto\r\n",
+            exe: "El archivo no existe o no es ejecutable\r\n",
+            file_s: "El archivo .s no existe\r\n"
 }
 
 ###########################################
@@ -426,6 +434,39 @@ execute = Proc.new { |entrada|
   res
 }
 
+#config_compiler
+#---------------
+#Establece el camino del compilador. Devuelve OK
+# @param [Array] entrada
+# @return [String]
+
+config_compiler = Proc.new { |entrada|
+  $compiler = entrada[0]
+  res = "OK\r\n"
+}
+
+#config_args
+#-----------
+#Establece los argumentos de compilacion. Devuelve OK
+# @param [Array] entrada
+# @return [String]
+
+config_args = Proc.new { |entrada|
+  $args = entrada[0]
+  res = "OK\r\n"
+}
+
+#config_path
+#-----------
+#Establece el directorio de trabajo. Devuelve OK
+# @param [Array] entrada
+# @return [String]
+
+config_path = Proc.new { |entrada|
+  $path = entrada[0]
+  res = "OK\r\n"
+}
+
 #sysinfo_memory
 #--------------
 #Devuelve la información de la memoria.
@@ -444,7 +485,28 @@ sysinfo_memory = Proc.new { |entrada|
 # @return [String]
 
 assemble = Proc.new { |entrada|
-  res = "OK\r\n"
+  nf = entrada[0].split('.')[0]
+  fline = $path + nf
+  cline = $compiler + ' ' + $args + ' -o ' + fline + '.o'
+  eline = '2> ' + fline + '.err'
+  if system(cline + ' ' + fline + '.s ' + ' ' + eline  )
+    blocks = read_ELF(fline + '.o')
+    procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
+    procesador.memory.add_block(blocks[1])
+    procesador.memory.symbolTable = blocks[2]
+    $symbol_table = blocks[2]
+    procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
+    $server.proc = procesador
+    res = "SUCCESS\r\n"
+  else
+    res = "ERROR\r\n"
+    File.foreach(fline + '.err') do |line|
+      res = res + line[0..-2] + "\r\n"
+    end
+    res = res + "EOF\r\n"
+  end
+  File.delete(fline + '.err')
+  res
 }
 
 #exit
@@ -484,6 +546,11 @@ Set = { 'REGISTER' => [1, set_register, [:regname, 'WITH', :hexvalue]],
         'BREAKPOINT' => [1, set_breakpoint, ['AT', :address]]
 }
 
+Config = { 'COMPILER' => [1, config_compiler, [:exe]],
+        'ARGS' => [1, config_args, [:cad]],
+        'PATH' => [1,config_path, [:path]]
+}
+
 Sysinfo = { 'MEMORY' => [1, sysinfo_memory, []]
 }
 
@@ -495,14 +562,15 @@ Ordenes = {'SHOW' => [0, Show],
            'SET' => [0, Set],
            'SYSINFO' => [0, Sysinfo],
            'EXECUTE' => [1, execute, [:keyword]],
-           'ASSEMBLE' => [1, assemble, [:path]],
+           'ASSEMBLE' => [1, assemble, [:file_s]],
+           'CONFIG' => [0, Config],
            'EXIT' => [1, exit, []]
 }
 
 class MainServer < TCPServer
 
   #A través del Core procesador podemos acceder a todo
-  attr_reader :proc
+  attr_accessor :proc
   attr_reader :coder
   attr_reader :breakpoints
 
@@ -542,6 +610,12 @@ class MainServer < TCPServer
                 tokens[idx] = tokens[idx].hex
               when :nbytes, :ninst
                 tokens[idx] = tokens[idx].to_i
+              when :path
+                return Errores[:path] unless File.directory?(tokens[idx])
+              when :exe
+                return Errores[:exe] unless File.executable?(tokens[idx])
+              when :file_s
+                return Errores[:file_s] unless File.file?($path + tokens[idx].split('.')[0] + '.s')
             end
           end
         end
@@ -549,6 +623,117 @@ class MainServer < TCPServer
       end
       base = linea[1]
     end
+  end
+end
+
+def read_ELF(name)
+  ELF_File.open(name, 'rb') do |file|
+    e_ident = file.get_array(16)
+    magic = e_ident[1].chr + e_ident[2].chr + e_ident[3].chr
+    puts("MAGIC: 0x%02X %s" % [e_ident[0], magic])
+    puts("CLASS: %s" % ELFCLASS[e_ident[4]])
+    puts("DATA:  %s" % ELFCLASS[e_ident[5]])
+    puts(ELFVERSION[e_ident[6]])
+    e_type = file.get_half
+    puts(ELFTYPE[e_type])
+    e_machine = file.get_half
+    puts("MACHINE:%d (ARM)" % e_machine)
+    e_version = file.get_word
+    puts(ELFVERSION[e_version])
+    e_entry = file.get_word
+    puts("Entry point address: %d" % e_entry)
+    e_phoff = file.get_word
+    puts("Program header table offset: %d" % e_phoff)
+    e_shoff = file.get_word
+    puts("Section header table offset: %d" % e_shoff)
+    e_flags = file.get_word
+    p e_flags
+    e_ehsize = file.get_half
+    puts("ELF header size: %d" % e_ehsize)
+    e_phentsize = file.get_half
+    puts("Program header table entry size: %d" % e_phentsize)
+    e_phnum = file.get_half
+    puts("Program header table entries: %d" % e_phnum)
+    e_shentsize = file.get_half
+    puts("Section header table entry size: %d" % e_shentsize)
+    e_shnum = file.get_half
+    puts("Section header table entries: %d" % e_shnum)
+    e_shstrndx = file.get_half
+    puts("Section name string table index: %d" % e_shstrndx)
+
+    file.seek(e_shoff, IO::SEEK_SET)
+    file.sections = Array.new
+    st = 0
+    stable = 0
+    0.upto(e_shnum - 1) do |idx|
+      cursec = Section.new
+      cursec.idx = idx
+      cursec.header = file.get_section_hdr
+      file.sections << cursec
+      st = idx if cursec.header[:type] == 3 && idx != e_shstrndx
+      stable = idx if cursec.header[:type] == 2
+      file.rel_idx << idx if cursec.header[:type] == 9
+    end
+    file.section_names_idx = e_shstrndx
+    file.string_table_idx = st
+    file.sym_table_idx = stable
+    file.fill_section_names_data
+    file.fill_string_table_data
+    0.upto(file.rel_idx.length - 1) do |idx|
+      file.fill_relocation_table_data(idx)
+    end
+    file.sections.each do |cursec|
+      cursec.name = file.get_section_name_string(cursec.header[:name])
+      file.wks[cursec.name] = cursec.idx unless file.wks[cursec.name].nil?
+      puts cursec
+    end
+    file.wks_orig['.rodata'] = file.wks_orig['.text'] + file.sections[file.wks['.text']].header[:size]
+    file.wks_orig['.rodata'] += 4 - (file.wks_orig['.rodata'] % 4) unless (file.wks_orig['.rodata'] % 4) == 0
+    file.wks_orig['.bss'] = file.wks_orig['.data'] + file.sections[file.wks['.data']].header[:size]
+    p file.wks
+    p file.wks_orig
+    file.seek(file.sections[stable].header[:offset], IO::SEEK_SET)
+    num = file.sections[stable].header[:size] / file.sections[stable].header[:entsize]
+    puts "Symbol table idx: %d, entries: %d, at file offset: %d" % [stable, num, file.sections[stable].header[:offset]]
+    puts "File size: %d, section end: %d\n" % [file.size, file.sections[stable].header[:offset] + file.sections[stable].header[:size] - 1 ]
+    file.symbols = Array.new
+    0.upto(num - 1) do |idx|
+      cursym = SymbolTableEntry.new
+      cursym.idx = idx
+      cursym.data = file.get_symbol_entry
+      cursym.name = file.get_string_table_string(cursym.data[:name])
+      file.symbols << cursym
+    end
+    file.symbols.each do |cursec|
+      puts cursec
+    end
+    file.rel_idx.each do |rel|
+      file.seek(file.sections[rel].header[:offset], IO::SEEK_SET)
+      num = file.sections[rel].header[:size] / file.sections[rel].header[:entsize]
+      relocations = Array.new
+      0.upto(num - 1) do |idx|
+        cursym = RelocationEntry.new
+        cursym.idx = idx
+        cursym.data = file.get_relocation_entry
+        relocations << cursym
+      end
+      file.relocations << relocations
+    end
+    file.relocations.each do |cursec|
+      puts "Tabla"
+      cursec.each do |entry|
+        puts entry
+      end
+    end
+    # Nos preparamos. Lo primero es leer las secciones con datos
+    file.fill_section(file.wks['.text']) unless file.sections[file.wks['.text']].header[:size] == 0;
+    p file.sections[file.wks['.text']].data
+    file.fill_section(file.wks['.data']) unless file.sections[file.wks['.data']].header[:size] == 0;
+    p file.sections[file.wks['.data']].data
+    file.fill_section(file.wks['.rodata']) unless file.sections[file.wks['.rodata']].header[:size] == 0;
+    p file.sections[file.wks['.rodata']].data
+
+    return file.relocate
   end
 end
 
@@ -562,7 +747,7 @@ class ServerApp
   #Aquí pondremos toda la inicialización y esas cosas
   #de momento una ROM random, la RAM de datos y la pila
   def main
-    blocks = read_ELF
+    blocks = read_ELF('complex.o')
     puerto = ARGV.length == 0 ? 9999 : ARGV[0].to_i
     @procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     @procesador.memory.add_block(blocks[1])
@@ -570,6 +755,9 @@ class ServerApp
     $symbol_table = blocks[2]
     @procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
     $server = MainServer.new(@procesador, puerto)
+    $compiler = GCC
+    $args = CL1
+    $path = "C:\\Users\\German\\Desarrollos\\ArduinoDue\\"
     $exit = false
     session = $server.accept
     while !$exit
@@ -584,117 +772,6 @@ class ServerApp
     end
     session.close
   end
-
-  def read_ELF
-    ELF_File.open('complex.o', 'rb') do |file|
-      e_ident = file.get_array(16)
-      magic = e_ident[1].chr + e_ident[2].chr + e_ident[3].chr
-      puts("MAGIC: 0x%02X %s" % [e_ident[0], magic])
-      puts("CLASS: %s" % ELFCLASS[e_ident[4]])
-      puts("DATA:  %s" % ELFCLASS[e_ident[5]])
-      puts(ELFVERSION[e_ident[6]])
-      e_type = file.get_half
-      puts(ELFTYPE[e_type])
-      e_machine = file.get_half
-      puts("MACHINE:%d (ARM)" % e_machine)
-      e_version = file.get_word
-      puts(ELFVERSION[e_version])
-      e_entry = file.get_word
-      puts("Entry point address: %d" % e_entry)
-      e_phoff = file.get_word
-      puts("Program header table offset: %d" % e_phoff)
-      e_shoff = file.get_word
-      puts("Section header table offset: %d" % e_shoff)
-      e_flags = file.get_word
-      p e_flags
-      e_ehsize = file.get_half
-      puts("ELF header size: %d" % e_ehsize)
-      e_phentsize = file.get_half
-      puts("Program header table entry size: %d" % e_phentsize)
-      e_phnum = file.get_half
-      puts("Program header table entries: %d" % e_phnum)
-      e_shentsize = file.get_half
-      puts("Section header table entry size: %d" % e_shentsize)
-      e_shnum = file.get_half
-      puts("Section header table entries: %d" % e_shnum)
-      e_shstrndx = file.get_half
-      puts("Section name string table index: %d" % e_shstrndx)
-
-      file.seek(e_shoff, IO::SEEK_SET)
-      file.sections = Array.new
-      st = 0
-      stable = 0
-      0.upto(e_shnum - 1) do |idx|
-        cursec = Section.new
-        cursec.idx = idx
-        cursec.header = file.get_section_hdr
-        file.sections << cursec
-        st = idx if cursec.header[:type] == 3 && idx != e_shstrndx
-        stable = idx if cursec.header[:type] == 2
-        file.rel_idx << idx if cursec.header[:type] == 9
-      end
-      file.section_names_idx = e_shstrndx
-      file.string_table_idx = st
-      file.sym_table_idx = stable
-      file.fill_section_names_data
-      file.fill_string_table_data
-      0.upto(file.rel_idx.length - 1) do |idx|
-        file.fill_relocation_table_data(idx)
-      end
-      file.sections.each do |cursec|
-        cursec.name = file.get_section_name_string(cursec.header[:name])
-        file.wks[cursec.name] = cursec.idx unless file.wks[cursec.name].nil?
-        puts cursec
-      end
-      file.wks_orig['.rodata'] = file.wks_orig['.text'] + file.sections[file.wks['.text']].header[:size]
-      file.wks_orig['.rodata'] += 4 - (file.wks_orig['.rodata'] % 4) unless (file.wks_orig['.rodata'] % 4) == 0
-      file.wks_orig['.bss'] = file.wks_orig['.data'] + file.sections[file.wks['.data']].header[:size]
-      p file.wks
-      p file.wks_orig
-      file.seek(file.sections[stable].header[:offset], IO::SEEK_SET)
-      num = file.sections[stable].header[:size] / file.sections[stable].header[:entsize]
-      puts "Symbol table idx: %d, entries: %d, at file offset: %d" % [stable, num, file.sections[stable].header[:offset]]
-      puts "File size: %d, section end: %d\n" % [file.size, file.sections[stable].header[:offset] + file.sections[stable].header[:size] - 1 ]
-      file.symbols = Array.new
-      0.upto(num - 1) do |idx|
-        cursym = SymbolTableEntry.new
-        cursym.idx = idx
-        cursym.data = file.get_symbol_entry
-        cursym.name = file.get_string_table_string(cursym.data[:name])
-        file.symbols << cursym
-      end
-      file.symbols.each do |cursec|
-        puts cursec
-      end
-      file.rel_idx.each do |rel|
-        file.seek(file.sections[rel].header[:offset], IO::SEEK_SET)
-        num = file.sections[rel].header[:size] / file.sections[rel].header[:entsize]
-        relocations = Array.new
-        0.upto(num - 1) do |idx|
-          cursym = RelocationEntry.new
-          cursym.idx = idx
-          cursym.data = file.get_relocation_entry
-          relocations << cursym
-        end
-        file.relocations << relocations
-      end
-      file.relocations.each do |cursec|
-        puts "Tabla"
-        cursec.each do |entry|
-          puts entry
-        end
-      end
-      # Nos preparamos. Lo primero es leer las secciones con datos
-      file.fill_section(file.wks['.text']) unless file.sections[file.wks['.text']].header[:size] == 0;
-      p file.sections[file.wks['.text']].data
-      file.fill_section(file.wks['.data']) unless file.sections[file.wks['.data']].header[:size] == 0;
-      p file.sections[file.wks['.data']].data
-      file.fill_section(file.wks['.rodata']) unless file.sections[file.wks['.rodata']].header[:size] == 0;
-      p file.sections[file.wks['.rodata']].data
-
-      return file.relocate
-    end
-  end
 end
 
-ServerApp.new.main()
+$app = ServerApp.new.main()
