@@ -20,8 +20,6 @@ from PyQt4 import QtCore, QtGui
 
 class MyQTreeView(QtGui.QTreeView):
     
-    pass
-
     def sizeHint(self):
         """
         If there is no model yet, just return a 0x0 size.
@@ -32,14 +30,16 @@ class MyQTreeView(QtGui.QTreeView):
         width=0
         my_vertical_scrollbar = self.verticalScrollBar()
         my_dock = self.parent().parent()
-        # Compute width as the sum of the width of all the columns and an extra width
-        if self.model():
-            for i in range(self.model().rowCount(self.model().index(0,0,QtCore.QModelIndex()))):
-                width += self.columnWidth(i)
-        # @todo: the extra width should be obtained automatically
-        width += 15
+        print(my_dock)
+        self.resizeColumnToContents(0)
+        self.resizeColumnToContents(1)
+        for i in range(2):
+            width += self.columnWidth(i)
+            print("i: ", i, "width:", self.columnWidth(i))
         # If the vertical scrollbar is visible, add its width
         if my_vertical_scrollbar.isVisible():
             width += my_vertical_scrollbar.width()
-        my_dock.setMinimumWidth(width)
+        self.setMinimumSize(width, 0)
+        # @todo: the extra width should be obtained automatically
+        my_dock.setMinimumWidth(width+15)
         return QtCore.QSize(width, 0)
