@@ -237,4 +237,6 @@ class ARMSimConnector():
         Sends exit command.
         """
         self.mysocket.send_line("EXIT")
+        self.disconnect()
+        time.sleep(0.5)
         
