@@ -127,8 +127,8 @@
     <addaction name="actionHelp"/>
     <addaction name="actionWhats_This"/>
     <addaction name="separator"/>
-    <addaction name="actionAbout_Qt_ArmSim"/>
-    <addaction name="actionAbout_ArmSim"/>
+    <addaction name="actionAbout_Qt_ARMSim"/>
+    <addaction name="actionAbout_ARMSim"/>
    </widget>
    <widget class="QMenu" name="menu_Window">
     <property name="title">
@@ -370,14 +370,14 @@
     <string>Shift+F1</string>
    </property>
   </action>
-  <action name="actionAbout_Qt_ArmSim">
+  <action name="actionAbout_Qt_ARMSim">
    <property name="icon">
     <iconset theme="help-about">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>About Qt ArmSim</string>
+    <string>About Qt ARMSim</string>
    </property>
    <property name="statusTip">
     <string>Sobre spim</string>
@@ -399,14 +399,14 @@
     <string>F1</string>
    </property>
   </action>
-  <action name="actionAbout_ArmSim">
+  <action name="actionAbout_ARMSim">
    <property name="icon">
     <iconset theme="help-about">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>About ArmSim</string>
+    <string>About ARMSim</string>
    </property>
   </action>
   <action name="actionNew">

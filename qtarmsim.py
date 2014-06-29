@@ -31,6 +31,7 @@
 
 
 import os
+import shutil
 import signal
 import sys
 
@@ -47,6 +48,7 @@ from src.memorymodel import MemoryModel
 from src.mu import Multipasos
 from src.op import Opciones
 from src.registersmodel import RegistersModel
+from src.settingsdialog import SettingsDialog
 from src.simplearmeditor import SimpleARMEditor
 from src.va import Valor
 from ui.mainwindow import Ui_MainWindow
@@ -59,6 +61,41 @@ try:
 except AttributeError:
     def _fromUtf8(s):
         return s
+
+class DefaultSettings():
+    
+    def __init__(self):
+        self._setARMSimDefaults()
+    
+    def value(self, name):
+        return getattr(self, "_" + name)
+        
+    def _setARMSimDefaults(self):
+        my_path = os.path.dirname(os.path.realpath(__file__))
+        fname = os.path.join(my_path, "armsim", "server.rb")
+        if os.path.isfile(fname):
+            fname = os.path.abspath(fname)
+        else:
+            # If not found, search its executable in the path
+            fname = shutil.which("server.rb")
+            if not os.path.isfile(fname):
+                # If not found, use "server.rb" as default
+                fname = "server.rb"
+        self._ARMSimCommand = fname
+        self._ARMSimServer = "localhost"
+        self._ARMSimPort = 8010
+        self._ARMSimPortMinimum = 8010
+        self._ARMSimPortMaximum = 8080
+        fname = ""
+        for name in ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc"]:
+            fname = shutil.which(name)
+            print("**: ", fname)
+            if fname:
+                break
+        fname = fname if fname else name[0]
+        self._ARMGccCommand = fname
+        self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
+        
 
 class QtARMSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ARMSim application."
@@ -92,6 +129,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Read the settings
         self.readSettings()
 
+
     def show(self, *args, **kwargs):
         "Method called when the window is ready to be shown"
         super(QtARMSimMainWindow, self).show(*args, **kwargs)
@@ -116,23 +154,33 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.registersModel.setupModelData()
         self.ui.treeViewRegisters.setModel(self.registersModel)
         self.ui.treeViewRegisters.expandAll()
-        self.ui.treeViewRegisters.resizeColumnToContents(0)
-        self.ui.treeViewRegisters.resizeColumnToContents(1)
-
+          
         # memoryModel
         self.memoryModel = MemoryModel()
         self.ui.treeViewMemory.setModel(self.memoryModel)
 
-        
             
     def readSettings(self):
-        "Reads the settings from the settings file"
+        "Reads the settings from the settings file or initializes them from defaultSettings"
+        self.defaultSettings = DefaultSettings()
         self.settings = QtCore.QSettings("UJI", "QtARMSim")
         self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
         self.restoreState(self.settings.value("windowState", self.initialWindowState))
-        self.command_path = os.path.dirname(os.path.realpath(__file__))
-        self.armsim_command = self.settings.value("ARMSimCommand", os.path.join(self.command_path, "armsim", "server.rb"))
-        self.armsim_port = self.settings.value("ARMSimPort", 8010)
+        if not self.settings.value("ARMSimCommand"):
+            self.settings.setValue("ARMSimCommand", self.defaultSettings.value("ARMSimCommand"))
+        if not self.settings.value("ARMSimServer"):
+            self.settings.setValue("ARMSimServer", self.defaultSettings.value("ARMSimServer"))
+        if not self.settings.value("ARMSimPort"):
+            self.settings.setValue("ARMSimPort", self.defaultSettings.value("ARMSimPort"))
+        if not self.settings.value("ARMSimPortMinimum"):
+            self.settings.setValue("ARMSimPortMinimum", self.defaultSettings.value("ARMSimPortMinimum"))
+        if not self.settings.value("ARMSimPortMaximum"):
+            self.settings.setValue("ARMSimPortMaximum", self.defaultSettings.value("ARMSimPortMaximum"))
+        if not self.settings.value("ARMGccCommand"):
+            self.settings.setValue("ARMGccCommand", self.defaultSettings.value("ARMGccCommand"))
+        if not self.settings.value("ARMGccOptions"):
+            self.settings.setValue("ARMGccOptions", self.defaultSettings.value("ARMGccOptions"))
+            
         
     def defaultGeometry(self):
         "Resizes main window to 800x600 and returns the geometry"
@@ -200,7 +248,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         "Opens an ARM assembler file"
         fileName = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
                                                      QtCore.QDir.currentPath(),
-                                                     self.tr("ARM assembler files(*.s *.asm);;All the files(*.*)"))
+                                                     self.tr("ARM assembler files (*.s) (*.s)"))
         if fileName:
             self.ui.textEditSource.setText(open(fileName).read())
             self.setFileName(fileName)
@@ -340,6 +388,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.statusBar.setVisible(True)
         self.checkShowActions()
         
+    def doConfigure_Qt_ArmSim(self):
+        settings = SettingsDialog(self)
+        if settings.exec_():
+            if self.simulator and self.simulator.connected:
+                self.simulator.sendExit()
+            self.connectToARMSim() 
             
     ## Acción asociada a actionOpciones2
     #
@@ -529,13 +583,19 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def connectToARMSim(self):
-        if not os.path.exists(self.armsim_command):
+        self.simulator = None
+        if not os.path.isfile(self.settings.value("ARMSimCommand")):
             QtGui.QMessageBox.warning(self, self.tr("ARMSim not found"),
                     self.tr("ARMSim command not found.\n\n"
-                            "Please go to the 'Configure QtARMSim' entry\n"
-                            "on the Window menu, and set its path.\n"))
+                            "Please go to 'Configure QtARMSim' and set its path.\n"))
             return False
-        self.simulator = ARMSimConnector(self.armsim_command, self.armsim_port)
+        if not os.path.isfile(self.settings.value("ARMGccCommand")):
+            QtGui.QMessageBox.warning(self, self.tr("ARM gcc not found"),
+                    self.tr("ARM gcc command not found.\n\n"
+                            "Please go to 'Configure QtARMSim' and set its path.\n"))
+            return False
+        # @todo: simulator does not take into account min and maximum ports
+        self.simulator = ARMSimConnector(self.settings.value("ARMSimCommand"), int(self.settings.value("ARMSimPort")))
         errmsg = self.simulator.connect()
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "\n{}\n".format(errmsg))
@@ -543,6 +603,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.textEditMessages.append("<b>ArmSim version info</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
+        # Update registers and memory
+        self.updateRegisters()
+        self.updateMemory()
         return True
             
 def main():
@@ -553,9 +616,7 @@ def main():
     # Create the main window and show it
     main_window = QtARMSimMainWindow()
     main_window.show()
-    if main_window.connectToARMSim():
-        main_window.updateRegisters()
-        main_window.updateMemory()
+    main_window.connectToARMSim()
     # Enter the mainloop of the application
     sys.exit(app.exec_())
     
