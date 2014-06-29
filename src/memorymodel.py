@@ -162,6 +162,7 @@ class MemoryModel(TreeModel):
     
     def clear(self):
         self.memory_banks.clear()
+        self.rootItem.childItems.clear()
 
     def clearHistory(self):
         self.previously_modified_words.clear()
