@@ -289,7 +289,7 @@ class ELF_File < File
   def relocate
     symbolTable = Hash.new
     code = @sections[@wks['.text']].data.dup
-    data = @sections[@wks['.data']].data.dup
+    data = @sections[@wks['.data']].data.nil? ? [0, 0, 0, 0] : @sections[@wks['.data']].data.dup
     bssdir = @wks_orig['.bss']
     externdir = ORIG_EXTERN
     @relocations.each_with_index do |rel, idx|

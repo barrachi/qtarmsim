@@ -1,3 +1,6 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
 require 'socket'
 require 'shell'
 require_relative 'thumbII_Defs'
