@@ -283,7 +283,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                          msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.No:
                     self.ui.tabWidgetCode.setCurrentIndex(0)
-
+                    return
+            # Connect to the simulator if not already connected
+            if not self.simulator or (self.simulator and not self.simulator.connected):
+                if not self.connectToARMSim():
+                    self.ui.tabWidgetCode.setCurrentIndex(0)
+                    return
+            # Assemble file_name
+            self.simulator.doAssemble(self.file_name)  
         
     def sourceCodeChanged(self, changed):
         self.checkFileActions()
@@ -463,7 +470,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if settings.exec_():
             if self.simulator and self.simulator.connected:
                 self.simulator.sendExit()
-            self.connectToARMSim() 
+                self.connectToARMSim() 
             
     ## Acción asociada a actionOpciones2
     #
@@ -669,15 +676,21 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                     self.tr("ARM gcc command not found.\n\n"
                             "Please go to 'Configure QtARMSim' and set its path.\n"))
             return False
-        # @todo: simulator does not take into account min and maximum ports
-        self.simulator = ARMSimConnector(self.settings.value("ARMSimCommand"), int(self.settings.value("ARMSimPort")))
-        errmsg = self.simulator.connect()
+        self.simulator = ARMSimConnector()
+        errmsg = self.simulator.connect(self.settings.value("ARMSimCommand"),
+                                        self.settings.value("ARMSimServer"),
+                                        int(self.settings.value("ARMSimPort")),
+                                        int(self.settings.value("ARMSimPortMinimum")),
+                                        int(self.settings.value("ARMSimPortMaximum")),
+                                        self.settings.value("ARMGccCommand"),
+                                        self.settings.value("ARMGccOptions"))
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "\n{}\n".format(errmsg))
             return False
-        self.ui.textEditMessages.append("<b>ArmSim version info</b><br/>")
+        self.ui.textEditMessages.append("<b>Connected to ARMSim. ARMSim version info follows.</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
+        self.statusBar().showMessage(self.tr("Connected to ARMSim"), 2000)
         # Update registers and memory
         self.updateRegisters()
         self.updateMemory()
