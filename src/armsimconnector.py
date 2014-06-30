@@ -53,7 +53,7 @@ class ARMSimConnector():
     def __init__(self):
         # Set properties default values
         self.mysocket = MySocket()
-        self.armsim_pid = None
+        self.armsim_process = None
         self.setConnected(False, None)
         self.version = None
         
@@ -80,53 +80,66 @@ class ARMSimConnector():
         
         @return: errmsg     An error msg if an error occurred, None otherwise   
         """
-        # 1) Search if ARMSim is already listening in a port in the range [port,] + [minimum_port, maximum_port]
-        for current_port in [port, ] + list(range(minimum_port, maximum_port+1)):
-            try:
-                self.mysocket.connect_to(current_port, server=server)
-                self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
-            except ConnectionRefusedError:
-                continue
-            try:
-                self.getVersion()
-            except socket.timeout:
-                return "Socket timeout when trying to get ARMSim version"
-            self.setConnected(True, current_port)
-            return None
-        if server != "localhost":
-            return "Could not connect to ARMSim server at {}:{}-{}".format(server, minimum_port, maximum_port)
-        # 2) Else, if server == "localhost", then launch a new copy of ARMSim 
-        self.armsim_pid = subprocess.Popen(["ruby",
-                                            command, 
-                                            str(port)],
-                                            cwd = os.path.dirname(command)
-                                           ).pid
-        if not self.armsim_pid:
-            return "Could not launch ARMSim command '{}'".format(command)
-        chances = 3
-        while chances:
-            try:
-                self.mysocket.connect_to(port)
-                self.mysocket.sock.settimeout(2.0) # Set timeout to 2 seconds
-                break
-            except ConnectionRefusedError:
-                # Sleep half a second while the server gets ready
-                time.sleep(.5)
-                chances -= 1
-        if chances == 0:
-            return "ARMSim refused to open a connection at port {}.".format(port)
-        if not self.getVersion():
-            return "ARMSim could be listening at port {}, but it does not answer as expected.".format(port)
-        
-        # 3) Try to set configuration options for localhost execution
-        errmsg = self.setConfigOptions(gcc_command, gcc_options)
-        if errmsg:
-            return errmsg
-
-        # 4) Mark as connected and return no error message
+        # 1) Try to connect to the given server and port
+        if not self.doConnect(server, port):
+            if server != "localhost":
+                return "Could not connect to ARMSim server at {}:{}".format(server, port)
+            # 1.1) If server == localhost, launch ARMSim on any possible port
+            connected = False
+            for current_port in [port, ] + list(range(minimum_port, maximum_port+1)):
+                print("*************** port: ", current_port)
+                self.armsim_process = subprocess.Popen(["ruby", command, str(current_port)],
+                                                   cwd = os.path.dirname(command)
+                                                   )
+                if not self.armsim_process.pid:
+                    return  "Could not launch ARMSim command:\n" \
+                            "'{}'".format(" ".join(["ruby", command, str(current_port)]))
+                chances = 0
+                while not self.doConnect(server, current_port) and chances < 3:
+                    time.sleep(.5)
+                    chances += 1
+                if chances < 3:
+                    # Mark as connected and break
+                    connected = True
+                    break
+                else:
+                    # Kill current ARMSim process (if it is still alive)
+                    self.armsim_process.kill()
+            if not connected:
+                return "Could not bind ARMSim to any port between {} and {}".format(minimum_port, maximum_port)
+            # 1.2) Try to set configuration options for localhost execution
+            errmsg = self.setConfigOptions(gcc_command, gcc_options)
+            if errmsg:
+                return errmsg
+        # 2) Mark as connected and return no error message
         self.setConnected(True, port)
         return None
     
+
+    def doConnect(self, server, port):
+        """
+        Tries to connect to the given server and port.
+        
+        @return: True if successfully connected, False otherwise.
+        """
+        print("doConnect: ", server, ":", port)
+        try:
+            self.mysocket.connect_to(port, server=server)
+            self.mysocket.sock.settimeout(0.2) # Set timeout to .2 seconds
+        except ConnectionRefusedError as e:
+            print("ConnectionRefusedError: ({}) {}".format(e.errno, e.strerror))
+            return False
+        except OSError as e:
+            print("OSError: ({}) {}".format(e.errno, e.strerror))
+            return False
+        try:
+            self.getVersion()
+        except socket.timeout as e:
+            print("Timeout: ({}) {}".format(e.errno, e.strerror))
+            return False
+        # Set timeout to something bigger
+        self.mysocket.sock.settimeout(2.0)
+        return True
     
     def disconnect(self):
         """
@@ -142,13 +155,10 @@ class ARMSimConnector():
         
         @return: The ARMSim Version text.
         """
-        if self.version:
-            return self.version
-        else:
-            self.mysocket.send_line("SHOW VERSION")
-            version_lines = self.mysocket.receive_lines_till_eof()
-            self.version = "\n".join(version_lines)
-            return self.version
+        self.mysocket.send_line("SHOW VERSION")
+        version_lines = self.mysocket.receive_lines_till_eof()
+        self.version = "\n".join(version_lines) 
+        return self.version
     
     #@todo: add this to the grammar document
     def setConfigOptions(self, gcc_command, gcc_options):

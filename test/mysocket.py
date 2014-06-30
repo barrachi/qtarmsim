@@ -30,9 +30,6 @@ class MySocket:
     def __init__(self, verbose=False):
         "Creates and initializes the socket"
         self.verbose = verbose
-        if self.verbose:
-            print('Creating the socket')
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Set conn to None
         self.conn = None
         # Set pending_lines to empty
@@ -42,6 +39,9 @@ class MySocket:
 
     def server_bind(self, port):
         """Binds the socket to a given port and starts listening. Should be used by the server application. Returns -1 if something went wrong."""
+        if self.verbose:
+            print('Creating the socket')
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             if self.verbose:
                 print('Binding to port {}'.format(port))
@@ -66,8 +66,11 @@ class MySocket:
         
     def connect_to(self, port, server="localhost"):
         "Used by a client to establish a connection to the specified port."
+        if self.verbose:
+            print('Creating the socket')
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((server, port))
-        self.conn = self.sock
+        self.conn = self.sock 
         
     def get_lines(self):
         """

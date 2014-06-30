@@ -86,7 +86,7 @@ class DefaultSettings():
         self._ARMSimServer = "localhost"
         self._ARMSimPort = 8010
         self._ARMSimPortMinimum = 8010
-        self._ARMSimPortMaximum = 8080
+        self._ARMSimPortMaximum = 8020
         fname = ""
         for name in ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc"]:
             fname = shutil.which(name)
@@ -677,6 +677,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                             "Please go to 'Configure QtARMSim' and set its path.\n"))
             return False
         self.simulator = ARMSimConnector()
+        self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         errmsg = self.simulator.connect(self.settings.value("ARMSimCommand"),
                                         self.settings.value("ARMSimServer"),
                                         int(self.settings.value("ARMSimPort")),
@@ -690,7 +691,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.textEditMessages.append("<b>Connected to ARMSim. ARMSim version info follows.</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
-        self.statusBar().showMessage(self.tr("Connected to ARMSim"), 2000)
+        self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(self.simulator.current_port), 2000)
         # Update registers and memory
         self.updateRegisters()
         self.updateMemory()
