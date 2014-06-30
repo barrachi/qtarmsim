@@ -57,7 +57,7 @@
        <enum>QTabWidget::South</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabSource">
        <property name="whatsThis">
@@ -112,8 +112,6 @@
     <addaction name="actionReset_Registers"/>
     <addaction name="actionReset_Memory"/>
     <addaction name="actionClear_Console"/>
-    <addaction name="separator"/>
-    <addaction name="actionAssemble_Source_Code"/>
     <addaction name="separator"/>
     <addaction name="actionRun"/>
     <addaction name="actionStep"/>
@@ -487,14 +485,6 @@
   <action name="actionClear_Console">
    <property name="text">
     <string>Clear &amp;Console</string>
-   </property>
-  </action>
-  <action name="actionAssemble_Source_Code">
-   <property name="text">
-    <string>&amp;Assemble source code</string>
-   </property>
-   <property name="toolTip">
-    <string>Assemble Source Code</string>
    </property>
   </action>
   <action name="actionRun">

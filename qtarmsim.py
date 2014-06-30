@@ -52,6 +52,7 @@ from src.settingsdialog import SettingsDialog
 from src.simplearmeditor import SimpleARMEditor
 from src.va import Valor
 from ui.mainwindow import Ui_MainWindow
+from PyQt4.Qsci import QsciScintilla
 
 
 __version__ = "0.1"
@@ -89,9 +90,6 @@ class DefaultSettings():
         fname = ""
         for name in ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc"]:
             fname = shutil.which(name)
-            print("**: ", fname)
-            if fname:
-                break
         fname = fname if fname else name[0]
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
@@ -103,14 +101,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         # Call super.__init__()
         super(QtARMSimMainWindow, self).__init__()
-        # Initialize variables
-        self.fileName = ''
         # Load the user interface
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         # Extends the Ui
         self.extendUi()
-        # Set the application icon, title and size
+        # Set the file name
+        self.setFileName("untitled.s")
+        # Set the application icon
         self.setWindowIcon(QtGui.QIcon(":/images/logo.svg"))
         # Breakpoint dialog initialization
         self.br = Breakpoi(self)
@@ -128,17 +126,21 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.initialWindowState = self.saveState()
         # Read the settings
         self.readSettings()
+        # Set self.simulator to None
+        self.simulator = None
 
 
     def show(self, *args, **kwargs):
         "Method called when the window is ready to be shown"
         super(QtARMSimMainWindow, self).show(*args, **kwargs)
-        # restore actions have to be called after the window is shown
+        # checkFileActions checkShowActions and checkAssembledActions have to be called after the window is shown
+        self.checkFileActions()
         self.checkShowActions()
+        self.checkAssembledActions()
         
-        
+
     def extendUi(self):
-        "Extends the Ui with new objects and links the table views with their models"
+        "Extends the Ui with new objects and links the tree views with their models"
         # Add text editor based on QsciScintilla to tabSource
         self.ui.textEditSource = SimpleARMEditor(self.ui.tabSource)
         self.ui.textEditSource.setObjectName(_fromUtf8("textEditSource"))
@@ -186,6 +188,29 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         "Resizes main window to 800x600 and returns the geometry"
         self.resize(800, 600)
         return self.saveGeometry()
+
+        
+    def isSourceCodeModified(self):
+        "Asks textEditSource if its contents have been modified"
+        return self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_GETMODIFY)
+        
+
+    def updateWindowTitle(self):
+        modified_txt = self.tr(" [modified] - ") if self.isSourceCodeModified() else " - "
+        title_txt = "{}{}{}".format(os.path.basename(self.file_name), modified_txt, "Qt ARMSim")
+        self.setWindowTitle(title_txt)
+        
+
+    def checkFileActions(self):
+        "Enables/disables actions related to file management and updates window title accordingly"
+        if self.isSourceCodeModified():
+            self.ui.actionSave.setEnabled(True)
+            self.ui.actionSave_As.setEnabled(True)
+        else:
+            self.ui.actionSave.setEnabled(False)
+            self.ui.actionSave_As.setEnabled(True)
+        self.updateWindowTitle()
+
         
     def checkShowActions(self):
         "Modifies the checked state of the show/hide actions depending on their widgets visibility"
@@ -194,8 +219,20 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
         self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
-        
  
+        
+    def checkAssembledActions(self):
+        "Enables/disables actions that depend on an assembled code"
+        enabled = True if (self.simulator and self.simulator.code_is_assembled) else False
+        self.ui.actionRun.setEnabled(enabled)
+        self.ui.actionStep.setEnabled(enabled)
+        self.ui.actionReset_Memory.setEnabled(enabled)
+        self.ui.actionReset_Registers.setEnabled(enabled)
+        self.ui.actionBreakpoints.setEnabled(enabled)
+        self.ui.treeViewRegisters.setEnabled(enabled)
+        self.ui.treeViewMemory.setEnabled(enabled)
+        self.ui.actionAbout_ARMSim.setEnabled(enabled)
+        
     #################################################################################
     # Actions and events
     #################################################################################
@@ -214,12 +251,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                     continue
                 action = getattr(self.ui, actionName)
                 self.connect(action, signalTriggered, method)
+        # Tab changes
+        self.ui.tabWidgetCode.currentChanged.connect(self.onTabChange)
+        # textEditSource modification changes 
+        self.ui.textEditSource.modificationChanged.connect(self.sourceCodeChanged)
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
-        #self.ui.treeViewRegisters.installEventFilter(self)
-        #self.ui.treeViewMemory.installEventFilter(self)
+
 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
@@ -229,62 +269,92 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.ui.actionShow_Memory.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
                 self.ui.actionShow_Messages.setChecked(False)
-        #if (event.type() == QtCore.QEvent.LayoutRequest and isinstance(source, QtGui.QTableView)): 
-        #    source.resizeColumnsToContents()
         return super(QtARMSimMainWindow, self).eventFilter(source, event)
 
+
+    def onTabChange(self, tabIndex):
+        if tabIndex == 1:
+            # Check if there is something to assemble
+            text = self.ui.textEditSource.text().replace(" ", "").replace("\n", "")
+            if len(text) < 10:
+                msg =   "It seems that there is no source code to assemble.\n" \
+                        "Do you really want to proceed?"
+                reply = QtGui.QMessageBox.question(self, 'Empty source code?', 
+                         msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                if reply == QtGui.QMessageBox.No:
+                    self.ui.tabWidgetCode.setCurrentIndex(0)
+
         
+    def sourceCodeChanged(self, changed):
+        self.checkFileActions()
+
+
+    def checkCurrentFileState(self):
+        if not self.isSourceCodeModified():
+            return QtGui.QMessageBox.Discard
+        msg =   "The document '{}' has been modified.\n" \
+                "Do you want to save the changes, or discard them?".format(os.path.basename(self.file_name))
+        reply = QtGui.QMessageBox.question(self, 'Close Document', 
+                                           msg, QtGui.QMessageBox.Save, QtGui.QMessageBox.Discard, QtGui.QMessageBox.Cancel)
+        if reply == QtGui.QMessageBox.Save:
+            self.doSave()
+        return reply
+
+            
     #################################################################################
     # File menu actions
     #################################################################################
 
-    def setFileName(self, fileName):
+    def setFileName(self, file_name):
         "Sets the filename and updates the window title accordingly"
-        self.fileName = fileName
-        self.setWindowTitle("Qt ARMSim - {}".format(self.fileName))
-    
+        self.file_name = file_name
+        self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
+        self.checkFileActions()
+        
     
     def doOpen(self):
         "Opens an ARM assembler file"
-        fileName = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
+        if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
+            return
+        file_name = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
                                                      QtCore.QDir.currentPath(),
                                                      self.tr("ARM assembler files (*.s) (*.s)"))
-        if fileName:
-            self.ui.textEditSource.setText(open(fileName).read())
-            self.setFileName(fileName)
+        if file_name:
+            self.ui.textEditSource.setText(open(file_name).read())
+            self.setFileName(file_name)
             
          
     def doSave(self):
         "Saves the current ARM assembler file"
-        if self.fileName == '':
+        if self.file_name == 'untitled.s':
             return self.doSave_As()
         else:
-            return self.saveFile(self.fileName)
+            return self.saveFile(self.file_name)
 
 
     def doSave_As(self):
         "Saves the ARM assembler file with a new specified name"
-        fileName = self.fileName
-        if fileName == '':
-            fileName = os.path.join(QtCore.QDir.currentPath(), self.tr("untitled.s"))
-        fileName = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"), fileName, self.tr("ARM assembler file(*.s *.asm)"))
-        if fileName == '':
+        file_name = self.file_name
+        if file_name == '':
+            file_name = os.path.join(QtCore.QDir.currentPath(), self.tr("untitled.s"))
+        file_name = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"), file_name, self.tr("ARM assembler file (*.s) (*.s)"))
+        if file_name == '':
             return False
         else:
-            return self.saveFile(fileName)
+            return self.saveFile(file_name)
 
 
-    def saveFile(self, fileName):
+    def saveFile(self, file_name):
         "Saves the contents of the source editor on the given file name"
-        asm_file = QtCore.QFile(fileName)
+        asm_file = QtCore.QFile(file_name)
         if not asm_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
             QtGui.QMessageBox.warning(self, self.tr("Error"),
-                    self.tr("Could not write to file '{0}':\n{1}.").format(fileName, asm_file.errorString()))
+                    self.tr("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
         asm_file.write(self.ui.textEditSource.text())
         asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
-        self.setFileName(fileName)
+        self.setFileName(file_name)
         return True
     
     def doQuit(self):
@@ -480,12 +550,17 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def reinicializar(self):
         self.mens.append(self.tr("Restaurando contenidos de registros y memoria"))
         
+
     def closeEvent(self, event):
-        "Called when the main window has been closed. Saves state and performs clean up actions."
+        "Called when the main window is closed. Saves state and performs clean up actions."
+        if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
+            event.ignore()
+            return
+        # Save current geometry and window state
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
         # Send EXIT command to ARMSim
-        if self.simulator.connected:
+        if self.simulator and self.simulator.connected:
             self.simulator.sendExit()
             self.simulator.disconnect()
         # Close windows
@@ -616,7 +691,6 @@ def main():
     # Create the main window and show it
     main_window = QtARMSimMainWindow()
     main_window.show()
-    main_window.connectToARMSim()
     # Enter the mainloop of the application
     sys.exit(app.exec_())
     

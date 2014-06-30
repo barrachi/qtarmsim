@@ -45,6 +45,7 @@ class ARMSimConnector():
         self.server = server
         self.port = port
         self.connected = False
+        self.code_is_assembled = False
         self.current_port = None
         self.version = None
         # Regular expressions
