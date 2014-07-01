@@ -30,12 +30,10 @@ class MyQTreeView(QtGui.QTreeView):
         width=0
         my_vertical_scrollbar = self.verticalScrollBar()
         my_dock = self.parent().parent()
-        print(my_dock)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
         for i in range(2):
             width += self.columnWidth(i)
-            print("i: ", i, "width:", self.columnWidth(i))
         # If the vertical scrollbar is visible, add its width
         if my_vertical_scrollbar.isVisible():
             width += my_vertical_scrollbar.width()
