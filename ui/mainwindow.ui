@@ -109,14 +109,18 @@
     <property name="title">
      <string>&amp;Run</string>
     </property>
+    <addaction name="actionResume"/>
+    <addaction name="actionStepInto"/>
+    <addaction name="actionStepOver"/>
+    <addaction name="actionRestart"/>
+    <addaction name="separator"/>
+    <addaction name="actionRun"/>
+    <addaction name="separator"/>
+    <addaction name="actionBreakpoints"/>
+    <addaction name="separator"/>
     <addaction name="actionReset_Registers"/>
     <addaction name="actionReset_Memory"/>
     <addaction name="actionClear_Console"/>
-    <addaction name="separator"/>
-    <addaction name="actionRun"/>
-    <addaction name="actionStep"/>
-    <addaction name="separator"/>
-    <addaction name="actionBreakpoints"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -188,7 +192,10 @@
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
    <addaction name="actionRun"/>
-   <addaction name="actionStep"/>
+   <addaction name="separator"/>
+   <addaction name="actionResume"/>
+   <addaction name="actionStepInto"/>
+   <addaction name="actionStepOver"/>
    <addaction name="separator"/>
    <addaction name="actionWhats_This"/>
   </widget>
@@ -489,7 +496,7 @@
   </action>
   <action name="actionRun">
    <property name="icon">
-    <iconset theme="media-playback-start">
+    <iconset theme="system-run">
      <normaloff/>
     </iconset>
    </property>
@@ -500,17 +507,20 @@
     <string>Ctrl+F11</string>
    </property>
   </action>
-  <action name="actionStep">
+  <action name="actionStepInto">
    <property name="icon">
-    <iconset theme="media-playback-pause">
+    <iconset theme="debug-step-into">
      <normaloff/>
     </iconset>
    </property>
    <property name="text">
-    <string>&amp;Step</string>
+    <string>Step &amp;Into</string>
+   </property>
+   <property name="toolTip">
+    <string>Step Into</string>
    </property>
    <property name="shortcut">
-    <string>F11</string>
+    <string>F5</string>
    </property>
   </action>
   <action name="actionBreakpoints">
@@ -570,7 +580,7 @@
     <string>Restore Default &amp;Layout</string>
    </property>
    <property name="shortcut">
-    <string>F5</string>
+    <string>F3</string>
    </property>
   </action>
   <action name="actionConfigure_Qt_ArmSim">
@@ -665,6 +675,50 @@
    </property>
    <property name="text">
     <string>Show M&amp;essages</string>
+   </property>
+  </action>
+  <action name="actionStepOver">
+   <property name="icon">
+    <iconset theme="debug-step-over">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Step &amp;Over</string>
+   </property>
+   <property name="toolTip">
+    <string>Step Over</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="actionRestart">
+   <property name="icon">
+    <iconset theme="view-refresh"/>
+   </property>
+   <property name="text">
+    <string>Re&amp;start</string>
+   </property>
+   <property name="toolTip">
+    <string>Restart Simulation</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="actionResume">
+   <property name="icon">
+    <iconset theme="debug-run"/>
+   </property>
+   <property name="text">
+    <string>Resu&amp;me</string>
+   </property>
+   <property name="toolTip">
+    <string>Resume Execution</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
    </property>
   </action>
  </widget>

@@ -33,14 +33,14 @@ class ExecuteResponse():
         self.assembly_line = ""
         self.registers = []
         self.memory = []
-        self.errmsg = []
+        self.errmsg = ""
 
 ## Assemble response container
 class AssembleResponse():
     
     def __init__(self):
         self.result = ""
-        self.errmsg = []
+        self.errmsg = ""
 
 
 class ARMSimConnector():
@@ -62,7 +62,6 @@ class ARMSimConnector():
         Sets properties related to the connected status:
           * self.connected
           * self.current_port
-          * self.code_is_assembled
         """
         if connected:
             self.connected = True
@@ -70,11 +69,9 @@ class ARMSimConnector():
         else:
             self.connected = False
             self.current_port = None
-        # If setConnected is called, it forces code_is_assembled to be set to False
-        self.code_is_assembled = False
             
         
-    def connect(self, command, server, port, minimum_port, maximum_port, gcc_command, gcc_options):
+    def connect(self, command, server, port, minimum_port, maximum_port):
         """
         Connects with ARMSim.
         
@@ -86,8 +83,8 @@ class ARMSimConnector():
                 return "Could not connect to ARMSim server at {}:{}".format(server, port)
             # 1.1) If server == localhost, launch ARMSim on any possible port
             connected = False
-            for current_port in [port, ] + list(range(minimum_port, maximum_port+1)):
-                print("*************** port: ", current_port)
+            rest_of_ports = [x for x in range(minimum_port, maximum_port+1) if x != port]
+            for current_port in [port, ] + rest_of_ports:
                 self.armsim_process = subprocess.Popen(["ruby", command, str(current_port)],
                                                    cwd = os.path.dirname(command)
                                                    )
@@ -107,10 +104,6 @@ class ARMSimConnector():
                     self.armsim_process.kill()
             if not connected:
                 return "Could not bind ARMSim to any port between {} and {}".format(minimum_port, maximum_port)
-            # 1.2) Try to set configuration options for localhost execution
-            errmsg = self.setConfigOptions(gcc_command, gcc_options)
-            if errmsg:
-                return errmsg
         # 2) Mark as connected and return no error message
         self.setConnected(True, port)
         return None
@@ -122,23 +115,25 @@ class ARMSimConnector():
         
         @return: True if successfully connected, False otherwise.
         """
-        print("doConnect: ", server, ":", port)
         try:
             self.mysocket.connect_to(port, server=server)
-            self.mysocket.sock.settimeout(0.2) # Set timeout to .2 seconds
-        except ConnectionRefusedError as e:
-            print("ConnectionRefusedError: ({}) {}".format(e.errno, e.strerror))
+            self.mysocket.sock.settimeout(0.2)  # Set timeout to .2 seconds
+        except ConnectionRefusedError as e:     # @UnusedVariable
+            # print("ConnectionRefusedError: ({}) {}".format(e.errno, e.strerror))
             return False
-        except OSError as e:
-            print("OSError: ({}) {}".format(e.errno, e.strerror))
+        except OSError as e:                    # @UnusedVariable
+            # print("OSError: ({}) {}".format(e.errno, e.strerror))
             return False
         try:
             self.getVersion()
-        except socket.timeout as e:
-            print("Timeout: ({}) {}".format(e.errno, e.strerror))
+        except socket.timeout as e:             # @UnusedVariable
+            # print("Timeout: ({}) {}".format(e.errno, e.strerror))
+            return False
+        except InterruptedError as e:           # @UnusedVariable
+            # print("InterruptedError: ({}) {}".format(e.errno, e.strerror))
             return False
         # Set timeout to something bigger
-        self.mysocket.sock.settimeout(2.0)
+        self.mysocket.sock.settimeout(4.0)
         return True
     
     def disconnect(self):
@@ -161,21 +156,22 @@ class ARMSimConnector():
         return self.version
     
     #@todo: add this to the grammar document
-    def setConfigOptions(self, gcc_command, gcc_options):
+    def setSettings(self, setting_name, setting_value):
         """
         Sets configuration options.
         
         @return: Error message (or None)
         """
-        self.mysocket.send_line("CONFIG COMPILER {}".format(gcc_command))
+        translated_setting_name = {"ARMGccCommand": "COMPILER",
+                                   "ARMGccOptions": "ARGS",
+                                   "PATH": "PATH",
+                                   }[setting_name]
+        self.mysocket.send_line("CONFIG {} {}".format(translated_setting_name, setting_value))
         line = self.mysocket.receive_line()
         if line != 'OK':
-            return "Error when trying to configure the compiler command"
-        self.mysocket.send_line("CONFIG ARGS {}".format(gcc_options))
-        line = self.mysocket.receive_line()
-        if line != 'OK':
-            return "Error when trying to configure the compiler options"
+            return "Error when trying to configure the '{}' setting on ARMSim".format(setting_name)
         return None
+
         
     def _parseRegister(self, line):
         """
@@ -263,18 +259,20 @@ class ARMSimConnector():
         return self.mysocket.receive_lines_till_eof()
 
 
-    def getExecuteStep(self):
+    def _getExecuteStep(self, ARMSim_command):
         """
         Gets the execute step response.
         
         @return: An ExecuteResponse object.
         """
-        self.mysocket.send_line("EXECUTE STEP")
+        self.mysocket.send_line("EXECUTE {}".format(ARMSim_command))
         lines = self.mysocket.receive_lines_till_eof()
+        print(lines)
         response = ExecuteResponse()
         response.result = lines[0]
         response.assembly_line = lines[1]
         mode = ""
+        errmsg_list = []
         for line in lines[2:]:
             if line in ("AFFECTED REGISTERS", 
                         "AFFECTED MEMORY",
@@ -286,9 +284,19 @@ class ARMSimConnector():
             elif mode == "AFFECTED MEMORY":
                 response.memory.append(self._parseMemory(line))
             elif mode == "ERROR MESSAGE":
-                response.errmsg.append(line)
+                errmsg_list.append(line)
+        response.errmsg = "\n".join(errmsg_list)
         return response
 
+    def getExecuteStepInto(self):
+        return self._getExecuteStep("STEP")
+
+    def getExecuteStepOver(self):
+        return self._getExecuteStep("SUBROUTINE")
+    
+    def getExecuteAll(self):
+        return self._getExecuteStep("ALL")
+        
     def sendExit(self):
         """
         Sends exit command.
@@ -298,18 +306,6 @@ class ARMSimConnector():
         time.sleep(0.5)
 
 
-    #@todo: add this to the grammar document
-    def _setConfigPath(self, path):
-        """
-        Sets the current directory path.
-        
-        @return: Error message (or None)
-        """
-        self.mysocket.send_line("CONFIG PATH {}".format(path))
-        line = self.mysocket.receive_line()
-        if line != 'OK':
-            return "Error when trying to configure the working directory path"
-        return None
 
 #===============================================================================
 # ASSEMBLE fich[.s] (vamos, que la extensión es ignorada)
@@ -326,8 +322,9 @@ class ARMSimConnector():
 
     #@todo: add this to the grammar document
     def doAssemble(self, path):
+        self.has_assembled_code = False
         response = AssembleResponse()
-        errmsg = self._setConfigPath(os.path.dirname(os.path.abspath(path)))
+        errmsg = self.setSettings("PATH", os.path.dirname(os.path.abspath(path)) + '/')
         if errmsg:
             response.result = "ERROR"
             response.errmsg.append(errmsg)
@@ -335,6 +332,7 @@ class ARMSimConnector():
         self.mysocket.send_line("ASSEMBLE {}".format(os.path.basename(path)))
         line = self.mysocket.receive_line()
         response.result = line
-        if response == "ERROR":
-            response.errmsg = self.mysocket.receive_lines_till_eof()
+        if response.result == "ERROR":
+            errmsg_list = self.mysocket.receive_lines_till_eof()
+            response.errmsg = "\n".join(errmsg_list)
         return response

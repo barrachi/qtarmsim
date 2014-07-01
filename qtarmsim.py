@@ -128,6 +128,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.readSettings()
         # Set self.simulator to None
         self.simulator = None
+        # Set current source code has been assembled to False
+        self.source_code_assembled = False
 
 
     def show(self, *args, **kwargs):
@@ -223,12 +225,20 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         
     def checkAssembledActions(self):
         "Enables/disables actions that depend on an assembled code"
-        enabled = True if (self.simulator and self.simulator.code_is_assembled) else False
+        enabled = True if self.source_code_assembled else False
+        #--
+        self.ui.actionResume.setEnabled(enabled)
+        self.ui.actionStepInto.setEnabled(enabled)
+        self.ui.actionStepOver.setEnabled(enabled)
+        self.ui.actionRestart.setEnabled(enabled)
+        #--
         self.ui.actionRun.setEnabled(enabled)
-        self.ui.actionStep.setEnabled(enabled)
-        self.ui.actionReset_Memory.setEnabled(enabled)
-        self.ui.actionReset_Registers.setEnabled(enabled)
+        #--
         self.ui.actionBreakpoints.setEnabled(enabled)
+        #--
+        self.ui.actionReset_Registers.setEnabled(enabled)
+        self.ui.actionReset_Memory.setEnabled(enabled)
+        #--
         self.ui.treeViewRegisters.setEnabled(enabled)
         self.ui.treeViewMemory.setEnabled(enabled)
         self.ui.actionAbout_ARMSim.setEnabled(enabled)
@@ -273,7 +283,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def onTabChange(self, tabIndex):
-        if tabIndex == 1:
+        if tabIndex == 1: # doAssemble()
+            if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
+                self.ui.tabWidgetCode.setCurrentIndex(0)
+                return
+            if self.simulator and self.source_code_assembled and not self.isSourceCodeModified():
+                return
             # Check if there is something to assemble
             text = self.ui.textEditSource.text().replace(" ", "").replace("\n", "")
             if len(text) < 10:
@@ -289,10 +304,35 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 if not self.connectToARMSim():
                     self.ui.tabWidgetCode.setCurrentIndex(0)
                     return
+            # Send settings to ARMSim
+            self.sendSettingsToARMSim()
             # Assemble file_name
-            self.simulator.doAssemble(self.file_name)  
-        
+            self.doAssemble()
+    
+    def doAssemble(self):
+        # Assemble file_name
+        response = self.simulator.doAssemble(self.file_name)
+        if response.result == "SUCCESS":
+            # Set current source code has already been assembled as True
+            self.source_code_assembled = True
+            self.ui.textEditMessages.append(self.tr("<b>{} assembled.</b>\n").format(self.file_name))
+            # Update registers and memory
+            self.updateRegisters()
+            self.updateMemory()
+        else:
+            self.ui.textEditMessages.append(self.tr("<b>Assembly errors:</b>"))
+            self.ui.textEditMessages.append(response.errmsg)
+            self.ui.textEditMessages.append("")
+            msg = self.tr("An error has occurred when assembling the source code.\n"\
+                          "Please, see the Messages panel for more details.")
+            QtGui.QMessageBox.warning(self, self.tr("Assembly Error"), msg)
+            self.ui.tabWidgetCode.setCurrentIndex(0)
+        self.checkAssembledActions()
+
+
     def sourceCodeChanged(self, changed):
+        if changed:
+            self.source_code_assembled = False
         self.checkFileActions()
 
 
@@ -319,6 +359,19 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.checkFileActions()
         
     
+    def doNew(self):
+        "Creates a new untitled.s file"
+        if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
+            return
+        # 1) Change to tab 0
+        self.ui.tabWidgetCode.setCurrentIndex(0)
+        # 2) Set file name to untitled.s
+        self.setFileName("untitled.s")
+        # 3) Clear textEditSource
+        #self.ui.textEditSource.setText("")
+        self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_CLEARALL)
+        
+        
     def doOpen(self):
         "Opens an ARM assembler file"
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
@@ -327,12 +380,21 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                                                      QtCore.QDir.currentPath(),
                                                      self.tr("ARM assembler files (*.s) (*.s)"))
         if file_name:
+            self.readFile(file_name)
+        # Change to tab 0
+        self.ui.tabWidgetCode.setCurrentIndex(0)
+
+            
+    def readFile(self, file_name):
+        "Reads a file. Can be called using an argument from the command line"
+        if file_name:
             self.ui.textEditSource.setText(open(file_name).read())
             self.setFileName(file_name)
-            
-         
+        
     def doSave(self):
         "Saves the current ARM assembler file"
+        # Set current source code has been assembled to False
+        self.source_code_assembled = False
         if self.file_name == 'untitled.s':
             return self.doSave_As()
         else:
@@ -373,23 +435,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     # Run menu actions
     #################################################################################
 
-    def doStep(self):
-        if not self.simulator.connected:
-            return
-        self.registersModel.stepHistory()
-        self.memoryModel.stepHistory()
-        response = self.simulator.getExecuteStep()
-        self.ui.textEditMessages.append(response.assembly_line)
-        for (reg_number, reg_value) in response.registers:
-            self.registersModel.setRegister(reg_number, reg_value)
-        for (hex_address, hex_byte) in response.memory:
-            self.memoryModel.setByte(hex_address, hex_byte)
-        if response.errmsg:
-            self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
-            self.ui.textEditMessages.append("\n".join(response.errmsg))
-        self.highlight_pc_line()
-        
-        
     def highlight_pc_line(self):
         PC = self.registersModel.getRegister(15)
         if self.ui.textEditARMSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
@@ -397,36 +442,44 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.ui.textEditARMSim.setFocus()
             self.ui.textEditARMSim.setCursorPosition(line, 0)
             self.ui.textEditARMSim.ensureLineVisible(line)
-            
-#===============================================================================
-# 
-#         virtual void ensureLineVisible (int line)
-#         
-#         virtual void QsciScintilla::setCursorPosition    (    int     line,
-# int     index 
-# )         [virtual, slot]
-#===============================================================================
 
+    def _doStep(self, simulator_step_callback):
+        if not self.simulator.connected:
+            return
+        self.registersModel.stepHistory()
+        self.memoryModel.stepHistory()
+        response = simulator_step_callback()
+        self.ui.textEditMessages.append(response.assembly_line)
+        for (reg_number, reg_value) in response.registers:
+            self.registersModel.setRegister(reg_number, reg_value)
+        for (hex_address, hex_byte) in response.memory:
+            self.memoryModel.setByte(hex_address, hex_byte)
+        if response.errmsg:
+            self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
+            self.ui.textEditMessages.append(response.errmsg)
+        self.highlight_pc_line()
+        
+    def doStepInto(self):
+        self._doStep(self.simulator.getExecuteStepInto)
+        
+    def doStepOver(self):
+        self._doStep(self.simulator.getExecuteStepOver)
 
-#===============================================================================
-# SUCCESS
-# [0x00001000] 0xB580 push {r7, lr}
-# AFFECTED REGISTERS
-# r13: 0x20070778
-# r15: 0x00001002
-# AFFECTED MEMORY
-# 0x20070778: 0x00
-# 0x20070779: 0x00
-# 0x2007077A: 0x00
-# 0x2007077B: 0x00
-# 0x2007077C: 0x00
-# 0x2007077D: 0x00
-# 0x2007077E: 0x00
-# 0x2007077F: 0x00
-# EOF
-#===============================================================================
+    def doRestart(self):
+        self.doAssemble()
 
-
+    def doRun(self):
+        response = self.simulator.getExecuteAll()
+        self.ui.textEditMessages.append(response.assembly_line)
+        for (reg_number, reg_value) in response.registers:
+            self.registersModel.setRegister(reg_number, reg_value)
+        for (hex_address, hex_byte) in response.memory:
+            self.memoryModel.setByte(hex_address, hex_byte)
+        if response.errmsg:
+            self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
+            self.ui.textEditMessages.append(response.errmsg)
+        self.highlight_pc_line()
+                
     #################################################################################
     # Window menu actions
     #################################################################################
@@ -469,8 +522,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         settings = SettingsDialog(self)
         if settings.exec_():
             if self.simulator and self.simulator.connected:
-                self.simulator.sendExit()
-                self.connectToARMSim() 
+                self.sendSettingsToARMSim()
             
     ## Acción asociada a actionOpciones2
     #
@@ -682,9 +734,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                                         self.settings.value("ARMSimServer"),
                                         int(self.settings.value("ARMSimPort")),
                                         int(self.settings.value("ARMSimPortMinimum")),
-                                        int(self.settings.value("ARMSimPortMaximum")),
-                                        self.settings.value("ARMGccCommand"),
-                                        self.settings.value("ARMGccOptions"))
+                                        int(self.settings.value("ARMSimPortMaximum")))
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "\n{}\n".format(errmsg))
             return False
@@ -692,11 +742,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
         self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(self.simulator.current_port), 2000)
-        # Update registers and memory
-        self.updateRegisters()
-        self.updateMemory()
         return True
-            
+
+    def sendSettingsToARMSim(self):
+        for setting in [("ARMGccCommand", self.settings.value("ARMGccCommand")), ("ARMGccOptions", self.settings.value("ARMGccOptions"))]:
+            errmsg = self.simulator.setSettings(setting[0], setting[1])
+            if errmsg:
+                QtGui.QMessageBox.warning(self, self.tr("ARMSim set setting failed"), "\n{}\n".format(errmsg))
+                return False
+                                        
 def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -705,6 +759,9 @@ def main():
     # Create the main window and show it
     main_window = QtARMSimMainWindow()
     main_window.show()
+    # If there is an assembly file on the command line, open it
+    if sys.argv[1:] and sys.argv[1][-2:]==".s":
+        main_window.readFile(sys.argv[1])
     # Enter the mainloop of the application
     sys.exit(app.exec_())
     
