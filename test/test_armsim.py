@@ -19,11 +19,13 @@
 
 
 import getopt
-import socket
 import sys
 import unittest
 
-from mysocket import MySocket
+sys.path.append('..')
+from src.mysocket import MySocket
+
+
 
 
 PORT = 8010
@@ -197,9 +199,11 @@ class CommunicationTestCase(unittest.TestCase):
         self.mysocket.send_line("SET MEMORY BYTE AT 0x20070023 WITH 0x40")
         self.assertEqual(self.mysocket.receive_line(), OK)
         self.mysocket.send_line("SHOW MEMORY HALF AT 0x20070020")
-        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x1020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x2010")
         self.mysocket.send_line("SHOW MEMORY WORD AT 0x20070020")
-        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x10203040")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x40302010")
+        self.mysocket.send_line("SHOW MEMORY WORD AT 0x20070020")
+        self.assertEqual(self.mysocket.receive_line(), "0x20070020: 0x40302010")
 
     def test_reset_memory(self):
         "RESET MEMORY should reset all the memory to its initial value."
@@ -223,7 +227,8 @@ class CommunicationTestCase(unittest.TestCase):
         for pos in range(537329664, 537329664+20): # From 0x20070000
             hex_pos = "0x{0:0{1}X}".format(pos, 8)
             self.assertEqual(self.mysocket.receive_line(), "{}: 0x00".format(hex_pos))
-        self.assertRaises(socket.timeout, self.mysocket.receive_line)
+        self.assertEqual(self.mysocket.receive_line(), "EOF")
+        #self.assertRaises(socket.timeout, self.mysocket.receive_line)
 
     #===========================================================================
     # Breakpoint tests         
@@ -304,12 +309,12 @@ def suite():
         suite.addTest(CommunicationTestCase('test_show_register_r0'))
         suite.addTest(CommunicationTestCase('test_set_register_r1'))
         
-        #suite.addTest(CommunicationTestCase('test_reset_registers'))
-        #suite.addTest(CommunicationTestCase('test_show_memory_byte'))
-        #suite.addTest(CommunicationTestCase('test_show_memory_half'))
-        #suite.addTest(CommunicationTestCase('test_show_memory_word'))
-        #suite.addTest(CommunicationTestCase('test_endianess'))
-        #suite.addTest(CommunicationTestCase('test_reset_memory'))
+        suite.addTest(CommunicationTestCase('test_reset_registers'))
+        suite.addTest(CommunicationTestCase('test_show_memory_byte'))
+        suite.addTest(CommunicationTestCase('test_show_memory_half'))
+        suite.addTest(CommunicationTestCase('test_show_memory_word'))
+        suite.addTest(CommunicationTestCase('test_endianess'))
+        suite.addTest(CommunicationTestCase('test_reset_memory'))
 
         suite.addTest(CommunicationTestCase('test_dump_registers'))
         suite.addTest(CommunicationTestCase('test_set_memory_byte'))
