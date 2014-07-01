@@ -334,7 +334,7 @@ class MainWindow < Frame
 end
 
 def read_ELF
-    ELF_File.open('c:\complex.o', 'rb') do |file|
+    ELF_File.open('c:\add.o', 'rb') do |file|
     e_ident = file.get_array(16)
     magic = e_ident[1].chr + e_ident[2].chr + e_ident[3].chr
     puts("MAGIC: 0x%02X %s" % [e_ident[0], magic])

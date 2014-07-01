@@ -1,6 +1,3 @@
-#!/usr/bin/env ruby
-# -*- coding: utf-8 -*-
-
 require 'socket'
 require 'shell'
 require_relative 'thumbII_Defs'
@@ -598,7 +595,7 @@ class MainServer < TCPServer
       linea = base[key]
       return Errores[:orden] if linea.nil?
       if linea[0] == 1
-        return Errores[:args] unless tokens.length == linea[2].length
+        return Errores[:args] unless tokens.length == linea[2].length || linea[2][-1] == :cad
         args = linea[2]
         0.upto(args.length - 1) do |idx|
           if args[idx].kind_of?(String)
@@ -619,6 +616,12 @@ class MainServer < TCPServer
                 return Errores[:exe] unless File.executable?(tokens[idx])
               when :file_s
                 return Errores[:file_s] unless File.file?($path + tokens[idx].split('.')[0] + '.s')
+              when :cad
+                cad = tokens[idx]
+                (idx + 1).upto(tokens.length - 1) do |idx2|
+                  cad = cad + ' ' + tokens[idx2]
+                end
+                tokens[idx] = cad
             end
           end
         end
@@ -719,6 +722,7 @@ def read_ELF(name)
         cursym.idx = idx
         cursym.data = file.get_relocation_entry
         relocations << cursym
+        p cursym
       end
       file.relocations << relocations
     end
@@ -758,11 +762,15 @@ class ServerApp
     $symbol_table = blocks[2]
     @procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
     $server = MainServer.new(@procesador, puerto)
+    cucho = true
     $compiler = GCC
     $args = CL1
     $path = "C:\\Users\\German\\Desarrollos\\ArduinoDue\\"
     $exit = false
-    session = $server.accept
+    if cucho
+      session = $server.accept
+      cucho = false
+    end
     while !$exit
       request = session.gets
       if request.nil?

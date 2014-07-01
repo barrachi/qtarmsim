@@ -229,16 +229,19 @@ module ThumbII_Defs
   #-----------
   #Dado un entero y una máscara de 16 bits
   #devuelve el valor del campo de bits seleccionado,
-  #ajustado a la derecha
+  #ajustado a la derecha. Modifica los tipos con agujeros
+  #en la mascara
   # @param [Integer] entero
   # @param [Integer] mascara
+  # @param [Symbol] tipo
   # @return [Integer]
-  def ThumbII_Defs.valor_campo(entero, mascara)
+  def ThumbII_Defs.valor_campo(entero, mascara, tipo = :notipo)
     salida = entero & mascara
     while (mascara % 2) == 0 do
       salida = salida / 2
       mascara = mascara / 2
     end
+    salida = 8 + (salida & 7) if tipo == :r4d && salida > 8
     return salida
   end
 
@@ -507,7 +510,7 @@ module ThumbII_Defs
   }
 
   #Listas de funciones de generación de parámetros
-  OPTOS = {r3: nreg_to_s, r4: nreg_to_s, r4d: nregd_to_s, label8: label_to_s, label6d: labeld_to_s,
+  OPTOS = {r3: nreg_to_s, r4: nreg_to_s, r4d: nreg_to_s, label8: label_to_s, label6d: labeld_to_s,
            label8s: label8s_to_s, label11s: label11s_to_s, labeldbl: labeldbl_to_s, imm5x2: immx2_to_s, imm5x4: immx4_to_s,
            imm8x4: immx4_to_s, imm3: imm_to_s, imm7x4: immx4_to_s, imm4: imm_to_s, imm5: imm_to_s,
            imm8: imm_to_s, imm11: imm_to_s, rl8: rlist9_to_s, rl9: rlist9_to_s, cond: cond_to_s}

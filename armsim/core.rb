@@ -47,7 +47,11 @@ class Core
   # @param [Instruction] inst
   # @return [Hash]
   def execute(inst)
+    #p inst
+    #p inst.operands
     res = inst.execute(@estado)
+    #puts "Salida :"
+    #p res
     if res[:usr_regs].nil?
       res[:usr_regs] = [ThumbII_Defs::PC, @estado[:usr_regs][ThumbII_Defs::PC] + 2 * inst.size]
     else

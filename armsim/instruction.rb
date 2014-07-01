@@ -67,7 +67,8 @@ class Instruction
   # @return [Hash]
   def execute(estado)
     data = ThumbII_Defs.prep_data(@type, @operands, estado)
-    # p data
+    #puts "Data: "
+    #p data
     ThumbII_Defs.execute(@type, data)
   end
 end

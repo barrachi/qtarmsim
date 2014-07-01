@@ -77,8 +77,8 @@ class Coder
       word = (word << 16) + words[idx]
     end
     res = Array.new()
-    lista[3].each do |msc|
-      res << ThumbII_Defs.valor_campo(word, msc)
+    lista[3].each_with_index do |msc, idx|
+      res << ThumbII_Defs.valor_campo(word, msc, lista[2][idx])
     end
     return res
   end
