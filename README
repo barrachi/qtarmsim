@@ -1,0 +1,8 @@
+
+Qt ARMSim
+=========
+
+Qt ARMSim is a graphical frontend to the ARMSim ARM simulator.
+
+It should run on any platform supported by PyQt4, including GNU/Linux,
+MacOS/X and Windows.
