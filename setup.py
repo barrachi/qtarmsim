@@ -10,15 +10,15 @@ with open('qtarmsim/version.py') as fp:
     exec(fp.read(), version)
 __version__ = version['__version__']
 
-# Get the long description from the README file
-with open(path.join(here, 'README'), encoding='utf-8') as f:
-    long_description = f.read()
+# Get the long description from the a file
+#with open(path.join(here, 'DESCRIPTION'), encoding='utf-8') as f:
+#    long_description = f.read()
 
 setup(
     name = 'qtarmsim',
     version = __version__,
     description = 'Qt graphical frontend to ARMSim',
-    long_description = long_description,
+    #long_description = long_description,
 
     # The project's main homepage.
     url = 'http://lorca.act.uji.es/projects/qtarmsim/',
@@ -55,7 +55,7 @@ setup(
     ],
 
     # What does the project relate to?
-    keywords='ARM simulator Qt assembler disassembler debugger',
+    keywords=['ARM', 'simulator', 'assembler', 'disassembler', 'debugger'],
 
     # Packages of the project
     packages = find_packages(exclude=['docs', 'tmp']),

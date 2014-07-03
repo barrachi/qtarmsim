@@ -20,3 +20,6 @@ Installation & Packaging
 ------------------------
 
   * [Installation & Packaging Tutorial](https://packaging.python.org/en/latest/tutorial.html)
+
+  * [How to submit a package to PyPI](http://peterdowns.com/posts/first-time-with-pypi.html)
+
