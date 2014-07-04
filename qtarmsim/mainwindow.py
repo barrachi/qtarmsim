@@ -723,7 +723,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                     self.tr("ARM gcc command not found.\n\n"
                             "Please go to 'Configure QtARMSim' and set its path.\n"))
             return False
-        self.simulator = ARMSimConnector()
+        self.simulator = ARMSimConnector(self.ui.textEditMessages)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         errmsg = self.simulator.connect(self.settings.value("ARMSimCommand"),
                                         self.settings.value("ARMSimServer"),
