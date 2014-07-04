@@ -50,13 +50,13 @@ class ARMSimConnector():
     re_membanksexpr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
     re_memexpr = re.compile("(0[xX][0-9a-fA-F]+): (0[xX][0-9a-fA-F]+)")
 
-    def __init__(self, messages = None):
+    def __init__(self):
         # Set properties default values
         self.mysocket = MySocket()
         self.armsim_process = None
         self.setConnected(False, None)
         self.version = None
-        self.messages = messages if messages else []
+        self.messages = []
         
     def setConnected(self, connected, port):
         """
@@ -76,9 +76,10 @@ class ARMSimConnector():
         """
         Connects with ARMSim.
         
-        @return: errmsg     An error msg if an error occurred, None otherwise   
+        @return: errmsg    An error msg with every connection error (\n as separator), None otherwise   
         """
         # 1) Try to connect to the given server and port
+        self.messages.append("\nTrying to connect to port {} (first attempt)...".format(port))
         if self.doConnect(server, port):
             # Mark as connected and return no error message
             self.setConnected(True, port)
@@ -89,8 +90,9 @@ class ARMSimConnector():
             # 1.1) If server == localhost, launch ARMSim on any possible port
             connected = False
             #rest_of_ports = [x for x in range(minimum_port, maximum_port+1) if x != port]
-            rest_of_ports = list(range(port+1, port+2))
+            rest_of_ports = list(range(port+1, port+10))
             for current_port in [port, ] + rest_of_ports:
+                self.messages.append("\nTrying to connect to port {}...".format(current_port))
                 cmd = ["ruby", os.path.basename(command), str(current_port) ]
                 try:
                     self.armsim_process = subprocess.Popen(cmd,
@@ -123,8 +125,8 @@ class ARMSimConnector():
                     # Kill current ARMSim process (if it is still alive)
                     if self.armsim_process.poll() == None:
                         self.armsim_process.kill()
-                    # Check previously gotten stderr, only return if it is a ruby error
-                    if stderr and stderr.decode().count("ruby:"):
+                    # Check previously gotten stderr, only return now if it is a ruby error
+                    if stderr and stderr.decode().count("ruby"):
                         return  "Could not launch the next command:\n" \
                                 "    '{}'\n\n" \
                                 "on the directory:\n" \
@@ -132,8 +134,11 @@ class ARMSimConnector():
                                 "The error was:\n" \
                                 "    {}".format(" ".join(cmd), os.path.dirname(command), stderr.decode())
             if not connected:
-                return "Could not bind ARMSim to any port between {} and {}".format(port, rest_of_ports[-1])
-    
+                return "Could not bind ARMSim to any port between {} and {}.\n" \
+                        "\n" \
+                        "The next errors occurred while trying to establish a connection:\n" \
+                        "   {}".format(port, rest_of_ports[-1], "\n   ".join(self.messages))
+
 
     def doConnect(self, server, port):
         """
@@ -144,21 +149,21 @@ class ARMSimConnector():
         try:
             self.mysocket.connect_to(port, server=server)
             self.mysocket.sock.settimeout(0.2)  # Set timeout to .2 seconds
-        except ConnectionRefusedError as e:     # @UnusedVariable
+        except ConnectionRefusedError as e:
             self.messages.append("ConnectionRefusedError: ({}) {}".format(e.errno, e.strerror))
             self.mysocket.close_socket()
             return False
-        except OSError as e:                    # @UnusedVariable
+        except OSError as e:
             self.messages.append("OSError: ({}) {}".format(e.errno, e.strerror))
             self.mysocket.close_socket()
             return False
         try:
             self.getVersion()
-        except socket.timeout as e:             # @UnusedVariable
-            self.messages.append("Timeout: ({}) {}".format(e.errno, e.strerror))
+        except socket.timeout as e:
+            self.messages.append("Timeout occurred")
             self.mysocket.close_socket()
             return False
-        except InterruptedError as e:           # @UnusedVariable
+        except InterruptedError as e:
             self.messages.append("InterruptedError: ({}) {}".format(e.errno, e.strerror))
             self.mysocket.close_socket()
             return False

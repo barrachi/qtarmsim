@@ -53,6 +53,7 @@ from .window.mu import Multipasos
 from .window.op import Opciones
 from .window.settingsdialog import SettingsDialog
 from .window.va import Valor
+from .window.connectprogressbardialog import ConnectProgressBarDialog
 
 
 def _fromUtf8(s):
@@ -723,15 +724,28 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                     self.tr("ARM gcc command not found.\n\n"
                             "Please go to 'Configure QtARMSim' and set its path.\n"))
             return False
-        self.simulator = ARMSimConnector(self.ui.textEditMessages)
+        self.simulator = ARMSimConnector()
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
-        errmsg = self.simulator.connect(self.settings.value("ARMSimCommand"),
-                                        self.settings.value("ARMSimServer"),
-                                        int(self.settings.value("ARMSimPort")),
-                                        int(self.settings.value("ARMSimPortMinimum")),
-                                        int(self.settings.value("ARMSimPortMaximum")))
+        connectProgressBarDialog = ConnectProgressBarDialog(self.simulator,
+                                                            self.settings.value("ARMSimCommand"),
+                                                            self.settings.value("ARMSimServer"),
+                                                            int(self.settings.value("ARMSimPort")),
+                                                            int(self.settings.value("ARMSimPortMinimum")),
+                                                            int(self.settings.value("ARMSimPortMaximum")),
+                                                            self
+                                                            )
+        if not connectProgressBarDialog.exec_():
+            return False
+        errmsg = connectProgressBarDialog.getMsg()
+        #=======================================================================
+        # errmsg = self.simulator.connect(self.settings.value("ARMSimCommand"),
+        #                                 self.settings.value("ARMSimServer"),
+        #                                 int(self.settings.value("ARMSimPort")),
+        #                                 int(self.settings.value("ARMSimPortMinimum")),
+        #                                 int(self.settings.value("ARMSimPortMaximum")))
+        #=======================================================================
         if errmsg:
-            QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "\n{}\n".format(errmsg))
+            QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed\n\n"), "{}".format(errmsg))
             return False
         self.ui.textEditMessages.append("<b>Connected to ARMSim. ARMSim version info follows.</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
