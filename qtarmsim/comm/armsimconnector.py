@@ -91,15 +91,20 @@ class ARMSimConnector():
                 return "Could not connect to ARMSim server at {}:{}".format(server, port)
             # If server == localhost, launch ARMSim on any possible port
             connected = False
-            rest_of_ports = list(range(port+1, port+20))
+            rest_of_ports = list(range(port+1, port+10))
             for current_port in [port, ] + rest_of_ports:
                 self.messages.append("\nTrying to connect to port {}...".format(current_port))
                 cmd = shlex.split(command) + [str(port), ]
                 try:
-                    self.armsim_process = subprocess.Popen(cmd,
-                                                           cwd = working_directory,
-                                                           stderr = subprocess.PIPE
-                                                           )
+                    if sys.platform == "win32":
+                        self.armsim_process = subprocess.Popen(cmd,
+                                                               cwd = working_directory
+                                                               )
+                    else:
+                        self.armsim_process = subprocess.Popen(cmd,
+                                                               cwd = working_directory,
+                                                               stderr = subprocess.PIPE
+                                                               )                        
                 except Exception as e:
                     return  "Could not launch the next command:\n" \
                             "    '{}'\n\n" \
@@ -119,10 +124,11 @@ class ARMSimConnector():
                 else:
                     # Get stderr
                     stderr = ""
-                    try:
-                        (stdout, stderr) = self.armsim_process.communicate(timeout = 1)  # @UnusedVariable stdout
-                    except:
-                        pass
+                    if sys.platform != "win32":
+                        try:
+                            (stdout, stderr) = self.armsim_process.communicate(timeout = 1)  # @UnusedVariable stdout
+                        except:
+                            pass
                     # Kill current ARMSim process (if it is still alive)
                     if self.armsim_process.poll() == None:
                         self.armsim_process.kill()
