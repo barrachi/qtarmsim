@@ -23,6 +23,7 @@ import time
 
 from .mysocket import MySocket
 import socket
+import shlex
 
 
 ## Execute response container
@@ -72,31 +73,30 @@ class ARMSimConnector():
             self.current_port = None
             
         
-    def connect(self, command, server, port, minimum_port, maximum_port):
+    def connect(self, command, working_directory, server, port):
         """
         Connects with ARMSim.
         
         @return: errmsg    An error msg with every connection error (\n as separator), None otherwise   
         """
-        # 1) Try to connect to the given server and port
+        # Try to connect to the given server and port
         self.messages.append("\nTrying to connect to port {} (first attempt)...".format(port))
         if self.doConnect(server, port):
             # Mark as connected and return no error message
             self.setConnected(True, port)
             return None
         else:
-            if server != "localhost":
+            if server != "localhost" and server != "127.0.0.1":
                 return "Could not connect to ARMSim server at {}:{}".format(server, port)
-            # 1.1) If server == localhost, launch ARMSim on any possible port
+            # If server == localhost, launch ARMSim on any possible port
             connected = False
-            #rest_of_ports = [x for x in range(minimum_port, maximum_port+1) if x != port]
-            rest_of_ports = list(range(port+1, port+10))
+            rest_of_ports = list(range(port+1, port+20))
             for current_port in [port, ] + rest_of_ports:
                 self.messages.append("\nTrying to connect to port {}...".format(current_port))
-                cmd = ["ruby", os.path.basename(command), str(current_port) ]
+                cmd = shlex.split(command) + [str(port), ]
                 try:
                     self.armsim_process = subprocess.Popen(cmd,
-                                                           cwd = os.path.dirname(command),
+                                                           cwd = working_directory,
                                                            stderr = subprocess.PIPE
                                                            )
                 except Exception as e:
@@ -105,7 +105,7 @@ class ARMSimConnector():
                             "on the directory:\n" \
                             "    '{}'\n\n" \
                             "Error was:\n" \
-                            "    [Errno {}] {}".format(" ".join(cmd), os.path.dirname(command), e.errno, e.strerror)
+                            "    [Errno {}] {}".format(" ".join(cmd), working_directory, e.errno, e.strerror)
                 chances = 0
                 while self.armsim_process.poll() == None and not self.doConnect(server, current_port) and chances < 3:
                     time.sleep(.5)
@@ -132,7 +132,7 @@ class ARMSimConnector():
                                 "on the directory:\n" \
                                 "    '{}'\n\n" \
                                 "The error was:\n" \
-                                "    {}".format(" ".join(cmd), os.path.dirname(command), stderr.decode())
+                                "    {}".format(" ".join(cmd), working_directory, stderr.decode())
             if not connected:
                 return "Could not bind ARMSim to any port between {} and {}.\n" \
                         "\n" \
@@ -204,7 +204,8 @@ class ARMSimConnector():
         self.mysocket.send_line("CONFIG {} {}".format(translated_setting_name, setting_value))
         line = self.mysocket.receive_line()
         if line != 'OK':
-            return "Error when trying to configure the '{}' setting on ARMSim".format(setting_name)
+            return "Error when trying to configure the '{}' setting on ARMSim\n" \
+                    "Error message was '{}'".format(setting_name, line)
         return None
 
         

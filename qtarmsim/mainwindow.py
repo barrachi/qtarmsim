@@ -32,6 +32,7 @@
 
 
 import os
+import sys
 import shutil
 
 from PyQt4 import QtCore, QtGui
@@ -75,18 +76,22 @@ class DefaultSettings():
         else:
             # If not found, search its executable in the path
             fname = shutil.which("server.rb")
-            if not fname:
-                # If not found, use "server.rb" as default
-                fname = "server.rb"
-        self._ARMSimCommand = fname
+        if fname:
+            ruby_cmd = "ruby" if sys.platform != "win32" else "rubyw"
+            self._ARMSimCommand = "{} {}".format(ruby_cmd, os.path.basename(fname))
+            self._ARMSimDirectory = os.path.dirname(fname)
+        else:
+            self._ARMSimCommand = ""
+            self._ARMSimDirectory = ""
         self._ARMSimServer = "localhost"
         self._ARMSimPort = 8010
-        self._ARMSimPortMinimum = 8010
-        self._ARMSimPortMaximum = 8070
+        gcc_names = ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc"]
+        if sys.platform == "win32":
+            gcc_names = [n+".exe" for n in gcc_names]
         fname = ""
-        for name in ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc"]:
+        for name in gcc_names:
             fname = shutil.which(name)
-        fname = fname if fname else name[0]
+        fname = fname if fname else gcc_names[0]
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
         
@@ -166,16 +171,29 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.settings = QtCore.QSettings("UJI", "QtARMSim")
         self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
         self.restoreState(self.settings.value("windowState", self.initialWindowState))
+        # Begin migration of settings versions
+        conf_version = self.settings.value("ConfVersion")
+        if not conf_version:
+            # Migrate from version 1 to version 2
+            conf_version = "2"
+            self.settings.setValue("ConfVersion", conf_version)
+            # Version 1 -> ARMSimCommand only had the server.rb full path.
+            # Version 2 -> ARMSimCommand has the full command, e.g. 'rubyw server.rb',
+            #              and ARMSimDirectory has the working directory of the simulator.
+            #              ARMSimPortMinimum and ARMSimPortMaximum are no longer used.
+            ARMSimCommand = self.settings.value("ARMSimCommand")
+            ruby_cmd = self.defaultSettings.value("ARMSimCommand").split(" ")[0]
+            self.settings.setValue("ARMSimCommand", "{} {}".format(ruby_cmd, os.path.basename(ARMSimCommand)))
+            self.settings.setValue("ARMSimDirectory", os.path.dirname(ARMSimCommand))
+        # End migration of settings versions
         if not self.settings.value("ARMSimCommand"):
             self.settings.setValue("ARMSimCommand", self.defaultSettings.value("ARMSimCommand"))
+        if not self.settings.value("ARMSimDirectory"):
+            self.settings.setValue("ARMSimDirectory", self.defaultSettings.value("ARMSimDirectory"))
         if not self.settings.value("ARMSimServer"):
             self.settings.setValue("ARMSimServer", self.defaultSettings.value("ARMSimServer"))
         if not self.settings.value("ARMSimPort"):
             self.settings.setValue("ARMSimPort", self.defaultSettings.value("ARMSimPort"))
-        if not self.settings.value("ARMSimPortMinimum"):
-            self.settings.setValue("ARMSimPortMinimum", self.defaultSettings.value("ARMSimPortMinimum"))
-        if not self.settings.value("ARMSimPortMaximum"):
-            self.settings.setValue("ARMSimPortMaximum", self.defaultSettings.value("ARMSimPortMaximum"))
         if not self.settings.value("ARMGccCommand"):
             self.settings.setValue("ARMGccCommand", self.defaultSettings.value("ARMGccCommand"))
         if not self.settings.value("ARMGccOptions"):
@@ -374,7 +392,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             return
         file_name = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
                                                      QtCore.QDir.currentPath(),
-                                                     self.tr("ARM assembler files (*.s) (*.s)"))
+                                                     self.tr("ARM assembler files (*.s)"))
         if file_name:
             self.readFile(file_name)
         # Change to tab 0
@@ -402,7 +420,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         file_name = self.file_name
         if file_name == '':
             file_name = os.path.join(QtCore.QDir.currentPath(), self.tr("untitled.s"))
-        file_name = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"), file_name, self.tr("ARM assembler file (*.s) (*.s)"))
+        file_name = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"),
+                                                      file_name,
+                                                      self.tr("ARM assembler file (*.s)"))
         if file_name == '':
             return False
         else:
@@ -416,7 +436,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(self, self.tr("Error"),
                     self.tr("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
-        asm_file.write(self.ui.textEditSource.text())
+        asm_file.write(self.ui.textEditSource.text().replace('\r\n', '\n'))
         asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         self.setFileName(file_name)
@@ -714,24 +734,24 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def connectToARMSim(self):
         self.simulator = None
-        if not os.path.isfile(self.settings.value("ARMSimCommand")):
-            QtGui.QMessageBox.warning(self, self.tr("ARMSim not found"),
-                    self.tr("ARMSim command not found.\n\n"
-                            "Please go to 'Configure QtARMSim' and set its path.\n"))
+        if self.settings.value("ARMSimServer") in ('localhost', '127.0.0.1') \
+            and not self.settings.value("ARMSimCommand"):
+            QtGui.QMessageBox.warning(self, self.tr("ARMSim command empty"),
+                    self.tr("ARMSim command is empty.\n\n"
+                            "Please go to 'Configure QtARMSim' and set it.\n"))
             return False
         if not os.path.isfile(self.settings.value("ARMGccCommand")):
             QtGui.QMessageBox.warning(self, self.tr("ARM gcc not found"),
                     self.tr("ARM gcc command not found.\n\n"
-                            "Please go to 'Configure QtARMSim' and set its path.\n"))
+                            "Please go to 'Configure QtARMSim' and set it.\n"))
             return False
         self.simulator = ARMSimConnector()
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         connectProgressBarDialog = ConnectProgressBarDialog(self.simulator,
                                                             self.settings.value("ARMSimCommand"),
+                                                            self.settings.value("ARMSimDirectory"),
                                                             self.settings.value("ARMSimServer"),
                                                             int(self.settings.value("ARMSimPort")),
-                                                            int(self.settings.value("ARMSimPortMinimum")),
-                                                            int(self.settings.value("ARMSimPortMaximum")),
                                                             self
                                                             )
         if not connectProgressBarDialog.exec_():

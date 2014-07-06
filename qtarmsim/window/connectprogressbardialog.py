@@ -38,7 +38,7 @@ from PyQt4 import QtGui, QtCore
 
 class ConnectProgressBarDialog(QtGui.QDialog):
 
-    def __init__(self, simulator, ARMSimCommand, ARMSimServer, ARMSimPort, ARMSimPortMinimum, ARMSimPortMaximum, parent=None):
+    def __init__(self, simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort, parent=None):
         self.errmsg = ""
         
         super(ConnectProgressBarDialog, self).__init__(parent)
@@ -62,7 +62,7 @@ class ConnectProgressBarDialog(QtGui.QDialog):
         #self.layout.addWidget(button)      
         #button.clicked.connect(self.a)
 
-        self.myLongTask = ConnectThread(simulator, ARMSimCommand, ARMSimServer, ARMSimPort, ARMSimPortMinimum, ARMSimPortMaximum)
+        self.myLongTask = ConnectThread(simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort)
         self.myLongTask.taskFinished.connect(self.onFinished)
         self.progressBar.setRange(0,0)
         self.myLongTask.start()
@@ -79,19 +79,18 @@ class ConnectProgressBarDialog(QtGui.QDialog):
 class ConnectThread(QtCore.QThread):
     taskFinished = QtCore.pyqtSignal(str)
 
-    def __init__(self, simulator, ARMSimCommand, ARMSimServer, ARMSimPort, ARMSimPortMinimum, ARMSimPortMaximum):
+    def __init__(self, simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort):
         super(ConnectThread, self).__init__()
         self.simulator = simulator
         self.ARMSimCommand = ARMSimCommand
+        self.ARMSimDirectory = ARMSimDirectory
         self.ARMSimServer = ARMSimServer
         self.ARMSimPort = ARMSimPort
-        self.ARMSimPortMinimum = ARMSimPortMinimum
-        self.ARMSimPortMaximum = ARMSimPortMaximum
         
     def run(self):
         errmsg = self.simulator.connect(self.ARMSimCommand,
+                                        self.ARMSimDirectory,
                                         self.ARMSimServer,
-                                        self.ARMSimPort,
-                                        self.ARMSimPortMinimum,
-                                        self.ARMSimPortMaximum)
+                                        self.ARMSimPort
+                                        )
         self.taskFinished.emit(errmsg)

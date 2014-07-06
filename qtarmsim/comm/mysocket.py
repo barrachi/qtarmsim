@@ -123,7 +123,10 @@ class MySocket:
         lines = [l.strip() for l in msg.strip().replace('\r\n', '\n').split('\n') if l.strip() != ""]
         if len(lines)>1:
             self.pending_lines = lines[1:]
-        return lines[0]
+        try:
+            return lines[0]
+        except IndexError:
+            return ""
 
     def receive_lines_till_eof(self):
         """
