@@ -24,6 +24,7 @@ import time
 from .mysocket import MySocket
 import socket
 import shlex
+import sys
 
 
 ## Execute response container
@@ -126,13 +127,13 @@ class ARMSimConnector():
                     if self.armsim_process.poll() == None:
                         self.armsim_process.kill()
                     # Check previously gotten stderr, only return now if it is a ruby error
-                    if stderr and stderr.decode().count("ruby"):
+                    if stderr and stderr.decode(sys.stderr.encoding).count("ruby"):
                         return  "Could not launch the next command:\n" \
                                 "    '{}'\n\n" \
                                 "on the directory:\n" \
                                 "    '{}'\n\n" \
                                 "The error was:\n" \
-                                "    {}".format(" ".join(cmd), working_directory, stderr.decode())
+                                "    {}".format(" ".join(cmd), working_directory, stderr.decode(sys.stderr.encoding))
             if not connected:
                 return "Could not bind ARMSim to any port between {} and {}.\n" \
                         "\n" \
