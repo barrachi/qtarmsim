@@ -586,7 +586,7 @@ class MainServer < TCPServer
     @breakpoints = Array.new
     #El decodificador es cosa de la interfaz. Así podemos cambiar desde ella distintas características
     @coder = Coder.new
-    super('localhost', puerto)
+    super('0.0.0.0', puerto)
   end
 
   def process(request)
