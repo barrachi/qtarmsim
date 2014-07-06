@@ -42,7 +42,7 @@ from .version import __version__
 from .comm.armsimconnector import ARMSimConnector
 from .model.memorymodel import MemoryModel
 from .model.registersmodel import RegistersModel
-from .res import main_rc
+from .res import main_rc, oxygen_rc  # @UnusedImport
 from .ui.mainwindow import Ui_MainWindow
 from .widget.simplearmeditor import SimpleARMEditor
 from .window.br import Breakpoi

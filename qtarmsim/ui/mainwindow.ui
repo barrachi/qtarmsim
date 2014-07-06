@@ -359,8 +359,7 @@
   <action name="actionWhats_This">
    <property name="icon">
     <iconset theme="system-help">
-     <normaloff/>
-    </iconset>
+     <normaloff>:/themes/oxygen/64x64/actions/system-run.png</normaloff>:/themes/oxygen/64x64/actions/system-run.png</iconset>
    </property>
    <property name="text">
     <string>What's &amp;This?</string>
@@ -379,6 +378,7 @@
    <property name="icon">
     <iconset theme="help-about">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -498,6 +498,7 @@
    <property name="icon">
     <iconset theme="system-run">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/system-run.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -695,7 +696,9 @@
   </action>
   <action name="actionRestart">
    <property name="icon">
-    <iconset theme="view-refresh"/>
+    <iconset theme="view-refresh">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Re&amp;start</string>
@@ -709,7 +712,9 @@
   </action>
   <action name="actionResume">
    <property name="icon">
-    <iconset theme="debug-run"/>
+    <iconset theme="debug-run">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Resu&amp;me</string>

@@ -1,0 +1,26 @@
+Instructions
+============
+
+The files in this directory are used to automatically grab the icons
+required by Qt ARMSim from the oxygen iconset.
+
+For doing this, you should run the following commands in order::
+
+    $ ./get_oxygen_icons.sh
+    $ ./create_oxygen_qrc.sh
+
+
+Requirements
+============
+
+The oxygen iconset should be installed on '/usr/share/icons/oxygen'.
+
+
+Credits
+=======
+
+The next files are from the Oxygen Icons by Oxygen Team package
+(https://github.com/pasnox/oxygen-icons-png):
+
+  * create_oxygen_qrc.sh (based on create_qrc.sh)
+  * qrcgen.py (as is)

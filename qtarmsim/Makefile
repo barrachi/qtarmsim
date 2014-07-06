@@ -13,6 +13,8 @@ all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 
 %.py : %.ui
 	pyuic4 -o $@ $<
+	res/bin/add_file_icons.py $@ > $@.tmp
+	mv $@.tmp $@
 
 %_rc.py : %.qrc
 	pyrcc4 -py3 -o $@ $<
