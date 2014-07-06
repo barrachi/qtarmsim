@@ -1,0 +1,5 @@
+* When running a program, use a progress bar dialog to manage
+  timeouts and allow the user to cancel the execution.
+
+* Editable installs?
+  http://pip.readthedocs.org/en/latest/reference/pip_install.html
