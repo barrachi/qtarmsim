@@ -1,23 +1,13 @@
 <!DOCTYPE RCC><RCC version="1.0">
     <qresource prefix="" > 
-        <file>images/screenCapture.png</file> 
-        <file>images/open.png</file>
-        <file>images/whatsThis.png</file>
-        <file>images/runProject.png</file> 
-        <file>images/break.png</file>
-        <file>images/breakpointToggle.png</file>
         <file>images/logo.svg</file>
-        
     </qresource>
+    
     <qresource prefix="">
        <file>dictionary/reg.txt</file>
        <file>dictionary/data.txt</file>
        <file>dictionary/text.txt</file>
        <file>dictionary/mens.txt</file>
-       <file>dictionary/Ayuda.html</file>
-       <file>dictionary/Opciones.png</file>
-       <file>dictionary/Registros.png</file>
-       <file>dictionary/Spim.png</file>
     </qresource>
 </RCC>
 

@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+						"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="Author" content="Sergio Barrachina Mir y Rafael Mayo Gual" />
+	<meta name="Description" content="Qt ARMSim: interfaz gráfica para el simulador ARMSim" />
+	<title>Qt ARMSim: interfaz gráfica para el simulador ARMSim</title>
+</head>
+
+<body>
+	<h1>Manual de Qt ARMSim</h1>
+	
+	<blockquote style="border: solid 1pt; padding: 0pt 1em;">
+		<p>El texto de esta ayuda aún no ha sido actualizado, aún sigue siendo el texto
+			de ayuda del programa GlSpim.
+		</p>
+
+		<p>Como fase previa a su reescritura, se ha simplificado el código HTML.</p>
+	</blockquote>
+
+	<p><b>Tabla de contenidos</b></p>
+
+	<blockquote>
+		<a href="#Comandos">1. Comandos</a><br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Archivo">1.1 Menú Archivo</a><br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Simulacion">1.2 Menú Simulación</a><br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Ver">1.3 Menú Ver</a><br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Ayuda">1.4 Menú Ayuda</a><br/>
+		<a href="#Manual">2. Manual de usuario</a><br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a href="#p1intro">2.1 Introducción</a><br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a href="#p1descrip">2.2 Descripción del simulador GlSpim</a><br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;<a href="#p1sintaxis">2.3 Sintaxis del Lenguaje ensamblador del MIPS R2000</a><br/>
+	</blockquote>
+
+
+	<h2><a name="Comandos"></a>1. Comandos</h2>
+	
+	<h3><a name="Archivo">1.1 Menú archivo</a></h3>
+
+	<p>El menú archivo ofrece los siguientes comandos para el tratamiento de archivos:</p>
+
+	<ul>
+		<li>Abrir: Permite especificar el nombre del fichero que debe ser cargado
+			y ensamblado en memoria.(Ctrl+O) <img src="img/open.png" alt=""></li>
+		<li>Capturar estado actual: Permite guardar en un archivo .out el estado
+			actual de los segmentos de texto y datos, de los registros, los mensajes
+			 y la consola (Ctrl+S) <img src="img/screenCapture.png"	alt=""></li>
+		<li>Salir: Se utiliza para terminar la	sesión del simulador (Ctrl+Q)</li>
+	</ul>
+		
+		
+	<p><a href="#Inicio">Inicio</a></p>
+
+	<!-- ------------------------------------------------------------------------ -->
+	<h3><a name="Simulacion">1.2 Menú simulación</a></h3>
+	<!-- ------------------------------------------------------------------------ -->
+	
+	<p>En el menú simulación se encuentran
+		los comandos relacionados con la simulación de la
+		ejecución del programa actualmente ensamblado, que son los
+		siguientes:</p>
+	<ul>
+		<li>Limpiar registros: Restaura al valor inicial el contenido de los registros.</li>
+		<li>Reinicializar: Restaura a su valor incial el contenido de los registros y la memoria.</li>
+		<li>Recargar: Permite ensamblar de nuevo el	archivo actualmente ensamblado.</li>
+		<li>Ejecutar: Sirve para ejecutar el programa cargado en memoria. Antes
+			de comenzar la ejecución un diálogo permite
+			especificar la dirección de comienzo de la ejecución.
+			(F5) <img src="img/runProject.png" alt=""></li>
+		<li>Detener ejecución: Permite detener la ejecución en curso. <img src="img/break.png" alt=""></li>
+		<li>Ejecución paso a paso: Permite ejecutar el programa instrucción por instrucción. (F10)</li>
+		<li>Ejecución multipaso: Mediante un cuadro de diálogo se especifica
+			el número de instrucciones que se deben ejecutar en cada paso. (F11)</li>
+		<li>Puntos de ruptura: Sirve para introducir o borrar puntos de ruptura
+			en la ejecución del programa. Un cuadro de diálogo
+			permite añadir las direcciones de memoria en las que se
+			desea detener la ejecución. (Ctrl+B) <img src="img/breakpointToggle.png" alt=""></li>
+		<li>Fijar valor: Permite cambiar el contenido de un registro o una posición de memoria.</li>
+		<li>Imprimir valor: Permite mostrar en el panel	de mensajes el contenido
+			de un rango de memoria o el valor asociado a las etiquetas globales.</li>
+		<li>Opciones: Permite modificar el modo de funcionamiento de GlSpim
+			y la ruta de la rutina de servicio de interrupción.</li>
+	</ul>
+
+	<p><a href="#Inicio">Inicio</a></p>
+
+	<!-- ------------------------------------------------------------------------ -->
+	<h3><a name="Ver">1.3 Menú ver</a></h3>
+	<!-- ------------------------------------------------------------------------ -->
+	
+	<p>En el menú ver encontramos los comandos
+		relacionados con la visualización de los distintos elementos
+		que componen la aplicación, estos comandos son:</p>
+
+	<ul>
+		<li>Limpiar consola: Limpia el contenido de la consola.</li>
+		<li>Barra de herramientas: Oculta o hace visible la barra de herramientas.</li>
+		<li>Barra de estado: Oculta o hace visible la barra de estado.</li>
+		<li>Consola: Oculta o hace visible la consola.</li>
+		<li>Registros: Oculta o hace visible el panel de registros.</li>
+		<li>Segmento de texto: Oculta o hace visible el	panel de segmento de texto.</li>
+		<li>Segmento de datos: Oculta o hace visible el	panel de segmento de datos.</li>
+		<li>Mensajes: Oculta o hace visible el panel de	mensajes.</li>
+		<li>Restaurar disposición por defecto: Recupera la disposición por
+			defecto de la barra de tareas y	los paneles del simulador en
+			la ventana principal del programa.</li>
+	</ul>
+
+	<p><a href="#Inicio">Inicio</a></p>
+
+	<!-- ------------------------------------------------------------------------ -->
+	<h3><a name="Ayuda">1.4 Menú Ayuda</a></h3>
+	<!-- ------------------------------------------------------------------------ -->
+	
+	<p>En el menú ayuda encontramos los comandos de ayuda para asistir al usuario,
+	   son los siguientes:</p>
+
+	<ul>
+		<li>¿Qué es esto?: Activa la ayuda. <img src="img/whatsThis.png" alt=""></li>
+		<li>Sobre spim: Muestra un mensaje con información sobre GlSpim.</li>
+		<li>Temas de ayuda: Abre la ventana de ayuda sobre la aplicación.</li>
+	</ul>
+
+	<p><a href="#Inicio">Inicio</a></p>
+		
+	<!-- ======================================================================== -->
+	<h2><a name="Manual">2. Manual de usuario</a></h2>
+	<!-- ======================================================================== -->
+		
+	
+	<!-- ------------------------------------------------------------------------ -->
+	<h3><a name="p1intro">2.1 Introducción</a></h3>
+	<!-- ------------------------------------------------------------------------ -->
+		
+	<p>El SPIM (MIPS al revés) es un simulador que ejecuta programas en
+		lenguaje ensamblador para los computadores basados en los procesadores
+		MIPS R2000/R3000. La arquitectura de este tipo de procesadores es
+		RISC, por lo tanto simple y regular, y en consecuencia fácil de
+		aprender y entender.</p>
+
+	<p>La pregunta obvia en estos casos es por qué se va a utilizar un
+		simulador y no una máquina real. Las razones son diversas: entre ellas
+		cabe destacar la facilidad de poder trabajar con una versión
+		simplificada y estable del procesador real. Los procesadores actuales
+		ejecutan varias instrucciones al mismo tiempo y en muchos casos de
+		forma desordenada, esto hace que sean más difíciles de comprender y
+		programar.</p>
+
+	<p>Este simulador es una versión gráfica del SPIM llamado GlSpim.</p>
+
+	<p><a href="#Inicio">Inicio</a></p>
+	
+	<!-- ------------------------------------------------------------------------ -->
+	<h3><a name="p1descrip">2.2 Descripción del Simulador GlSpim</a></h3>
+	<!-- ------------------------------------------------------------------------ -->
+	
+	<p>Al ejecutar GlSpim aparece la siguiente ventana:</p>
+
+	<p style="text-align:center">
+		<img src="img/Spim_es.png" alt="">
+	</p>
+
+	<p>La ventana principal de GlSpim se divide en tres partes:</p>
+	<ol>
+		<li>La parte superior de la ventana es la <b>barra de menús</b>.
+			Permite acceder a las operaciones con ficheros (menú <em>Archivo</em>),
+			especificar las opciones del simulador (menú <em>Simulación</em>),
+			seleccionar la forma de visualización de las ventanas incluidas en la
+			ventana principal (menú <em>Ver</em>), y obtener información de ayuda
+			(menú <em>Ayuda</em>).
+		</li>
+		<li>Debajo de la barra de menús se encuentra la <b>barra de herramientas</b>
+			que	incluye en forma de botones algunas de las acciones más comunes en
+			GlSpim.
+		</li>
+		<li>La parte central de la ventana de la aplicación sirve para visualizar
+			cuatro paneles: <b>Registros</b>, <b>Segmento de Texto</b>,
+			<b>Segmento de Datos</b> y <b>Mensajes</b>.</li>
+	</ol>
+	
+	<p>A continuación se presentan las características de estas cuatro
+		ventanas:</p>
+		
+	<h4>Registros</h4>
+	<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+
+	<p>Aparecen el nombre y el contenido de los registros enteros, R0 a R31,
+		con sus correspondientes alias entre paréntesis, los registros de coma
+		flotante, FP0 a FP31, los registros	de control de la CPU (BadVAddr,
+		Cause, Status, EPC) y los registros	especiales para la multiplicación
+		y división entera, HI y LO.</p>
+
+	<p style="text-align: center;">
+		<img src="img/Registers_es.png" alt="">
+	</p>
+	
+	<h4>Segmento de Texto</h4>
+	<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+	
+	<p>Se pueden ver cada una de las direcciones, el código máquina, las
+		instrucciones ensambladas y	el código fuente del programa de usuario
+		(a partir de la dirección <tt>0x00400000</tt>) y del núcleo del
+		simulador (a partir de la dirección <tt>0x80000000</tt>).</p>
+
+	<h4>Segmento de Datos</h4>
+	<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+	
+	<p>Aparecen las direcciones	y datos almacenados en las zonas de memoria
+		de datos del usuario (a	partir de la dirección <tt>0x10000000</tt>
+		en adelante), el núcleo del simulador (a partir de la dirección
+		<tt>0x90000000</tt>) y la pila (el puntero de pila, registro sp,
+		se encuentra cargado con la dirección <tt>0x7fffeffc</tt>,
+		y ésta crece hacia direcciones decrecientes).</p>
+
+	<h4>Mensajes</h4>
+	<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+	
+	
+	<p>En este panel se observan los diversos mensajes que comunica el
+		simulador, que nos tendrán informados del resultado y evolución
+		de las acciones que éste lleva a cabo.</p>
+
+	<p>Existe una quinta ventana, llamada <b>Consola</b>, independiente, a la
+		que se accede con la opción <em>Ver-&gt;Consol</em>a, y que sirve para
+		realizar la entrada/salida del programa simulado. En esta ventana se
+		teclean los datos de entrada, cuando sean necesarios, y se lee la
+		información que pueda imprimir nuestro programa.</p>
+
+	<p><a href="#Inicio">Inicio</a></p>
+	
+	<h4>Carga y ejecución de programas</h4>
+	<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+
+	<p>Los ficheros de entrada a GlSpim son de tipo texto ASCII, que
+		incluyen las instrucciones ensamblador del programa que se desea
+		simular.</p>
+
+	<p>Para cargar un programa se selecciona <em>Archivo-&gt;Abrir </em>(o el
+		botón <em>Abrir </em>de la barra de herramientas, con el icono de la
+		carpeta abriéndose) con lo que aparecerá un cuadro de diálogo donde se
+		puede seleccionar el fichero que se quiere abrir.</p>
+		
+	<p>Para ejecutar el programa, <em>Simulación-&gt;Ejecutar</em>
+		(o el botón <em>de Ejecutar programa </em>de la barra de
+		herramientas), hará que GlSpim comience a simularlo. Previamente
+		pedirá que se le indique la dirección de comienzo del programa (en
+		hexadecimal). En nuestro caso este valor será normalmente 0x00400000
+		(donde comienza nuestro segmento de texto). Si se desea detener la
+		ejecución del programa, <em>Simulación-&gt;Detener ejecución</em>
+		(o el botón de Detener ejecución de la barra de herramientas).</p>
+
+	<p>Si el programa incluye operaciones de lectura o escritura desde el
+		terminal, GlSpim despliega una ventana independiente llamada <em>Consol</em>a,
+		a través de la cual se realiza la entrada-salida (se simula un
+		terminal de la máquina MIPS).</p>
+	
+	<p><a href="#Inicio">Inicio</a></p>
+	
+	<h4>Depuración de programas</h4>
+	<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+	
+	<p>Si un programa no hace lo que se esperaba, hay algunas características
+		del simulador que ayudarán a depurar el programa. Con <em>Simulación-&gt;Ejecución
+		paso a paso </em>(o bien la tecla F10) es posible ejecutar las
+		instrucciones del programa una a una <b>(paso a paso</b>). Esto
+		permite verificar el contenido de los registros, la pila, los datos,
+		etc., tras la ejecución de cada instrucción. Empleando <em>Simulación-&gt;Ejecución
+		Multipaso</em> se consigue ejecutar el programa un número determinado de
+		instrucciones.</p>
+		
+	<p>GlSpim también permite ejecutar todas las instrucciones de un programa
+		hasta llegar a un determinado punto, denominado <b>breakpoint </b>(punto
+		de ruptura), a partir del cual se puede recuperar el control del
+		programa y, por ejemplo, continuar paso a paso. Para ello, se
+		selecciona <em>Simulación-&gt;Puntos de ruptura </em>(o el botón
+		<em>Puntos de ruptura </em>de la barra de herramientas). Una vez
+		seleccionada esa opción, GlSpim muestra una ventana en la que pide
+		la(s) dirección(es) en la(s) que se quiere que el programa se detenga,
+		para recuperar el control sobre el mismo. Se debe mirar cuál es la
+		dirección en que interesa parar el programa, en la ventana del
+		segmento de texto, e introducirla (en hexadecimal) en la ventana,
+		pulsando a continuación la tecla 'Añadir', para añadir dicho
+		breakpoint. Se pueden introducir tantos puntos de ruptura como se
+		desee.</p>
+		
+	<p>Una vez encontrado el error y corregido, se vuelve a cargar el
+		programa con <em>Simulación-&gt;Recargar&lt;nombre_fichero</em>&gt;.
+		Con <em>Simulación-&gt;Limpiar registros</em> se pone el
+		contenido de los registros a cero (excepto $sp), mientras que con
+		<em>Simulación-&gt;Reinicializar</em> se reinicializa el contenido
+		de los registros y de la memoria.</p>
+
+	<p>Cuando es necesario conocer el valor de los símbolos globales o
+		de un rango de memoria en concreto con <em>Simulación-&gt;Imprimir
+		valor</em> se imprimen en la ventana de mensajes los valores solicitados.
+		Con <em>Simulación-&gt;Fijar valor</em> se cambia el valor actual
+		de un registro o de una posición de memoria por un valor arbitrario.</p>
+	
+	<p><a href="#Inicio">Inicio</a></p>
+	
+	<h4>Opciones del simulador</h4>
+	<!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ -->
+
+	<p>Al elegir la opción <em>Simulación-&gt;Opciones</em> se muestran
+		las diversas opciones que ofrece el simulador. GlSpim utiliza estas
+		opciones para determinar cómo cargar y ejecutar los programas. Una vez
+		escogida esta opción aparece la siguiente ventana</p>
+		
+	<p style="text-align: center;">
+		<img src="img/Options_es.png" alt="">
+	</p>
+	
+	<p>El significado de las opciones es el siguiente:</p>
+
+	<ol>
+	<li><em>Máquina básica </em>. Simula el ensamblador sin
+		pseudoinstrucciones o modos de direccionamiento suministrados por el
+		simulador.</li>
+	<li><em>Modo silencioso </em>. Si se activa, GlSpim no imprime mensaje
+		alguno cuando se producen las excepciones. De otra manera, se muestra
+		un mensaje cuando ocurre una excepción.</li>
+	<li><em>E/S Mapeada </em>. Si se selecciona esta opción, se activa la
+		entrada-salida mapeada en Memoria. Los programas que utilizan llamadas
+		al sistema <em>(syscall</em>), para leer o escribir en el terminal,
+		deben desactivar esta opción. Aquellos otros programas que vayan a
+		hacer entrada-salida mediante mapeo en memoria deben tenerla activada.</li>
+	<li><em>Cargar archivo de interrupciones </em> Indica si se debe cargar el
+			manejador de interrupciones (fichero 'trap.handler'). En tal caso,
+			cuando se produce una excepción, GlSpim salta a la
+			dirección 0x80000080, que contiene el código necesario
+			para tratar la excepción.</li>
+	</ol>
+
+	
+	<p><a href="#Inicio">Inicio</a></p>
+	
+	<!-- ------------------------------------------------------------------------ -->
+	<h3><a name="p1sintaxis">Sintaxis del Lenguaje ensamblador del MIPS R2000</a></h3>
+	
+	<p>La sintaxis del lenguaje ensamblador es algo que se descubrirá
+		poco a poco, pero es interesante introducir algunos conceptos básicos:</p>
+
+	<p><b><em>Comentarios</em></b></p>
+	
+	<p>Estos son muy importantes en los lenguajes de bajo nivel ya que
+		ayudan a seguir el desarrollo del programa y, por tanto, se usan con
+		profusión. Comienzan con un carácter de almohadilla &quot;#&quot; y
+		desde este carácter hasta el final de la línea es ignorado por el
+		ensamblador.</p>
+
+	<p><b><em>Identificadores</em></b></p>
+
+	<p>Son secuencias de caracteres alfanuméricos, guiones bajos (_) y puntos
+		(.), que no comienzan con un número. Los códigos de operación son
+		palabras reservadas que <b>no</b> pueden ser utilizadas como
+		identificadores.</p>
+		
+	<p><b><em>Etiquetas</em></b></p>
+	
+	<p>Son identificadores que se sitúan al principio de una línea y
+		seguidos de dos puntos. Sirven para hacer referencia a la posición o
+		dirección de memoria del elemento definido en ésta. A lo largo del
+		programa se puede hacer referencia a ellas en los modos de
+		direccionamiento de las instrucciones.</p>
+
+	<p><b><em>Pseudoinstrucciones</em></b></p>
+	
+	<p>No son instrucciones que tengan su traducción directa al
+		lenguaje máquina que entiende el procesador, pero el ensamblador las
+		interpreta y las convierte en una o más instrucciones máquina reales.
+		Permiten una programación más clara y comprensible. A lo largo del
+		desarrollo de las prácticas se irán introduciendo diferentes
+		pseudoinstrucciones que permite utilizar este ensamblador.</p>
+
+	<p><b><em>Directivas</em></b></p>
+	
+	<p>Tampoco son instrucciones que tengan su traducción directa al
+		lenguaje máquina que entiende el procesador, pero el ensamblador las
+		interpreta y le informan a éste de cómo tiene que traducir el
+		programa. Son identificadores reservados, que el ensamblador reconoce
+		y que van precedidos por un punto. A lo largo del desarrollo de las
+		prácticas se irán introduciendo las distintas directivas que permite
+		utilizar este ensamblador.</p>
+
+	<p>Por otro lado, los números se escriben, por defecto, en base 10.
+		Si van precedidos de 0x, se interpretan en hexadecimal. Las cadenas de
+		caracteres se encierran entre comillas dobles (&quot;). Los caracteres
+		especiales en las cadenas siguen la convención del lenguaje de
+		programación C:</p>
+	<ul>
+	<li>Salto de línea: <tt>\n</tt></li>
+	<li>Tabulador: <tt>\t</tt></li>
+	<li>Comilla: <tt>\''</tt></li>
+	</ul>
+
+	<p>A la hora de generar un fichero con un programa en ensamblador
+		(extensión .s), hay que tener en cuenta que algunas versiones del SPIM
+		tienen un &quot;<b>bug</b>&quot;, que se evita haciendo que los
+		códigos en ensamblador almacenados en estos ficheros terminen siempre
+		con una línea en blanco (vacía).</p>
+	
+	<p><a href="#Inicio">Inicio</a></p>
+
+</body>
+</html>

@@ -16,19 +16,18 @@
 #                                                                         #
 ###########################################################################
 
-import sys, os
-from ..res import main_rc
-from PyQt4 import QtCore, QtGui, Qt
+import os
+import sys
+
+from PyQt4 import QtCore, QtGui
+
 from ..ui.help import Ui_Help
 
-# _tr method for the HelpWindow class
-def _tr(text, disambig=""):
-    return QtGui.QApplication.translate("HelpWindow", text, disambig)
 
 class HelpWindow(QtGui.QWidget):
     "Help window"
     
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(HelpWindow, self).__init__()
         self.ui = Ui_Help()
         self.ui.setupUi(self)
@@ -43,7 +42,9 @@ class HelpWindow(QtGui.QWidget):
         policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored,
                                    QtGui.QSizePolicy.Ignored)
         self.editor.setSizePolicy(policy)
-        url = QtCore.QUrl("qrc:/dictionary/Ayuda.html")
+        my_path = os.path.dirname(os.path.realpath(__file__))
+        # @todo: Ayuda.html should be changed to Help.html
+        url = QtCore.QUrl.fromLocalFile(os.path.join(my_path, "..", "html", self.tr("Ayuda.html")))
         self.editor.setSource(url)
 
     def resizeEvent(self, event):
@@ -54,6 +55,6 @@ class HelpWindow(QtGui.QWidget):
         
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    help = HelpWindow()
-    help.show()
+    helpWindow = HelpWindow()
+    helpWindow.show()
     sys.exit(app.exec_())
