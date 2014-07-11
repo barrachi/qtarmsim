@@ -9,7 +9,7 @@
 import sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from PyQt4.Qsci import QsciScintilla, QsciLexerPython
+from PyQt4.Qsci import QsciScintilla
 from .qscilexerarm import QsciLexerARM
 
 class SimpleARMEditor(QsciScintilla):
@@ -46,7 +46,12 @@ class SimpleARMEditor(QsciScintilla):
             self.setMarginType(0, QsciScintilla.NumberMargin)
             self.setMarginWidth(0, QFontMetrics(font).width("0000") + 6)
             self.setMarginWidth(1, 0)
-            
+            # Don't want to see the horizontal scrollbar at all
+            self.SendScintilla(QsciScintilla.SCI_SETHSCROLLBAR, 0)
+        
+        # Set encoding as UTF-8
+        self.setUtf8(True)
+        
         # Current line visible with special background color
         self.setCaretLineVisible(True)
         self.setCaretLineBackgroundColor(QColor("#e4e4ff"))
@@ -56,9 +61,6 @@ class SimpleARMEditor(QsciScintilla):
         lexer.setDefaultFont(font)
         self.setLexer(lexer)
 
-        # Don't want to see the horizontal scrollbar at all
-        # Use raw message to Scintilla here (all messages are documented here: http://www.scintilla.org/ScintillaDoc.html)
-        self.SendScintilla(QsciScintilla.SCI_SETHSCROLLBAR, 0)
 
         # Not too small
         # self.setMinimumSize(400, 300)

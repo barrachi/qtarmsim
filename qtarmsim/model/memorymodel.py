@@ -163,7 +163,8 @@ class MemoryModel(TreeModel):
     def clear(self):
         self.memory_banks.clear()
         self.rootItem.childItems.clear()
-
+        self.rootItem = TreeItem(("Address", "Value")) # Required by windows version, WTF!
+        
     def clearHistory(self):
         self.previously_modified_words.clear()
         self.modified_words.clear()

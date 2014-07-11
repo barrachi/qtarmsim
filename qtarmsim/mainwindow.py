@@ -334,6 +334,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.updateRegisters()
             self.updateMemory()
         else:
+            # Set current source code has already been assembled as False
+            self.source_code_assembled = False
             self.ui.textEditMessages.append(self.tr("<b>Assembly errors:</b>"))
             self.ui.textEditMessages.append(response.errmsg)
             self.ui.textEditMessages.append("")
@@ -402,7 +404,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def readFile(self, file_name):
         "Reads a file. Can be called using an argument from the command line"
         if file_name:
-            self.ui.textEditSource.setText(open(file_name).read())
+            try:
+                self.ui.textEditSource.setText(open(file_name).read())
+            except UnicodeDecodeError as e:
+                err_msg = self.tr("'{}' codec can't decode byte {} in position {}: {}.").format(e.encoding,
+                                                                                                hex(e.object[e.start]),
+                                                                                                e.start,
+                                                                                                e.reason)
+                QtGui.QMessageBox.warning(self, self.tr("Error"), err_msg)
+                raise e
             self.setFileName(file_name)
         
     def doSave(self):
@@ -436,7 +446,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(self, self.tr("Error"),
                     self.tr("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
-        asm_file.write(self.ui.textEditSource.text().replace('\r\n', '\n'))
+        asm_file.write(self.ui.textEditSource.text().encode(sys.getdefaultencoding()))
         asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         self.setFileName(file_name)
@@ -688,7 +698,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         "Shows the About ARMSim dialog"
         QtGui.QMessageBox.about(self,
                                 self.tr("About ARMSim"),
-                                self.armsim_about_message)
+                                self.simulator.getVersion())
         
     def doHelp(self):
         "Shows the Help window"

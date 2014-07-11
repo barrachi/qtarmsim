@@ -291,6 +291,26 @@ class ARMSimConnector():
             memory_bytes.append(self._parseMemory(line))
         return memory_bytes
             
+    def _prettyPrintLine(self, line):
+        if line.count(';') == 0:
+            return line
+        else:
+            (assembly, ln_source_comment) = [x.strip() for x in line.split(";", 1)]
+            (ln, source_comment) = [x.strip() for x in ln_source_comment.split(" ", 1)]
+            ln = int(ln)
+            if source_comment.count("@"):
+                (source, comment) = [x.strip() for x in source_comment.split("@", 1)]
+                comment = "@ {}".format(comment)
+            else:
+                source = source_comment
+                comment = ""
+            if source.count(":"):
+                (label, source) = [x.strip() for x in source.split(":", 1)]
+                label = "{}:".format(label)
+            else:
+                label = ""
+            return "{:40};{:-4} {:10} {:20} {}".format(assembly, ln, label, source, comment)
+        
 
     def getDisassemble(self, hex_start, ninsts):
         """
@@ -299,7 +319,7 @@ class ARMSimConnector():
         @return: An array of lines with a disassembled instruction in each.
         """
         self.mysocket.send_line("DISASSEMBLE {} {}".format(hex_start, ninsts))
-        return self.mysocket.receive_lines_till_eof()
+        return [self._prettyPrintLine(line) for line in self.mysocket.receive_lines_till_eof() ]
 
 
     def _getExecuteStep(self, ARMSim_command):
@@ -310,10 +330,9 @@ class ARMSimConnector():
         """
         self.mysocket.send_line("EXECUTE {}".format(ARMSim_command))
         lines = self.mysocket.receive_lines_till_eof()
-        print(lines)
         response = ExecuteResponse()
         response.result = lines[0]
-        response.assembly_line = lines[1]
+        response.assembly_line = lines[1].split(";")[0] # get rid of source code part
         mode = ""
         errmsg_list = []
         for line in lines[2:]:
