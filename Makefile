@@ -25,6 +25,7 @@ all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 clean:
 	find ./qtarmsim/ -type f -name "*.pyc" -exec rm -f {} \; 2>/dev/null
 	find ./qtarmsim/ -type d -name "__pycache__" -exec rm -rf {} \; 2>/dev/null
+	cd ./examples; rm -f *.o *.err *.lst
 
 linguist:
 	@ \
