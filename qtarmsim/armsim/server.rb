@@ -15,6 +15,8 @@ GCC = 'C:\Users\German\Documents\GitHub\Arduino\build\windows\work\hardware\tool
 CL1 = '-mcpu=cortex-m1 -mthumb -c'
 CL3 = '-mcpu=cortex-m1 -mthumb -c'
 
+ORIG_CODE = 0x00001000  # Repetido en read_ELF. Ver
+
 Errores = { orden: "Orden no reconocida\r\n",
             args:  "Argumentos erroneos\r\n",
             sistema: "Error del sistema\r\n",
@@ -43,6 +45,7 @@ Errores = { orden: "Orden no reconocida\r\n",
 
 def gen_disassemble(dir)
   res = "[0x%08X] " % dir
+  sdir = dir
   word = $server.proc.memory_half(dir)
   word2 = $server.proc.memory_half(dir + 2)
   return nil if word.nil? || word2.nil?
@@ -50,8 +53,48 @@ def gen_disassemble(dir)
   inst = $server.coder.decode([word, word2], dir)
   dir = dir + 2 if inst.size == 2
   res = res + "0x%04X " % word2 if inst.size == 2
-  res = res +  (inst.kind == :und || inst.kind == :unp ? 'NOT AN ISTRUCTION' : inst.to_s)
+  if inst.kind == :und || inst.kind == :unp
+    res = res + 'NOT AN INSTRUCTION'
+  else
+    res = res + inst.to_s
+    src = $source[sdir - ORIG_CODE]
+    res = res + " ; %04d " % src[1] + src[0] unless src.nil?
+  end
+  #res = res +  (inst.kind == :und || inst.kind == :unp ? 'NOT AN INSTRUCTION' : inst.to_s)
   return [res, inst]
+end
+
+#gen_source
+#----------
+#Devuelve un hash donde, para cada direccion relativa de
+#memoria de codigo tiene la fuente y el numero de linea, a partir
+#del .lst
+# @param [String] name
+# @return [Hash] (dir_rel => [source, number])
+def gen_source(name)
+  source = Hash.new
+  intext = false
+  fi = File.open(name)
+  fi.each do |line|
+    line = line[0..-2]
+    line_number = line[0, 4].to_i
+    if line_number != 0
+      dir_rel = line[5, 4].hex
+      data = line[10, 8].lstrip.length
+      text = line[20..-1].gsub(/\t/, ' ').lstrip if line.length > 20
+      if intext
+        if data != 0
+          source[dir_rel] = [text, line_number]
+        else
+          intext = false if text == '.data' || text == '.rodata'
+        end
+      else
+        intext = true if text == '.text'
+      end
+    end
+  end
+  fi.close
+  source
 end
 
 #show_version
@@ -61,7 +104,7 @@ end
 # @param [Array] entrada
 # @return [String]
 show_version = Proc.new { |entrada|
-  res = "V 1.Nin se sabe\r\nLo he hecho yo\r\nEOF\r\n"
+  res = "V 1.0\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
 }
 
 #show_register
@@ -337,8 +380,8 @@ execute = Proc.new { |entrada|
           res = Errores[:args]
       end
 
-      res = "ERROR\r\n" + dos[0] + "\r\n" + Errores[:noexec] + "EOF\r\n" unless kinds_noexec.find_index(dos[1].kind).nil?
-      res = "ERROR\r\n" + dos[0] + "\r\n" + Errores[:end] + "EOF\r\n" unless kinds_end.find_index(dos[1].kind).nil?
+      res = "ERROR\r\n" + dos[0] + "\r\n" + "ERROR MESSAGE\r\n" + Errores[:noexec] + "EOF\r\n" unless kinds_noexec.find_index(dos[1].kind).nil?
+      res = "ERROR\r\n" + dos[0] + "\r\n" + "ERROR MESSAGE\r\n" + Errores[:end] + "EOF\r\n" unless kinds_end.find_index(dos[1].kind).nil?
       terror = Errores[:breakpoint] unless $server.breakpoints.find_index(pc).nil?
     end
     if res.nil?
@@ -490,9 +533,10 @@ sysinfo_memory = Proc.new { |entrada|
 assemble = Proc.new { |entrada|
   nf = entrada[0].split('.')[0]
   fline = $path + nf
-  cline = $compiler + ' ' + $args + ' -o ' + fline + '.o'
+  cline = $compiler + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
   eline = '2> ' + fline + '.err'
-  if system(cline + ' ' + fline + '.s ' + ' ' + eline  )
+  lline = '> ' + fline + '.lst'
+  if system(cline + ' ' + fline + '.s ' + ' ' + lline + ' ' + eline)
     blocks = read_ELF(fline + '.o')
     procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     procesador.memory.add_block(blocks[1])
@@ -500,6 +544,8 @@ assemble = Proc.new { |entrada|
     $symbol_table = blocks[2]
     procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
     $server.proc = procesador
+    $source = gen_source(fline + '.lst')
+    p $source
     res = "SUCCESS\r\n"
   else
     res = "ERROR\r\n"
@@ -509,6 +555,7 @@ assemble = Proc.new { |entrada|
     res = res + "EOF\r\n"
   end
   File.delete(fline + '.err')
+  File.delete(fline + '.lst')
   res
 }
 
@@ -615,6 +662,7 @@ class MainServer < TCPServer
                 tokens[idx] = tokens[idx].to_i
               when :path
                 return Errores[:path] unless File.directory?(tokens[idx])
+                tokens[idx] = tokens[idx] + '/' unless tokens[idx][-1] == '/' || tokens[idx][-1] == '\\'
               when :exe
                 return Errores[:exe] unless File.executable?(tokens[idx])
               when :file_s
@@ -758,10 +806,8 @@ class ServerApp
   #de momento una ROM random, la RAM de datos y la pila
   def main
     lpath = File.expand_path(File.dirname($0))
-    p lpath
-    #Shell.cd(lpath)
-    #p File.expand_path('.')
-    blocks = read_ELF(lpath + '/' + 'complex.o')
+    Shell.cd(lpath)
+    blocks = read_ELF('complex.o')
     puerto = ARGV.length == 0 ? 9999 : ARGV[0].to_i
     @procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     @procesador.memory.add_block(blocks[1])
