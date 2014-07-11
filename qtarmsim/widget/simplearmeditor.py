@@ -18,9 +18,6 @@ class SimpleARMEditor(QsciScintilla):
     def __init__(self, parent=None, disassemble=False):
         super(SimpleARMEditor, self).__init__(parent)
 
-        # Set the coding to utf8
-        self.setUtf8(True)
-        
         # Set the default font
         font = QFont()
         font.setFamily('Courier')
