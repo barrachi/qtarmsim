@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-ifdef SystemRoot
+ifdef SYSTEMROOT
    RM = del /Q
    FixPath = $(subst /,\,$1)
    PYUIC4 = pyuic4.bat /o
