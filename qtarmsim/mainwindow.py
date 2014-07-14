@@ -442,7 +442,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def saveFile(self, file_name):
         "Saves the contents of the source editor on the given file name"
         asm_file = QtCore.QFile(file_name)
-        if not asm_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+        # @warning: as qscintilla handles CRLF, the file cannot be opened in text mode (| QtCore.QFile.Text)
+        if not asm_file.open(QtCore.QFile.WriteOnly): 
             QtGui.QMessageBox.warning(self, self.tr("Error"),
                     self.tr("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
