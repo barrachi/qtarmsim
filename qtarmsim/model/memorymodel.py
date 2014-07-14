@@ -161,9 +161,10 @@ class MemoryModel(TreeModel):
         return memory_item.data(1)
     
     def clear(self):
+        self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
         self.memory_banks.clear()
         self.rootItem.childItems.clear()
-        self.rootItem = TreeItem(("Address", "Value")) # Required by windows version, WTF!
+        self.emit(QtCore.SIGNAL("layoutChanged()"))
         
     def clearHistory(self):
         self.previously_modified_words.clear()
