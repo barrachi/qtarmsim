@@ -81,20 +81,36 @@ def gen_source(name)
     if line_number != 0
       dir_rel = line[5, 4].hex
       data = line[10, 8].lstrip.length
-      text = line[20..-1].gsub(/\t/, ' ').lstrip if line.length > 20
+      text = line[19..-1].gsub(/\t/, ' ').lstrip if line.length > 19
       if intext
         if data != 0
-          source[dir_rel] = [text, line_number]
+          source[dir_rel] = [text, line_number] unless text.nil?
         else
-          intext = false if text == '.data' || text == '.rodata'
+          intext = false if get_section(text) > 1
         end
       else
-        intext = true if text == '.text'
+        intext = true if get_section(text) == 1
       end
     end
   end
   fi.close
   source
+end
+
+#get_section
+#-----------
+#Recibe el texto de una linea de listado. Si la linea es .text u otra sección, o
+#si la línea es .section .text u otra sección, devuelve el código de la sección. Si no, devuelve 0
+# @param [String] line
+# @return [Integer] 0 o código de seccion
+def get_section(line)
+  return 0 if line.nil?
+  secs = %w(.text .data .bss .rodata)
+  divide = line.split(' ')
+  p divide
+  return secs.find_index(divide[1]) + 1 if divide[0] == '.section'
+  idx = secs.find_index(divide[0])
+  return idx.nil? ? 0 : idx + 1
 end
 
 #show_version
