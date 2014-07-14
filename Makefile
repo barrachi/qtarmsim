@@ -3,12 +3,12 @@
 ifdef SystemRoot
    RM = del /Q
    FixPath = $(subst /,\,$1)
-   PYUIC4 = pyuic4.bat
+   PYUIC4 = pyuic4.bat /o
 else
    ifeq ($(shell uname), Linux)
       RM = rm -f
       FixPath = $1
-      PYUIC4 = pyuic4.bat
+      PYUIC4 = pyuic4 -o
    endif
 endif
 
@@ -25,7 +25,7 @@ TSOBJS:=$(TSSRCS:%.ts=%.qm)
 all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 
 %.py : %.ui
-	$(PYUIC4) -o $@ $<
+	$(PYUIC4) $@ $<
 	./qtarmsim/res/bin/add_file_icons.py $@ > $@.tmp
 	mv $@.tmp $@
 
