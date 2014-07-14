@@ -13,6 +13,7 @@ qtarmsim/ui/*.py
 *.aux
 *.log
 *.toc
+*.tmp
 qtarmsim.egg-info
 dist/
 tmp/qtarmsim-*

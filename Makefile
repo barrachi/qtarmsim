@@ -1,5 +1,18 @@
 #!/usr/bin/make -f
 
+ifdef SystemRoot
+   RM = del /Q
+   FixPath = $(subst /,\,$1)
+   PYUIC4 = pyuic4.bat
+else
+   ifeq ($(shell uname), Linux)
+      RM = rm -f
+      FixPath = $1
+      PYUIC4 = pyuic4.bat
+   endif
+endif
+
+
 UISRCS:=$(wildcard ./qtarmsim/ui/*.ui)
 UIOBJS:=$(UISRCS:%.ui=%.py)
 
@@ -12,7 +25,7 @@ TSOBJS:=$(TSSRCS:%.ts=%.qm)
 all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 
 %.py : %.ui
-	pyuic4 -o $@ $<
+	$(PYUIC4) -o $@ $<
 	./qtarmsim/res/bin/add_file_icons.py $@ > $@.tmp
 	mv $@.tmp $@
 
@@ -25,7 +38,7 @@ all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 clean:
 	find ./qtarmsim/ -type f -name "*.pyc" -exec rm -f {} \; 2>/dev/null
 	find ./qtarmsim/ -type d -name "__pycache__" -exec rm -rf {} \; 2>/dev/null
-	cd ./examples; rm -f *.o *.err *.lst
+	cd ./examples; $(RM) *.o *.err *.lst
 
 linguist:
 	@ \
