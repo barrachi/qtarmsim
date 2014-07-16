@@ -52,9 +52,10 @@ class ARMSimConnector():
     re_membanksexpr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
     re_memexpr = re.compile("(0[xX][0-9a-fA-F]+): (0[xX][0-9a-fA-F]+)")
 
-    def __init__(self):
+    def __init__(self, verbose = False):
         # Set properties default values
-        self.mysocket = MySocket()
+        self.verbose = verbose
+        self.mysocket = MySocket(verbose = verbose)
         self.armsim_process = None
         self.setConnected(False, None)
         self.version = None
@@ -208,11 +209,15 @@ class ARMSimConnector():
                                    "ARMGccOptions": "ARGS",
                                    "PATH": "PATH",
                                    }[setting_name]
-        self.mysocket.send_line("CONFIG {} {}".format(translated_setting_name, setting_value))
+        try:
+            self.mysocket.send_line("CONFIG {} {}".format(translated_setting_name, setting_value))
+        except BrokenPipeError:
+            return "Error when trying to configure the '{}' setting on ARMSim.\n" \
+                    "The pipe is broken.".format(setting_name)
         line = self.mysocket.receive_line()
         if line != 'OK':
-            return "Error when trying to configure the '{}' setting on ARMSim\n" \
-                    "Error message was '{}'".format(setting_name, line)
+            return "Error when trying to configure the '{}' setting on ARMSim.\n" \
+                    "Error message was '{}'.".format(setting_name, line)
         return None
 
         
@@ -389,7 +394,7 @@ class ARMSimConnector():
         errmsg = self.setSettings("PATH", os.path.dirname(os.path.abspath(path)) + '/')
         if errmsg:
             response.result = "ERROR"
-            response.errmsg.append(errmsg)
+            response.errmsg = errmsg
             return response
         self.mysocket.send_line("ASSEMBLE {}".format(os.path.basename(path)))
         line = self.mysocket.receive_line()
