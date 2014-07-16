@@ -23,8 +23,7 @@
 import sys
 import getopt
 
-sys.path.append('..')
-from comm.mysocket import MySocket
+from .. comm.mysocket import MySocket
 
 # Globals
 PORT = 0

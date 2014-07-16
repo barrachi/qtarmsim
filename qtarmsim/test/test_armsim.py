@@ -22,8 +22,7 @@ import getopt
 import sys
 import unittest
 
-sys.path.append('..')
-from comm.mysocket import MySocket
+from .. comm.mysocket import MySocket
 
 PORT = 8010
 
