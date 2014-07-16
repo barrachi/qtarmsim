@@ -111,7 +111,10 @@ class MySocket:
         @return: a line.
         """
         if len(self.pending_lines):
-            return self.pending_lines.pop(0)
+            line = self.pending_lines.pop(0)
+            if self.verbose:
+                print("Received line: {}".format(line))
+            return line
         data = self.conn.recv(self.MSGLEN)
         msg = data.decode(self.ENCODING)
         while (len(data) == self.MSGLEN and msg[-1] != self.NL) or msg.strip() == '':
@@ -123,11 +126,14 @@ class MySocket:
         lines = [l.strip() for l in msg.strip().replace('\r\n', '\n').split('\n') if l.strip() != ""]
         if len(lines)>1:
             self.pending_lines = lines[1:]
-        try:
-            return lines[0]
-        except IndexError:
+        if len(lines):
+            line = lines[0]
+            if self.verbose:
+                print("Received line: {}".format(line))
+            return line
+        else:
             return ""
-
+        
     def receive_lines_till_eof(self):
         """
         Receives lines until a line with the EOF word is received.
