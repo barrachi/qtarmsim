@@ -14,6 +14,7 @@ ELFSYMBIND = ['Local', 'Global', 'Weak']
 ELFSYMTYPE = ['No type', 'Data object', 'Function or code', 'Section', 'File']
 STT_FUNC = 2
 SHN_COMMON = 65522
+SHN_NAME  = 65521
 ORIG_CODE = 0x00001000
 ORIG_DATA = 0x20070000
 END_DATA =  0x20070800
@@ -292,6 +293,32 @@ class ELF_File < File
     data = @sections[@wks['.data']].data.nil? ? [0, 0, 0, 0] : @sections[@wks['.data']].data.dup
     bssdir = @wks_orig['.bss']
     externdir = ORIG_EXTERN
+    @symbols.each do |symbol|
+      symsection = symbol.data[:shndx]
+      next if symsection == SHN_NAME
+      #Si no tiene nombre lo bautizamos con sección:número de símbolo
+      symname = (symbol.name.length == 0) ? "SEC%d:S%d" % [symsection, symbol.idx]: symbol.name
+      #Lo buscamos en la tabla
+      if symsection == SHN_COMMON
+        #En el BSS lo hemos de alinear y crear espacio
+        if bssdir % symbol.data[:value] != 0
+          bssdir += symbol.data[:value] - (bssdir % symbol.data[:value])
+        end
+        symaddress = bssdir
+        bssdir += symbol.data[:size]
+      elsif symsection == 0
+        #Esto lo arreglaría el linker, nosotros tenemos un contador de externos que crece en pasos de SIZE_EXTERN
+        symaddress = externdir
+        externdir += SIZE_EXTERN
+      else
+        symaddress = @wks_orig[@sections[symsection].name]
+        symaddress += symbol.data[:value] unless symaddress.nil?
+      end
+      if !symaddress.nil?
+        symaddress = symaddress & 0xFFFFFFFE if symbol.data[:info] & 0x0F == STT_FUNC
+        symbolTable[symname] = symaddress
+      end
+    end
     @relocations.each_with_index do |rel, idx|
       dest = ( @sections[rel_idx[idx]].header[:info] == @wks['.text'] ) ? code : data
       basedir = ( @sections[rel_idx[idx]].header[:info] == @wks['.text'] ) ? @wks_orig['.text'] : @wks_orig['.data']
@@ -305,29 +332,7 @@ class ELF_File < File
         symsection = symbol.data[:shndx]
         #Si no tiene nombre lo bautizamos con sección:número de símbolo
         symname = (symbol.name.length == 0) ? "SEC%d:S%d" % [symsection, symbol.idx]: symbol.name
-        #Lo buscamos en la tabla
-        if symbolTable[symname].nil?
-          #Si no está, le calculamos dirección y lo añadimos
-          # 3 tipos, 0 que es externa, SHN_COMMON que es del bss y el resto -de bloques con datos
-          if symsection == SHN_COMMON
-            #En el BSS lo hemos de alinear y crear espacio
-            if bssdir % symbol.data[:value] != 0
-              bssdir += symbol.data[:value] - (bssdir % symbol.data[:value])
-            end
-            symaddress = bssdir
-            bssdir += symbol.data[:size]
-          elsif symsection == 0
-            #Esto lo arreglaría el linker, nosotros tenemos un contador de externos que crece en pasos de SIZE_EXTERN
-            symaddress = externdir
-            externdir += SIZE_EXTERN
-          else
-            symaddress = @wks_orig[@sections[symsection].name] + symbol.data[:value]
-          end
-          symaddress = symaddress & 0xFFFFFFFE if symbol.data[:info] & 0x0F == STT_FUNC
-          symbolTable[symname] = symaddress
-        else
-          symaddress = symbolTable[symname]
-        end
+        symaddress = symbolTable[symname]
         #Vamos a calcular y aplicar las reubicaciones
         #S es la dirección final del símbolo, symaddress
         #A es el addend, es decir el contenido en el fichero de la dirección a reubicar -porque son rel y no rela

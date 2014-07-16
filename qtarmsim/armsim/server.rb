@@ -13,7 +13,7 @@ require_relative 'read_ELF'
 
 GCC = 'C:\Users\German\Documents\GitHub\Arduino\build\windows\work\hardware\tools\g++_arm_none_eabi\bin\arm-none-eabi-gcc.exe'
 CL1 = '-mcpu=cortex-m1 -mthumb -c'
-CL3 = '-mcpu=cortex-m1 -mthumb -c'
+CL3 = '-mcpu=cortex-m3 -mthumb -c'
 
 ORIG_CODE = 0x00001000  # Repetido en read_ELF. Ver
 
@@ -549,7 +549,7 @@ sysinfo_memory = Proc.new { |entrada|
 assemble = Proc.new { |entrada|
   nf = entrada[0].split('.')[0]
   fline = $path + nf
-  cline = $compiler + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
+  cline = '"' + $compiler + '"' + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
   eline = '2> ' + fline + '.err'
   lline = '> ' + fline + '.lst'
   if system(cline + ' ' + fline + '.s ' + ' ' + lline + ' ' + eline)
@@ -558,7 +558,9 @@ assemble = Proc.new { |entrada|
     procesador.memory.add_block(blocks[1])
     procesador.memory.symbolTable = blocks[2]
     $symbol_table = blocks[2]
-    procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
+    dirPC = $symbol_table['main']
+    dirPC = ORIG_CODE if dirPC.nil?
+    procesador.update({usr_regs: [ThumbII_Defs::PC, dirPC, ThumbII_Defs::SP, END_DATA - 128]})
     $server.proc = procesador
     $source = gen_source(fline + '.lst')
     p $source
@@ -661,7 +663,7 @@ class MainServer < TCPServer
       linea = base[key]
       return Errores[:orden] if linea.nil?
       if linea[0] == 1
-        return Errores[:args] unless tokens.length == linea[2].length || linea[2][-1] == :cad
+        return Errores[:args] unless tokens.length == linea[2].length || linea[2][-1] == :cad || linea[2][-1] == :exe || linea[2][-1] == :path
         args = linea[2]
         0.upto(args.length - 1) do |idx|
           if args[idx].kind_of?(String)
@@ -676,19 +678,22 @@ class MainServer < TCPServer
                 tokens[idx] = tokens[idx].hex
               when :nbytes, :ninst
                 tokens[idx] = tokens[idx].to_i
-              when :path
-                return Errores[:path] unless File.directory?(tokens[idx])
-                tokens[idx] = tokens[idx] + '/' unless tokens[idx][-1] == '/' || tokens[idx][-1] == '\\'
-              when :exe
-                return Errores[:exe] unless File.executable?(tokens[idx])
               when :file_s
                 return Errores[:file_s] unless File.file?($path + tokens[idx].split('.')[0] + '.s')
               when :cad
+              when :path
+              when :exe
                 cad = tokens[idx]
                 (idx + 1).upto(tokens.length - 1) do |idx2|
                   cad = cad + ' ' + tokens[idx2]
                 end
                 tokens[idx] = cad
+              if args[idx] == :path
+                return Errores[:path] unless File.directory?(tokens[idx])
+                tokens[idx] = tokens[idx] + '/' unless tokens[idx][-1] == '/' || tokens[idx][-1] == '\\'
+              elsif args[idx] == :exe
+                return Errores[:exe] unless File.executable?(tokens[idx])
+              end
             end
           end
         end
@@ -829,6 +834,7 @@ class ServerApp
     @procesador.memory.add_block(blocks[1])
     @procesador.memory.symbolTable = blocks[2]
     $symbol_table = blocks[2]
+    $use_symbols = false
     @procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
     $server = MainServer.new(@procesador, puerto)
     $compiler = GCC

@@ -155,25 +155,31 @@ module ThumbII_Defs
 
   HINTS = [ ['00000000', 0, :nopt1],
             ['00010000', 0, :yieldt1],
+            ['0001xxxx', 0, :itt1],
             ['00100000', 0, :wfet1],
+            ['0010xxxx', 0, :itt1],
             ['00110000', 0, :wfit1],
+            ['0011xxxx', 0, :itt1],
             ['01000000', 0, :sevt1],
+            ['0100xxxx', 0, :itt1],
             ['xxxx0000', 0, :udef],
             ['xxxxxxxx', 0, :itt1] ]
 
   MISC = [ ['00000xx', 0, :addspit2],
            ['00001xx', 0, :subspit1],
-           ['00x1xxx', 0, :cbzt1],
+           ['0001xxx', 0, :cbzt1],
            ['001000x', 0, :sxtht1],
            ['001001x', 0, :sxtbt1],
            ['001010x', 0, :uxtht1],
            ['001011x', 0, :uxtbt1],
+           ['0011xxx', 0, :cbzt1],
            ['010xxxx', 0, :pusht1],
            ['0110011', 0, :cpst1],
+           ['1001xxx', 0, :cbnzt1],
            ['101000x', 0, :revt1],
            ['101001x', 0, :rev16t1],
            ['101011x', 0, :revsht1],
-           ['10x1xxx', 0, :cbnzt1],
+           ['1011xxx', 0, :cbnzt1],
            ['110xxxx', 0, :popt1],
            ['1110xxx', 0, :bkptt1],
            ['1111xxx', 8, 0x00FF, HINTS, 1] ]
@@ -409,7 +415,7 @@ module ThumbII_Defs
     numero = (numero > 31) ? 32 + (numero & 31) : numero
     if $address != nil
       busca = $address + 4 + numero * 2
-      res = $symbol_table.key(busca)
+      res = $symbol_table.key(busca) if $use_symbols
     end
     res = res.nil? ? 'pc, #' + (numero * 2).to_s: res
   }
@@ -423,7 +429,7 @@ module ThumbII_Defs
     numero = (numero > 127) ? 0 - ((numero^0xFF) + 1) : numero
     if $address != nil
       busca = $address + 4 + numero * 2
-      res = $symbol_table.key(busca)
+      res = $symbol_table.key(busca) if $use_symbols
     end
     res = res.nil? ? 'pc, #' + (numero * 2).to_s: res
   }
@@ -437,7 +443,7 @@ module ThumbII_Defs
     numero = (numero > 1023) ? 0 - ((numero^0x7FF) + 1) : numero
     if $address != nil
       busca = $address + 4 + numero * 2
-      res = $symbol_table.key(busca)
+      res = $symbol_table.key(busca) if $use_symbols
     end
     res = res.nil? ? 'pc, #' + (numero * 2).to_s: res
   }
@@ -465,7 +471,7 @@ module ThumbII_Defs
     imm = (s == 1) ? 0 - ((imm^0xEFFFFF) + 1) : imm
     if $address != nil
       busca = $address + 4 + imm * 2
-      res = $symbol_table.key(busca)
+      res = $symbol_table.key(busca) if $use_symbols
     end
     res = res.nil? ? 'pc, #' + (imm * 2).to_s: res
   }
@@ -867,6 +873,8 @@ module ThumbII_Defs
     op_s = ibonito(auto, operandos)
     inst = 3
     mask = 1
+    $itlist = [op_s[1]] #
+    cnum = operandos[1] #
     while (operandos[0] & mask) == 0 do
       inst -= 1
       mask <<= 1
@@ -879,14 +887,19 @@ module ThumbII_Defs
       if (operandos[0] & mask) != 0
         cuno += 1
         cad += (bit == 1) ? 't' : 'e'
+        $itlist << (bit == 1) ? CONCODES[cnum] : CONCODES[cnum - 1] #
       else
         cad += (bit == 1) ? 'e' : 't'
+        $itlist << (bit == 1) ? CONCODES[cnum + 1] : CONCODES[cnum] #
       end
       mask = mask / 2
     end
+    p $itlist
     if (operandos[1] == 15) || ((operandos[1] == 14) && (cuno > 1))
+      $itlist = nil #
       cad = 'ERROR: unpredictable'
     else
+      $itlist = nil unless itcond.nil? #
       cad += ' ' + op_s[1]
       (itcond == nil) ? SET[auto][0] + cad : 'ERROR: no permitida en bloque IT'
     end
@@ -981,6 +994,10 @@ module ThumbII_Defs
 #instrucción
   def  ThumbII_Defs.to_s(tipo, operandos, dir, cond = nil)
     $address = dir
+    if !$itlist.nil?
+      cond = $itlist.delete_at(0)
+      $itlist = nil if cond.nil?
+    end
     FSET[tipo][0].call(tipo, operandos, cond)
   end
 
