@@ -2,19 +2,12 @@
 
 ###########################################################################
 #  Qt ARMSim -- a Qt graphical interface to ARMSim                        #
-#  ---------------------------------------------------------------------  #
-#    begin                : 2014-04-02                                    #
-#    copyright            : (C) 2014 by Sergio Barrachina Mir             #
-#    email                : barrachi@uji.es                               #
-#  ---------------------------------------------------------------------  #
 #                                                                         #
-# This application is based on a previous work of Gloria Edo Piñana who   #
-# developed the graphical part of a Qt graphical interface to the SPIM    #
-# simulator in 2008.                                                      #
+#  Copyright 2014 Sergio Barrachina Mir <barrachi@uji.es>                 #
 #                                                                         #
-###########################################################################
-
-###########################################################################
+#  This application is based on a previous work of Gloria Edo Piñana who  #
+#  developed the graphical part of a Qt graphical interface to the SPIM   #
+#  simulator on 2008.                                                     #
 #                                                                         #
 #  This program is free software: you can redistribute it and/or modify   #
 #  it under the terms of the GNU General Public License as published by   #
@@ -28,12 +21,14 @@
 #                                                                         #
 ###########################################################################
 
+import os
 import signal
 import sys
 
 from PyQt4 import QtGui
 
-from .mainwindow import QtARMSimMainWindow 
+
+from . mainwindow import QtARMSimMainWindow 
 
 
 def main():
