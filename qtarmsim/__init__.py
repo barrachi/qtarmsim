@@ -21,6 +21,7 @@
 #                                                                         #
 ###########################################################################
 
+import getopt
 import os
 import signal
 import sys
@@ -31,19 +32,57 @@ from PyQt4 import QtGui
 from . mainwindow import QtARMSimMainWindow 
 
 
+def _help():
+    print("""Usage: qtarmsim.py [options] [asmfile.s]
+
+Qt ARMSim is a graphical frontend to the ARMSim ARM simulator. It provides
+an easy to use multiplatform ARM emulation environment that has been designed
+to be used on Computer Architecture Introductory courses.
+
+If an asmfile.s is provided, it will be opened.
+
+Options:
+   -v, --verbose     increments the output verbosity
+   -h, --help        displays this help and exit
+
+Please, report bugs to <barrachi@uji.es>.
+""")
+
+
+def _getopts():
+    "Processes the options passed to the executable"
+    verbose = False
+    file_name = ""
+    optlist, args = getopt.getopt(sys.argv[1:],         # @UnusedVariable
+                                  'vh',
+                                  ['verbose', 'help', ])
+    for opt, arg in optlist:  # @UnusedVariable arg
+        if opt in ('-h', '--help'):
+            _help()
+            sys.exit()
+        elif opt in ('-v', '--verbose'):
+            verbose = True
+    if len(args) and args[0][-2:]=='.s':
+        file_name = args[0]
+    return (file_name, verbose)
+
+
 def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     # Create the application
     app = QtGui.QApplication(sys.argv)
+    # Process the command line options
+    (file_name, verbose) = _getopts()
     # Create the main window and show it
-    main_window = QtARMSimMainWindow()
+    main_window = QtARMSimMainWindow(verbose = verbose)
     main_window.show()
-    # If there is an assembly file on the command line, open it
-    if sys.argv[1:] and sys.argv[1][-2:]==".s":
-        main_window.readFile(sys.argv[1])
+    # If there is a file_name from the command line, open it
+    if file_name:
+        main_window.readFile(file_name)
     # Enter the main loop of the application
     sys.exit(app.exec_())
+    
     
 if __name__ == "__main__":
     main()
