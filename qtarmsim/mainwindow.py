@@ -85,9 +85,11 @@ class DefaultSettings():
 class QtARMSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ARMSim application."
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, verbose=False):
         # Call super.__init__()
         super(QtARMSimMainWindow, self).__init__()
+        # Set verbosity
+        self.verbose = verbose
         # Load the user interface
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -305,7 +307,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                     self.ui.tabWidgetCode.setCurrentIndex(0)
                     return
             # Send settings to ARMSim
-            self.sendSettingsToARMSim()
+            if not self.sendSettingsToARMSim():
+                self.ui.tabWidgetCode.setCurrentIndex(0)
+                return
             # Assemble file_name
             self.doAssemble()
     
@@ -323,7 +327,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             # Set current source code has already been assembled as False
             self.source_code_assembled = False
             self.ui.textEditMessages.append(self.tr("<b>Assembly errors:</b>"))
-            self.ui.textEditMessages.append(response.errmsg)
+            if response.errmsg:
+                self.ui.textEditMessages.append(response.errmsg)
+            else:
+                self.ui.textEditMessages.append(self.tr("(Something bad has happened. That's all I know.)"))
             self.ui.textEditMessages.append("")
             msg = self.tr("An error has occurred when assembling the source code.\n"\
                           "Please, see the Messages panel for more details.")
@@ -390,15 +397,24 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def readFile(self, file_name):
         "Reads a file. Can be called using an argument from the command line"
         if file_name:
-            try:
-                self.ui.textEditSource.setText(open(file_name).read())
-            except UnicodeDecodeError as e:
-                err_msg = self.tr("'{}' codec can't decode byte {} in position {}: {}.").format(e.encoding,
-                                                                                                hex(e.object[e.start]),
-                                                                                                e.start,
-                                                                                                e.reason)
-                QtGui.QMessageBox.warning(self, self.tr("Error"), err_msg)
-                raise e
+            encodings = ['utf-8', 'latin1', 'ascii']
+            for i in range(len(encodings)):
+                try:
+                    text = open(file_name, encoding = encodings[i]).read()
+                    break
+                except UnicodeDecodeError as e:
+                    if i < len(encodings) - 1:
+                        msg = "Will try next with '{}' encoding.".format(encodings[i+1])
+                    else:
+                        msg = "No more supported encodings.\nPlease, manually convert the file to 'utf-8' and load it again."
+                    err_msg = self.tr("'{}' codec can't decode byte {} in position {}: {}.\n{}").format(e.encoding,
+                                                                                                        hex(e.object[e.start]),
+                                                                                                        e.start, e.reason, msg)
+                    err_msg = self.tr("Couldn't read the file using the '{}' encoding.\n{}").format(encodings[i], msg)
+                    QtGui.QMessageBox.warning(self, self.tr("Error reading '{}'").format(os.path.basename(file_name)), err_msg)
+                    if i == len(encodings) -1:
+                        raise e
+            self.ui.textEditSource.setText(text)
             self.setFileName(file_name)
         
     def doSave(self):
@@ -428,12 +444,16 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def saveFile(self, file_name):
         "Saves the contents of the source editor on the given file name"
         asm_file = QtCore.QFile(file_name)
-        # @warning: as qscintilla handles CRLF, the file cannot be opened in text mode (| QtCore.QFile.Text)
+        # @warning: as qscintilla messes up CRLFs and LFs on Windows, the file is not opened in text mode (| QtCore.QFile.Text)
         if not asm_file.open(QtCore.QFile.WriteOnly): 
             QtGui.QMessageBox.warning(self, self.tr("Error"),
                     self.tr("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
-        asm_file.write(self.ui.textEditSource.text().encode(sys.getdefaultencoding()))
+        # As \r\n can be mixed with \n, replace each \r\n by a \n
+        text = self.ui.textEditSource.text().replace('\r\n', '\n')
+        if sys.platform == "win32":
+            text = text.replace('\n', '\r\n')
+        asm_file.write(text.encode('utf-8')); # @todo: let user decide which enconding (including sys.getdefaultencoding())
         asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         self.setFileName(file_name)
@@ -742,7 +762,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                     self.tr("ARM gcc command not found.\n\n"
                             "Please go to 'Configure QtARMSim' and set it.\n"))
             return False
-        self.simulator = ARMSimConnector()
+        self.simulator = ARMSimConnector(verbose = self.verbose)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         connectProgressBarDialog = ConnectProgressBarDialog(self.simulator,
                                                             self.settings.value("ARMSimCommand"),
@@ -776,4 +796,5 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             if errmsg:
                 QtGui.QMessageBox.warning(self, self.tr("ARMSim set setting failed"), "\n{}\n".format(errmsg))
                 return False
+        return True
                                         
