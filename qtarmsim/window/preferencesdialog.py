@@ -19,13 +19,13 @@
 
 from PyQt4 import QtGui, QtCore
 
-from ..ui.settings import Ui_SettingsDialog
+from .. ui.preferences import Ui_PreferencesDialog
 
-class SettingsDialog(QtGui.QDialog):
+class PreferencesDialog(QtGui.QDialog):
 
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
-        self.ui = Ui_SettingsDialog()
+        self.ui = Ui_PreferencesDialog()
         self.ui.setupUi(self)
         self.setFromSettings(self.parent().settings)
         self.connect(self.ui.pushButtonARMSimRestoreDefaults, QtCore.SIGNAL('clicked()'), self.restoreARMSimDefaults)
@@ -63,5 +63,5 @@ class SettingsDialog(QtGui.QDialog):
         s.setValue("ARMSimDirectory", self.ui.lineEditARMSimDirectory.text())
         s.setValue("ARMGccCommand", self.ui.lineEditARMGccCommand.text())
         s.setValue("ARMGccOptions", self.ui.lineEditARMGccOptions.text())
-        return super(SettingsDialog, self).accept()
+        return super(PreferencesDialog, self).accept()
     

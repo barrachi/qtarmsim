@@ -37,7 +37,7 @@ from . window.help import HelpWindow
 from . window.im import Imprimir
 from . window.mu import Multipasos
 from . window.op import Opciones
-from . window.settingsdialog import SettingsDialog
+from . window.preferencesdialog import PreferencesDialog
 from . window.va import Valor
 from . window.connectprogressbardialog import ConnectProgressBarDialog
 from . modulepath import module_path
@@ -551,9 +551,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.statusBar.setVisible(True)
         self.checkShowActions()
         
-    def doConfigure_Qt_ArmSim(self):
-        settings = SettingsDialog(self)
-        if settings.exec_():
+    def doPreferences(self):
+        preferences = PreferencesDialog(self)
+        if preferences.exec_():
             if self.simulator and self.simulator.connected:
                 self.sendSettingsToARMSim()
             
@@ -755,12 +755,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             and not self.settings.value("ARMSimCommand"):
             QtGui.QMessageBox.warning(self, self.tr("ARMSim command empty"),
                     self.tr("ARMSim command is empty.\n\n"
-                            "Please go to 'Configure QtARMSim' and set it.\n"))
+                            "Please go to 'View, Preferences...' and set it.\n"))
             return False
         if not os.path.isfile(self.settings.value("ARMGccCommand")):
             QtGui.QMessageBox.warning(self, self.tr("ARM gcc not found"),
                     self.tr("ARM gcc command not found.\n\n"
-                            "Please go to 'Configure QtARMSim' and set it.\n"))
+                            "Please go to 'View, Preferences...' and set it.\n"))
             return False
         self.simulator = ARMSimConnector(verbose = self.verbose)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
