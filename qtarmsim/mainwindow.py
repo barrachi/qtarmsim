@@ -159,7 +159,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.restoreState(self.settings.value("windowState", self.initialWindowState))
         # Begin migration of settings versions
         conf_version = self.settings.value("ConfVersion")
-        if not conf_version:
+        if not conf_version and self.settings.value("ARMSimCommand"):
             # Migrate from version 1 to version 2
             conf_version = "2"
             self.settings.setValue("ConfVersion", conf_version)
