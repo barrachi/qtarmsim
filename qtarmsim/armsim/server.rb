@@ -515,6 +515,7 @@ config_compiler = Proc.new { |entrada|
 
 config_args = Proc.new { |entrada|
   $args = entrada[0]
+  p $args
   res = "OK\r\n"
 }
 
@@ -680,9 +681,7 @@ class MainServer < TCPServer
                 tokens[idx] = tokens[idx].to_i
               when :file_s
                 return Errores[:file_s] unless File.file?($path + tokens[idx].split('.')[0] + '.s')
-              when :cad
-              when :path
-              when :exe
+              when :cad, :path, :exe
                 cad = tokens[idx]
                 (idx + 1).upto(tokens.length - 1) do |idx2|
                   cad = cad + ' ' + tokens[idx2]
