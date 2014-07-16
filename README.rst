@@ -1,12 +1,12 @@
 Qt ARMSim
 =========
 
-Qt ARMSim is a graphical frontend to the ARMSim ARM simulator. It provides
-an easy to use multiplatform ARM emulation environment that can be used on
-Computer Architecture Introductory courses.
+Qt |~| ARMSim is a graphical frontend to the ARMSim ARM simulator. It provides
+an easy to use multiplatform ARM emulation environment that has been designed
+to be used on Computer Architecture Introductory courses.
 
-The ARMSim ARM simulator, Copyright (c) 2014 German Fabregat, is included
-with the Qt ARM Sim distribution. It can be found on the `armsim/` directory.
+The ARMSim ARM simulator, Copyright (c) 2014 by German Fabregat, is included
+with the Qt |~| ARMSim package. It can be found on the `armsim/` directory.
 
 
 .. contents::
@@ -181,7 +181,7 @@ the following command::
 This installation option is intended only for those GNU/Linux that does not provide
 yet an easy installation procedure for Python |~| 3 and PyQt4 for Python |~| 3.
 The other dependencies, i.e. Ruby and the GCC ARM cross compiler, should be installed
-as described previously.
+as previously described.
 
 If a binary package is available for this Qt ARMSim version, you will see a file
 called like ``qtarmsim-x.y.z.linux-ARCH.tar.gz`` in the Downloads section of
