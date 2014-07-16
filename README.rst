@@ -1,10 +1,15 @@
 Qt ARMSim
 =========
 
-Qt ARMSim is a graphical frontend to the ARMSim ARM simulator.
+Qt ARMSim is a graphical frontend to the ARMSim ARM simulator. It provides
+an easy to use multiplatform ARM emulation environment that can be used on
+Computer Architecture Introductory courses.
 
-It should run on any platform supported by PyQt4, including GNU/Linux,
-MacOS/X and Windows.
+The ARMSim ARM simulator, Copyright (c) 2014 German Fabregat, is included
+with the Qt ARM Sim distribution. It can be found on the `armsim/` directory.
+
+
+.. contents::
 
 
 1. Dependencies
@@ -36,23 +41,27 @@ Python3 (the package manager will take care of its dependencies and
 will also install Python3 if it is not already installed); QScintilla
 with python bindings, if offered as a separate package; and Ruby.
 
-For example, in Gentoo, you can use::
-
-  # emerge -av PyQt4 qscintilla-python ruby
-
 Installing GCC for ARM can be achieved either by building a
 cross-compiling toolchain, installing a GCC for ARM package provided
 by your distribution, or by extracting the ``gcc-arm-none-eabi``
 ``tar.gz`` for linux32 or linux64 from the `Arduino download page
 <https://code.google.com/p/arduino/downloads/list>`_.
 
-For example, on Gentoo, building the cross-compiling toolchain
-involves the following commands::
+On Gentoo you can install all the dependencies using::
 
-  # emerge -av crossdev
-  # crossdev --target arm --ov-output /usr/local/portage
+   # emerge -av PyQt4 qscintilla-python ruby
+   # emerge -av crossdev
+   # crossdev --target arm --ov-output /usr/local/portage
 
-On Ubuntu, the ``gcc-arm-linux-gnueabi`` package should be installed.
+On Kubuntu you can install all the dependencies using::
+
+   $ TO BE DONE
+   
+.. comment:  On Ubuntu, the ``gcc-arm-linux-gnueabi`` package should be installed.
+
+In case your GNU/Linux distribution does not provide an easy way to
+install Python3, PyQt4 for Python3, and QScintilla, you can try the
+`Installing a binary version on GNU/Linux Section`_.
 
 
 1.2 How to install the dependencies on Windows?
@@ -105,10 +114,12 @@ follow the next steps:
 -----------------------
 
 Qt ARMSim can be automatically installed using pip (a tool for
-installing Python packages), or it can be manually installed.
-Next section shows how to install Qt |~| ARMSim using `pip`,
-which is the recommended method. Section |~| 2.2 shows how to
-install it manually. 
+installing Python packages), or manually. Next section shows how to
+install Qt |~| ARMSim using `pip`, which is the recommended method.
+Section |~| 2.2 shows how to install it manually. Finally,
+Section |~| 2.3 shows how to install a binary package
+on GNU/Linux (in case there is one available for this version of
+Qt |~| ARMSim). 
 
 
 2.1 Using pip (recommended method)
@@ -118,14 +129,25 @@ If pip is not installed in your system, download `get-pip.py
 <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_, and
 execute::
 
-  # python3 get-pip.py
+   # python3 get-pip.py
 
 Once ``pip`` is installed, you can install Qt ARMSim with::
 
-  # pip3 install --pre qtarmsim
+   # pip3 install --pre qtarmsim
 
-If you execute the previous commands as root, they will be installed
-system wide. If not, they will be installed only for the current user.
+If you execute the previous commands as root, both pip and Qt |~| ARMSim
+will be installed system wide. If not, they will be installed only
+for the current user.
+
+To upgrade a previous installation of Qt |~| ARMSim you can use the command::
+
+   # pip3 install --pre --upgrade qtarmsim
+   
+If it refuses to upgrade, then you can uninstall any previously installed
+version and then install it again::
+
+   # pip3 uninstall qtarmsim   
+   # pip3 install --pre qtarmsim
 
 
 2.2 Manual installation
@@ -151,6 +173,42 @@ the following command::
 
 
 
+.. _Installing a binary version on GNU/Linux Section:
+
+2.3 Installing a binary version on GNU/Linux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This installation option is intended only for those GNU/Linux that does not provide
+yet an easy installation procedure for Python |~| 3 and PyQt4 for Python |~| 3.
+The other dependencies, i.e. Ruby and the GCC ARM cross compiler, should be installed
+as described previously.
+
+If a binary package is available for this Qt ARMSim version, you will see a file
+called like ``qtarmsim-x.y.z.linux-ARCH.tar.gz`` in the Downloads section of
+`<https://pypi.python.org/pypi/qtarmsim/>`_. 
+
+If there is such a file for your GNU/Linux architecture, you can download it and
+follow the next steps to install Qt |~| ARMSim on your system::
+
+   # mkdir tmp/
+   # cd tmp/
+   # tar -xzf qtarmsim-x.y.z.linux-ARCH.tar.gz
+   # cp -r usr/bin/* /usr/bin/
+   # cp -r usr/lib/* /usr/lib/
+
+Although you could be tempted to extract the ``tar.gz`` file directly
+on the root directory, this is not a good idea. If you do that and the original
+``/usr/lib`` directory happens to be a symbolic link, the extraction will silently
+overwrite the original ``/usr/lib`` link with a new, an almost empty, directory.
+
+Finally, to be able to execute the ``qtarmsim`` binary you will have to either
+add ``/usr/lib/qtarmsim-x.y.z`` to your system ``LD_LIBRARY_PATH`` or simply copy
+the ``/usr/lib/qtarmsim-x.y.z/libqscintilla2.so.x`` file to ``/usr/lib/``::
+
+   # cp /usr/lib/qtarmsim-x.y.z/libqscintilla* /usr/lib/
+
+
+
 3. Executing Qt ARMSim
 ----------------------
 
@@ -160,8 +218,8 @@ that should be on the system path.
 
 Otherwise, ``qtarmsim`` will be on a user directory. On GNU/Linux, it
 will be on ``~/.local/bin/``. On Windows, it will be on
-``C:\\Users\YourUser\AppData\Roaming\Python\Scripts\``. You can add
-that directory to your path if you want.
+``C:\\Users\YourUser\AppData\Roaming\Python\Scripts\``. For your convenience,
+you could add that directory to your path.
 
 
 

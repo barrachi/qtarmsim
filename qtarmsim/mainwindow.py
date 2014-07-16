@@ -16,21 +16,6 @@
 #                                                                         #
 ###########################################################################
 
-###########################################################################
-#                                                                         #
-#  This program is free software: you can redistribute it and/or modify   #
-#  it under the terms of the GNU General Public License as published by   #
-#  the Free Software Foundation; either version 3 of the License, or      #
-#  (at your option) any later version.                                    #
-#                                                                         #
-#  This program is distributed in the hope that it will be useful, but    #
-#  WITHOUT ANY WARRANTY; without even the implied warranty of             #
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      #
-#  General Public License for more details.                               #
-#                                                                         #
-###########################################################################
-
-
 import os
 import sys
 import shutil
@@ -38,27 +23,29 @@ import shutil
 from PyQt4 import QtCore, QtGui
 from PyQt4.Qsci import QsciScintilla
 
-from .version import __version__
-from .comm.armsimconnector import ARMSimConnector
-from .model.memorymodel import MemoryModel
-from .model.registersmodel import RegistersModel
-from .res import main_rc, oxygen_rc  # @UnusedImport
-from .ui.mainwindow import Ui_MainWindow
-from .widget.simplearmeditor import SimpleARMEditor
-from .window.br import Breakpoi
-from .window.co import Conso
-from .window.ej import Ejecutar
-from .window.help import HelpWindow
-from .window.im import Imprimir
-from .window.mu import Multipasos
-from .window.op import Opciones
-from .window.settingsdialog import SettingsDialog
-from .window.va import Valor
-from .window.connectprogressbardialog import ConnectProgressBarDialog
+from . version import __version__
+from . comm.armsimconnector import ARMSimConnector
+from . model.memorymodel import MemoryModel
+from . model.registersmodel import RegistersModel
+from . res import main_rc, oxygen_rc  # @UnusedImport
+from . ui.mainwindow import Ui_MainWindow
+from . widget.simplearmeditor import SimpleARMEditor
+from . window.br import Breakpoi
+from . window.co import Conso
+from . window.ej import Ejecutar
+from . window.help import HelpWindow
+from . window.im import Imprimir
+from . window.mu import Multipasos
+from . window.op import Opciones
+from . window.settingsdialog import SettingsDialog
+from . window.va import Valor
+from . window.connectprogressbardialog import ConnectProgressBarDialog
+from . modulepath import module_path
 
 
 def _fromUtf8(s):
     return s
+
 
 class DefaultSettings():
     
@@ -69,8 +56,7 @@ class DefaultSettings():
         return getattr(self, "_" + name)
         
     def _setARMSimDefaults(self):
-        my_path = os.path.dirname(os.path.realpath(__file__))
-        fname = os.path.join(my_path, "armsim", "server.rb")
+        fname = os.path.join(module_path, "armsim", "server.rb")
         if os.path.isfile(fname):
             fname = os.path.abspath(fname)
         else:

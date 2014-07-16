@@ -21,7 +21,10 @@ import sys
 
 from PyQt4 import QtCore, QtGui
 
-from ..ui.help import Ui_Help
+
+from .. modulepath import module_path
+from .. ui.help import Ui_Help
+
 
 
 class HelpWindow(QtGui.QWidget):
@@ -42,9 +45,7 @@ class HelpWindow(QtGui.QWidget):
         policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored,
                                    QtGui.QSizePolicy.Ignored)
         self.editor.setSizePolicy(policy)
-        my_path = os.path.dirname(os.path.realpath(__file__))
-        # @todo: Ayuda.html should be changed to Help.html
-        url = QtCore.QUrl.fromLocalFile(os.path.join(my_path, "..", "html", self.tr("Ayuda.html")))
+        url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "html", self.tr("Help.html")))
         self.editor.setSource(url)
 
     def resizeEvent(self, event):
