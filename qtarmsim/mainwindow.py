@@ -271,7 +271,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
-
+        # Connect to breakpoint_changed from self.ui.textEditARMSim
+        self.ui.textEditARMSim.breakpoint_changed.connect(self.breakpointChanged)
 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
@@ -344,6 +345,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.source_code_assembled = False
         self.checkFileActions()
         self.checkAssembledActions()
+
+    def breakpointChanged(self, set_breakpoint, hex_address):
+        errmsg = ""
+        if set_breakpoint:
+            errmsg = self.simulator.setBreakpoint(hex_address)
+        else:
+            errmsg = self.simulator.clearBreakpoint(hex_address)
+        if errmsg:
+            QtGui.QMessageBox.warning(self, self.tr("Breakpoints Error"), errmsg)
 
 
     def checkCurrentFileState(self):
@@ -475,6 +485,20 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             (line, index) = self.ui.textEditARMSim.getCursorPosition()  # @UnusedVariable index
             self.ui.textEditARMSim.highlightPCLine(line)
             
+    def _processExecutionResponse(self, response):
+        self.ui.textEditMessages.append(response.assembly_line)
+        for (reg_number, reg_value) in response.registers:
+            self.registersModel.setRegister(reg_number, reg_value)
+        for (hex_address, hex_byte) in response.memory:
+            self.memoryModel.setByte(hex_address, hex_byte)
+        if response.result == "ERROR":
+            self.ui.textEditMessages.append("<b>An error has occurred.</b>")
+        elif response.result == "BREAKPOINT REACHED":
+            self.ui.textEditMessages.append("Breakpoint reached.")
+        elif response.result == "END OF PROGRAM":
+            self.ui.textEditMessages.append("End of program reached.")
+        if response.errmsg:
+            self.ui.textEditMessages.append(response.errmsg)
 
     def _doStep(self, simulator_step_callback):
         if not self.simulator.connected:
@@ -482,14 +506,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.registersModel.stepHistory()
         self.memoryModel.stepHistory()
         response = simulator_step_callback()
-        self.ui.textEditMessages.append(response.assembly_line)
-        for (reg_number, reg_value) in response.registers:
-            self.registersModel.setRegister(reg_number, reg_value)
-        for (hex_address, hex_byte) in response.memory:
-            self.memoryModel.setByte(hex_address, hex_byte)
-        if response.errmsg:
-            self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
-            self.ui.textEditMessages.append(response.errmsg)
+        self._processExecutionResponse(response)
         self.highlight_pc_line()
         
     def doStepInto(self):
@@ -503,14 +520,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def doRun(self):
         response = self.simulator.getExecuteAll()
-        self.ui.textEditMessages.append(response.assembly_line)
-        for (reg_number, reg_value) in response.registers:
-            self.registersModel.setRegister(reg_number, reg_value)
-        for (hex_address, hex_byte) in response.memory:
-            self.memoryModel.setByte(hex_address, hex_byte)
-        if response.errmsg:
-            self.ui.textEditMessages.append("<b>The following error has occurred:</b>")
-            self.ui.textEditMessages.append(response.errmsg)
+        self._processExecutionResponse(response)
         self.highlight_pc_line()
                 
     #################################################################################

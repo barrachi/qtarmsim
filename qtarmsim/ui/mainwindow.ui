@@ -109,7 +109,6 @@
     <property name="title">
      <string>&amp;Run</string>
     </property>
-    <addaction name="actionResume"/>
     <addaction name="actionStepInto"/>
     <addaction name="actionStepOver"/>
     <addaction name="actionRestart"/>
@@ -194,7 +193,6 @@
    <addaction name="separator"/>
    <addaction name="actionRun"/>
    <addaction name="separator"/>
-   <addaction name="actionResume"/>
    <addaction name="actionStepInto"/>
    <addaction name="actionStepOver"/>
    <addaction name="separator"/>

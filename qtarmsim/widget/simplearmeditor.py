@@ -7,12 +7,19 @@
 #===============================================================================
 
 import sys
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+
+from PyQt4 import QtCore, QtGui
 from PyQt4.Qsci import QsciScintilla
+
 from .qscilexerarm import QsciLexerARM
 
+
 class SimpleARMEditor(QsciScintilla):
+
+    # breakpoint_changed signal, parameters are if set or unset (True/False) and hex_address
+    breakpoint_changed = QtCore.pyqtSignal(int, 'QString')
+
+    # Markers
     BREAKPOINT_MARKER = QsciScintilla.Circle
     PC_MARKER1 = QsciScintilla.RightArrow
     PC_MARKER2 = QsciScintilla.Background
@@ -21,13 +28,13 @@ class SimpleARMEditor(QsciScintilla):
         super(SimpleARMEditor, self).__init__(parent)
 
         # Set the default font
-        font = QFont()
+        font = QtGui.QFont()
         font.setFamily('Courier')
         font.setFixedPitch(True)
         font.setPointSize(10)
         self.setFont(font)
         self.setMarginsFont(font)
-        self.setMarginsBackgroundColor(QColor("#CCCCCC"))
+        self.setMarginsBackgroundColor(QtGui.QColor("#CCCCCC"))
 
         # Marker related variables
         self.breakpoints = {}
@@ -43,29 +50,29 @@ class SimpleARMEditor(QsciScintilla):
             self.setMarginType(1, QsciScintilla.SymbolMargin)
             self.setMarginSensitivity(1, True)
             # Clickable margin configuration
-            self.connect(self, SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'), self.on_margin_clicked)
+            self.connect(self, QtCore.SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'), self.on_margin_clicked)
             # Breakpoint marker (white circle filled with red)
             self.markerDefine(self.BREAKPOINT_MARKER, self.BREAKPOINT_MARKER)
-            self.setMarkerForegroundColor(QColor("#DDDDDD"), self.BREAKPOINT_MARKER)
-            self.setMarkerBackgroundColor(QColor("#DD5555"), self.BREAKPOINT_MARKER)
+            self.setMarkerForegroundColor(QtGui.QColor("#DDDDDD"), self.BREAKPOINT_MARKER)
+            self.setMarkerBackgroundColor(QtGui.QColor("#DD5555"), self.BREAKPOINT_MARKER)
             # PC Marker 1 (white right arrow filled with light blue)
             self.markerDefine(self.PC_MARKER1, self.PC_MARKER1)
-            self.setMarkerForegroundColor(QColor("#000000"), self.PC_MARKER1)
-            self.setMarkerBackgroundColor(QColor("#E4E4FF"), self.PC_MARKER1)
+            self.setMarkerForegroundColor(QtGui.QColor("#000000"), self.PC_MARKER1)
+            self.setMarkerBackgroundColor(QtGui.QColor("#E4E4FF"), self.PC_MARKER1)
             # PC Marker 2 (line background with light blue)
             self.markerDefine(self.PC_MARKER2, self.PC_MARKER2)
-            self.setMarkerForegroundColor(QColor("#FFFFFF"), self.PC_MARKER2) # Not used
-            self.setMarkerBackgroundColor(QColor("#E4E4FF"), self.PC_MARKER2)
+            self.setMarkerForegroundColor(QtGui.QColor("#FFFFFF"), self.PC_MARKER2) # Not used
+            self.setMarkerBackgroundColor(QtGui.QColor("#E4E4FF"), self.PC_MARKER2)
         else:
             # Brace matching kind
             self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
             # Margin on editor
             self.setMarginType(0, QsciScintilla.NumberMargin)
-            self.setMarginWidth(0, QFontMetrics(font).width("0000") + 6)
+            self.setMarginWidth(0, QtGui.QFontMetrics(font).width("0000") + 6)
             self.setMarginWidth(1, 0)
             # Current line visible with special background color
             self.setCaretLineVisible(True)
-            self.setCaretLineBackgroundColor(QColor("#e4e4ff"))
+            self.setCaretLineBackgroundColor(QtGui.QColor("#e4e4ff"))
             # Don't want to see the horizontal scrollbar at all
             self.SendScintilla(QsciScintilla.SCI_SETHSCROLLBAR, 0)
         
@@ -82,13 +89,17 @@ class SimpleARMEditor(QsciScintilla):
 
     
     def on_margin_clicked(self, nmargin, nline, modifiers):
+        # Get hex address from nline
+        hex_address = self.text(nline).split(" ")[0][1:-1]
         # Toggle marker for the line the margin was clicked on
         if self.breakpoints.get(nline):
             self.markerDelete(nline, self.BREAKPOINT_MARKER)
             self.breakpoints.pop(nline)
+            self.breakpoint_changed.emit(False, hex_address)
         else:
             self.markerAdd(nline, self.BREAKPOINT_MARKER)
             self.breakpoints[nline] = True
+            self.breakpoint_changed.emit(True, hex_address)
 
     def highlightPCLine(self, nline):
         #self.setFocus()
@@ -108,7 +119,7 @@ class SimpleARMEditor(QsciScintilla):
             
         
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
     editor = SimpleARMEditor()
     editor.show()
     editor.setText(open("hello_world.asm").read())

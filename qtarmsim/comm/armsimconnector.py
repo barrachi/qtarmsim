@@ -364,6 +364,20 @@ class ARMSimConnector():
     def getExecuteAll(self):
         return self._getExecuteStep("ALL")
         
+    def setBreakpoint(self, hex_address):
+        self.mysocket.send_line("SET BREAKPOINT AT {}".format(hex_address))
+        line = self.mysocket.receive_line()
+        if line != 'OK':
+            return "Error when trying to set the breakpoint at '{}'.\n".format(hex_address)
+        return None
+
+    def clearBreakpoint(self, hex_address):
+        self.mysocket.send_line("CLEAR BREAKPOINT AT {}".format(hex_address))
+        line = self.mysocket.receive_line()
+        if line != 'OK':
+            return "Error when trying to clear the breakpoint at '{}'.\n".format(hex_address)
+        return None
+
     def sendExit(self):
         """
         Sends exit command.
