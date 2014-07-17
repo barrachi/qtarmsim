@@ -72,6 +72,7 @@ end
 # @param [String] name
 # @return [Hash] (dir_rel => [source, number])
 def gen_source(name)
+  p name
   source = Hash.new
   intext = false
   fi = File.open(name)
@@ -549,11 +550,13 @@ sysinfo_memory = Proc.new { |entrada|
 
 assemble = Proc.new { |entrada|
   nf = entrada[0].split('.')[0]
-  fline = $path + nf
+  old_dir = Dir.pwd
+  Dir.chdir($path)
+  fline = nf
   cline = '"' + $compiler + '"' + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
   eline = '2> ' + fline + '.err'
   lline = '> ' + fline + '.lst'
-  if system(cline + ' ' + fline + '.s ' + ' ' + lline + ' ' + eline)
+  if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
     blocks = read_ELF(fline + '.o')
     procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     procesador.memory.add_block(blocks[1])
@@ -575,6 +578,7 @@ assemble = Proc.new { |entrada|
   end
   File.delete(fline + '.err')
   File.delete(fline + '.lst')
+  Dir.chdir(old_dir)
   res
 }
 
@@ -686,11 +690,13 @@ class MainServer < TCPServer
                 (idx + 1).upto(tokens.length - 1) do |idx2|
                   cad = cad + ' ' + tokens[idx2]
                 end
-                tokens[idx] = cad
+              tokens[idx] = cad
               if args[idx] == :path
+                tokens[idx] = cad.gsub('\\', "/") #
                 return Errores[:path] unless File.directory?(tokens[idx])
                 tokens[idx] = tokens[idx] + '/' unless tokens[idx][-1] == '/' || tokens[idx][-1] == '\\'
               elsif args[idx] == :exe
+                tokens[idx] = cad.gsub('\\', "/") #
                 return Errores[:exe] unless File.executable?(tokens[idx])
               end
             end
