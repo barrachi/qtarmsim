@@ -343,6 +343,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if changed:
             self.source_code_assembled = False
         self.checkFileActions()
+        self.checkAssembledActions()
 
 
     def checkCurrentFileState(self):
@@ -472,9 +473,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         PC = self.registersModel.getRegister(15)
         if self.ui.textEditARMSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
             (line, index) = self.ui.textEditARMSim.getCursorPosition()  # @UnusedVariable index
-            self.ui.textEditARMSim.setFocus()
-            self.ui.textEditARMSim.setCursorPosition(line, 0)
-            self.ui.textEditARMSim.ensureLineVisible(line)
+            self.ui.textEditARMSim.highlightPCLine(line)
+            
 
     def _doStep(self, simulator_step_callback):
         if not self.simulator.connected:
