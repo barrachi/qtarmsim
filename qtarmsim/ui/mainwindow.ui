@@ -109,11 +109,12 @@
     <property name="title">
      <string>&amp;Run</string>
     </property>
+    <addaction name="actionRun"/>
+    <addaction name="separator"/>
     <addaction name="actionStepInto"/>
     <addaction name="actionStepOver"/>
-    <addaction name="actionRestart"/>
     <addaction name="separator"/>
-    <addaction name="actionRun"/>
+    <addaction name="actionRestart"/>
     <addaction name="separator"/>
     <addaction name="actionBreakpoints"/>
     <addaction name="separator"/>
@@ -195,6 +196,8 @@
    <addaction name="separator"/>
    <addaction name="actionStepInto"/>
    <addaction name="actionStepOver"/>
+   <addaction name="separator"/>
+   <addaction name="actionRestart"/>
    <addaction name="separator"/>
    <addaction name="actionWhats_This"/>
   </widget>

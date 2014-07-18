@@ -118,16 +118,16 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Set self.simulator to None
         self.simulator = None
         # Set current source code has been assembled to False
-        self.source_code_assembled = False
+        self.current_source_code_assembled = False
 
 
     def show(self, *args, **kwargs):
         "Method called when the window is ready to be shown"
         super(QtARMSimMainWindow, self).show(*args, **kwargs)
-        # checkFileActions checkShowActions and checkAssembledActions have to be called after the window is shown
+        # checkFileActions checkShowActions and enableSimulatorActions have to be called after the window is shown
         self.checkFileActions()
         self.checkShowActions()
-        self.checkAssembledActions()
+        self.enableSimulatorActions(False)
         
 
     def extendUi(self):
@@ -225,9 +225,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
  
         
-    def checkAssembledActions(self):
-        "Enables/disables actions that depend on an assembled code"
-        enabled = True if self.source_code_assembled else False
+    def enableSimulatorActions(self, enabled):
+        "Enables/disables actions that depend on being on the simulator tab"
         #--
         self.ui.actionResume.setEnabled(enabled)
         self.ui.actionStepInto.setEnabled(enabled)
@@ -287,12 +286,16 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def onTabChange(self, tabIndex):
         if tabIndex == 1: # doAssemble()
+            # Check if source code has to be saved or not
             if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
                 self.ui.tabWidgetCode.setCurrentIndex(0)
                 return
-            if self.simulator and self.source_code_assembled and not self.isSourceCodeModified():
+            # If we have already assembled the current source code, enable the simulator actions and return
+            if self.simulator and self.current_source_code_assembled and not self.isSourceCodeModified():
+                self.enableSimulatorActions(True)
                 return
-            # Check if there is something to assemble
+            # If not,
+            #   1) check if there is something to assemble
             text = self.ui.textEditSource.text().replace(" ", "").replace("\n", "")
             if len(text) < 10:
                 msg =   "It seems that there is no source code to assemble.\n" \
@@ -302,31 +305,33 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 if reply == QtGui.QMessageBox.No:
                     self.ui.tabWidgetCode.setCurrentIndex(0)
                     return
-            # Connect to the simulator if not already connected
+            #   2) Mark current source code as not assembled for now
+            self.current_source_code_assembled = False # Optimistic, isn't?
+            #   3) Connect to the simulator if not already connected
             if not self.simulator or (self.simulator and not self.simulator.connected):
                 if not self.connectToARMSim():
                     self.ui.tabWidgetCode.setCurrentIndex(0)
                     return
-            # Send settings to ARMSim
-            if not self.sendSettingsToARMSim():
+            #   4) Send settings to ARMSim and assemble file_name
+            if self.sendSettingsToARMSim() and self.doAssemble():
+                # If we arrived here:
+                self.current_source_code_assembled = True
+                self.enableSimulatorActions(True)
+            else:
                 self.ui.tabWidgetCode.setCurrentIndex(0)
-                return
-            # Assemble file_name
-            self.doAssemble()
+        else:
+            self.enableSimulatorActions(False)
     
     def doAssemble(self):
         # Assemble file_name
         response = self.simulator.doAssemble(self.file_name)
         if response.result == "SUCCESS":
-            # Set current source code has already been assembled as True
-            self.source_code_assembled = True
             self.ui.textEditMessages.append(self.tr("<b>{} assembled.</b>\n").format(self.file_name))
             # Update registers and memory
             self.updateRegisters()
             self.updateMemory()
+            return True
         else:
-            # Set current source code has already been assembled as False
-            self.source_code_assembled = False
             self.ui.textEditMessages.append(self.tr("<b>Assembly errors:</b>"))
             if response.errmsg:
                 self.ui.textEditMessages.append(response.errmsg)
@@ -336,15 +341,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             msg = self.tr("An error has occurred when assembling the source code.\n"\
                           "Please, see the Messages panel for more details.")
             QtGui.QMessageBox.warning(self, self.tr("Assembly Error"), msg)
-            self.ui.tabWidgetCode.setCurrentIndex(0)
-        self.checkAssembledActions()
+            return False
 
 
     def sourceCodeChanged(self, changed):
         if changed:
-            self.source_code_assembled = False
+            self.current_source_code_assembled = False
         self.checkFileActions()
-        self.checkAssembledActions()
+
 
     def breakpointChanged(self, set_breakpoint, hex_address):
         errmsg = ""
@@ -431,7 +435,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def doSave(self):
         "Saves the current ARM assembler file"
         # Set current source code has been assembled to False
-        self.source_code_assembled = False
+        self.current_source_code_assembled = False
+        # Save file
         if self.file_name == 'untitled.s':
             return self.doSave_As()
         else:
@@ -784,13 +789,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if not connectProgressBarDialog.exec_():
             return False
         errmsg = connectProgressBarDialog.getMsg()
-        #=======================================================================
-        # errmsg = self.simulator.connect(self.settings.value("ARMSimCommand"),
-        #                                 self.settings.value("ARMSimServer"),
-        #                                 int(self.settings.value("ARMSimPort")),
-        #                                 int(self.settings.value("ARMSimPortMinimum")),
-        #                                 int(self.settings.value("ARMSimPortMaximum")))
-        #=======================================================================
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed\n\n"), "{}".format(errmsg))
             return False
