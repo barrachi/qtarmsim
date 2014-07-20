@@ -62,7 +62,7 @@ def _getopts():
             sys.exit()
         elif opt in ('-v', '--verbose'):
             verbose = True
-    if len(args) and args[0][-2:]=='.s':
+    if len(args) and args[0][-2:] in ('.s', '.c'):
         file_name = args[0]
     return (file_name, verbose)
 

@@ -402,7 +402,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             return
         file_name = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
                                                      QtCore.QDir.currentPath(),
-                                                     self.tr("ARM assembler files (*.s)"))
+                                                     self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
         if file_name:
             self.readFile(file_name)
         # Change to tab 0
@@ -448,9 +448,13 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         file_name = self.file_name
         if file_name == '':
             file_name = os.path.join(QtCore.QDir.currentPath(), self.tr("untitled.s"))
+        if file_name[-2:] == '.c':
+            file_type = self.tr("ARM C files (*.c)")
+        else:
+            file_type = self.tr("ARM assembler files (*.s)")
         file_name = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"),
                                                       file_name,
-                                                      self.tr("ARM assembler file (*.s)"))
+                                                      file_type)
         if file_name == '':
             return False
         else:
