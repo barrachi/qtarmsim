@@ -1,0 +1,3 @@
+# Additional files to be included in the distribution
+
+include settings.py
