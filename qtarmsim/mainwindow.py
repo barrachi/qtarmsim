@@ -41,6 +41,7 @@ from . window.preferencesdialog import PreferencesDialog
 from . window.va import Valor
 from . window.connectprogressbardialog import ConnectProgressBarDialog
 from . modulepath import module_path
+from qtarmsim.window.runprogressbardialog import RunProgressBarDialog
 
 
 def _fromUtf8(s):
@@ -285,7 +286,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def onTabChange(self, tabIndex):
-        if tabIndex == 1: # doAssemble()
+        if tabIndex == 1:
             # Check if source code has to be saved or not
             if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
                 self.ui.tabWidgetCode.setCurrentIndex(0)
@@ -305,33 +306,36 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 if reply == QtGui.QMessageBox.No:
                     self.ui.tabWidgetCode.setCurrentIndex(0)
                     return
-            #   2) Mark current source code as not assembled for now
-            self.current_source_code_assembled = False # Optimistic, isn't?
-            #   3) Connect to the simulator if not already connected
-            if not self.simulator or (self.simulator and not self.simulator.connected):
-                if not self.connectToARMSim():
-                    self.ui.tabWidgetCode.setCurrentIndex(0)
-                    return
-            #   4) Assemble file_name
-            if self.doAssemble():
-                # If we arrived here:
-                self.current_source_code_assembled = True
-                self.enableSimulatorActions(True)
-            else:
-                self.ui.tabWidgetCode.setCurrentIndex(0)
+            #   2) Assembly self.file_name
+            self.doAssemble()
         else:
             self.enableSimulatorActions(False)
-    
+
+    def assembled(self, has_been_assembled):
+        if has_been_assembled:
+            self.current_source_code_assembled = True
+            self.enableSimulatorActions(True)
+            self.ui.textEditMessages.append(self.tr("<b>{} assembled.</b>\n").format(self.file_name))
+        else:
+            self.current_source_code_assembled = False
+            self.enableSimulatorActions(False)
+            self.ui.tabWidgetCode.setCurrentIndex(0)
+
     def doAssemble(self):
-        # Assemble file_name
+        # If not connected, connect to the simulator
+        if not self.simulator or (self.simulator and not self.simulator.connected):
+            if not self.connectToARMSim():
+                self.assembled(False)
+                return
+        # Assemble self.file_name
         response = self.simulator.doAssemble(self.file_name)
         if response.result == "SUCCESS":
-            self.ui.textEditMessages.append(self.tr("<b>{} assembled.</b>\n").format(self.file_name))
+            self.assembled(True)
             # Update registers and memory
             self.updateRegisters()
             self.updateMemory()
-            return True
         else:
+            self.assembled(False)
             self.ui.textEditMessages.append(self.tr("<b>Assembly errors:</b>"))
             if response.errmsg:
                 self.ui.textEditMessages.append(response.errmsg)
@@ -341,7 +345,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             msg = self.tr("An error has occurred when assembling the source code.\n"\
                           "Please, see the Messages panel for more details.")
             QtGui.QMessageBox.warning(self, self.tr("Assembly Error"), msg)
-            return False
 
 
     def sourceCodeChanged(self, changed):
@@ -525,11 +528,21 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self._doStep(self.simulator.getExecuteStepOver)
 
     def doRestart(self):
+        self.simulator.disconnect()
         self.doAssemble()
 
     def doRun(self):
-        response = self.simulator.getExecuteAll()
+        runProgressBarDialog = RunProgressBarDialog(self.simulator, self)
+        if not runProgressBarDialog.exec_():
+            self.simulator.disconnect()
+            self.doAssemble()
+            return
+        response = runProgressBarDialog.getResponse()
         self._processExecutionResponse(response)
+        if response.result == "ERROR":
+            self.simulator.disconnect()
+            self.doAssemble()
+            return
         self.highlight_pc_line()
                 
     #################################################################################
@@ -670,9 +683,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Save current geometry and window state
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
-        # Send EXIT command to ARMSim
+        # Disconnect the simulator
         if self.simulator and self.simulator.connected:
-            self.simulator.sendExit()
             self.simulator.disconnect()
         # Close windows
         self.consoleWindow.close()

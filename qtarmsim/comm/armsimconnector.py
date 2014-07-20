@@ -16,36 +16,20 @@
 #                                                                         #
 ###########################################################################
 
+from glob import glob
 import os
 import re
-import subprocess
-import time
-
-from .mysocket import MySocket
-import socket
 import shlex
+import socket
+import subprocess
 import sys
 import tempfile
-from glob import glob
+import time
 
 
-## Execute response container
-class ExecuteResponse():
-    
-    def __init__(self):
-        self.result = ""
-        self.assembly_line = ""
-        self.registers = []
-        self.memory = []
-        self.errmsg = ""
-
-## Assemble response container
-class AssembleResponse():
-    
-    def __init__(self):
-        self.result = ""
-        self.errmsg = ""
-
+from . mysocket import MySocket
+from . responses import ExecuteResponse, AssembleResponse
+from . exceptions import RunTimeOut
 
 class ARMSimConnector():
 
@@ -178,15 +162,20 @@ class ARMSimConnector():
             self.mysocket.close_socket()
             return False
         # Set timeout to something bigger
-        self.mysocket.sock.settimeout(4.0)
+        self.mysocket.sock.settimeout(5.0)
         return True
     
     def disconnect(self):
         """
-        Closes the socket. See also sendExit().
+        Ends the simulator connection.
         """
+        self._sendExit()
+        time.sleep(0.5)
         self.mysocket.close_connection()
         self.mysocket.close_socket()
+        # Kill current ARMSim process (if it is still alive)
+        if self.armsim_process and self.armsim_process.poll() == None:
+            self.armsim_process.kill()
         self.connected = False
         
     def getVersion(self):
@@ -364,7 +353,11 @@ class ARMSimConnector():
         return self._getExecuteStep("SUBROUTINE")
     
     def getExecuteAll(self):
-        return self._getExecuteStep("ALL")
+        try:
+            response = self._getExecuteStep("ALL")
+        except socket.timeout:
+            raise RunTimeOut()
+        return response
         
     def setBreakpoint(self, hex_address):
         self.mysocket.send_line("SET BREAKPOINT AT {}".format(hex_address))
@@ -380,13 +373,11 @@ class ARMSimConnector():
             return "Error when trying to clear the breakpoint at '{}'.\n".format(hex_address)
         return None
 
-    def sendExit(self):
+    def _sendExit(self):
         """
         Sends exit command.
         """
         self.mysocket.send_line("EXIT")
-        time.sleep(0.5)
-        self.disconnect()
 
 
 
