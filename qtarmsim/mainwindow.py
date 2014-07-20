@@ -312,8 +312,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 if not self.connectToARMSim():
                     self.ui.tabWidgetCode.setCurrentIndex(0)
                     return
-            #   4) Send settings to ARMSim and assemble file_name
-            if self.sendSettingsToARMSim() and self.doAssemble():
+            #   4) Assemble file_name
+            if self.doAssemble():
                 # If we arrived here:
                 self.current_source_code_assembled = True
                 self.enableSimulatorActions(True)
@@ -414,17 +414,17 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if file_name:
             encodings = ['utf-8', 'latin1', 'ascii']
             for i in range(len(encodings)):
+                f = open(file_name, encoding = encodings[i])
                 try:
-                    text = open(file_name, encoding = encodings[i]).read()
+                    text = f.read()
+                    f.close()
                     break
                 except UnicodeDecodeError as e:
+                    f.close()
                     if i < len(encodings) - 1:
-                        msg = "Will try next with '{}' encoding.".format(encodings[i+1])
+                        msg = self.tr("Will try next with '{}' encoding.").format(encodings[i+1])
                     else:
-                        msg = "No more supported encodings.\nPlease, manually convert the file to 'utf-8' and load it again."
-                    err_msg = self.tr("'{}' codec can't decode byte {} in position {}: {}.\n{}").format(e.encoding,
-                                                                                                        hex(e.object[e.start]),
-                                                                                                        e.start, e.reason, msg)
+                        msg = self.tr("No more supported encodings.\nPlease, manually convert the file to 'utf-8' and load it again.")
                     err_msg = self.tr("Couldn't read the file using the '{}' encoding.\n{}").format(encodings[i], msg)
                     QtGui.QMessageBox.warning(self, self.tr("Error reading '{}'").format(os.path.basename(file_name)), err_msg)
                     if i == len(encodings) -1:
@@ -796,7 +796,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
         self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(self.simulator.current_port), 2000)
-        return True
+        return self.sendSettingsToARMSim()
 
     def sendSettingsToARMSim(self):
         for setting in [("ARMGccCommand", self.settings.value("ARMGccCommand")), ("ARMGccOptions", self.settings.value("ARMGccOptions"))]:

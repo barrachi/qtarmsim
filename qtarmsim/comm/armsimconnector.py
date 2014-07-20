@@ -25,6 +25,8 @@ from .mysocket import MySocket
 import socket
 import shlex
 import sys
+import tempfile
+from glob import glob
 
 
 ## Execute response container
@@ -383,8 +385,8 @@ class ARMSimConnector():
         Sends exit command.
         """
         self.mysocket.send_line("EXIT")
-        self.disconnect()
         time.sleep(0.5)
+        self.disconnect()
 
 
 
@@ -400,20 +402,70 @@ class ARMSimConnector():
 # En caso de error, todas terminadas en \r\n.
 #===============================================================================
 
+    def _copyToTmpDir(self, src_fname):
+        """
+        Copies the given file to a temporary directory. Returns the name of the new file.
+        """
+        tmp_dir = tempfile.mkdtemp(".qtarmsim")
+        if self.verbose:
+            print("Creating temporary directory: {}".format(tmp_dir))
+        dst_fname = "program.s" if src_fname[-2:] != '.c' else "program.c"
+        dst_fname = os.path.join(tmp_dir, dst_fname)
+        # Find the coding of the  original file
+        encodings = ['utf-8', 'latin1', 'ascii']
+        for i in range(len(encodings)):
+            f = open(src_fname, encoding = encodings[i])
+            try:
+                f.read()
+                f.close()
+                break
+            except UnicodeDecodeError as e:
+                f.close()
+                if i == len(encodings) - 1:
+                    raise e
+        # Open the file with the correct encoding
+        f = open(src_fname, encoding = encodings[i])
+        dest = open(dst_fname, 'w')
+        for line in f:
+            dest.write(line)
+        f.close()
+        dest.close()
+        return dst_fname
+
+    def _disposeTmpDir(self, fname):
+        """
+        Removes the directory where the given file name is.
+        """
+        tmp_dir = os.path.dirname(fname)
+        if len(tmp_dir) < 5:
+            if self.verbose:
+                print("Cowardly refusing to remove directory '{}' (less than 5 characters).".format(tmp_dir))
+            return
+        if self.verbose:
+            print("Deleting temporary directory '{}'.".format(tmp_dir))
+        for fname in glob(os.path.join(tmp_dir, "program.*")):
+            os.remove(fname)
+        try:
+            os.rmdir(tmp_dir)
+        except OSError:
+            # Directory was not empty (don't raise an exception just for that ;-) )
+            pass
 
     #@todo: add this to the grammar document
-    def doAssemble(self, path):
-        self.has_assembled_code = False
+    def doAssemble(self, fname):
         response = AssembleResponse()
-        errmsg = self.setSettings("PATH", os.path.dirname(os.path.abspath(path)) + '/')
+        tmp_fname = self._copyToTmpDir(fname)
+        errmsg = self.setSettings("PATH", os.path.dirname(os.path.abspath(tmp_fname)) + '/')
         if errmsg:
             response.result = "ERROR"
             response.errmsg = errmsg
+            self._disposeTmpDir(tmp_fname)
             return response
-        self.mysocket.send_line("ASSEMBLE {}".format(os.path.basename(path)))
+        self.mysocket.send_line("ASSEMBLE {}".format(os.path.basename(tmp_fname)))
         line = self.mysocket.receive_line()
         response.result = line
         if response.result == "ERROR":
             errmsg_list = self.mysocket.receive_lines_till_eof()
             response.errmsg = "\n".join(errmsg_list)
+        self._disposeTmpDir(tmp_fname)
         return response
