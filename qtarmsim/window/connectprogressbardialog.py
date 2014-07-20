@@ -28,6 +28,7 @@ class ConnectProgressBarDialog(QtGui.QDialog):
         self.errmsg = ""
         
         super(ConnectProgressBarDialog, self).__init__(parent)
+        self.setWindowTitle("Connecting...")
         self.layout = QtGui.QVBoxLayout(self)
         
         # Create a label and a progress bar and add them to the main layout
