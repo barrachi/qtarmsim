@@ -33,7 +33,7 @@ class MemoryBank():
         """
         self.memtype = memtype
         self.start = int(start, 16)
-        self.end = self.start + nbytes
+        self.end = self.start + nbytes - 1
         if nbytes % 4:
             self.end += 4 - nbytes % 4
         self.length = int((self.end-self.start)/4) + 1
@@ -133,6 +133,11 @@ class MemoryModel(TreeModel):
             mb_row += 1
         return (-1, None)
     
+    def getIndex(self, hex_address):
+        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
+        memory_row = memory_bank.addressToIndex(hex_address)
+        return self.createIndex(memory_row, 0, self.rootItem.child(mb_row))
+
     def setByte(self, hex_address, hex_byte):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
         memory_row = memory_bank.addressToIndex(hex_address)
@@ -144,7 +149,7 @@ class MemoryModel(TreeModel):
         hex_word = "0x" + "".join(word_bytes)
         memory_item.setData(1, hex_word)
         self.modified_words.append((mb_row, memory_row))
-        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 0, self.rootItem.child(mb_row)))
+        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 1, self.rootItem.child(mb_row)))
 
     def setWord(self, hex_address, hex_word):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
@@ -152,7 +157,7 @@ class MemoryModel(TreeModel):
         memory_item = self.rootItem.child(mb_row).child(memory_row)
         memory_item.setData(1, hex_word)
         self.modified_words.append((mb_row, memory_row))
-        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 0, self.rootItem.child(mb_row)))
+        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 1, self.rootItem.child(mb_row)))
 
     def getWord(self, hex_address):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
@@ -175,4 +180,4 @@ class MemoryModel(TreeModel):
         self.previously_modified_words = self.modified_words[:]
         self.modified_words.clear()
         for (mb_row, memory_row) in copy_of_previous + self.previously_modified_words:
-            self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 0, self.rootItem.child(mb_row)))
+            self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 1, self.rootItem.child(mb_row)))

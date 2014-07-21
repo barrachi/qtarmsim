@@ -17,11 +17,12 @@
 ###########################################################################
 
 import os
-import sys
 import shutil
+import sys
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.Qsci import QsciScintilla
+
 
 from . version import __version__
 from . comm.armsimconnector import ARMSimConnector
@@ -41,7 +42,7 @@ from . window.preferencesdialog import PreferencesDialog
 from . window.va import Valor
 from . window.connectprogressbardialog import ConnectProgressBarDialog
 from . modulepath import module_path
-from qtarmsim.window.runprogressbardialog import RunProgressBarDialog
+from . window.runprogressbardialog import RunProgressBarDialog
 
 
 def _fromUtf8(s):
@@ -503,6 +504,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.registersModel.setRegister(reg_number, reg_value)
         for (hex_address, hex_byte) in response.memory:
             self.memoryModel.setByte(hex_address, hex_byte)
+        # @todo
+        #if response.memory:
+        #    (hex_address, hex_byte) = response.memory[0]
+        #    print(self.memoryModel.getIndex(hex_address))
+        #    self.ui.treeViewMemory.scrollTo(self.memoryModel.getIndex(hex_address), hint = QAbstractItemView.EnsureVisible)
         if response.result == "ERROR":
             self.ui.textEditMessages.append("<b>An error has occurred.</b>")
         elif response.result == "BREAKPOINT REACHED":
@@ -768,9 +774,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             for (hex_address, hex_byte) in self.simulator.getMemory(hex_start, nbytes):  # @UnusedVariable address
                 membytes.append(hex_byte)
             self.memoryModel.appendMemoryBank(memtype, hex_start, membytes)
-            #self.ui.treeViewMemory.expandAll()
-            self.ui.treeViewMemory.resizeColumnToContents(0)
-            self.ui.treeViewMemory.resizeColumnToContents(1)
             # if memtype == ROM then load the program into the ARMSim tab
             if memtype == 'ROM':
                 ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
@@ -778,6 +781,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.ui.textEditARMSim.setText('\n'.join(armsim_lines))
                 self.highlight_pc_line()
         self.memoryModel.clearHistory()
+        self.ui.treeViewMemory.expandAll()
+        self.ui.treeViewMemory.resizeColumnToContents(0)
+        self.ui.treeViewMemory.resizeColumnToContents(1)
 
 
     def connectToARMSim(self):
