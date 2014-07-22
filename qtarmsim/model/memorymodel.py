@@ -38,8 +38,8 @@ class MemoryBank():
             self.end += 4 - nbytes % 4
         self.length = int((self.end-self.start)/4) + 1
 
-    def addressToIndex(self, hex_address):
-        "Given an hexadecimal hex_address, it returns the corresponding index"
+    def addressToRow(self, hex_address):
+        "Given an hexadecimal hex_address, it returns the corresponding row"
         int_address = int(hex_address, 16)
         return int((int_address - self.start)/4)
     
@@ -135,12 +135,12 @@ class MemoryModel(TreeModel):
     
     def getIndex(self, hex_address):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToIndex(hex_address)
-        return self.createIndex(memory_row, 0, self.rootItem.child(mb_row))
+        memory_row = memory_bank.addressToRow(hex_address)
+        return self.createIndex(memory_row, 0, self.rootItem.child(mb_row).child(memory_row))
 
     def setByte(self, hex_address, hex_byte):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToIndex(hex_address)
+        memory_row = memory_bank.addressToRow(hex_address)
         memory_item = self.rootItem.child(mb_row).child(memory_row)
         hex_word = memory_item.data(1)
         pos = 3 - int(hex_address, 16) % 4
@@ -153,7 +153,7 @@ class MemoryModel(TreeModel):
 
     def setWord(self, hex_address, hex_word):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToIndex(hex_address)
+        memory_row = memory_bank.addressToRow(hex_address)
         memory_item = self.rootItem.child(mb_row).child(memory_row)
         memory_item.setData(1, hex_word)
         self.modified_words.append((mb_row, memory_row))
@@ -161,7 +161,7 @@ class MemoryModel(TreeModel):
 
     def getWord(self, hex_address):
         (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToIndex(hex_address)
+        memory_row = memory_bank.addressToRow(hex_address)
         memory_item = self.rootItem.child(mb_row).child(memory_row)
         return memory_item.data(1)
     

@@ -504,11 +504,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.registersModel.setRegister(reg_number, reg_value)
         for (hex_address, hex_byte) in response.memory:
             self.memoryModel.setByte(hex_address, hex_byte)
-        # @todo
-        #if response.memory:
-        #    (hex_address, hex_byte) = response.memory[0]
-        #    print(self.memoryModel.getIndex(hex_address))
-        #    self.ui.treeViewMemory.scrollTo(self.memoryModel.getIndex(hex_address), hint = QAbstractItemView.EnsureVisible)
+            self.ui.treeViewMemory.scrollTo(self.memoryModel.getIndex(hex_address))
         if response.result == "ERROR":
             self.ui.textEditMessages.append("<b>An error has occurred.</b>")
         elif response.result == "BREAKPOINT REACHED":

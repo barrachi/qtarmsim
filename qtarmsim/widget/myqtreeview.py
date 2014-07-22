@@ -34,7 +34,7 @@ class MyQTreeView(QtGui.QTreeView):
         self.resizeColumnToContents(1)
         for i in range(2):
             width += self.columnWidth(i)
-        # If the vertical scrollbar is visible, add its width
+        # If the vertical scroll bar is visible, add its width
         if my_vertical_scrollbar.isVisible():
             width += my_vertical_scrollbar.width()
         self.setMinimumSize(width, 0)
