@@ -27,7 +27,7 @@ class RegisterBank():
     def __init__(self, name, registers_data):
         self.name = name
         self.registers_data = registers_data
-        
+
 class RegistersModel(TreeModel):
 
     previously_modified_registers = []
@@ -36,7 +36,9 @@ class RegistersModel(TreeModel):
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
     q_font_last = QtGui.QFont("Courier 10 Pitch", weight=100)
 
-    def setupModelData(self):
+    def __init__(self, parent=None):
+        super(RegistersModel, self).__init__(parent)
+        self.rootItem = TreeItem(("Register", "Value"))
         register_banks = [ RegisterBank("General", [
                                                     ['r0', '0x00000000'], ['r1', '0x00000000'], ['r2', '0x00000000'], ['r3', '0x00000000'],
                                                     ['r4', '0x00000000'], ['r5', '0x00000000'], ['r6', '0x00000000'], ['r7', '0x00000000'],
@@ -78,14 +80,14 @@ class RegistersModel(TreeModel):
         self.modified_registers.append(reg)
         self.dataChanged.emit(self.createIndex(reg, 0, self.rootItem.child(0)),
                               self.createIndex(reg, 1, self.rootItem.child(0)))
-        
+
     def getRegister(self, i):
         return self.rootItem.child(0).child(i).data(1)
-    
+
     def clearHistory(self):
         self.previously_modified_registers.clear()
         self.modified_registers.clear()
-        
+
     def stepHistory(self):
         copy_of_previous = self.previously_modified_registers[:]
         self.previously_modified_registers = self.modified_registers[:]
@@ -93,3 +95,8 @@ class RegistersModel(TreeModel):
         for reg in copy_of_previous + self.previously_modified_registers:
             self.dataChanged.emit(self.createIndex(reg, 0, self.rootItem.child(0)),
                                   self.createIndex(reg, 1, self.rootItem.child(0)))
+
+    def reset(self):
+        self.beginResetModel()
+        # Reset stuff
+        self.endResetModel()

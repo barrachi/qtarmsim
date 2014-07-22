@@ -165,11 +165,15 @@ class MemoryModel(TreeModel):
         memory_item = self.rootItem.child(mb_row).child(memory_row)
         return memory_item.data(1)
     
-    def clear(self):
-        self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
+    def reset(self):
+        """
+        Resets the model to its original state in any attached views.
+        """
+        self.beginResetModel()
         self.memory_banks.clear()
         self.rootItem.childItems.clear()
-        self.emit(QtCore.SIGNAL("layoutChanged()"))
+        self.clearHistory()
+        self.endResetModel()
         
     def clearHistory(self):
         self.previously_modified_words.clear()

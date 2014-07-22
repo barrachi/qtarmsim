@@ -146,7 +146,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         
         # Link tableViewRegisters with registersModel
         self.registersModel = RegistersModel()
-        self.registersModel.setupModelData()
         self.ui.treeViewRegisters.setModel(self.registersModel)
         self.ui.treeViewRegisters.expandAll()
           
@@ -760,7 +759,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def updateMemory(self):
         "Updates the memory dock upon ARMSim data."
         # Process memory info
-        self.memoryModel.clear()
+        self.memoryModel.reset()
         for (memtype, hex_start, hex_end) in self.simulator.getMemoryBanks():
             # Dump memory
             start = int(hex_start, 16)
@@ -776,7 +775,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 armsim_lines = self.simulator.getDisassemble(hex_start, ninsts)
                 self.ui.textEditARMSim.setText('\n'.join(armsim_lines))
                 self.highlight_pc_line()
-        self.memoryModel.clearHistory()
         self.ui.treeViewMemory.expandAll()
         self.ui.treeViewMemory.resizeColumnToContents(0)
         self.ui.treeViewMemory.resizeColumnToContents(1)

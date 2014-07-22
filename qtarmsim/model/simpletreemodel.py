@@ -19,7 +19,7 @@
 ###########################################################################
 
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
 
 class TreeItem(object):
@@ -58,14 +58,14 @@ class TreeItem(object):
     def row(self):
         if self.parentItem:
             return self.parentItem.childItems.index(self)
-
-        return 0
+        else:
+            return 0
 
 
 class TreeModel(QtCore.QAbstractItemModel):
     def __init__(self, parent=None):
         super(TreeModel, self).__init__(parent)
-        self.rootItem = TreeItem(("Register", "Value"))
+        self.rootItem = TreeItem(("Column1", "Column2"))
 
     def columnCount(self, parent):
         if parent.isValid():
