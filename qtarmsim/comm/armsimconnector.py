@@ -373,6 +373,13 @@ class ARMSimConnector():
             return "Error when trying to clear the breakpoint at '{}'.\n".format(hex_address)
         return None
 
+    def clearBreakpoints(self):
+        self.mysocket.send_line("CLEAR BREAKPOINTS")
+        line = self.mysocket.receive_line()
+        if line != 'OK':
+            return "Error when trying to clear all the breakpoints.\n"
+        return None
+
     def _sendExit(self):
         """
         Sends exit command.

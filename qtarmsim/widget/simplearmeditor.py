@@ -87,7 +87,6 @@ class SimpleARMEditor(QsciScintilla):
         # Not too small
         # self.setMinimumSize(400, 300)
 
-    
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Get hex address from nline
         hex_address = self.text(nline).split(" ")[0][1:-1]
@@ -116,8 +115,12 @@ class SimpleARMEditor(QsciScintilla):
         # Restore breakpoints
         for nline in self.breakpoints.keys():
             self.markerAdd(nline, self.BREAKPOINT_MARKER)
-            
-        
+
+    def clearBreakpoints(self):
+        for nline in self.breakpoints.keys():
+            self.markerDelete(nline, self.BREAKPOINT_MARKER)
+        self.breakpoints.clear()
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     editor = SimpleARMEditor()

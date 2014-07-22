@@ -50,13 +50,13 @@ def _fromUtf8(s):
 
 
 class DefaultSettings():
-    
+
     def __init__(self):
         self._setARMSimDefaults()
-    
+
     def value(self, name):
         return getattr(self, "_" + name)
-        
+
     def _setARMSimDefaults(self):
         fname = os.path.join(module_path, "armsim", "server.rb")
         if os.path.isfile(fname):
@@ -82,11 +82,11 @@ class DefaultSettings():
         fname = fname if fname else gcc_names[0]
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
-        
+
 
 class QtARMSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ARMSim application."
-    
+
     def __init__(self, parent=None, verbose=False):
         # Call super.__init__()
         super(QtARMSimMainWindow, self).__init__()
@@ -121,6 +121,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.simulator = None
         # Set current source code has been assembled to False
         self.current_source_code_assembled = False
+        # Breakpoints
+        self.breakpoints = []
 
 
     def show(self, *args, **kwargs):
@@ -130,7 +132,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.checkFileActions()
         self.checkShowActions()
         self.enableSimulatorActions(False)
-        
+
 
     def extendUi(self):
         "Extends the Ui with new objects and links the tree views with their models"
@@ -138,12 +140,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.textEditSource = SimpleARMEditor(self.ui.tabSource)
         self.ui.textEditSource.setObjectName(_fromUtf8("textEditSource"))
         self.ui.verticalLayoutSource.addWidget(self.ui.textEditSource)
-        
+
         # Add text editor based on QsciScintilla to tabARMSim
         self.ui.textEditARMSim = SimpleARMEditor(self.ui.tabARMSim, disassemble=True)
         self.ui.textEditARMSim.setObjectName(_fromUtf8("textEditARMSim"))
         self.ui.verticalLayoutARMSim.addWidget(self.ui.textEditARMSim)
-        
+
         # Link tableViewRegisters with registersModel
         self.registersModel = RegistersModel()
         self.ui.treeViewRegisters.setModel(self.registersModel)
@@ -153,7 +155,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.memoryModel = MemoryModel()
         self.ui.treeViewMemory.setModel(self.memoryModel)
 
-            
+
     def readSettings(self):
         "Reads the settings from the settings file or initializes them from defaultSettings"
         self.defaultSettings = DefaultSettings()
@@ -187,24 +189,24 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.settings.setValue("ARMGccCommand", self.defaultSettings.value("ARMGccCommand"))
         if not self.settings.value("ARMGccOptions"):
             self.settings.setValue("ARMGccOptions", self.defaultSettings.value("ARMGccOptions"))
-            
-        
+
+
     def defaultGeometry(self):
         "Resizes main window to 800x600 and returns the geometry"
         self.resize(800, 600)
         return self.saveGeometry()
 
-        
+
     def isSourceCodeModified(self):
         "Asks textEditSource if its contents have been modified"
         return self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_GETMODIFY)
-        
+
 
     def updateWindowTitle(self):
         modified_txt = self.tr(" [modified] - ") if self.isSourceCodeModified() else " - "
         title_txt = "{}{}{}".format(os.path.basename(self.file_name), modified_txt, "Qt ARMSim")
         self.setWindowTitle(title_txt)
-        
+
 
     def checkFileActions(self):
         "Enables/disables actions related to file management and updates window title accordingly"
@@ -216,7 +218,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.ui.actionSave_As.setEnabled(True)
         self.updateWindowTitle()
 
-        
+
     def checkShowActions(self):
         "Modifies the checked state of the show/hide actions depending on their widgets visibility"
         self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
@@ -225,7 +227,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
  
-        
+
     def enableSimulatorActions(self, enabled):
         "Enables/disables actions that depend on being on the simulator tab"
         #--
@@ -244,7 +246,17 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.treeViewRegisters.setEnabled(enabled)
         self.ui.treeViewMemory.setEnabled(enabled)
         self.ui.actionAbout_ARMSim.setEnabled(enabled)
-        
+
+    def clearBreakpoints(self):
+        """
+        Clears breakpoints on simulator, on textEditARMSim and on myself
+        """
+        if self.simulator and self.simulator.connected:
+            self.simulator.clearBreakpoints()
+        self.ui.textEditARMSim.clearBreakpoints()
+        self.breakpoints.clear()
+
+
     #################################################################################
     # Actions and events
     #################################################################################
@@ -357,8 +369,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         errmsg = ""
         if set_breakpoint:
             errmsg = self.simulator.setBreakpoint(hex_address)
+            if not errmsg:
+                self.breakpoints.append(hex_address)
         else:
             errmsg = self.simulator.clearBreakpoint(hex_address)
+            if not errmsg:
+                self.breakpoints.remove(hex_address)
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Breakpoints Error"), errmsg)
 
@@ -374,7 +390,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.doSave()
         return reply
 
-            
+
     #################################################################################
     # File menu actions
     #################################################################################
@@ -384,8 +400,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.file_name = file_name
         self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
         self.checkFileActions()
-        
-    
+
+
     def doNew(self):
         "Creates a new untitled.s file"
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
@@ -395,10 +411,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # 2) Set file name to untitled.s
         self.setFileName("untitled.s")
         # 3) Clear textEditSource
-        #self.ui.textEditSource.setText("")
         self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_CLEARALL)
-        
-        
+        # 4) Clear breakpoints when creating a new file
+        self.clearBreakpoints()
+
+
     def doOpen(self):
         "Opens an ARM assembler file"
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
@@ -411,7 +428,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Change to tab 0
         self.ui.tabWidgetCode.setCurrentIndex(0)
 
-            
+
     def readFile(self, file_name):
         "Reads a file. Can be called using an argument from the command line"
         if file_name:
@@ -434,7 +451,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                         raise e
             self.ui.textEditSource.setText(text)
             self.setFileName(file_name)
-        
+        # Clear breakpoints for the new read file
+        self.clearBreakpoints()
+
     def doSave(self):
         "Saves the current ARM assembler file"
         # Set current source code has been assembled to False
@@ -481,11 +500,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         self.setFileName(file_name)
         return True
-    
+
     def doQuit(self):
         "Quits the program"
         self.close()
-        
+
 
     #################################################################################
     # Run menu actions
@@ -496,7 +515,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if self.ui.textEditARMSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
             (line, index) = self.ui.textEditARMSim.getCursorPosition()  # @UnusedVariable index
             self.ui.textEditARMSim.highlightPCLine(line)
-            
+
     def _processExecutionResponse(self, response):
         self.ui.textEditMessages.append(response.assembly_line)
         for (reg_number, reg_value) in response.registers:
@@ -521,42 +540,44 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         response = simulator_step_callback()
         self._processExecutionResponse(response)
         self.highlight_pc_line()
-        
+
     def doStepInto(self):
         self._doStep(self.simulator.getExecuteStepInto)
-        
+
     def doStepOver(self):
         self._doStep(self.simulator.getExecuteStepOver)
 
     def doRestart(self):
         self.simulator.disconnect()
         self.doAssemble()
+        # Restore breakpoints
+        for hex_address in self.breakpoints:
+            self.simulator.setBreakpoint(hex_address)
 
     def doRun(self):
         runProgressBarDialog = RunProgressBarDialog(self.simulator, self)
         if not runProgressBarDialog.exec_():
-            self.simulator.disconnect()
-            self.doAssemble()
+            self.doRestart()
             return
         response = runProgressBarDialog.getResponse()
         self._processExecutionResponse(response)
         if response.result == "ERROR":
-            self.simulator.disconnect()
-            self.doAssemble()
+            self.doRestart()
             return
         self.highlight_pc_line()
-                
+
+
     #################################################################################
     # Window menu actions
     #################################################################################
-    
+
     def _doShow(self, widget, action):
         if widget.isVisible():
             widget.setHidden(True)
         else:
             widget.setVisible(True)
         action.setChecked(widget.isVisible())
-        
+
     def doShow_Statusbar(self):
         "Shows or hides the status bar"
         self._doShow(self.ui.statusBar, self.ui.actionShow_Statusbar)
@@ -564,7 +585,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def doShow_Toolbar(self):
         "Shows or hides the tool bar"
         self._doShow(self.ui.toolBar, self.ui.actionShow_Toolbar)
-    
+
     def doShow_Registers(self):
         "Shows or hides the registers dock widget"
         self._doShow(self.ui.dockWidgetRegisters, self.ui.actionShow_Registers)
@@ -583,13 +604,13 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # status bar is not automatically restored, restore it manually
         self.ui.statusBar.setVisible(True)
         self.checkShowActions()
-        
+
     def doPreferences(self):
         preferences = PreferencesDialog(self)
         if preferences.exec_():
             if self.simulator and self.simulator.connected:
                 self.sendSettingsToARMSim()
-            
+
     ## Acción asociada a actionOpciones2
     #
     # Abre el diálogo de opciones del Spim
@@ -604,14 +625,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         im = Imprimir(self)
         im.exec_()
 
-        
+
     ## Acción asociada a actionEjecutar
     #
     # Abre el diálogo de parámetros de ejecución del simulador
     def ejecutar(self):
         eje = Ejecutar(self)
         eje.exec_()
-    
+
     ## Acción asociada a actionEjecuci_n_multipasos
     #
     # Abre el diálogo para seleccionar el número de pasos a ejecutar
@@ -619,11 +640,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         ej = Multipasos(self)
         ej.exec_()
 
-        
+
     ## Acción asociada a actionEjecuci_n_pasos
     def ejecutar_single(self):
         self.mens.append(self.tr("Ejecutando instrucción"))
-        
+
     ## Acción asociada a actionPunto_de_corte
     #
     # Abre el diálogo que permite añadir y suprimir puntos de ruptura
@@ -637,7 +658,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def fijar_valor(self):
         va = Valor(self)
         va.exec_()
-    
+
 
     ## Acción asociada al botón de parar ejecución de la barra de herramientas
     #
@@ -646,7 +667,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         QtGui.QMessageBox.warning(self, self.tr("Detener ejecución"),
                             self.tr("Quieres detener la ejecución del programa?"), QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
                             
-    
+
     ## Acción asociada a actionLimpiar_Consola
     #
     # Función para limpiar la consola
@@ -655,7 +676,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.consoleWindow.consolEdit.clear()
 
 
-        
+
     ## Acción asociada a actionLimpiar_registros
     #
     # Función para poner todos los registros a 0
@@ -667,14 +688,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     # Función para volver a ensamblar el archivo actual en el simulador
     def recargar(self):
         self.mens.append(self.tr("Recargando el archivo actual"))
-        
-        
+
+
     ## Acción asociada a actionReinicializar
     #
     # Función para restaurar el contenido de los registros y la memoria
     def reinicializar(self):
         self.mens.append(self.tr("Restaurando contenidos de registros y memoria"))
-        
+
 
     def closeEvent(self, event):
         "Called when the main window is closed. Saves state and performs clean up actions."
@@ -701,7 +722,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.consoleWindow.showNormal()
         if self.helpWindow.isVisible() == True:
             self.helpWindow.showNormal()
-            
+
     def hideEvent(self, event):
         "Method called when the hide event is received, minimizes the other app windows"
         super(QtARMSimMainWindow, self).hideEvent(event)
@@ -725,7 +746,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         return self.tr("Version") + " " + __version__ + "\n\n" + \
                  "(c) 2014 Sergio Barrachina Mir\n\n" + \
                  self.tr("Based on the graphical frontend for Spim\ndeveloped on 2008 by Gloria Edo Piñana.")
-    
+
     def doAbout_Qt_ARMSim(self):
         "Shows the About Qt ARMSim dialog"
         QtGui.QMessageBox.about(self,
@@ -738,12 +759,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         QtGui.QMessageBox.about(self,
                                 self.tr("About ARMSim"),
                                 self.simulator.getVersion())
-        
+
     def doHelp(self):
         "Shows the Help window"
         self.helpWindow.setVisible(True)
 
-    
+
     #################################################################################
     # Communication with ARMSim
     #################################################################################
