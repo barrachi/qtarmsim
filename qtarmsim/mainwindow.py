@@ -519,7 +519,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         text = self.ui.textEditSource.text().replace('\r\n', '\n')
         if sys.platform == "win32":
             text = text.replace('\n', '\r\n')
-        asm_file.write(text.encode('utf-8')); # @todo: let user decide which enconding (including sys.getdefaultencoding())
+        asm_file.write(text.encode('utf-8')); # @todo: let user decide which encoding (including sys.getdefaultencoding())
         asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         self.setFileName(file_name)
