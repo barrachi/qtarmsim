@@ -344,7 +344,7 @@
          <height>16777215</height>
         </size>
        </property>
-       <property name="toolTip">
+       <property name="whatsThis">
         <string>Shows the simulator messages</string>
        </property>
        <property name="documentTitle">

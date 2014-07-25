@@ -76,6 +76,9 @@ class RegistersModel(TreeModel):
             return None
 
     def setRegister(self, reg, value):
+        # Ignore register numbers above 15 (16 is currently the Application Processor Status Register)
+        if reg > 15:
+            return
         self.rootItem.child(0).child(reg).setData(1, value)
         self.modified_registers.append(reg)
         self.dataChanged.emit(self.createIndex(reg, 0, self.rootItem.child(0)),

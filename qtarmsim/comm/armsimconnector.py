@@ -240,6 +240,15 @@ class ARMSimConnector():
             registers.append(self._parseRegister(line))
         return registers
 
+    def getRegister(self, register_name):
+        """
+        Gets the register data of the register with the given name.
+
+        @return: A pair (register number, contents of the register in hexadecimal)
+        """
+        self.mysocket.send_line("SHOW REGISTER {}".format(register_name.lower()))
+        line = self.mysocket.receive_line()
+        return self._parseRegister(line)
 
     def getMemoryBanks(self):
         """

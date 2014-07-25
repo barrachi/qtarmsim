@@ -110,9 +110,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.helpWindow = HelpWindow()
         # Connect actions
         self.connectActions()
-        # Print welcome message on the Messages Window and "Ready" on the statusBar 
-        self.ui.textEditMessages.append(self.welcome_message())
-        self.statusBar().showMessage(self.tr("Ready"))
         # Saves the initial WindowState of the interface
         self.initialWindowState = self.saveState()
         # Read the settings
@@ -123,6 +120,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.current_source_code_assembled = False
         # Breakpoints
         self.breakpoints = []
+        # Print welcome message on the Messages Window and show Ready on the status bar
+        self.ui.textEditMessages.append(self.welcome_message())
+        self.statusBar().showMessage(self.tr("Ready"))
 
 
     def show(self, *args, **kwargs):
@@ -154,6 +154,24 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # memoryModel
         self.memoryModel = MemoryModel()
         self.ui.treeViewMemory.setModel(self.memoryModel)
+
+        # Status bar with flags indicator
+        self.statusBar().addWidget(QtGui.QLabel(""), 10) # No permanent
+        self.flagsLabel = QtGui.QLabel("Flags:")
+        self.statusBar().addPermanentWidget(self.flagsLabel, 0)
+        self.flagsText = QtGui.QLabel("- - - -")
+        self.flagsText.setFrameStyle(QtGui.QFrame.Sunken | QtGui.QFrame.StyledPanel)
+        font = QtGui.QFont()
+        font.setFamily('Courier')
+        font.setFixedPitch(True)
+        font.setPointSize(12)
+        self.flagsText.setFont(font)
+        self.flagsText.setToolTip("<b>Condition flag bits in the Application Processor Status Register</b>"
+                                  "<p>Negative: The N flag is set by an instruction if the result is negative.</p>"
+                                  "<p>Zero: The Z flag is set if the result of the flag-setting instruction is zero.</p>"
+                                  "<p>Carry: The C flag is set if the result of an unsigned operation overflows the 32-bit result register.</p>"
+                                  "<p>oVerflow: The V flag works the same as the C flag, but for signed operations.</p>")
+        self.statusBar().addPermanentWidget(self.flagsText, 0)
 
 
     def readSettings(self):
@@ -246,6 +264,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.treeViewRegisters.setEnabled(enabled)
         self.ui.treeViewMemory.setEnabled(enabled)
         self.ui.actionAbout_ARMSim.setEnabled(enabled)
+        #--
+        self.flagsLabel.setEnabled(enabled)
+        self.flagsText.setEnabled(enabled)
 
     def clearBreakpoints(self):
         """
@@ -518,6 +539,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def _processExecutionResponse(self, response):
         self.ui.textEditMessages.append(response.assembly_line)
+        self.updateFlags()
         for (reg_number, reg_value) in response.registers:
             self.registersModel.setRegister(reg_number, reg_value)
         for (hex_address, hex_byte) in response.memory:
@@ -769,12 +791,23 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     # Communication with ARMSim
     #################################################################################
 
+    def updateFlags(self):
+        # @todo: use r16 instead when armsim supports it
+        (reg, hex_value) = self.simulator.getRegister('r15')  # @UnusedVariable reg
+        value = int(hex_value, 16)
+        N = '<b>N</b>' if value & 2**31 else 'n'
+        Z = '<b>Z</b>' if value & 2**30 else 'z'
+        C = '<b>C</b>' if value & 2**29 else 'c'
+        V = '<b>V</b>' if value & 2**28 else 'v'
+        self.flagsText.setText("{} {} {} {}".format(N, Z, C, V))
+
     def updateRegisters(self):
         "Updates the registers dock upon ARMSim data."
         registers_model = self.ui.treeViewRegisters.model()
         for (reg, hex_value) in self.simulator.getRegisters():
             registers_model.setRegister(reg, hex_value)
         registers_model.clearHistory()
+        self.updateFlags()
 
 
     def updateMemory(self):
