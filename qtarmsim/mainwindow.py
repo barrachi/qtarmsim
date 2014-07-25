@@ -48,6 +48,25 @@ from . window.runprogressbardialog import RunProgressBarDialog
 def _fromUtf8(s):
     return s
 
+def which(cmd):
+    """
+    Searches cmd in the system PATH.
+
+    It calls shutil.which if available (>= Python3.3), otherwise it does a naive search for the given command on the system PATH.
+
+    @return: the full path to the given command.
+    """
+    # Try with shutil.which
+    try:
+        return shutil.which(cmd)
+    except AttributeError:
+        pass
+    # Do naive search if not
+    for dirname in os.get_exec_path():
+        path = os.path.join(dirname, cmd)
+        if os.path.exists(path):
+            return os.path.realpath(path)
+    return None
 
 class DefaultSettings():
 
@@ -63,7 +82,7 @@ class DefaultSettings():
             fname = os.path.abspath(fname)
         else:
             # If not found, search its executable in the path
-            fname = shutil.which("server.rb")
+            fname = which("server.rb")
         if fname:
             ruby_cmd = "ruby" if sys.platform != "win32" else "rubyw"
             self._ARMSimCommand = "{} {}".format(ruby_cmd, os.path.basename(fname))
@@ -75,11 +94,13 @@ class DefaultSettings():
         self._ARMSimPort = 8010
         gcc_names = ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc"]
         if sys.platform == "win32":
-            gcc_names = [n+".exe" for n in gcc_names]
+            gcc_names = ["{}.exe".format(name) for name in gcc_names]
         fname = ""
         for name in gcc_names:
-            fname = shutil.which(name)
-        fname = fname if fname else gcc_names[0]
+            fname = which(name)
+            if fname:
+                break
+        fname = fname if fname else ""
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
 
