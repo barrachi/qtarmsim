@@ -180,12 +180,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.settings = QtCore.QSettings("UJI", "QtARMSim")
         self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
         self.restoreState(self.settings.value("windowState", self.initialWindowState))
+        #-----------------------------------------------------------------------------
         # Begin migration of settings versions
+        #-----------------------------------------------------------------------------
         conf_version = self.settings.value("ConfVersion")
-        if not conf_version and self.settings.value("ARMSimCommand"):
+        if conf_version == None and self.settings.value("ARMSimCommand") and self.settings.value("ARMSimCommand").count("ruby")==0:
             # Migrate from version 1 to version 2
-            conf_version = "2"
-            self.settings.setValue("ConfVersion", conf_version)
             # Version 1 -> ARMSimCommand only had the server.rb full path.
             # Version 2 -> ARMSimCommand has the full command, e.g. 'rubyw server.rb',
             #              and ARMSimDirectory has the working directory of the simulator.
@@ -194,7 +194,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             ruby_cmd = self.defaultSettings.value("ARMSimCommand").split(" ")[0]
             self.settings.setValue("ARMSimCommand", "{} {}".format(ruby_cmd, os.path.basename(ARMSimCommand)))
             self.settings.setValue("ARMSimDirectory", os.path.dirname(ARMSimCommand))
+        #-----------------------------------------------------------------------------
         # End migration of settings versions
+        #-----------------------------------------------------------------------------
+        self.settings.setValue("ConfVersion", 2)
         if not self.settings.value("ARMSimCommand"):
             self.settings.setValue("ARMSimCommand", self.defaultSettings.value("ARMSimCommand"))
         if not self.settings.value("ARMSimDirectory"):
