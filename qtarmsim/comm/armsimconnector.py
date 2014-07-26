@@ -235,7 +235,7 @@ class ARMSimConnector():
             return []
         self.mysocket.send_line("DUMP REGISTERS")
         registers = []
-        for i in range(16):  # @UnusedVariable i
+        for i in range(17):  # @UnusedVariable i
             line = self.mysocket.receive_line()
             registers.append(self._parseRegister(line))
         return registers

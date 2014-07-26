@@ -816,8 +816,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     #################################################################################
 
     def updateFlags(self):
-        # @todo: use r16 instead when armsim supports it
-        (reg, hex_value) = self.simulator.getRegister('r15')  # @UnusedVariable reg
+        (reg, hex_value) = self.simulator.getRegister('r16')  # @UnusedVariable reg
         value = int(hex_value, 16)
         N = '<b>N</b>' if value & 2**31 else 'n'
         Z = '<b>Z</b>' if value & 2**30 else 'z'

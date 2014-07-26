@@ -1,11 +1,11 @@
 @
-@ Example from http://www.bravegnu.org/gnu-eprog/hello-arm.html
+@ Basic loop example
 @
-	.text
-start:				@ Label, not really required
-	mov   r0, #5		@ Load register r0 with the value 5
-	mov   r1, #4		@ Load register r1 with the value 4
-loop:	add   r2, r1, r0	@ Add r0 and r1 and store in r2
-	b loop
 
+	.text
+start:	mov	r3, #0		@ Load register r3 with the value 0
+	mov     r4, #5		@ Load register r4 with the value 5
+loop:	add	r3, r3, #1	@ r3 <- r3 + 1
+	sub	r4, r4, #1	@ r4 <- r4 - 1
+	bne	loop		@ Branch if non zero
 stop:	wfi			@ End of program
