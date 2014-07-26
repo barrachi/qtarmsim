@@ -114,6 +114,35 @@ def get_section(line)
   return idx.nil? ? 0 : idx + 1
 end
 
+#reg_to_flags
+#------------
+#Recibe un entero y genera un hash con los valores de los flags
+# @param [Integer] reg
+# @return [Hash] flags
+def reg_to_flags(reg)
+  flags = {n: 0, z: 0, c: 0, v: 0}
+  flags[:n] = 1 if reg & 0x80000000 == 0x80000000
+  flags[:z] = 1 if reg & 0x40000000 == 0x40000000
+  flags[:c] = 1 if reg & 0x20000000 == 0x20000000
+  flags[:v] = 1 if reg & 0x10000000 == 0x10000000
+  return flags
+end
+
+#flags_to_reg
+#------------
+#Recibe un hash con los valores de los flags y devuelve un entero con el
+#formato del ASR
+# @param [Hash] flags
+# @return [Integer] reg
+def flags_to_reg(flags)
+  reg = 0
+  reg = reg + 0x80000000 if flags[:n] == 1
+  reg = reg + 0x40000000 if flags[:z] == 1
+  reg = reg + 0x20000000 if flags[:c] == 1
+  reg = reg + 0x10000000 if flags[:v] == 1
+  return reg
+end
+
 #show_version
 #------------
 #Devuelve un string con el número de versión y
@@ -132,8 +161,10 @@ show_version = Proc.new { |entrada|
 show_register = Proc.new { |entrada|
   if $server.proc.nil?
     res = Errores[:sistema]
-  elsif entrada[0] > 15
+  elsif entrada[0] > 16
     res = Errores[:rango]
+  elsif entrada[0] == 16
+    res = "r16: 0x%08X\r\n" % flags_to_reg($server.proc.flags)
   else
     res = "r%d: 0x%08X\r\n" % [entrada[0], $server.proc.reg(entrada[0])]
   end
@@ -192,6 +223,7 @@ dump_registers = Proc.new { |entrada|
     0.upto(15) do |idx|
       res = res + "r%d: 0x%08X\r\n" % [idx, $server.proc.reg(idx)]
     end
+    res = res + "r16: 0x%08X\r\n" % flags_to_reg($server.proc.flags)
     #res = res + "EOF\r\n"
   end
   res
@@ -287,8 +319,11 @@ clear_breakpoint = Proc.new { |entrada|
 set_register = Proc.new { |entrada|
   if $server.proc.nil?
     res = Errores[:sistema]
-  elsif entrada[0] > 15
+  elsif entrada[0] > 16
     res = Errores[:rango]
+  elsif entrada[0] == 16
+    $server.proc.update({flags: reg_to_flags(entrada[2])})
+    res = "OK\r\n"
   else
     lista = {usr_regs: [entrada[0], entrada[2]]}
     $server.proc.update(lista)
@@ -478,12 +513,13 @@ execute = Proc.new { |entrada|
       end
       res = (terror.nil? ? "SUCCESS\r\n" : "ERROR\r\n") if res.nil?
       res = res + dos[0] + "\r\n"
+      res = res + "AFFECTED REGISTERS\r\n"
       if regs.length > 0
-        res = res + "AFFECTED REGISTERS\r\n"
         regs.each do |nreg|
           res = res + "r%d: 0x%08X\r\n" % [nreg, $server.proc.reg(nreg)]
         end
       end
+      res = res + "r16: 0x%08X\r\n" % flags_to_reg($server.proc.flags)
       if mem.length > 0
         res = res + "AFFECTED MEMORY\r\n"
         mem.each do |pos|

@@ -121,6 +121,15 @@ class Core
     @estado[:flags][sym]
   end
 
+  #flags
+  #-----
+  #Devuelve un hash con los flags de la arquitectura
+  # @param [Symbol] sym
+  # @return [Integer]
+  def flags
+    @estado[:flags]
+  end
+
   #memory_xxxx
   #-----------
   #Funciones para acceder a datos de memoria a efectos de IU sobre todo.
