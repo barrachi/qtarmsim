@@ -45,4 +45,3 @@ class Settings():
         with open('qtarmsim/version.py') as fp:
             exec(fp.read(), version_dict)
         return version_dict['__version__']
-    
