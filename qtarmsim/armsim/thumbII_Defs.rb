@@ -6,6 +6,7 @@ module ThumbII_Defs
   PC = 15
   LR = 14
   SP = 13
+  APSR = 16
   #Tabla de simbolos
  # $symbol_table = nil
   #TOBE ARMv7-M
@@ -2081,22 +2082,29 @@ module ThumbII_Defs
   add_e = Proc.new {|op|
     data = Hash.new
     data[:usr_regs] = [op[:d]] unless op[:d] == nil
-    uop1 = op[:f1]
-    uop2 = op[:f2]
-    sop1 = ((uop1 & 0x80000000) == 0) ? uop1 : (~uop1 + 1) & 0xFFFFFFFF
-    sop2 = ((uop2 & 0x80000000) == 0) ? uop2 : (~uop2 + 1) & 0xFFFFFFFF
-    ures = uop1 + uop2 + op[:c]
-    sres = sop1 + sop2 + op[:c]
-    res = ures & 0xFFFFFFFF
-    ssres = ((res & 0x80000000) == 0) ? res : (~res + 1) & 0xFFFFFFFF
+    op1 = op[:f1]
+    op2 = op[:f2]
+    eop1 = op1 + ((op1 & 0x80000000) << 1)
+    eop2 = op2 + ((op2 & 0x80000000) << 1)
+ #   sop1 = ((uop1 & 0x80000000) == 0) ? uop1 : (~uop1 + 1) & 0xFFFFFFFF
+ #   sop2 = ((uop2 & 0x80000000) == 0) ? uop2 : (~uop2 + 1) & 0xFFFFFFFF
+ #   ures = uop1 + uop2 + op[:c]
+ #   sres = sop1 + sop2 + op[:c]
+ #   res = ures & 0xFFFFFFFF
+ #   ssres = ((res & 0x80000000) == 0) ? res : (~res + 1) & 0xFFFFFFFF
     #l =  [uop1, uop2, sop1, sop2, ures, sres, res, ssres]
     #p l
     #p "%X - %X - %X - %X - %X - %X - %X - %X" % l
+    ures = op1 + op2 + op[:c]
+    eres = eop1 + eop2 + op[:c]
+    res = ures & 0xFFFFFFFF
     if op[:fg]
       z = (res == 0) ? 1 : 0
       n = ((res & 0x80000000) == 0) ? 0 : 1
       c = (res == ures) ? 0 : 1
-      v = (sres == ssres) ? 0 : 1
+ #     v = (sres == ssres) ? 0 : 1
+      dbits = (eres & 0x180000000) >> 31
+      v = (dbits == 1 || dbits == 2) ? 1 : 0
       data[:flags] = {c: c, v: v, z: z, n: n}
     end
     data[:usr_regs] << res unless op[:d] == nil
