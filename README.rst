@@ -5,7 +5,8 @@ Qt |~| ARMSim is a graphical frontend to the ARMSim ARM simulator. It provides
 an easy to use multiplatform ARM emulation environment that has been designed
 to be used on Computer Architecture Introductory courses.
 
-It is based on a previous work of Gloria Edo Piñana who developed the graphical
+It is based on a previous work of Gloria Edo Piñana who developed
+`GlSpim <http://lorca.act.uji.es/projects/glspim/>`_, the graphical
 part of a Qt graphical interface to the SPIM simulator on 2008.
 
 The ARMSim ARM simulator, Copyright (c) 2014 by German Fabregat, is included
@@ -62,9 +63,6 @@ On Kubuntu you can install all the dependencies using::
    
 .. comment:  On Ubuntu, the ``gcc-arm-linux-gnueabi`` package should be installed.
 
-In case your GNU/Linux distribution does not provide an easy way to
-install Python3, PyQt4 for Python3, and QScintilla, you can try the
-`Installing a binary version on GNU/Linux Section`_.
 
 
 1.2 How to install the dependencies on Windows?
@@ -119,10 +117,7 @@ follow the next steps:
 Qt ARMSim can be automatically installed using pip (a tool for
 installing Python packages), or manually. Next section shows how to
 install Qt |~| ARMSim using `pip`, which is the recommended method.
-Section |~| 2.2 shows how to install it manually. Finally,
-Section |~| 2.3 shows how to install a binary package
-on GNU/Linux (in case there is one available for this version of
-Qt |~| ARMSim). 
+Section |~| 2.2 shows how to install it manually.
 
 
 2.1 Using pip (recommended method)
@@ -173,43 +168,6 @@ If you prefer to install Qt ARMSim on a user basis, you should execute
 the following command::
 
 	$ python3 setup.py install --user
-
-
-
-.. _Installing a binary version on GNU/Linux Section:
-
-2.3 Installing a binary version on GNU/Linux
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This installation option is intended only for those GNU/Linux that does not provide
-yet an easy installation procedure for Python |~| 3 and PyQt4 for Python |~| 3.
-The other dependencies, i.e. Ruby and the GCC ARM cross compiler, should be installed
-as previously described.
-
-If a binary package is available for this Qt ARMSim version, you will see a file
-called like ``qtarmsim-x.y.z.linux-ARCH.tar.gz`` in the Downloads section of
-`<https://pypi.python.org/pypi/qtarmsim/>`_. 
-
-If there is such a file for your GNU/Linux architecture, you can download it and
-follow the next steps to install Qt |~| ARMSim on your system::
-
-   # mkdir tmp/
-   # cd tmp/
-   # tar -xzf qtarmsim-x.y.z.linux-ARCH.tar.gz
-   # cp -r usr/bin/* /usr/bin/
-   # cp -r usr/lib/* /usr/lib/
-
-Although you could be tempted to extract the ``tar.gz`` file directly
-on the root directory, this is not a good idea. If you do that and the original
-``/usr/lib`` directory happens to be a symbolic link, the extraction will silently
-overwrite the original ``/usr/lib`` link with a new, an almost empty, directory.
-
-Finally, to be able to execute the ``qtarmsim`` binary you will have to either
-add ``/usr/lib/qtarmsim-x.y.z`` to your system ``LD_LIBRARY_PATH`` or simply copy
-the ``/usr/lib/qtarmsim-x.y.z/libqscintilla2.so.x`` file to ``/usr/lib/``::
-
-   # cp /usr/lib/qtarmsim-x.y.z/libqscintilla* /usr/lib/
-
 
 
 3. Executing Qt ARMSim
