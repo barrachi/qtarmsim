@@ -110,8 +110,8 @@ class SimpleARMEditor(QsciScintilla):
         self.markerAdd(nline, self.PC_MARKER2)
         self.last_highlighted_line = nline
 
-    def setText(self, txt):
-        super(SimpleARMEditor, self).setText(txt)
+    def setText(self, text):
+        super(SimpleARMEditor, self).setText(text)
         # Restore breakpoints
         for nline in self.breakpoints.keys():
             self.markerAdd(nline, self.BREAKPOINT_MARKER)
