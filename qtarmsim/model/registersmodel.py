@@ -20,7 +20,8 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
-from .simpletreemodel import TreeModel, TreeItem
+from . simpletreemodel import TreeModel, TreeItem
+from . common import InputToHex
 
 
 class RegisterBank():
@@ -36,7 +37,13 @@ class RegistersModel(TreeModel):
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
     q_font_last = QtGui.QFont("Courier 10 Pitch", weight=100)
 
-    def __init__(self, parent=None):
+    # register_edited, parameters are register name and hex value
+    register_edited = QtCore.pyqtSignal('QString', 'QString')
+
+    # InputToHex object
+    input2hex = InputToHex()
+    
+    def __init__(self, parent = None):
         super(RegistersModel, self).__init__(parent)
         self.rootItem = TreeItem(("Register", "Value"))
         register_banks = [ RegisterBank("General", [
@@ -46,10 +53,9 @@ class RegistersModel(TreeModel):
                                                     ['r12', '0x00000000'], ['r13 (SP)', '0x00000000'], ['r14 (LR)', '0x00000000'], ['r15 (PC)', '0x00000000'],
                                                     ]),
                           ]
-        parent = self.rootItem
         for register_bank in register_banks:
-            rbti = TreeItem([register_bank.name, ""], parent) 
-            parent.appendChild(rbti)
+            rbti = TreeItem([register_bank.name, ""], self.rootItem) 
+            self.rootItem.appendChild(rbti)
             for register_data in register_bank.registers_data:
                 rti = TreeItem([register_data[0], register_data[1]], rbti)
                 rbti.appendChild(rti)
@@ -75,6 +81,28 @@ class RegistersModel(TreeModel):
         else:
             return None
 
+    def flags(self, index):
+        if not index.isValid():
+            return False
+        item = index.internalPointer()
+        if item.parent() == self.rootItem:
+            return Qt.ItemIsEnabled
+        if  index.column() == 0:
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
+
+    def setData(self, index, value, role = Qt.EditRole):
+        item = index.internalPointer()
+        reg_name = item.data(0).split(" ")[0]
+        reg_num = int(reg_name[1:])
+        (hex_value, err_msg) = self.input2hex.convert(value)
+        if not hex_value:
+            QtGui.QMessageBox.critical(None, self.tr("Input error"), "<p>{0}</p>{1}".format(err_msg, self.input2hex.html_help()))
+            return False
+        self.rootItem.child(0).child(reg_num).setData(1, hex_value)
+        self.register_edited.emit(reg_name, hex_value)
+        return True
+        
     def setRegister(self, reg, value):
         # Ignore register numbers above 15 (16 is currently the Application Processor Status Register)
         if reg > 15:

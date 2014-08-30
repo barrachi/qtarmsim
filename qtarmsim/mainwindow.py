@@ -168,12 +168,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.verticalLayoutARMSim.addWidget(self.ui.textEditARMSim)
 
         # Link tableViewRegisters with registersModel
-        self.registersModel = RegistersModel()
+        self.registersModel = RegistersModel(self)
         self.ui.treeViewRegisters.setModel(self.registersModel)
         self.ui.treeViewRegisters.expandAll()
           
         # memoryModel
-        self.memoryModel = MemoryModel()
+        self.memoryModel = MemoryModel(self)
         self.ui.treeViewMemory.setModel(self.memoryModel)
 
         # Status bar with flags indicator
@@ -330,6 +330,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.dockWidgetMessages.installEventFilter(self)
         # Connect to breakpoint_changed from self.ui.textEditARMSim
         self.ui.textEditARMSim.breakpoint_changed.connect(self.breakpointChanged)
+        # Connect register edited on registers dock to self.registerEdited
+        self.registersModel.register_edited.connect(self.registerEdited)
 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
@@ -424,6 +426,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(self, self.tr("Breakpoints Error"), errmsg)
 
 
+    def registerEdited(self, reg_name, hex_value):
+        errmsg = self.simulator.setRegister(reg_name, hex_value)
+        if errmsg:
+            QtGui.QMessageBox.warning(self, self.tr("Set Register Error"), errmsg)
+        
     def checkCurrentFileState(self):
         if not self.isSourceCodeModified():
             return QtGui.QMessageBox.Discard

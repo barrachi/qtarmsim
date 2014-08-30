@@ -250,6 +250,13 @@ class ARMSimConnector():
         line = self.mysocket.receive_line()
         return self._parseRegister(line)
 
+    def setRegister(self, reg_name, hex_value):
+        self.mysocket.send_line("SET REGISTER {} WITH {}".format(reg_name, hex_value))
+        line = self.mysocket.receive_line()
+        if line != 'OK':
+            return "Error when trying to set the register '{}' with the value '{}'.\n".format(reg_name, hex_value)
+        return None
+
     def getMemoryBanks(self):
         """
         Gets the memory banks available at the simulator.
