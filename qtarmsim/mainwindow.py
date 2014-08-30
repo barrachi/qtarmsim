@@ -330,8 +330,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.dockWidgetMessages.installEventFilter(self)
         # Connect to breakpoint_changed from self.ui.textEditARMSim
         self.ui.textEditARMSim.breakpoint_changed.connect(self.breakpointChanged)
-        # Connect register edited on registers dock to self.registerEdited
+        # Connect register edited on registers model to self.registerEdited
         self.registersModel.register_edited.connect(self.registerEdited)
+        # Connect memory edited on memory model to self.memoryEdited
+        self.memoryModel.memory_edited.connect(self.memoryEdited)
 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
@@ -430,7 +432,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         errmsg = self.simulator.setRegister(reg_name, hex_value)
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Set Register Error"), errmsg)
-        
+        self.highlight_pc_line()
+
+
+    def memoryEdited(self, hex_address, hex_value):
+        errmsg = self.simulator.setMemory(hex_address, hex_value)
+        if errmsg:
+            QtGui.QMessageBox.warning(self, self.tr("Set Memory Error"), errmsg)
+
+
     def checkCurrentFileState(self):
         if not self.isSourceCodeModified():
             return QtGui.QMessageBox.Discard

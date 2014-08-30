@@ -92,14 +92,14 @@ class RegistersModel(TreeModel):
         return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def setData(self, index, value, role = Qt.EditRole):
-        item = index.internalPointer()
-        reg_name = item.data(0).split(" ")[0]
-        reg_num = int(reg_name[1:])
         (hex_value, err_msg) = self.input2hex.convert(value)
         if not hex_value:
-            QtGui.QMessageBox.critical(None, self.tr("Input error"), "<p>{0}</p>{1}".format(err_msg, self.input2hex.html_help()))
+            if err_msg:
+                QtGui.QMessageBox.warning(None, self.tr("Input error"), err_msg)
             return False
-        self.rootItem.child(0).child(reg_num).setData(1, hex_value)
+        item = index.internalPointer()
+        item.setData(1, hex_value)
+        reg_name = item.data(0).split(" ")[0]
         self.register_edited.emit(reg_name, hex_value)
         return True
         

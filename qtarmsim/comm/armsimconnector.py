@@ -251,6 +251,9 @@ class ARMSimConnector():
         return self._parseRegister(line)
 
     def setRegister(self, reg_name, hex_value):
+        """
+        Sets the register with name reg_name with the given hex_value.
+        """
         self.mysocket.send_line("SET REGISTER {} WITH {}".format(reg_name, hex_value))
         line = self.mysocket.receive_line()
         if line != 'OK':
@@ -303,6 +306,16 @@ class ARMSimConnector():
             memory_bytes.append(self._parseMemory(line))
         return memory_bytes
             
+    def setMemory(self, hex_address, hex_value):
+        """
+        Sets the memory at the given hex_address with the given hex_value.
+        """
+        self.mysocket.send_line("SET MEMORY WORD AT {} WITH {}".format(hex_address, hex_value))
+        line = self.mysocket.receive_line()
+        if line != 'OK':
+            return "Error when trying to set the memory word at '{}' with the value '{}'.\n".format(hex_address, hex_value)
+        return None
+
     def _prettyPrintLine(self, line):
         if line.count(';') == 0:
             return line

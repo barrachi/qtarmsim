@@ -19,7 +19,8 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 
-from .simpletreemodel import TreeModel, TreeItem
+from . simpletreemodel import TreeModel, TreeItem
+from . common import InputToHex
 
 
 class MemoryBank():
@@ -54,6 +55,12 @@ class MemoryModel(TreeModel):
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
     q_font_last = QtGui.QFont("Courier 10 Pitch", weight=100)
 
+    # memory_edited, parameters are hex address and hex value
+    memory_edited = QtCore.pyqtSignal('QString', 'QString')
+
+    # InputToHex object
+    input2hex = InputToHex()
+
     def __init__(self, parent=None):
         super(MemoryModel, self).__init__(parent)
         self.rootItem = TreeItem(("Address", "Value"))
@@ -79,23 +86,29 @@ class MemoryModel(TreeModel):
         else:
             return None
 
-    #============================================================================
-    # def data(self, index, role):
-    #  if not index.isValid():
-    #      return None
-    #  elif role == Qt.DisplayRole and self.memory:
-    #      return self.memory.loadWordByIndex(index.row())
-    #  elif role == Qt.BackgroundRole and self.modified_words.count(index.row()):
-    #      return self.q_brush_last
-    #  elif role == Qt.BackgroundRole and self.previously_modified_words.count(index.row()):
-    #      return self.q_brush_previous
-    #  elif role == Qt.FontRole and self.modified_words.count(index.row()):
-    #      return self.q_font_last
-    #  else:
-    #      return None
-    #============================================================================
- 
+    def flags(self, index):
+        if not index.isValid():
+            return False
+        item = index.internalPointer()
+        if item.parent() == self.rootItem:
+            return Qt.ItemIsEnabled
+        if  index.column() == 0:
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        if item.parent().data(0)[:3] == 'ROM':
+            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
+    def setData(self, index, value, role = Qt.EditRole):
+        (hex_value, err_msg) = self.input2hex.convert(value)
+        if not hex_value:
+            if err_msg:
+                QtGui.QMessageBox.warning(None, self.tr("Input error"), err_msg)
+            return False
+        item = index.internalPointer()
+        hex_address = item.data(0)
+        item.setData(1, hex_value)
+        self.memory_edited.emit(hex_address, hex_value)
+        return True
 
     def appendMemoryBank(self, memtype, hex_start, membytes):
         self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
