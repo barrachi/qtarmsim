@@ -803,12 +803,16 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def welcome_message(self):
         return "<b>Qt ARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014 Sergio Barrachina Mir<br></br>\n" + \
-                 self.tr("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n")
+                 self.tr("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
+                 self.tr("Developed at the Jaume I University, Castellón, Spain")
 
     def about_message(self):
-        return self.tr("Version") + " " + __version__ + "\n\n" + \
-                 "(c) 2014 Sergio Barrachina Mir\n\n" + \
-                 self.tr("Based on the graphical frontend for Spim\ndeveloped on 2008 by Gloria Edo Piñana.")
+        return "<html>" + \
+                "<p>" + self.tr("Version") + " " + __version__ + "</p>" + \
+                "<p>" + "(c) 2014 Sergio Barrachina Mir" + "</p>" + \
+                "<p>" + self.tr("<p>Based on the graphical frontend for Spim<br/>developed on 2008 by Gloria Edo Piñana.") + "</p>" + \
+                "<p>" + "<a href='http://lorca.act.uji.es/projects/qtarmsim/'>http://lorca.act.uji.es/projects/qtarmsim/</a>" + "</p>" + \
+                "</html>"
 
     def doAbout_Qt_ARMSim(self):
         "Shows the About Qt ARMSim dialog"

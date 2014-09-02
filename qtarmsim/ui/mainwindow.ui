@@ -314,7 +314,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidgetMessages">
    <property name="whatsThis">
-    <string>The Messages dock shows Qt ArmSim and ArmSim messages</string>
+    <string>The Messages dock shows Qt ARMSim and ARMSim messages</string>
    </property>
    <property name="allowedAreas">
     <set>Qt::BottomDockWidgetArea</set>
@@ -345,7 +345,7 @@
         </size>
        </property>
        <property name="whatsThis">
-        <string>Shows the simulator messages</string>
+        <string/>
        </property>
        <property name="documentTitle">
         <string/>
