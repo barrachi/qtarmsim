@@ -321,7 +321,11 @@ class ARMSimConnector():
             return line
         else:
             (assembly, ln_source_comment) = [x.strip() for x in line.split(";", 1)]
-            (ln, source_comment) = [x.strip() for x in ln_source_comment.split(" ", 1)]
+            try:
+                (ln, source_comment) = [x.strip() for x in ln_source_comment.split(" ", 1)]
+            except ValueError:
+                ln = ln_source_comment
+                source_comment = ''
             ln = int(ln)
             if source_comment.count("@"):
                 (source, comment) = [x.strip() for x in source_comment.split("@", 1)]
