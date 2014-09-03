@@ -2269,7 +2269,8 @@ module ThumbII_Defs
       res = op[:f1]
     else
       c = (op[:f1] >> (op[:sa] - 1)) & 1 == 0 ? 0 : 1
-      msc = 0x80000000 >> (op[:sa] - 1)
+      # msc = 0x80000000 >> (op[:sa] - 1)
+      msc = (0xFFFFFFFF << (32 - op[:sa])) & 0xFFFFFFFF
       res = op[:f1] >> op[:sa]
       res = res | msc unless (op[:f1] & 0x80000000) == 0
     end
