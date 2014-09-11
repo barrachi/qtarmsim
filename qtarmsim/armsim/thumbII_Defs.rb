@@ -1704,13 +1704,13 @@ module ThumbII_Defs
   #shiftr_p
   #--------
   #Desplazamientos con tres registros -fuente y destino
-  #en uno yy desplazamiento en otro inmediato.
+  #en uno y desplazamiento en otro.
   #Simbolos: f1 para la fuente, d para el destino, sa para el desplazamiento, fg para modificar flags.
   # @param [Array] operandos
   # @param [Hash] estado
   # @return[Hash]
   shiftr_p = Proc.new {|operandos, estado|
-    sa = operandos[1] & 0xFF
+    sa = estado[:usr_regs][operandos[1]]
     f1 = estado[:usr_regs][operandos[0]]
     d = operandos[0]
     flags = true
