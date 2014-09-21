@@ -86,12 +86,12 @@ class Memory
   #------
   #Propaga un acceso a memoria al bloque al que se refiere.
   #Busca el bloque e invoca la función que tiene asociada al acceso
-  #según el tipo
+  #según el tipo. Si el bloque no existe devuelve error.
   # @param [Symbol] type
   # @param [Integer] dir
   # @param [Integer] data
   def access(type, dir, data = nil)
-    (b = find_block(dir)) == nil ? nil : b.access(type, dir - b.origen, data)
+    (b = find_block(dir)) == nil ? :errnoblock : b.access(type, dir - b.origen, data)
   end
 
   #reset
