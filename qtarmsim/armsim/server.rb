@@ -18,18 +18,20 @@ CL3 = '-mcpu=cortex-m3 -mthumb -c'
 ORIG_CODE = 0x00001000  # Repetido en read_ELF. Ver
 
 Errores = { orden: "Orden no reconocida\r\n",
-            args:  "Argumentos erroneos\r\n",
+            args:  "Argumentos erróneos\r\n",
             sistema: "Error del sistema\r\n",
             rango: "Fuera de rango\r\n",
             vacio: "No hay datos\r\n",
-            noexec: "Instrucion indefinida o impredecible\r\n",
+            noexec: "Instrución indefinida o impredecible\r\n",
             call: "No es subrutina\r\nSe ejecuta STEP\r\n",
             end: "Se intenta ejecutar al final del programa\r\n",
-            breakpoint: "Se ejecuta desde direccion de breakpoint\r\nEl breakpoint se ignora\r\n",
+            breakpoint: "Se ejecuta desde dirección de breakpoint\r\nEl breakpoint se ignora\r\n",
             nomem: "Se intenta ejecutar fuera de la memoria\r\n",
             path: "El directorio no existe o no es correcto\r\n",
             exe: "El archivo no existe o no es ejecutable\r\n",
-            file_s: "El archivo .s no existe\r\n"
+            file_s: "El archivo .s no existe\r\n",
+            errnoalign: "Acesso no alineado en dirección",
+            errnoblock: "Memoria inexistente en dirección"
 }
 
 ###########################################
@@ -48,7 +50,7 @@ def gen_disassemble(dir)
   sdir = dir
   word = $server.proc.memory_half(dir)
   word2 = $server.proc.memory_half(dir + 2)
-  return nil if word.nil? || word2.nil?
+  return nil if word.is_a?(Symbol) || word2.is_a?(Symbol)
   res = res + "0x%04X " % word
   inst = $server.coder.decode([word, word2], dir)
   dir = dir + 2 if inst.size == 2
@@ -150,7 +152,7 @@ end
 # @param [Array] entrada
 # @return [String]
 show_version = Proc.new { |entrada|
-  res = "V 1.0\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
+  res = "V 1.1\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
 }
 
 #show_register
@@ -440,6 +442,7 @@ execute = Proc.new { |entrada|
       mod = $server.proc.execute(dos[1])
       nregs = mod[:usr_regs] != nil ? mod[:usr_regs].length / 2 : 0
       nmem = mod[:memory] != nil ? mod[:memory][1].length : 0
+      nerror = mod[:error]
       if nregs > 0
         0.upto(nregs - 1) do |ind|
           r = mod[:usr_regs][2 * ind]
@@ -466,6 +469,10 @@ execute = Proc.new { |entrada|
         mem.uniq!
         mem.sort!
       end
+      if nerror != nil
+        sigue = lambda {false}
+        terror = "%s 0x%08X\r\n" % [Errores[nerror[0]], nerror[1]]
+      end
       while sigue.call
         pc = $server.proc.reg(ThumbII_Defs::PC)
         dos = gen_disassemble(pc)
@@ -489,6 +496,7 @@ execute = Proc.new { |entrada|
         mod = $server.proc.execute(dos[1])
         nregs = mod[:usr_regs] != nil ? mod[:usr_regs].length / 2 : 0
         nmem = mod[:memory] != nil ? mod[:memory][1].length : 0
+        nerror = mod[:error]
         if nregs > 0
           0.upto(nregs - 1) do |ind|
             regs << mod[:usr_regs][2 * ind]
@@ -510,6 +518,10 @@ execute = Proc.new { |entrada|
           mem.uniq!
           mem.sort!
         end
+        if nerror != nil
+          terror = "%s 0x%08X\r\n" % [Errores[nerror[0]], nerror[1]]
+          break
+        end
       end
       res = (terror.nil? ? "SUCCESS\r\n" : "ERROR\r\n") if res.nil?
       res = res + dos[0] + "\r\n"
@@ -520,7 +532,7 @@ execute = Proc.new { |entrada|
         end
       end
       res = res + "r16: 0x%08X\r\n" % flags_to_reg($server.proc.flags)
-      if mem.length > 0
+          if mem.length > 0
         res = res + "AFFECTED MEMORY\r\n"
         mem.each do |pos|
           res = res + "0x%08X: 0x%02X\r\n" % [pos, $server.proc.memory_byte(pos)]
@@ -870,7 +882,7 @@ class ServerApp
     lpath = File.expand_path(File.dirname($0))
     Shell.cd(lpath)
     blocks = read_ELF('complex.o')
-    puerto = ARGV.length == 0 ? 9999 : ARGV[0].to_i
+    puerto = ARGV.length == 0 ? 8070 : ARGV[0].to_i
     @procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     @procesador.memory.add_block(blocks[1])
     @procesador.memory.symbolTable = blocks[2]

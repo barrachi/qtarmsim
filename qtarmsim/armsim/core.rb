@@ -65,7 +65,7 @@ class Core
         res[:usr_regs] << @estado[:usr_regs][ThumbII_Defs::PC] + 2 * inst.size
       end
     end
-    update res
+    res = update res
     return res
   end
 
@@ -88,10 +88,22 @@ class Core
       end
     end
     if data[:memory] != nil
+      idx = 0
       data[:memory][1].each do |par|
-        @estado[:memory].access(data[:memory][0], par[0], par[1])
+        acok = @estado[:memory].access(data[:memory][0], par[0], par[1])
+        if acok.is_a?(Symbol)
+          data[:error] = [acok, par[0]]
+          if idx == 0
+            data.delete(:memory)
+          else
+            data[:memory][1] = data[:memory][1][0..idx - 1]
+          end
+          break
+        end
+        idx += 1
       end
     end
+  return data
   end
 
   #memory

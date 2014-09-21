@@ -1397,9 +1397,14 @@ module ThumbII_Defs
   ldripc_p = Proc.new {|operandos, estado|
     dir = operandos[1] * 4 + (estado[:usr_regs][PC] & 0xFFFFFFFC) + 4
     f1 = estado[:memory].access(:rw, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #str3rw_p
@@ -1462,10 +1467,15 @@ module ThumbII_Defs
   ldrsbr_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + estado[:usr_regs][operandos[2]]
     f1 = estado[:memory].access(:rb, dir)
-    f1 = 0xffffff00 | f1 unless (f1 & 0x80) == 0
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      f1 = 0xffffff00 | f1 unless (f1 & 0x80) == 0
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #ldrwr_p
@@ -1480,9 +1490,14 @@ module ThumbII_Defs
   ldrwr_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + estado[:usr_regs][operandos[2]]
     f1 = estado[:memory].access(:rw, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #ldrhr_p
@@ -1497,9 +1512,14 @@ module ThumbII_Defs
   ldrhr_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + estado[:usr_regs][operandos[2]]
     f1 = estado[:memory].access(:rh, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #ldrbr_p
@@ -1514,9 +1534,14 @@ module ThumbII_Defs
   ldrbr_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + estado[:usr_regs][operandos[2]]
     f1 = estado[:memory].access(:rb, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #ldrshr_p
@@ -1531,10 +1556,15 @@ module ThumbII_Defs
   ldrshr_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + estado[:usr_regs][operandos[2]]
     f1 = estado[:memory].access(:rh, dir)
-    f1 = 0xffff0000 | f1 unless (f1 & 0x8000) == 0
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      f1 = 0xffff0000 | f1 unless (f1 & 0x8000) == 0
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #str2riw_p
@@ -1597,9 +1627,14 @@ module ThumbII_Defs
   ldrwi_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + operandos[2] * 4
     f1 = estado[:memory].access(:rw, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #ldrhi_p
@@ -1614,9 +1649,14 @@ module ThumbII_Defs
   ldrhi_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + operandos[2] * 2
     f1 = estado[:memory].access(:rh, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #ldrbi_p
@@ -1631,9 +1671,14 @@ module ThumbII_Defs
   ldrbi_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][operandos[1]] + operandos[2]
     f1 = estado[:memory].access(:rb, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #strisp_p
@@ -1664,9 +1709,14 @@ module ThumbII_Defs
   ldrisp_p = Proc.new {|operandos, estado|
     dir = estado[:usr_regs][SP] + operandos[1] * 4
     f1 = estado[:memory].access(:rw, dir)
-    d = operandos[0]
-    flags = false
-    data = {fg: flags, f1: f1, d: d}
+    if f1.is_a?(Symbol)
+      data = {error: [f1, dir]}
+    else
+      d = operandos[0]
+      flags = false
+      data = {fg: flags, f1: f1, d: d}
+    end
+    data
   }
 
   #lsli_p
@@ -1797,25 +1847,43 @@ module ThumbII_Defs
     dest = Array.new
     fnt = Array.new
     esta = false
+    data = nil
     0.upto(7) do |ind|
       if lista & 1 == 1
         esta = true if base == ind
-        dest << ind
-        fnt << estado[:memory].access(:rw, dir)
-        dir += 4
+        acok = estado[:memory].access(:rw, dir)
+        if acok.is_a?(Symbol)
+          data = {error: [acok, dir]}
+          break
+        else
+          fnt << acok
+          dest << ind
+          dir += 4
+        end
       end
       lista = lista >> 1
     end
-    if lista & 1 == 1
-      dest << PC
-      fnt << estado[:memory].access(:rw, dir)
-      dir += 4
+    if data.nil? && lista & 1 == 1
+      acok = estado[:memory].access(:rw, dir)
+      if acok.is_a?(Symbol)
+        data = {error: [acok, dir]}
+      else
+        dest << PC
+        fnt << acok
+        dir += 4
+      end
     end
     if esta == false
       dest << base
       fnt << dir
     end
-    data = {f1: fnt, d: dest}
+    if data.nil?
+      data = {f1: fnt, d: dest}
+    else
+      data[:f1] = fnt
+      data[:d] = dest
+    end
+    data
   }
 
   #stm_p
@@ -2176,20 +2244,24 @@ module ThumbII_Defs
 
   #mov_e
   #-----
-  #Copia fuente en destino. Solo modifica N y Z
+  #Copia fuente en destino. Solo modifica N y Z. Verifica y propaga error
   #Simbolos: f1 para la fuente, d para el destino, fg para modificar flags
   # @param [Hash] op
   # @return[Hash]
   mov_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
-    res = op[:f1]
-    if op[:fg]
-      z = (res == 0) ? 1 : 0
-      n = ((res & 0x80000000) == 0) ? 0 : 1
-      data[:flags] = {z: z, n: n}
+    if op[:error].nil?
+      data[:usr_regs] = [op[:d]] unless op[:d] == nil
+      res = op[:f1]
+      if op[:fg]
+        z = (res == 0) ? 1 : 0
+        n = ((res & 0x80000000) == 0) ? 0 : 1
+        data[:flags] = {z: z, n: n}
+      end
+      data[:usr_regs] << res unless op[:d] == nil
+    else
+      data[:error] = op[:error]
     end
-    data[:usr_regs] << res unless op[:d] == nil
     data
   }
 
@@ -2437,17 +2509,22 @@ module ThumbII_Defs
 
   #ldm_e
   #-----
-  #Guarda registros múltiples
+  #Guarda registros múltiples, propaga el error
   #Simbolos: f1 para la lista de fuente y d para la lista de destinos
   # @param [Hash] op
   # @return[Hash]
   ldm_e = Proc.new {|op|
     res = Array.new
-    op[:d].each.with_index do |item, ind|
-      res << item
-      res << op[:f1][ind]
+    data = Hash.new
+    if !op[:d].nil?
+      op[:d].each.with_index do |item, ind|
+        res << item
+        res << op[:f1][ind]
+      end
+    data[:usr_regs] = res
     end
-    data = {usr_regs: res}
+    data[:error] = op[:error] unless op[:error].nil?
+    data
   }
 
   #stm_e

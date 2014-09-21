@@ -2,7 +2,7 @@ require_relative 'memory_Defs'
 require_relative 'memory_block'
 
 
-ACESSES = Memory_Defs::RAM_LE
+ACESSES = Memory_Defs::RAM_LE_NA
 ELFCLASS = ['Invalid object', '32 bit object', '64 bit object']
 ELFDATA = ['Invalid data', 'LSB data', 'MSB data']
 ELFVERSION = ['Invalid version', 'Current version']
