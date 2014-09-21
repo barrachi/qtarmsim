@@ -482,8 +482,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         "Opens an ARM assembler file"
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
             return
+        open_dir = QtCore.QDir.currentPath() if self.file_name=="untitled.s" else os.path.dirname(os.path.abspath(self.file_name))
         file_name = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
-                                                     QtCore.QDir.currentPath(),
+                                                     open_dir,
                                                      self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
         if file_name:
             self.readFile(file_name)
