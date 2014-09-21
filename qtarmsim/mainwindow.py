@@ -624,9 +624,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             return
         response = runProgressBarDialog.getResponse()
         self._processExecutionResponse(response)
-        if response.result == "ERROR":
-            self.doRestart()
-            return
         self.highlight_pc_line()
 
 
