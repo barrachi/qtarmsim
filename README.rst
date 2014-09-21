@@ -58,11 +58,12 @@ On Gentoo you can install all the dependencies using::
    # emerge -av crossdev
    # crossdev --target arm --ov-output /usr/local/portage
 
-On Kubuntu you can install all the dependencies using::
+On Ubuntu you can install all the dependencies using::
 
-   $ TO BE DONE
-   
-.. comment:  On Ubuntu, the ``gcc-arm-linux-gnueabi`` package should be installed.
+   $ sudo apt-get install python3-pyqt4
+   $ sudo apt-get install pyton3-pyqt4.qsci
+   $ sudo apt-get install ruby
+   $ sudo apt-get install gcc-arm-linux-gnueabi
 
 
 
