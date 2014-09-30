@@ -882,12 +882,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             and not self.settings.value("ARMSimCommand"):
             QtGui.QMessageBox.warning(self, self.tr("ARMSim command empty"),
                     self.tr("ARMSim command is empty.\n\n"
-                            "Please go to 'View, Preferences...' and set it.\n"))
+                            "Please go to 'Edit, Preferences...' and set it.\n"))
             return False
         if not os.path.isfile(self.settings.value("ARMGccCommand")):
             QtGui.QMessageBox.warning(self, self.tr("ARM gcc not found"),
                     self.tr("ARM gcc command not found.\n\n"
-                            "Please go to 'View, Preferences...' and set it.\n"))
+                            "Please go to 'Edit, Preferences...' and set it.\n"))
             return False
         self.simulator = ARMSimConnector(verbose = self.verbose)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
