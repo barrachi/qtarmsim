@@ -49,21 +49,18 @@ with python bindings, if offered as a separate package; and Ruby.
 Installing GCC for ARM can be achieved either by building a
 cross-compiling toolchain, installing a GCC for ARM package provided
 by your distribution, or by extracting the ``gcc-arm-none-eabi``
-``tar.gz`` for linux32 or linux64 from the `Arduino download page
-<https://code.google.com/p/arduino/downloads/list>`_.
+``tar.gz`` for linux32 from the `Arduino download page
+<https://code.google.com/p/arduino/downloads/list>`_ (beware
+that this last option is of no use for linux64 versions).
 
 On Gentoo you can install all the dependencies using::
 
-   # emerge -av PyQt4 qscintilla-python ruby
-   # emerge -av crossdev
+   # emerge -av PyQt4 qscintilla-python ruby crossdev
    # crossdev --target arm --ov-output /usr/local/portage
 
 On Ubuntu you can install all the dependencies using::
 
-   $ sudo apt-get install python3-pyqt4
-   $ sudo apt-get install pyton3-pyqt4.qsci
-   $ sudo apt-get install ruby
-   $ sudo apt-get install gcc-arm-linux-gnueabi
+   $ sudo apt-get install python3-pyqt4 pyton3-pyqt4.qsci ruby gcc-arm-linux-gnueabi
 
 
 
