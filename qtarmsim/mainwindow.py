@@ -92,7 +92,7 @@ class DefaultSettings():
             self._ARMSimDirectory = ""
         self._ARMSimServer = "localhost"
         self._ARMSimPort = 8010
-        gcc_names = ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc"]
+        gcc_names = ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc", "arm-linux-gnueabi-gcc"]
         if sys.platform == "win32":
             gcc_names = ["{}.exe".format(name) for name in gcc_names]
         fname = ""
