@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 require_relative 'memory_Defs'
 require_relative 'memory_block'
 
@@ -20,6 +21,8 @@ ORIG_DATA = 0x20070000
 END_DATA =  0x20070800
 ORIG_EXTERN = 0x00004000
 SIZE_EXTERN = 16
+
+BLOCK0 = [0x30, 0xBF]
 
 #Struct para la lectura de la cabezera de sección. Los tamaños de los campos se ven en la función
 #get_section_hdr de ELF File
@@ -288,13 +291,16 @@ class ELF_File < File
   #Aplicamos la relocalización. Acabamos con un bloque de
   #datos y otro de codigo y la tabla de símbolos en memoria.
   def relocate
+    $warn = Array.new
     symbolTable = Hash.new
-    code = @sections[@wks['.text']].data.dup
+    code =  @sections[@wks['.text']].data.nil? ? BLOCK0 : @sections[@wks['.text']].data.dup
     data = @sections[@wks['.data']].data.nil? ? [0, 0, 0, 0] : @sections[@wks['.data']].data.dup
     bssdir = @wks_orig['.bss']
     externdir = ORIG_EXTERN
     @symbols.each do |symbol|
       symsection = symbol.data[:shndx]
+      bind = (symbol.data[:info] >> 4) & 0x0F
+      $warn << "Símbolo %s no definido." % symbol.name if bind == 1
       next if symsection == SHN_NAME
       #Si no tiene nombre lo bautizamos con sección:número de símbolo
       symname = (symbol.name.length == 0) ? "SEC%d:S%d" % [symsection, symbol.idx]: symbol.name

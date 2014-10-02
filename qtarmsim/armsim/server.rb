@@ -604,6 +604,7 @@ assemble = Proc.new { |entrada|
   cline = '"' + $compiler + '"' + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
   eline = '2> ' + fline + '.err'
   lline = '> ' + fline + '.lst'
+  WARN = nil
   if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
     blocks = read_ELF(fline + '.o')
     procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
@@ -616,7 +617,15 @@ assemble = Proc.new { |entrada|
     $server.proc = procesador
     $source = gen_source(fline + '.lst')
     p $source
-    res = "SUCCESS\r\n"
+    if $warn.size == 0
+      res = "SUCCESS\r\n"
+    else
+      res = "ERROR\r\n"
+      $warn.each do |line|
+        res = res + line + "\r\n"
+      end
+      res = res + "EOF\r\n"
+    end
   else
     res = "ERROR\r\n"
     File.foreach(fline + '.err') do |line|
