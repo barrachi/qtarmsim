@@ -300,7 +300,7 @@ class ELF_File < File
     @symbols.each do |symbol|
       symsection = symbol.data[:shndx]
       bind = (symbol.data[:info] >> 4) & 0x0F
-      $warn << "Símbolo %s no definido." % symbol.name if bind == 1
+      $warn << "Símbolo «%s» no definido." % symbol.name if bind == 1
       next if symsection == SHN_NAME
       #Si no tiene nombre lo bautizamos con sección:número de símbolo
       symname = (symbol.name.length == 0) ? "SEC%d:S%d" % [symsection, symbol.idx]: symbol.name
