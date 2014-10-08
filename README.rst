@@ -60,7 +60,8 @@ On Gentoo you can install all the dependencies using::
 
 On Ubuntu you can install all the dependencies using::
 
-   $ sudo apt-get install python3-pyqt4 pyton3-pyqt4.qsci ruby gcc-arm-linux-gnueabi
+   $ sudo apt-get install python3-pyqt4 python3-pyqt4.qsci python3-pip
+   $ sudo apt-get install ruby gcc-arm-linux-gnueabi
 
 
 
@@ -113,28 +114,27 @@ follow the next steps:
 2. Installing Qt ARMSim
 -----------------------
 
-Qt ARMSim can be automatically installed using pip (a tool for
+Qt ARMSim can be automatically installed using pip3 (a tool for
 installing Python packages), or manually. Next section shows how to
-install Qt |~| ARMSim using `pip`, which is the recommended method.
+install Qt |~| ARMSim using `pip3`, which is the recommended method.
 Section |~| 2.2 shows how to install it manually.
 
 
-2.1 Using pip (recommended method)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.1 Using pip3 (recommended method)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If pip is not installed in your system, download `get-pip.py
+If ``pip3`` is installed, you can install Qt ARMSim with::
+
+   # pip3 install --pre qtarmsim
+
+If you execute the previous command as root, Qt |~| ARMSim will be
+installed system wide.
+
+If pip3 is not installed in your system, download `get-pip.py
 <https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_, and
 execute::
 
    # python3 get-pip.py
-
-Once ``pip`` is installed, you can install Qt ARMSim with::
-
-   # pip3 install --pre qtarmsim
-
-If you execute the previous commands as root, both pip and Qt |~| ARMSim
-will be installed system wide. If not, they will be installed only
-for the current user.
 
 To upgrade a previous installation of Qt |~| ARMSim you can use the command::
 
