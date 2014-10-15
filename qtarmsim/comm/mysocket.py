@@ -34,7 +34,11 @@ class MySocket:
         self.verbose = verbose
         self.conn = None
         self.pending_lines = []
-        signal.signal(signal.SIGINT, self.exit_signal_handler)
+        try:
+            signal.signal(signal.SIGINT, self.exit_signal_handler)
+        except ValueError:
+            # If not in main thread signal will raise a ValueError
+            pass
 
     def server_bind(self, port):
         """
@@ -52,7 +56,7 @@ class MySocket:
             self.sock.bind(('localhost', port))
         except socket.error as error:
             sys.stderr.write('Bind failed. [Errno {}] {}\n'.format(str(error.errno), error.strerror))
-            sys.exit(-1)
+            return -1
         if self.verbose:
             print('Socket bind complete')
         # Only one listener
@@ -73,6 +77,23 @@ class MySocket:
         if self.verbose:
             print('Connected with ' + addr[0] + ':' + str(addr[1]))
         
+    def test_port_is_free(self, port):
+        """
+        Tests if a port is free by binding a new socket to the given port and closing it afterwards.
+        This method should only be used if a free port number has to passed to a third application, and be aware that
+        there is a chance that another application grabs the port in the meantime.
+
+        The correct way of getting a port for ourselves is using self.server_bind().
+
+        Returns True if the port was free when the test was conducted.
+        """
+        err = self.server_bind(port)
+        if err==0:
+            self.close_socket()
+            return True
+        else:
+            return False
+
     def connect_to(self, port, server="localhost"):
         """
         Establishes a connection to the given server at the given port.
@@ -117,7 +138,8 @@ class MySocket:
             return line
         data = self.conn.recv(self.MSGLEN)
         msg = data.decode(self.ENCODING)
-        while (len(data) == self.MSGLEN and msg[-1] != self.NL) or msg.strip() == '':
+        # while (len(data) == self.MSGLEN and msg[-1] != self.NL) or msg.strip() == '':
+        while msg[-1] != self.NL or msg.strip() == '':
             data = self.conn.recv(self.MSGLEN)
             if len(data) == 0: # Connection closed
                 # @warning: even in this case we should continue, as there could be previous read lines
