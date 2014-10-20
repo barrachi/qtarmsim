@@ -299,7 +299,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if self.simulator and self.simulator.connected:
             self.simulator.clearBreakpoints()
         self.ui.textEditARMSim.clearBreakpoints()
-        self.breakpoints.clear()
+        try:
+            self.breakpoints.clear()
+        except AttributeError:
+            # Python 3.2 does not have clear() method for lists
+            self.breakpoints = []
 
 
     #################################################################################
