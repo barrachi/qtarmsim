@@ -26,6 +26,7 @@ class Settings():
             'Topic :: Software Development :: Assemblers',
             'Topic :: Software Development :: Debuggers',
             'Topic :: Software Development :: Disassemblers',
+            'Topic :: System :: Emulators',
     
             # License long description
             'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
