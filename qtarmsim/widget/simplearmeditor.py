@@ -30,7 +30,7 @@ class SimpleARMEditor(QsciScintilla):
         # Set the default font
         font = QtGui.QFont()
         font.setFamily('Courier')
-        font.setFixedPitch(True)
+        font.setStyleHint(QtGui.QFont.Monospace)
         font.setPointSize(10)
         self.setFont(font)
         self.setMarginsFont(font)

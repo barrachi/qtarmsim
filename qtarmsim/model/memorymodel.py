@@ -53,7 +53,6 @@ class MemoryModel(TreeModel):
     modified_words = []
     q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
-    q_font_last = QtGui.QFont("Courier 10 Pitch", weight=100)
 
     # memory_edited, parameters are hex address and hex value
     memory_edited = QtCore.pyqtSignal('QString', 'QString')
@@ -64,6 +63,14 @@ class MemoryModel(TreeModel):
     def __init__(self, parent=None):
         super(MemoryModel, self).__init__(parent)
         self.rootItem = TreeItem(("Address", "Value"))
+        # Set fonts
+        self.q_font = QtGui.QFont()
+        self.q_font_last = QtGui.QFont()
+        for font in self.q_font, self.q_font_last:
+            font.setFamily("Courier")
+            font.setPointSize(10)
+            font.setStyleHint(QtGui.QFont.Monospace)
+        self.q_font_last.setWeight(QtGui.QFont.Black)
 
     def data(self, index, role):
         if not index.isValid():
@@ -71,7 +78,9 @@ class MemoryModel(TreeModel):
         item = index.internalPointer()
         # Memory bank
         if item.parent() == self.rootItem:
-            if role != QtCore.Qt.DisplayRole:
+            if role == Qt.FontRole:
+                return self.q_font
+            elif role != QtCore.Qt.DisplayRole:
                 return None
             return item.data(index.column())
         # Register
@@ -81,8 +90,11 @@ class MemoryModel(TreeModel):
             return self.q_brush_last
         elif role == Qt.BackgroundRole and self.previously_modified_words.count((index.parent().row(), index.row())):
             return self.q_brush_previous
-        elif role == Qt.FontRole and self.modified_words.count((index.parent().row(), index.row())):
-            return self.q_font_last
+        elif role == Qt.FontRole:
+            if self.modified_words.count((index.parent().row(), index.row())):
+                return self.q_font_last
+            else:
+                return self.q_font
         else:
             return None
 

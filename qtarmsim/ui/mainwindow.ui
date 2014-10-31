@@ -244,7 +244,7 @@
        </property>
        <property name="font">
         <font>
-         <family>Courier 10 Pitch</family>
+         <family>Courier</family>
         </font>
        </property>
        <property name="frameShape">
@@ -292,7 +292,7 @@
       <widget class="MyQTreeView" name="treeViewMemory">
        <property name="font">
         <font>
-         <family>Courier 10 Pitch</family>
+         <family>Courier</family>
         </font>
        </property>
        <property name="frameShape">

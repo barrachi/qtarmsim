@@ -35,8 +35,7 @@ class RegistersModel(TreeModel):
     modified_registers = []
     q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
-    q_font_last = QtGui.QFont("Courier 10 Pitch", weight=100)
-
+    
     # register_edited, parameters are register name and hex value
     register_edited = QtCore.pyqtSignal('QString', 'QString')
 
@@ -59,14 +58,24 @@ class RegistersModel(TreeModel):
             for register_data in register_bank.registers_data:
                 rti = TreeItem([register_data[0], register_data[1]], rbti)
                 rbti.appendChild(rti)
-
+        # Set fonts
+        self.q_font = QtGui.QFont()
+        self.q_font_last = QtGui.QFont()
+        for font in self.q_font, self.q_font_last:
+            font.setFamily("Courier")
+            font.setPointSize(10)
+            font.setStyleHint(QtGui.QFont.Monospace)
+        self.q_font_last.setWeight(QtGui.QFont.Black)
+        
     def data(self, index, role):
         if not index.isValid():
             return None
         item = index.internalPointer()
         # Register bank
         if item.parent() == self.rootItem:
-            if role != QtCore.Qt.DisplayRole:
+            if role == Qt.FontRole:
+                return self.q_font
+            elif role != QtCore.Qt.DisplayRole:
                 return None
             return item.data(index.column())
         # Register
@@ -76,8 +85,11 @@ class RegistersModel(TreeModel):
             return self.q_brush_last
         elif role == Qt.BackgroundRole and self.previously_modified_registers.count(index.row()):
             return self.q_brush_previous
-        elif role == Qt.FontRole and self.modified_registers.count(index.row()):
-            return self.q_font_last
+        elif role == Qt.FontRole:
+            if self.modified_registers.count(index.row()):
+                return self.q_font_last
+            else:
+                return self.q_font
         else:
             return None
 
