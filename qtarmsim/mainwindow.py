@@ -43,7 +43,6 @@ from . window.va import Valor
 from . window.connectprogressbardialog import ConnectProgressBarDialog
 from . modulepath import module_path
 from . window.runprogressbardialog import RunProgressBarDialog
-from posix import strerror
 
 
 def _fromUtf8(s):
