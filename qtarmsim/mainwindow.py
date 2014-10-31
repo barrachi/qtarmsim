@@ -806,7 +806,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         return "<b>Qt ARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014 Sergio Barrachina Mir<br></br>\n" + \
                  self.tr("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
-                 self.tr("Developed at the Jaume I University, Castellón, Spain")
+                 self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
