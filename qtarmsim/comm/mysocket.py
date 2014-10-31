@@ -25,6 +25,7 @@ class MySocket:
     
     MSGLEN = 1024
     NL = '\n'
+    ORD_NL = 10
     ENCODING = 'utf8'
 
     def __init__(self, verbose=False):
@@ -136,15 +137,22 @@ class MySocket:
             if self.verbose:
                 print("Received line: {}".format(line))
             return line
-        data = self.conn.recv(self.MSGLEN)
-        msg = data.decode(self.ENCODING)
-        # while (len(data) == self.MSGLEN and msg[-1] != self.NL) or msg.strip() == '':
-        while msg[-1] != self.NL or msg.strip() == '':
-            data = self.conn.recv(self.MSGLEN)
-            if len(data) == 0: # Connection closed
-                # @warning: even in this case we should continue, as there could be previous read lines
-                break
-            msg += data.decode(self.ENCODING)
+        chunk = self.conn.recv(self.MSGLEN)
+        if self.verbose:
+            print("Received chunk of size: {}".format(len(chunk)))
+            print("Contents:\n #{}#".format(chunk))
+        data = chunk
+        # Grab more chunks while the other end does not disconnect AND the received chunk does not end with \n 
+        while len(chunk)!=0 and chunk[-1] != self.ORD_NL:
+            chunk = self.conn.recv(self.MSGLEN)
+            if self.verbose:
+                print("Received chunk of size: {}".format(len(chunk)))
+                print("Contents: #{}#".format(chunk))
+            data += chunk
+        try:
+            msg = data.decode(self.ENCODING)
+        except UnicodeDecodeError as e:
+            msg = data.decode('latin1')
         lines = [l.strip() for l in msg.strip().replace('\r\n', '\n').split('\n') if l.strip() != ""]
         if len(lines)>1:
             self.pending_lines = lines[1:]
