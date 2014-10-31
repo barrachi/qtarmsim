@@ -225,6 +225,19 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEditARMSimServer</tabstop>
+  <tabstop>spinBoxARMSimPort</tabstop>
+  <tabstop>lineEditARMSimCommand</tabstop>
+  <tabstop>lineEditARMSimDirectory</tabstop>
+  <tabstop>toolButtonARMSimDirectory</tabstop>
+  <tabstop>lineEditARMGccCommand</tabstop>
+  <tabstop>toolButtonARMGccCommand</tabstop>
+  <tabstop>lineEditARMGccOptions</tabstop>
+  <tabstop>pushButtonARMSimRestoreDefaults</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>tabWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
