@@ -501,7 +501,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if file_name:
             encodings = ['utf-8', 'latin1', 'ascii']
             for i in range(len(encodings)):
-                f = open(file_name, encoding = encodings[i])
+                try:
+                    f = open(file_name, encoding = encodings[i])
+                except FileNotFoundError as e:
+                    QtGui.QMessageBox.warning(self, self.tr("Open File"), "{}: '{}'.".format(e.strerror, file_name))
+                    raise e
                 try:
                     text = f.read()
                     f.close()
