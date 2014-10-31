@@ -43,6 +43,7 @@ from . window.va import Valor
 from . window.connectprogressbardialog import ConnectProgressBarDialog
 from . modulepath import module_path
 from . window.runprogressbardialog import RunProgressBarDialog
+from posix import strerror
 
 
 def _fromUtf8(s):
@@ -392,6 +393,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             if not self.connectToARMSim():
                 self.assembled(False)
                 return
+        # Check that self.file_name exists
+        if not os.path.exists(self.file_name):
+            strerror = self.tr('File not found')
+            QtGui.QMessageBox.warning(self, self.tr("Assemble File"), "{}: '{}'.".format(strerror, self.file_name))
+            self.assembled(False)
+            return
         # Assemble self.file_name
         response = self.simulator.doAssemble(self.file_name)
         if response.result == "SUCCESS":
