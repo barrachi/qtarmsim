@@ -3,6 +3,7 @@
 
 require 'socket'
 require 'shell'
+require 'rbconfig'
 require_relative 'thumbII_Defs'
 require_relative 'instruction'
 require_relative 'coder'
@@ -11,7 +12,7 @@ require_relative 'memory'
 require_relative 'memory_block'
 require_relative 'read_ELF'
 
-GCC = 'C:\Users\German\Documents\GitHub\Arduino\build\windows\work\hardware\tools\g++_arm_none_eabi\bin\arm-none-eabi-gcc.exe'
+GCC = 'C:/devkitPro/devkitARM/bin/arm-none-eabi-gcc.exe'
 CL1 = '-mcpu=cortex-m1 -mthumb -c'
 CL3 = '-mcpu=cortex-m3 -mthumb -c'
 
@@ -87,7 +88,10 @@ def gen_source(name)
       text = line[19..-1].gsub(/\t/, ' ').lstrip if line.length > 19
       if intext
         if data != 0
-          source[dir_rel] = [text, line_number] unless text.nil?
+          if text != nil
+            text = text.encode('UTF-8') if $windows
+            source[dir_rel] = [text, line_number]
+          end
         else
           intext = false if get_section(text) > 1
         end
@@ -152,7 +156,7 @@ end
 # @param [Array] entrada
 # @return [String]
 show_version = Proc.new { |entrada|
-  res = "V 1.1\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
+  res = "V 1.2\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
 }
 
 #show_register
@@ -473,8 +477,9 @@ execute = Proc.new { |entrada|
         sigue = lambda {false}
         terror = "%s 0x%08X\r\n" % [Errores[nerror[0]], nerror[1]]
       end
+      pc = $server.proc.reg(ThumbII_Defs::PC)
       while sigue.call
-        pc = $server.proc.reg(ThumbII_Defs::PC)
+       # pc = $server.proc.reg(ThumbII_Defs::PC)
         dos = gen_disassemble(pc)
         if dos.nil?
           terror = Errores[:nomem]
@@ -494,6 +499,7 @@ execute = Proc.new { |entrada|
           break
         end
         mod = $server.proc.execute(dos[1])
+        pc = $server.proc.reg(ThumbII_Defs::PC) #
         nregs = mod[:usr_regs] != nil ? mod[:usr_regs].length / 2 : 0
         nmem = mod[:memory] != nil ? mod[:memory][1].length : 0
         nerror = mod[:error]
@@ -604,7 +610,8 @@ assemble = Proc.new { |entrada|
   cline = '"' + $compiler + '"' + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
   eline = '2> ' + fline + '.err'
   lline = '> ' + fline + '.lst'
-  WARN = nil
+  #$warn = nil
+  puts cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline
   if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
     blocks = read_ELF(fline + '.o')
     procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
@@ -678,7 +685,7 @@ Set = { 'REGISTER' => [1, set_register, [:regname, 'WITH', :hexvalue]],
 
 Config = { 'COMPILER' => [1, config_compiler, [:exe]],
         'ARGS' => [1, config_args, [:cad]],
-        'PATH' => [1,config_path, [:path]]
+        'PATH' => [1, config_path, [:path]]
 }
 
 Sysinfo = { 'MEMORY' => [1, sysinfo_memory, []]
@@ -888,6 +895,10 @@ class ServerApp
   #Aquí pondremos toda la inicialización y esas cosas
   #de momento una ROM random, la RAM de datos y la pila
   def main
+    host_os = RbConfig::CONFIG['host_os']
+    $windows = host_os == "linux" ? false : true
+    p $windows
+    p host_os
     lpath = File.expand_path(File.dirname($0))
     Shell.cd(lpath)
     blocks = read_ELF('complex.o')
