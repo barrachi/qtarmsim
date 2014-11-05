@@ -72,6 +72,7 @@ class DefaultSettings():
 
     def __init__(self):
         self._setARMSimDefaults()
+        self._setDirectoryDefaults()
 
     def value(self, name):
         return getattr(self, "_" + name)
@@ -103,6 +104,9 @@ class DefaultSettings():
         fname = fname if fname else ""
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
+        
+    def _setDirectoryDefaults(self):
+        self._LastUsedDirectory = QtCore.QDir.currentPath()
 
 
 class QtARMSimMainWindow(QtGui.QMainWindow):
@@ -118,8 +122,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         # Extends the Ui
         self.extendUi()
-        # Set the file name
-        self.setFileName("untitled.s")
+        # Set the file name to default untitled name
+        self.setFileName("")
         # Set the application icon
         self.setWindowIcon(QtGui.QIcon(":/images/logo.svg"))
         # Breakpoint dialog initialization
@@ -219,18 +223,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # End migration of settings versions
         #-----------------------------------------------------------------------------
         self.settings.setValue("ConfVersion", 2)
-        if not self.settings.value("ARMSimCommand"):
-            self.settings.setValue("ARMSimCommand", self.defaultSettings.value("ARMSimCommand"))
-        if not self.settings.value("ARMSimDirectory"):
-            self.settings.setValue("ARMSimDirectory", self.defaultSettings.value("ARMSimDirectory"))
-        if not self.settings.value("ARMSimServer"):
-            self.settings.setValue("ARMSimServer", self.defaultSettings.value("ARMSimServer"))
-        if not self.settings.value("ARMSimPort"):
-            self.settings.setValue("ARMSimPort", self.defaultSettings.value("ARMSimPort"))
-        if not self.settings.value("ARMGccCommand"):
-            self.settings.setValue("ARMGccCommand", self.defaultSettings.value("ARMGccCommand"))
-        if not self.settings.value("ARMGccOptions"):
-            self.settings.setValue("ARMGccOptions", self.defaultSettings.value("ARMGccOptions"))
+        for setting in ("ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMGccCommand", "ARMGccOptions", 
+                        "LastUsedDirectory"):
+            if not self.settings.value(setting):
+                self.settings.setValue(setting, self.defaultSettings.value(setting))
 
 
     def defaultGeometry(self):
@@ -469,74 +465,79 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def setFileName(self, file_name):
         "Sets the filename and updates the window title accordingly"
-        self.file_name = file_name
+        self.file_name = file_name if file_name else self.tr("untitled.s")
         self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
         self.checkFileActions()
 
 
     def doNew(self):
-        "Creates a new untitled.s file"
+        "Creates a new file"
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
             return
         # 1) Change to tab 0
         self.ui.tabWidgetCode.setCurrentIndex(0)
-        # 2) Set file name to untitled.s
-        self.setFileName("untitled.s")
+        # 2) Set file name to default untitled name
+        self.setFileName("")
         # 3) Clear textEditSource
         self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_CLEARALL)
         # 4) Clear breakpoints when creating a new file
         self.clearBreakpoints()
 
+    def _getDirectory(self):
+        directory = self.settings.value("LastUsedDirectory")
+        if not os.path.isdir(directory):
+            directory = self.defaultSettings.value("LastUsedDirectory")
+        return directory
 
     def doOpen(self):
         "Opens an ARM assembler file"
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
             return
-        open_dir = QtCore.QDir.currentPath() if self.file_name=="untitled.s" else os.path.dirname(os.path.abspath(self.file_name))
         file_name = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
-                                                     open_dir,
+                                                     self._getDirectory(),
                                                      self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
         if file_name:
             self.readFile(file_name)
-        # Change to tab 0
-        self.ui.tabWidgetCode.setCurrentIndex(0)
+            # Change to tab 0
+            self.ui.tabWidgetCode.setCurrentIndex(0)
+            # Clear breakpoints for the new read file
+            self.clearBreakpoints()
+            # Update LastUsedDirectory setting
+            self.settings.setValue("LastUsedDirectory", os.path.dirname(file_name))
 
 
     def readFile(self, file_name):
         "Reads a file. Can be called using an argument from the command line"
-        if file_name:
-            encodings = ['utf-8', 'latin1', 'ascii']
-            for i in range(len(encodings)):
-                try:
-                    f = open(file_name, encoding = encodings[i])
-                except FileNotFoundError as e:
-                    QtGui.QMessageBox.warning(self, self.tr("Open File"), "{}: '{}'.".format(e.strerror, file_name))
+        encodings = ['utf-8', 'latin1', 'ascii']
+        for i in range(len(encodings)):
+            try:
+                f = open(file_name, encoding = encodings[i])
+            except FileNotFoundError as e:
+                QtGui.QMessageBox.warning(self, self.tr("Open File"), "{}: '{}'.".format(e.strerror, file_name))
+                raise e
+            try:
+                text = f.read()
+                f.close()
+                break
+            except UnicodeDecodeError as e:
+                f.close()
+                if i < len(encodings) - 1:
+                    msg = self.tr("Will try next with '{}' encoding.").format(encodings[i+1])
+                else:
+                    msg = self.tr("No more supported encodings.\nPlease, manually convert the file to 'utf-8' and load it again.")
+                err_msg = self.tr("Couldn't read the file using the '{}' encoding.\n{}").format(encodings[i], msg)
+                QtGui.QMessageBox.warning(self, self.tr("Error reading '{}'").format(os.path.basename(file_name)), err_msg)
+                if i == len(encodings) -1:
                     raise e
-                try:
-                    text = f.read()
-                    f.close()
-                    break
-                except UnicodeDecodeError as e:
-                    f.close()
-                    if i < len(encodings) - 1:
-                        msg = self.tr("Will try next with '{}' encoding.").format(encodings[i+1])
-                    else:
-                        msg = self.tr("No more supported encodings.\nPlease, manually convert the file to 'utf-8' and load it again.")
-                    err_msg = self.tr("Couldn't read the file using the '{}' encoding.\n{}").format(encodings[i], msg)
-                    QtGui.QMessageBox.warning(self, self.tr("Error reading '{}'").format(os.path.basename(file_name)), err_msg)
-                    if i == len(encodings) -1:
-                        raise e
-            self.ui.textEditSource.setText(text)
-            self.setFileName(file_name)
-        # Clear breakpoints for the new read file
-        self.clearBreakpoints()
+        self.ui.textEditSource.setText(text)
+        self.setFileName(file_name)
 
     def doSave(self):
         "Saves the current ARM assembler file"
         # Set current source code has been assembled to False
         self.current_source_code_assembled = False
         # Save file
-        if self.file_name == 'untitled.s':
+        if self.file_name == self.tr("untitled.s"):
             return self.doSave_As()
         else:
             return self.saveFile(self.file_name)
@@ -544,20 +545,17 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def doSave_As(self):
         "Saves the ARM assembler file with a new specified name"
-        file_name = self.file_name
-        if file_name == '':
-            file_name = os.path.join(QtCore.QDir.currentPath(), self.tr("untitled.s"))
-        if file_name[-2:] == '.c':
-            file_type = self.tr("ARM C files (*.c)")
+        assert(self.file_name != "")
+        new_file_name = self.file_name
+        if os.path.dirname(new_file_name) == '':
+            new_file_name = os.path.join(self._getDirectory(), new_file_name)
+        new_file_name = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"),
+                                                      new_file_name,
+                                                      self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
+        if new_file_name != '':
+            return self.saveFile(new_file_name)
         else:
-            file_type = self.tr("ARM assembler files (*.s)")
-        file_name = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"),
-                                                      file_name,
-                                                      file_type)
-        if file_name == '':
             return False
-        else:
-            return self.saveFile(file_name)
 
 
     def saveFile(self, file_name):
@@ -575,7 +573,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         asm_file.write(text.encode('utf-8')); # @todo: let user decide which encoding (including sys.getdefaultencoding())
         asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
+        # Set file name
         self.setFileName(file_name)
+        # Update LastUsedDirectory setting
+        self.settings.setValue("LastUsedDirectory", os.path.dirname(file_name))
+        # Return
         return True
 
     def doQuit(self):
