@@ -56,6 +56,7 @@ that this last option is of no use for linux64 versions).
 On Gentoo you can install all the dependencies using::
 
    # emerge -av PyQt4 qscintilla-python ruby crossdev
+   # echo "PORDIR_OVERLAY=/usr/local/portage" >> /etc/portage/make.conf
    # crossdev --target arm --ov-output /usr/local/portage
 
 On Ubuntu you can install all the dependencies using::
