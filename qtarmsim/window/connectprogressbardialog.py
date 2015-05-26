@@ -19,7 +19,7 @@
 # Adapted from:
 # http://stackoverflow.com/questions/19442443/busy-indication-with-pyqt-progress-bar
 
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 
 class ConnectProgressBarDialog(QtGui.QDialog):
@@ -64,7 +64,7 @@ class ConnectProgressBarDialog(QtGui.QDialog):
         return self.errmsg
 
 class ConnectThread(QtCore.QThread):
-    taskFinished = QtCore.pyqtSignal(str)
+    taskFinished = QtCore.Signal(str)
 
     def __init__(self, simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort):
         super(ConnectThread, self).__init__()

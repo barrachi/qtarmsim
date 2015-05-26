@@ -17,8 +17,8 @@
 ###########################################################################
 
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
+from PySide import QtCore, QtGui
+from PySide.QtCore import Qt
 
 from . simpletreemodel import TreeModel, TreeItem
 from . common import InputToHex
@@ -37,7 +37,7 @@ class RegistersModel(TreeModel):
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
     
     # register_edited, parameters are register name and hex value
-    register_edited = QtCore.pyqtSignal('QString', 'QString')
+    register_edited = QtCore.Signal('QString', 'QString')
 
     # InputToHex object
     input2hex = InputToHex()

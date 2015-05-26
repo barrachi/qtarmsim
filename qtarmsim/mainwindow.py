@@ -20,8 +20,8 @@ import os
 import shutil
 import sys
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.Qsci import QsciScintilla
+from PySide import QtCore, QtGui
+#from PySide.Qsci import QsciScintilla
 
 
 from . version import __version__
@@ -237,7 +237,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def isSourceCodeModified(self):
         "Asks textEditSource if its contents have been modified"
-        return self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_GETMODIFY)
+        #return self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_GETMODIFY)
+        pass
 
 
     def updateWindowTitle(self):
@@ -323,7 +324,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Tab changes
         self.ui.tabWidgetCode.currentChanged.connect(self.onTabChange)
         # textEditSource modification changes 
-        self.ui.textEditSource.modificationChanged.connect(self.sourceCodeChanged)
+        #self.ui.textEditSource.modificationChanged.connect(self.sourceCodeChanged)
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
@@ -466,7 +467,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def setFileName(self, file_name):
         "Sets the filename and updates the window title accordingly"
         self.file_name = file_name if file_name else self.tr("untitled.s")
-        self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
+        #self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
         self.checkFileActions()
 
 
@@ -479,7 +480,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # 2) Set file name to default untitled name
         self.setFileName("")
         # 3) Clear textEditSource
-        self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_CLEARALL)
+        #self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_CLEARALL)
         # 4) Clear breakpoints when creating a new file
         self.clearBreakpoints()
 

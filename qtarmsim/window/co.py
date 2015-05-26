@@ -5,7 +5,7 @@
 #Construir la consola de entrada salida
 
 
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.consola import Ui_Consola
 from ..res import console_rc
 import sys

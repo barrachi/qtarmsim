@@ -19,7 +19,7 @@
 import os
 import sys
 
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 
 from .. modulepath import module_path

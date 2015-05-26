@@ -17,7 +17,7 @@
 ###########################################################################
 
 
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 from .. ui.preferences import Ui_PreferencesDialog
 

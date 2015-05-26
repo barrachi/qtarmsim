@@ -3,12 +3,12 @@
 ifdef SYSTEMROOT
    RM = del /Q
    FixPath = $(subst /,\,$1)
-   PYUIC4 = pyuic4.bat
+   PYSIDEUIC4 = pyside-uic.bat
 else
    ifeq ($(shell uname), Linux)
       RM = rm -f
       FixPath = $1
-      PYUIC4 = pyuic4
+      PYSIDEUIC4 = pyside-uic
    endif
 endif
 
@@ -25,12 +25,12 @@ TSOBJS:=$(TSSRCS:%.ts=%.qm)
 all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 
 %.py : %.ui
-	$(PYUIC4) -o $@ $<
+	$(PYSIDEUIC4) -o $@ $<
 	./qtarmsim/res/bin/add_file_icons.py $@ > $@.tmp
 	mv $@.tmp $@
 
 %_rc.py : %.qrc
-	pyrcc4 -py3 -o $@ $<
+	pyside-rcc -py3 -o $@ $<
 
 %.qm : %.ts
 	lrelease ./qtarmsim/qtarmsim.pro
@@ -42,5 +42,5 @@ clean:
 
 linguist:
 	@ \
-	pylupdate4 ./qtarmsim/qtarmsim.pro; \
+	pyside-lupdate4 ./qtarmsim/qtarmsim.pro; \
 	echo "Now you can run 'linguist ./qtarmsim/lang/qtarmsim_es.ts'"

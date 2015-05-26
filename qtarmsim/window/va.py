@@ -5,7 +5,7 @@
 #Construir el diálogo que asocia un valor a un registro o posición de memoria
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.value import Ui_Value
 
 ##Clase que define el diálogo asignar valor que hereda de la clase QDialog del módulo QtGui

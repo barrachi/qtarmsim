@@ -16,7 +16,7 @@
 #                                                                         #
 ###########################################################################
 
-from PyQt4.Qt import QObject
+from PySide.QtCore import QObject
 
 class InputToHex(QObject):
     """

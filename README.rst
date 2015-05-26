@@ -23,11 +23,11 @@ with Qt |~| ARMSim. It can be found on the `armsim/` directory.
 Qt ARMSim has the following dependencies:
 
   * `Python 3 <https://www.python.org/>`_.
-  * `PyQt4 for Python 3
+  * `PySide for Python 3
     <http://www.riverbankcomputing.co.uk/software/pyqt/intro>`_.
   * `QScintilla <http://www.riverbankcomputing.co.uk/software/qscintilla/intro>`_.
 
-(Depending on the platform, QScintilla can be bundled with the PyQt4
+(Depending on the platform, QScintilla can be bundled with the PySide
 installer.)
 
 On the other hand, ARMSim has the next dependencies:
@@ -39,9 +39,9 @@ On the other hand, ARMSim has the next dependencies:
 1.1 How to install the dependencies on GNU/Linux?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The GNU/Linux major distributions provide packages for Python3, PyQt4,
-QScintilla (if not bundled with PyQt4), and Ruby. You should use the
-package manager of your GNU/Linux distribution to install PyQt4 for
+The GNU/Linux major distributions provide packages for Python3, PySide,
+QScintilla (if not bundled with PySide), and Ruby. You should use the
+package manager of your GNU/Linux distribution to install PySide for
 Python3 (the package manager will take care of its dependencies and
 will also install Python3 if it is not already installed); QScintilla
 with python bindings, if offered as a separate package; and Ruby.
@@ -55,13 +55,13 @@ that this last option is of no use for linux64 versions).
 
 On Gentoo you can install all the dependencies using::
 
-   # emerge -av PyQt4 qscintilla-python ruby crossdev
+   # emerge -av PySide qscintilla-python ruby crossdev
    # echo "PORDIR_OVERLAY=/usr/local/portage" >> /etc/portage/make.conf
    # crossdev --target arm --ov-output /usr/local/portage
 
 On Ubuntu you can install all the dependencies using::
 
-   $ sudo apt-get install python3-pyqt4 python3-pyqt4.qsci python3-pip
+   $ sudo apt-get install python3-PySide python3-PySide.qsci python3-pip
    $ sudo apt-get install ruby gcc-arm-linux-gnueabi
 
 
@@ -69,33 +69,33 @@ On Ubuntu you can install all the dependencies using::
 1.2 How to install the dependencies on Windows?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Windows support has been tested with PyQt4 for Python |~| 3.4. It should
-work on newer versions, just make sure that you get the PyQt4 binary
+Windows support has been tested with PySide for Python |~| 3.4. It should
+work on newer versions, just make sure that you get the PySide binary
 package for the very same Python version you install.
 
 To install Qt ARMSim and ARMSim dependencies on Windows, please
 follow the next steps:
 
-1. Check which binaries versions of PyQt4 are available on the `PyQt4
+1. Check which binaries versions of PySide are available on the `PySide
    download page
    <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_. Select
-   one version of PyQt4 that works with Python3 and Qt4. Write down
+   one version of PySide that works with Python3 and Qt4. Write down
    the version of Python for which it has been compiled. The Python
    version is coded on the installer file name. For example, the file
-   ``PyQt4-4.11.1-gpl-Py3.4-Qt4.8.6-x64.exe`` provides an installer
-   for PyQt4 for Python |~| 3.4 and Qt |~| 4.8.6.  What is important
+   ``PySide-4.11.1-gpl-Py3.4-Qt4.8.6-x64.exe`` provides an installer
+   for PySide for Python |~| 3.4 and Qt |~| 4.8.6.  What is important
    in this step is to write down that the version of Python should be
    the |~| 3.4. The 3.4 |~| version, not any other version, not even a
    minor revision like |~| 3.4.1. Download now the chosen installer
-   for PyQt4, but do not install it yet.
+   for PySide, but do not install it yet.
 
 2. Download and install Python3 from the `Python download page for
    windows <https://www.python.org/downloads/windows/>`_ (you should
-   search for the exact version required by PyQt4 on the previous
+   search for the exact version required by PySide on the previous
    step).  During the installation, it is convenient to mark the
    option that adds Python to the Windows path.
 
-3. Install the PyQt4 package you downloaded on step 1.
+3. Install the PySide package you downloaded on step 1.
 
 4. Download and install Ruby from `Ruby Installer for Windows
    <https://www.ruby-lang.org/en/>`_.  Install a |~| 1.9 version (no a

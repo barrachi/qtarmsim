@@ -4,7 +4,7 @@
 #Construir el diálogo para añadir o elminar puntos de ruptura en el programa 
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.breakpo import Ui_Break
 
 ##Clase que define el diálogo puntos de ruptura que hereda de la clase QDialog del módulo QtGui

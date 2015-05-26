@@ -5,7 +5,7 @@
 #Construir el diálogo de opciones del simulador
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.opciones import Ui_Opciones
 
 ##Clase que define el diálogo opciones que hereda de la clase QDialog del módulo QtGui

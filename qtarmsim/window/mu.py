@@ -5,7 +5,7 @@
 #Construir el diálogo para introducir el número de instrucciones a ejecutar
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.multi import Ui_Multipasos
 
 ##Clase que define el diálogo múltiples pasos que hereda de la clase QDialog del módulo QtGui

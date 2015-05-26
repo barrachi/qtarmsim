@@ -16,8 +16,8 @@
 #                                                                         #
 ###########################################################################
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import Qt
+from PySide import QtGui, QtCore
+from PySide.QtCore import Qt
 
 from . simpletreemodel import TreeModel, TreeItem
 from . common import InputToHex
@@ -40,7 +40,7 @@ class MemoryBank():
         self.length = int((self.end-self.start)/4) + 1
 
     def addressToRow(self, hex_address):
-        "Given an hexadecimal hex_address, it returns the corresponding row"
+        "Given an hexadecimal hex_address, returns the corresponding row"
         int_address = int(hex_address, 16)
         return int((int_address - self.start)/4)
     
@@ -55,7 +55,7 @@ class MemoryModel(TreeModel):
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
 
     # memory_edited, parameters are hex address and hex value
-    memory_edited = QtCore.pyqtSignal('QString', 'QString')
+    memory_edited = QtCore.Signal('QString', 'QString')
 
     # InputToHex object
     input2hex = InputToHex()

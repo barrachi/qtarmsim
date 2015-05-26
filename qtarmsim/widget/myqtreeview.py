@@ -16,7 +16,7 @@
 #                                                                         #
 ###########################################################################
 
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 class MyQTreeView(QtGui.QTreeView):
     

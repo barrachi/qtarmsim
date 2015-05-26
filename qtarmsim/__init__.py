@@ -26,7 +26,7 @@ import os
 import signal
 import sys
 
-from PyQt4 import QtGui
+from PySide import QtGui
 
 
 from . mainwindow import QtARMSimMainWindow 

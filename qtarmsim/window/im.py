@@ -6,7 +6,7 @@
 
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.imprimir import Ui_Imprimir
 
 ##Clase que define el diálogo imprimir valor que hereda de la clase QDialog del módulo QtGui
