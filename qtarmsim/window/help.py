@@ -45,7 +45,7 @@ class HelpWindow(QtGui.QWidget):
         policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored,
                                    QtGui.QSizePolicy.Ignored)
         self.editor.setSizePolicy(policy)
-        url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "html", self.tr("Help.html")))
+        url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "html", self.trUtf8("Help.html")))
         self.editor.setSource(url)
 
     def resizeEvent(self, event):

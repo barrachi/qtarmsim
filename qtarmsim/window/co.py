@@ -28,15 +28,15 @@ class Conso(QtGui.QMainWindow):
         self.scrollArea.setWidget(self.consolEdit)
         self.scrollArea.setGeometry(rect)
 
-        self.setWindowTitle(self.tr("Consola"))
+        self.setWindowTitle(self.trUtf8("Consola"))
         self.setWindowIcon(QtGui.QIcon(":/images/consol.bmp"))
         
         
-        self.actionConsola=QtGui.QAction(self.tr("&Consola"), self)
+        self.actionConsola=QtGui.QAction(self.trUtf8("&Consola"), self)
         self.connect(self.actionConsola, QtCore.SIGNAL("triggered()"), self.con)
         
-        self.actionConsola.setWhatsThis(self.tr("Oculta o hace visible la consola"))
-        self.actionConsola.setStatusTip(self.tr("Consola"))
+        self.actionConsola.setWhatsThis(self.trUtf8("Oculta o hace visible la consola"))
+        self.actionConsola.setStatusTip(self.trUtf8("Consola"))
         self.actionConsola.setCheckable(1)
     
     ##Método asociado a actionConsola del menú Ventana de la ventana principal padre de la consola

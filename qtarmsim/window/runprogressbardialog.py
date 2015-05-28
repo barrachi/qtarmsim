@@ -34,7 +34,7 @@ class RunProgressBarDialog(QtGui.QDialog):
         self.layout = QtGui.QVBoxLayout(self)
         
         # Create a label and a progress bar and add them to the main layout
-        self.label = QtGui.QLabel(self.tr("Running..."), self)
+        self.label = QtGui.QLabel(self.trUtf8("Running..."), self)
         self.layout.addWidget(self.label)
         self.progressBar = QtGui.QProgressBar(self)
         self.progressBar.setRange(0,1)

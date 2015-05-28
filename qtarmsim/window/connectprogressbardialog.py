@@ -32,7 +32,7 @@ class ConnectProgressBarDialog(QtGui.QDialog):
         self.layout = QtGui.QVBoxLayout(self)
         
         # Create a label and a progress bar and add them to the main layout
-        self.label = QtGui.QLabel(self.tr("Connecting to ARMSim..."), self)
+        self.label = QtGui.QLabel(self.trUtf8("Connecting to ARMSim..."), self)
         self.layout.addWidget(self.label)
         self.progressBar = QtGui.QProgressBar(self)
         self.progressBar.setRange(0,1)

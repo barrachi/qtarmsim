@@ -46,10 +46,10 @@ class Multipasos(QtGui.QDialog):
         
     ##Método para asociar signals de los botones del diálogo y slots   
     def createActions(self):
-        self.aceptarButton = QtGui.QAction(self.tr("Aceptar"), self)
+        self.aceptarButton = QtGui.QAction(self.trUtf8("Aceptar"), self)
         self.connect(self.ui.aceptarButton,QtCore.SIGNAL("clicked()"),self.multi_accept)
         
-        self.cancelarButton = QtGui.QAction(self.tr("Cancelar"), self)
+        self.cancelarButton = QtGui.QAction(self.trUtf8("Cancelar"), self)
         self.connect(self.ui.cancelarButton,QtCore.SIGNAL("clicked()"),self.reject)
         
     ##Método asociado a aceptarButton
@@ -58,7 +58,7 @@ class Multipasos(QtGui.QDialog):
     def multi_accept(self):
         if self.ui.pasos.text() == "":
             self.ui.pasos.setText("1")
-        cad=self.tr("Ejecutando ") + self.ui.pasos.text() + self.tr(" instrucciones")
+        cad=self.trUtf8("Ejecutando ") + self.ui.pasos.text() + self.trUtf8(" instrucciones")
         padre=self.parentWidget()
         padre.mens.append(cad)
         self.accept()

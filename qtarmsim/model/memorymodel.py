@@ -114,7 +114,7 @@ class MemoryModel(TreeModel):
         (hex_value, err_msg) = self.input2hex.convert(value)
         if not hex_value:
             if err_msg:
-                QtGui.QMessageBox.warning(None, self.tr("Input error"), err_msg)
+                QtGui.QMessageBox.warning(None, self.trUtf8("Input error"), err_msg)
             return False
         item = index.internalPointer()
         hex_address = item.data(0)

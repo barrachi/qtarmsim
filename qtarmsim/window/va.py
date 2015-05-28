@@ -49,10 +49,10 @@ class Valor(QtGui.QDialog):
      
     ##Método para asociar signals de los botones del diálogo y slots 
     def createActions(self):
-        self.aceptarButton = QtGui.QAction(self.tr("Aceptar"), self)
+        self.aceptarButton = QtGui.QAction(self.trUtf8("Aceptar"), self)
         self.connect(self.ui.aceptarButton,QtCore.SIGNAL("clicked()"),self.valor_accept)
         
-        self.cancelarButton = QtGui.QAction(self.tr("Cancelar"), self)
+        self.cancelarButton = QtGui.QAction(self.trUtf8("Cancelar"), self)
         self.connect(self.ui.cancelarButton,QtCore.SIGNAL("clicked()"),self.reject)
     
     ##Método asociado a aceptarButton
@@ -60,9 +60,9 @@ class Valor(QtGui.QDialog):
     #Si los valores introducidos son correctos asocia el valor dado al registro o dirección especificada
     def valor_accept(self):
         if (self.ui.direcLineEdit.text()=="") or (self.ui.valueLineEdit.text()==""):
-            QtGui.QMessageBox.information(self, self.tr("Error"), self.tr("Los valores introducidos no son correctos"))
+            QtGui.QMessageBox.information(self, self.trUtf8("Error"), self.trUtf8("Los valores introducidos no son correctos"))
         else:
-            cad=self.tr("Asignando a ") + self.ui.direcLineEdit.text() + self.tr(" el valor ") + self.ui.valueLineEdit.text()
+            cad=self.trUtf8("Asignando a ") + self.ui.direcLineEdit.text() + self.trUtf8(" el valor ") + self.ui.valueLineEdit.text()
             padre=self.parentWidget()
             padre.mens.append(cad)
             self.accept()

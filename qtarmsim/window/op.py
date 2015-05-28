@@ -32,7 +32,7 @@ class Opciones(QtGui.QDialog):
         self.ui.Directrap.setText(parent.pathini)
         self.ui.Directrap.adjustSize()
         
-        self.horizontalGroupBox = QtGui.QGroupBox(self.tr("Modo de funcionamiento"))
+        self.horizontalGroupBox = QtGui.QGroupBox(self.trUtf8("Modo de funcionamiento"))
         
         layout1=QtGui.QHBoxLayout()
         layout1.addWidget(self.ui.Bare)
@@ -79,7 +79,7 @@ class Opciones(QtGui.QDialog):
     #
     #Abre un diálogo para determinar la ruta del archivo de interrupciones
     def explora(self):
-        fileName = QtGui.QFileDialog.getOpenFileName(self, self.tr("Ruta del archivo"),QtCore.QDir.currentPath(),self.tr("Assembly files (*.s *.asm)"))
+        fileName = QtGui.QFileDialog.getOpenFileName(self, self.trUtf8("Ruta del archivo"),QtCore.QDir.currentPath(),self.trUtf8("Assembly files (*.s *.asm)"))
         if not fileName == "":
             self.ui.Directrap.setText(fileName)
 
@@ -135,29 +135,29 @@ class Opciones(QtGui.QDialog):
     
     ##Método para asociar signals de los botones del diálogo y slots
     def createActions(self):
-        self.buttonBox = QtGui.QAction(self.tr("&Aceptar"), self)
+        self.buttonBox = QtGui.QAction(self.trUtf8("&Aceptar"), self)
         self.connect(self.ui.buttonBox,QtCore.SIGNAL("clicked()"),self.aceptar)
         
-        self.cancelarButton = QtGui.QAction(self.tr("&Cancelar"), self)
+        self.cancelarButton = QtGui.QAction(self.trUtf8("&Cancelar"), self)
         self.connect(self.ui.cancelarButton,QtCore.SIGNAL("clicked()"),self.reject)
         
-        self.actionExplorar = QtGui.QAction(self.tr("&Explorar"), self)
+        self.actionExplorar = QtGui.QAction(self.trUtf8("&Explorar"), self)
         self.connect(self.ui.actionExplorar,QtCore.SIGNAL("clicked()"),self.explora)
 
-        self.Loadtrap = QtGui.QAction(self.tr("Load"), self)
+        self.Loadtrap = QtGui.QAction(self.trUtf8("Load"), self)
         self.connect(self.ui.Loadtrap,QtCore.SIGNAL("stateChanged(int)"),self.act)
         
-        self.Bare = QtGui.QAction(self.tr("Bare"), self)
+        self.Bare = QtGui.QAction(self.trUtf8("Bare"), self)
         self.connect(self.ui.Bare,QtCore.SIGNAL("stateChanged(int)"),self.bar)
-        self.ui.Bare.setToolTip(self.tr("Simula el ensamblador sin pseudoinstrucciones o modos de direccionamiento suministrados por el simulador"))
+        self.ui.Bare.setToolTip(self.trUtf8("Simula el ensamblador sin pseudoinstrucciones o modos de direccionamiento suministrados por el simulador"))
         
-        self.Quiet = QtGui.QAction(self.tr("Quiet"), self)
+        self.Quiet = QtGui.QAction(self.trUtf8("Quiet"), self)
         self.connect(self.ui.Quiet,QtCore.SIGNAL("stateChanged(int)"),self.qui)
-        self.ui.Quiet.setToolTip(self.tr("Permite seleccionar que PCSpim no imprima ningún mensaje cuando se producen las excepciones"))
+        self.ui.Quiet.setToolTip(self.trUtf8("Permite seleccionar que PCSpim no imprima ningún mensaje cuando se producen las excepciones"))
         
-        self.Mapped = QtGui.QAction(self.tr("Mapped"), self)
+        self.Mapped = QtGui.QAction(self.trUtf8("Mapped"), self)
         self.connect(self.ui.Mapped,QtCore.SIGNAL("stateChanged(int)"),self.map)
-        self.ui.Mapped.setToolTip(self.tr("Permite seleccionar si se activa la entrada/salida mapeada en memoria"))
+        self.ui.Mapped.setToolTip(self.trUtf8("Permite seleccionar si se activa la entrada/salida mapeada en memoria"))
         
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

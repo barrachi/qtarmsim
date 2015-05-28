@@ -148,7 +148,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.breakpoints = []
         # Print welcome message on the Messages Window and show Ready on the status bar
         self.ui.textEditMessages.append(self.welcome_message())
-        self.statusBar().showMessage(self.tr("Ready"))
+        self.statusBar().showMessage(self.trUtf8("Ready"))
 
 
     def show(self, *args, **kwargs):
@@ -244,7 +244,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def updateWindowTitle(self):
-        modified_txt = self.tr(" [modified] - ") if self.isSourceCodeModified() else " - "
+        modified_txt = self.trUtf8(" [modified] - ") if self.isSourceCodeModified() else " - "
         title_txt = "{}{}{}".format(os.path.basename(self.file_name), modified_txt, "Qt ARMSim")
         self.setWindowTitle(title_txt)
 
@@ -379,7 +379,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if has_been_assembled:
             self.current_source_code_assembled = True
             self.enableSimulatorActions(True)
-            self.ui.textEditMessages.append(self.tr("<b>{} assembled.</b>\n").format(self.file_name))
+            self.ui.textEditMessages.append(self.trUtf8("<b>{} assembled.</b>\n").format(self.file_name))
         else:
             self.current_source_code_assembled = False
             self.enableSimulatorActions(False)
@@ -393,8 +393,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 return
         # Check that self.file_name exists
         if not os.path.exists(self.file_name):
-            strerror = self.tr('File not found')
-            QtGui.QMessageBox.warning(self, self.tr("Assemble File"), "{}: '{}'.".format(strerror, self.file_name))
+            strerror = self.trUtf8('File not found')
+            QtGui.QMessageBox.warning(self, self.trUtf8("Assemble File"), "{}: '{}'.".format(strerror, self.file_name))
             self.assembled(False)
             return
         # Assemble self.file_name
@@ -406,15 +406,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.updateMemory()
         else:
             self.assembled(False)
-            self.ui.textEditMessages.append(self.tr("<b>Assembly errors:</b>"))
+            self.ui.textEditMessages.append(self.trUtf8("<b>Assembly errors:</b>"))
             if response.errmsg:
                 self.ui.textEditMessages.append(response.errmsg)
             else:
-                self.ui.textEditMessages.append(self.tr("(Something bad has happened. That's all I know.)"))
+                self.ui.textEditMessages.append(self.trUtf8("(Something bad has happened. That's all I know.)"))
             self.ui.textEditMessages.append("")
-            msg = self.tr("An error has occurred when assembling the source code.\n"\
+            msg = self.trUtf8("An error has occurred when assembling the source code.\n"\
                           "Please, see the Messages panel for more details.")
-            QtGui.QMessageBox.warning(self, self.tr("Assembly Error"), msg)
+            QtGui.QMessageBox.warning(self, self.trUtf8("Assembly Error"), msg)
 
 
     def sourceCodeChanged(self, changed):
@@ -434,20 +434,20 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             if not errmsg:
                 self.breakpoints.remove(hex_address)
         if errmsg:
-            QtGui.QMessageBox.warning(self, self.tr("Breakpoints Error"), errmsg)
+            QtGui.QMessageBox.warning(self, self.trUtf8("Breakpoints Error"), errmsg)
 
 
     def registerEdited(self, reg_name, hex_value):
         errmsg = self.simulator.setRegister(reg_name, hex_value)
         if errmsg:
-            QtGui.QMessageBox.warning(self, self.tr("Set Register Error"), errmsg)
+            QtGui.QMessageBox.warning(self, self.trUtf8("Set Register Error"), errmsg)
         self.highlight_pc_line()
 
 
     def memoryEdited(self, hex_address, hex_value):
         errmsg = self.simulator.setMemory(hex_address, hex_value)
         if errmsg:
-            QtGui.QMessageBox.warning(self, self.tr("Set Memory Error"), errmsg)
+            QtGui.QMessageBox.warning(self, self.trUtf8("Set Memory Error"), errmsg)
 
 
     def checkCurrentFileState(self):
@@ -468,7 +468,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def setFileName(self, file_name):
         "Sets the filename and updates the window title accordingly"
-        self.file_name = file_name if file_name else self.tr("untitled.s")
+        self.file_name = file_name if file_name else self.trUtf8("untitled.s")
         #self.ui.sourceCodeEditor.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
         self.checkFileActions()
 
@@ -496,9 +496,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         "Opens an ARM assembler file"
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
             return
-        file_name = QtGui.QFileDialog.getOpenFileName(self, self.tr("Open File"),
+        file_name = QtGui.QFileDialog.getOpenFileName(self, self.trUtf8("Open File"),
                                                      self._getDirectory(),
-                                                     self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
+                                                     self.trUtf8("ARM assembler files (*.s);;ARM C files (*.c)"))
         if file_name:
             self.readFile(file_name)
             # Change to tab 0
@@ -516,7 +516,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             try:
                 f = open(file_name, encoding = encodings[i])
             except FileNotFoundError as e:
-                QtGui.QMessageBox.warning(self, self.tr("Open File"), "{}: '{}'.".format(e.strerror, file_name))
+                QtGui.QMessageBox.warning(self, self.trUtf8("Open File"), "{}: '{}'.".format(e.strerror, file_name))
                 raise e
             try:
                 text = f.read()
@@ -525,11 +525,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             except UnicodeDecodeError as e:
                 f.close()
                 if i < len(encodings) - 1:
-                    msg = self.tr("Will try next with '{}' encoding.").format(encodings[i+1])
+                    msg = self.trUtf8("Will try next with '{}' encoding.").format(encodings[i+1])
                 else:
-                    msg = self.tr("No more supported encodings.\nPlease, manually convert the file to 'utf-8' and load it again.")
-                err_msg = self.tr("Couldn't read the file using the '{}' encoding.\n{}").format(encodings[i], msg)
-                QtGui.QMessageBox.warning(self, self.tr("Error reading '{}'").format(os.path.basename(file_name)), err_msg)
+                    msg = self.trUtf8("No more supported encodings.\nPlease, manually convert the file to 'utf-8' and load it again.")
+                err_msg = self.trUtf8("Couldn't read the file using the '{}' encoding.\n{}").format(encodings[i], msg)
+                QtGui.QMessageBox.warning(self, self.trUtf8("Error reading '{}'").format(os.path.basename(file_name)), err_msg)
                 if i == len(encodings) -1:
                     raise e
         self.ui.sourceCodeEditor.setPlainText(text)
@@ -540,7 +540,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Set current source code has been assembled to False
         self.current_source_code_assembled = False
         # Save file
-        if self.file_name == self.tr("untitled.s"):
+        if self.file_name == self.trUtf8("untitled.s"):
             return self.doSave_As()
         else:
             return self.saveFile(self.file_name)
@@ -552,9 +552,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         new_file_name = self.file_name
         if os.path.dirname(new_file_name) == '':
             new_file_name = os.path.join(self._getDirectory(), new_file_name)
-        new_file_name = QtGui.QFileDialog.getSaveFileName(self, self.tr("Save File"),
+        new_file_name = QtGui.QFileDialog.getSaveFileName(self, self.trUtf8("Save File"),
                                                       new_file_name,
-                                                      self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
+                                                      self.trUtf8("ARM assembler files (*.s);;ARM C files (*.c)"))
         if new_file_name != '':
             return self.saveFile(new_file_name)
         else:
@@ -566,8 +566,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         asm_file = QtCore.QFile(file_name)
         # @warning: as qscintilla messes up CRLFs and LFs on Windows, the file is not opened in text mode (| QtCore.QFile.Text)
         if not asm_file.open(QtCore.QFile.WriteOnly): 
-            QtGui.QMessageBox.warning(self, self.tr("Error"),
-                    self.tr("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
+            QtGui.QMessageBox.warning(self, self.trUtf8("Error"),
+                    self.trUtf8("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
         # As \r\n can be mixed with \n, replace each \r\n by a \n
         text = self.ui.sourceCodeEditor.text().replace('\r\n', '\n')
@@ -575,7 +575,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             text = text.replace('\n', '\r\n')
         asm_file.write(text.encode('utf-8')); # @todo: let user decide which encoding (including sys.getdefaultencoding())
         asm_file.close()
-        self.statusBar().showMessage(self.tr("File saved"), 2000)
+        self.statusBar().showMessage(self.trUtf8("File saved"), 2000)
         # Set file name
         self.setFileName(file_name)
         # Update LastUsedDirectory setting
@@ -725,7 +725,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     ## Acción asociada a actionEjecuci_n_pasos
     def ejecutar_single(self):
-        self.mens.append(self.tr("Ejecutando instrucción"))
+        self.mens.append(self.trUtf8("Ejecutando instrucción"))
 
     ## Acción asociada a actionPunto_de_corte
     #
@@ -746,15 +746,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     #
     # Función para parar la ejecución en curso
     def parar(self):
-        QtGui.QMessageBox.warning(self, self.tr("Detener ejecución"),
-                            self.tr("Quieres detener la ejecución del programa?"), QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
+        QtGui.QMessageBox.warning(self, self.trUtf8("Detener ejecución"),
+                            self.trUtf8("Quieres detener la ejecución del programa?"), QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
                             
 
     ## Acción asociada a actionLimpiar_Consola
     #
     # Función para limpiar la consola
     def conso_clear(self):
-        self.mens.append(self.tr("Limpiando consola"))
+        self.mens.append(self.trUtf8("Limpiando consola"))
         self.consoleWindow.consolEdit.clear()
 
 
@@ -763,20 +763,20 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     #
     # Función para poner todos los registros a 0
     def limpiar_registros(self):
-        self.mens.append(self.tr("Limpiando registros"))
+        self.mens.append(self.trUtf8("Limpiando registros"))
      
     ## Acción asociada a actionRecargar
     #
     # Función para volver a ensamblar el archivo actual en el simulador
     def recargar(self):
-        self.mens.append(self.tr("Recargando el archivo actual"))
+        self.mens.append(self.trUtf8("Recargando el archivo actual"))
 
 
     ## Acción asociada a actionReinicializar
     #
     # Función para restaurar el contenido de los registros y la memoria
     def reinicializar(self):
-        self.mens.append(self.tr("Restaurando contenidos de registros y memoria"))
+        self.mens.append(self.trUtf8("Restaurando contenidos de registros y memoria"))
 
 
     def closeEvent(self, event):
@@ -820,30 +820,30 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def welcome_message(self):
-        return "<b>Qt ARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
+        return "<b>Qt ARMSim " + self.trUtf8("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014-15 Sergio Barrachina Mir<br></br>\n" + \
-                 self.tr("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
-                 self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
+                 self.trUtf8("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
+                 self.trUtf8("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
-                "<p>" + self.tr("Version") + " " + __version__ + "</p>" + \
+                "<p>" + self.trUtf8("Version") + " " + __version__ + "</p>" + \
                 "<p>" + "(c) 2014-15 Sergio Barrachina Mir" + "</p>" + \
-                "<p>" + self.tr("<p>Based on the graphical frontend for Spim<br/>developed on 2008 by Gloria Edo Piñana.") + "</p>" + \
+                "<p>" + self.trUtf8("<p>Based on the graphical frontend for Spim<br/>developed on 2008 by Gloria Edo Piñana.") + "</p>" + \
                 "<p>" + "<a href='http://lorca.act.uji.es/projects/qtarmsim/'>http://lorca.act.uji.es/projects/qtarmsim/</a>" + "</p>" + \
                 "</html>"
 
     def doAbout_Qt_ARMSim(self):
         "Shows the About Qt ARMSim dialog"
         QtGui.QMessageBox.about(self,
-                                self.tr("About Qt ARMSim"),
+                                self.trUtf8("About Qt ARMSim"),
                                 self.about_message(),
                                 )
 
     def doAbout_ARMSim(self):
         "Shows the About ARMSim dialog"
         QtGui.QMessageBox.about(self,
-                                self.tr("About ARMSim"),
+                                self.trUtf8("About ARMSim"),
                                 self.simulator.getVersion())
 
     def doHelp(self):
@@ -901,17 +901,17 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.simulator = None
         if self.settings.value("ARMSimServer") in ('localhost', '127.0.0.1') \
             and not self.settings.value("ARMSimCommand"):
-            QtGui.QMessageBox.warning(self, self.tr("ARMSim command empty"),
-                    self.tr("ARMSim command is empty.\n\n"
+            QtGui.QMessageBox.warning(self, self.trUtf8("ARMSim command empty"),
+                    self.trUtf8("ARMSim command is empty.\n\n"
                             "Please go to 'Edit, Preferences...' and set it.\n"))
             return False
         if not os.path.isfile(self.settings.value("ARMGccCommand")):
-            QtGui.QMessageBox.warning(self, self.tr("ARM gcc not found"),
-                    self.tr("ARM gcc command not found.\n\n"
+            QtGui.QMessageBox.warning(self, self.trUtf8("ARM gcc not found"),
+                    self.trUtf8("ARM gcc command not found.\n\n"
                             "Please go to 'Edit, Preferences...' and set it.\n"))
             return False
         self.simulator = ARMSimConnector(verbose = self.verbose)
-        self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
+        self.statusBar().showMessage(self.trUtf8("Connecting to ARMSim..."), 2000)
         connectProgressBarDialog = ConnectProgressBarDialog(self.simulator,
                                                             self.settings.value("ARMSimCommand"),
                                                             self.settings.value("ARMSimDirectory"),
@@ -923,19 +923,19 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             return False
         errmsg = connectProgressBarDialog.getMsg()
         if errmsg:
-            QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed\n\n"), "{}".format(errmsg))
+            QtGui.QMessageBox.warning(self, self.trUtf8("Connection to ARMSim failed\n\n"), "{}".format(errmsg))
             return False
         self.ui.textEditMessages.append("<b>Connected to ARMSim (ARMSim version info follows.</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
-        self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(self.simulator.current_port), 2000)
+        self.statusBar().showMessage(self.trUtf8("Connected to ARMSim at port {}").format(self.simulator.current_port), 2000)
         return self.sendSettingsToARMSim()
 
     def sendSettingsToARMSim(self):
         for setting in [("ARMGccCommand", self.settings.value("ARMGccCommand")), ("ARMGccOptions", self.settings.value("ARMGccOptions"))]:
             errmsg = self.simulator.setSettings(setting[0], setting[1])
             if errmsg:
-                QtGui.QMessageBox.warning(self, self.tr("ARMSim set setting failed"), "\n{}\n".format(errmsg))
+                QtGui.QMessageBox.warning(self, self.trUtf8("ARMSim set setting failed"), "\n{}\n".format(errmsg))
                 return False
         return True
                                         

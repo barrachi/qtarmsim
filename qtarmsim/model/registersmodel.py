@@ -107,7 +107,7 @@ class RegistersModel(TreeModel):
         (hex_value, err_msg) = self.input2hex.convert(value)
         if not hex_value:
             if err_msg:
-                QtGui.QMessageBox.warning(None, self.tr("Input error"), err_msg)
+                QtGui.QMessageBox.warning(None, self.trUtf8("Input error"), err_msg)
             return False
         item = index.internalPointer()
         item.setData(1, hex_value)
