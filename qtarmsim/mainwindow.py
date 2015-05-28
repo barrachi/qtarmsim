@@ -500,6 +500,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         file_name = QtGui.QFileDialog.getOpenFileName(self, self.trUtf8("Open File"),
                                                      self._getDirectory(),
                                                      self.trUtf8("ARM assembler files (*.s);;ARM C files (*.c)"))
+        # @warning: file_name should return a string, but on Python 3.3.5, PySide 1.2.2, and Qt 4.8.5, it returns a tuple (file_name, 'ARM assembler files (*.s)')
+        # @todo: check why this is happening and remove the following hack
+        if type(file_name) == tuple:
+            file_name = file_name[0]
         if file_name:
             self.readFile(file_name)
             # Change to tab 0
