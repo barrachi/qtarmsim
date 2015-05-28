@@ -26,8 +26,8 @@ all: ${UIOBJS} ${QROBJS} ${TSOBJS}
 
 %.py : %.ui
 	$(PYSIDEUIC4) -o $@ $<
-	./qtarmsim/res/bin/add_file_icons.py $@ > $@.tmp
-	mv $@.tmp $@
+#./qtarmsim/res/bin/add_file_icons.py $@ > $@.tmp
+#mv $@.tmp $@
 
 %_rc.py : %.qrc
 	pyside-rcc -py3 -o $@ $<

@@ -361,7 +361,9 @@
   <action name="actionWhats_This">
    <property name="icon">
     <iconset theme="system-help">
-     <normaloff>:/themes/oxygen/64x64/actions/system-run.png</normaloff>:/themes/oxygen/64x64/actions/system-run.png</iconset>
+     <normaloff/>
+     <normalon>:/themes/oxygen/48x48/categories/system-help.png</normalon>
+    </iconset>
    </property>
    <property name="text">
     <string>What's &amp;This?</string>
@@ -397,6 +399,7 @@
    <property name="icon">
     <iconset theme="help-contents">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/help-contents.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -410,6 +413,7 @@
    <property name="icon">
     <iconset theme="help-about">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -420,6 +424,7 @@
    <property name="icon">
     <iconset theme="document-new">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/document-new.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -433,6 +438,7 @@
    <property name="icon">
     <iconset theme="document-open">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/document-open.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -449,6 +455,7 @@
    <property name="icon">
     <iconset theme="document-save">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/document-save.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -462,6 +469,7 @@
    <property name="icon">
     <iconset theme="document-save-as">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/document-save-as.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -472,6 +480,7 @@
    <property name="icon">
     <iconset theme="application-exit">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/application-exit.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -514,6 +523,7 @@
    <property name="icon">
     <iconset theme="debug-step-into">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/debug-step-into.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -595,6 +605,7 @@
    <property name="icon">
     <iconset theme="edit-undo">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/edit-undo.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -608,6 +619,7 @@
    <property name="icon">
     <iconset theme="edit-redo">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/edit-redo.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -621,6 +633,7 @@
    <property name="icon">
     <iconset theme="edit-cut">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/edit-cut.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -634,6 +647,7 @@
    <property name="icon">
     <iconset theme="edit-copy">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/edit-copy.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -647,6 +661,7 @@
    <property name="icon">
     <iconset theme="edit-paste">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/edit-paste.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -660,6 +675,7 @@
    <property name="icon">
     <iconset theme="edit-select-all">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/edit-select-all.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -684,6 +700,7 @@
    <property name="icon">
     <iconset theme="debug-step-over">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/debug-step-over.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -700,6 +717,7 @@
    <property name="icon">
     <iconset theme="view-refresh">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/view-refresh.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -716,6 +734,7 @@
    <property name="icon">
     <iconset theme="debug-run">
      <normaloff/>
+     <normalon>:/themes/oxygen/48x48/actions/debug-run.png</normalon>
     </iconset>
    </property>
    <property name="text">
