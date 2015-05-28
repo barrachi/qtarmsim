@@ -32,9 +32,6 @@ from PySide import QtCore, QtGui
 #from .qscilexerarm import QsciLexerARM
 
 
-
-    
-    
 class SimpleARMEditor(QtGui.QTextEdit):
 
     # breakpoint_changed signal, parameters are if set or unset (True/False) and hex_address

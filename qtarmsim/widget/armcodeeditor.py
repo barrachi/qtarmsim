@@ -51,9 +51,10 @@ class ARMCodeEditor(CodeEditor):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    editor = ARMCodeEditor()
-    editor.setPlainText(open("../../examples/add.s").read())
-    editor.setWindowTitle("ARM Code Editor Example")
-    editor.setGeometry(QtCore.QRect(200, 200, 600, 400))
-    editor.show()
+    armEditor = ARMCodeEditor()
+    armEditor.setPlainText(open("../../examples/add.s").read())
+    armEditor.setWindowTitle("ARM Code Editor Example")
+    armEditor.setGeometry(QtCore.QRect(200, 200, 600, 400))
+    #armEditor.setReadOnly(True)
+    armEditor.show()
     sys.exit(app.exec_())

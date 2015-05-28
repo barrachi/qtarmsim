@@ -16,12 +16,12 @@
 #                                                                         #
 ###########################################################################
 
-from PySide import QtCore, QtGui
-
-#
-# ARMSyntaxHighlighter has been developed using the next reference:
+#===============================================================================
+# References:
 #   http://doc.qt.io/qt-5/qtwidgets-richtext-syntaxhighlighter-example.html
-#
+#===============================================================================
+
+from PySide import QtCore, QtGui
 
 class HighlightingRule:
     "A highlighting rule consists of a QRegExp pattern and its associated QTextCharFormat"
