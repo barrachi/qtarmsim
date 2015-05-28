@@ -40,9 +40,6 @@ class LeftArea(QtGui.QWidget):
     On the other hand, if the associated editor is not read only, it will show the line number of each line of the code editor source.
     """
 
-    setBreakpointSignal = QtCore.Signal('int', 'QString')
-    clearBreakpointSignal = QtCore.Signal('int')
-
 
     def __init__(self, codeEditor):
         "Asociates this LeftArea instance with its CodeEditor parent"
@@ -151,16 +148,19 @@ class LeftArea(QtGui.QWidget):
     def setOrClearBreakpoint(self, lineNumber, text):
         if lineNumber in self.breakpoints:
             self.breakpoints.pop(lineNumber)
-            self.clearBreakpointSignal.emit(lineNumber)
+            self.codeEditor.clearBreakpointSignal.emit(lineNumber, text)
         else:
             self.breakpoints[lineNumber] = text
-            self.setBreakpointSignal.emit(lineNumber, text)
+            self.codeEditor.setBreakpointSignal.emit(lineNumber, text)
 
 
 
 class CodeEditor(QtGui.QPlainTextEdit):
     "CodeEditor is a simple code editor that is able to use a syntax highlighter and provides a left line number area."
     
+    setBreakpointSignal = QtCore.Signal('int', 'QString')
+    clearBreakpointSignal = QtCore.Signal('int', 'QString')
+
     def __init__(self, parent=None, SyntaxHighlighterClass=None, *args, **kwargs):
         "CodeEditor initialization"
         super(CodeEditor, self).__init__(parent, *args, **kwargs)
@@ -198,6 +198,10 @@ class CodeEditor(QtGui.QPlainTextEdit):
             self.updateLeftAreaWidth()
         return super(CodeEditor, self).setReadOnly(ro)
     
+    def clearBreakpoints(self):
+        "Calls leftArea clearBreakpoints method"
+        self.leftArea.clearBreakpoints()
+
     def setCurrentHighlightedLineNumber(self, lineNumber):
         """
         Sets the stored currentHighlightedLineNumber variable.
