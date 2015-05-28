@@ -20,6 +20,7 @@ import os
 import shutil
 import sys
 
+import PySide
 from PySide import QtCore, QtGui
 #from PySide.Qsci import QsciScintilla
 
@@ -831,6 +832,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 "<p>" + "(c) 2014-15 Sergio Barrachina Mir" + "</p>" + \
                 "<p>" + self.trUtf8("<p>Based on the graphical frontend for Spim<br/>developed on 2008 by Gloria Edo Piñana.") + "</p>" + \
                 "<p>" + "<a href='http://lorca.act.uji.es/projects/qtarmsim/'>http://lorca.act.uji.es/projects/qtarmsim/</a>" + "</p>" + \
+                "<p></p>" + \
+                "<p>" + self.trUtf8("Running on ") + \
+                "Python " + sys.version.split(" ")[0] + ", " + \
+                "PySide " + PySide.__version__ + ", and " + \
+                "Qt " + QtCore.__version__ + "." + \
                 "</html>"
 
     def doAbout_Qt_ARMSim(self):
