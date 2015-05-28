@@ -21,8 +21,8 @@ import sys
 import re
 
 from PySide import QtCore, QtGui
-from codeeditor import CodeEditor
-from armsyntaxhighlighter import ARMSyntaxHighlighter
+from . codeeditor import CodeEditor
+from . armsyntaxhighlighter import ARMSyntaxHighlighter
 
 
 class ARMCodeEditor(CodeEditor):

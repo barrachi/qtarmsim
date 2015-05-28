@@ -30,7 +30,7 @@ from . model.memorymodel import MemoryModel
 from . model.registersmodel import RegistersModel
 from . res import main_rc, oxygen_rc  # @UnusedImport
 from . ui.mainwindow import Ui_MainWindow
-from . widget.simplearmeditor import SimpleARMEditor
+from . widget.armcodeeditor import ARMCodeEditor
 from . window.br import Breakpoi
 from . window.co import Conso
 from . window.ej import Ejecutar
@@ -112,6 +112,7 @@ class DefaultSettings():
 class QtARMSimMainWindow(QtGui.QMainWindow):
     "Main window of the Qt ARMSim application."
 
+    
     def __init__(self, parent=None, verbose=False):
         # Call super.__init__()
         super(QtARMSimMainWindow, self).__init__()
@@ -161,15 +162,16 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def extendUi(self):
         "Extends the Ui with new objects and links the tree views with their models"
-        # Add text editor based on QsciScintilla to tabSource
-        self.ui.textEditSource = SimpleARMEditor(self.ui.tabSource)
-        self.ui.textEditSource.setObjectName(_fromUtf8("textEditSource"))
-        self.ui.verticalLayoutSource.addWidget(self.ui.textEditSource)
+        # Add an ARMCodeEditor to tabSource
+        self.ui.sourceCodeEditor = ARMCodeEditor(self.ui.tabSource)
+        self.ui.sourceCodeEditor.setObjectName(_fromUtf8("sourceCodeEditor"))
+        self.ui.verticalLayoutSource.addWidget(self.ui.sourceCodeEditor)
 
-        # Add text editor based on QsciScintilla to tabARMSim
-        self.ui.textEditARMSim = SimpleARMEditor(self.ui.tabARMSim, disassemble=True)
-        self.ui.textEditARMSim.setObjectName(_fromUtf8("textEditARMSim"))
-        self.ui.verticalLayoutARMSim.addWidget(self.ui.textEditARMSim)
+        # Add a read only ARMCodeEditor to tabARMSim
+        self.ui.simCodeEditor = ARMCodeEditor(self.ui.tabARMSim)
+        self.ui.simCodeEditor.setReadOnly(True) # disassemble mode
+        self.ui.simCodeEditor.setObjectName(_fromUtf8("simCodeEditor"))
+        self.ui.verticalLayoutARMSim.addWidget(self.ui.simCodeEditor)
 
         # Link tableViewRegisters with registersModel
         self.registersModel = RegistersModel(self)
@@ -236,8 +238,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def isSourceCodeModified(self):
-        "Asks textEditSource if its contents have been modified"
-        #return self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_GETMODIFY)
+        "Asks sourceCodeEditor if its contents have been modified"
+        #return self.ui.sourceCodeEditor.SendScintilla(QsciScintilla.SCI_GETMODIFY)
         pass
 
 
@@ -291,11 +293,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def clearBreakpoints(self):
         """
-        Clears breakpoints on simulator, on textEditARMSim and on myself
+        Clears breakpoints on simulator, on simCodeEditor and on myself
         """
         if self.simulator and self.simulator.connected:
             self.simulator.clearBreakpoints()
-        self.ui.textEditARMSim.clearBreakpoints()
+        self.ui.simCodeEditor.clearBreakpoints()
         try:
             self.breakpoints.clear()
         except AttributeError:
@@ -323,14 +325,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.connect(action, signalTriggered, method)
         # Tab changes
         self.ui.tabWidgetCode.currentChanged.connect(self.onTabChange)
-        # textEditSource modification changes 
-        #self.ui.textEditSource.modificationChanged.connect(self.sourceCodeChanged)
+        # sourceCodeEditor modification changes 
+        #self.ui.sourceCodeEditor.modificationChanged.connect(self.sourceCodeChanged)
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
-        # Connect to breakpoint_changed from self.ui.textEditARMSim
-        self.ui.textEditARMSim.breakpoint_changed.connect(self.breakpointChanged)
+        # Connect to breakpoint_changed from self.ui.simCodeEditor
+        # @todo: self.ui.simCodeEditor.breakpoint_changed.connect(self.breakpointChanged)
         # Connect register edited on registers model to self.registerEdited
         self.registersModel.register_edited.connect(self.registerEdited)
         # Connect memory edited on memory model to self.memoryEdited
@@ -359,7 +361,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 return
             # If not,
             #   1) check if there is something to assemble
-            text = self.ui.textEditSource.text().replace(" ", "").replace("\n", "")
+            text = self.ui.sourceCodeEditor.document().toPlainText().replace(" ", "").replace("\n", "")
             if len(text) < 10:
                 msg =   "It seems that there is no source code to assemble.\n" \
                         "Do you really want to proceed?"
@@ -467,7 +469,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def setFileName(self, file_name):
         "Sets the filename and updates the window title accordingly"
         self.file_name = file_name if file_name else self.tr("untitled.s")
-        #self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
+        #self.ui.sourceCodeEditor.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
         self.checkFileActions()
 
 
@@ -479,8 +481,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.tabWidgetCode.setCurrentIndex(0)
         # 2) Set file name to default untitled name
         self.setFileName("")
-        # 3) Clear textEditSource
-        #self.ui.textEditSource.SendScintilla(QsciScintilla.SCI_CLEARALL)
+        # 3) Clear sourceCodeEditor
+        #self.ui.sourceCodeEditor.SendScintilla(QsciScintilla.SCI_CLEARALL)
         # 4) Clear breakpoints when creating a new file
         self.clearBreakpoints()
 
@@ -530,7 +532,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 QtGui.QMessageBox.warning(self, self.tr("Error reading '{}'").format(os.path.basename(file_name)), err_msg)
                 if i == len(encodings) -1:
                     raise e
-        self.ui.textEditSource.setText(text)
+        self.ui.sourceCodeEditor.setPlainText(text)
         self.setFileName(file_name)
 
     def doSave(self):
@@ -568,7 +570,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                     self.tr("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
         # As \r\n can be mixed with \n, replace each \r\n by a \n
-        text = self.ui.textEditSource.text().replace('\r\n', '\n')
+        text = self.ui.sourceCodeEditor.text().replace('\r\n', '\n')
         if sys.platform == "win32":
             text = text.replace('\n', '\r\n')
         asm_file.write(text.encode('utf-8')); # @todo: let user decide which encoding (including sys.getdefaultencoding())
@@ -592,9 +594,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def highlight_pc_line(self):
         PC = self.registersModel.getRegister(15)
-        if self.ui.textEditARMSim.findFirst("^\[{}\]".format(PC), True, False, False, False, line=0, index=0):
-            (line, index) = self.ui.textEditARMSim.getCursorPosition()  # @UnusedVariable index
-            self.ui.textEditARMSim.highlightPCLine(line)
+        document = self.ui.simCodeEditor.document()
+        cursor = QtGui.QTextCursor(document)
+        cursor = document.find(QtCore.QRegExp("^\\[{}\\]".format(PC)), cursor, QtGui.QTextDocument.FindWholeWords)
+        if cursor:
+            self.ui.simCodeEditor.setCurrentHighlightedLineNumber(cursor.blockNumber())
 
     def _processExecutionResponse(self, response):
         self.ui.textEditMessages.append(response.assembly_line)
@@ -817,14 +821,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def welcome_message(self):
         return "<b>Qt ARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
-                 "(c) 2014 Sergio Barrachina Mir<br></br>\n" + \
+                 "(c) 2014-15 Sergio Barrachina Mir<br></br>\n" + \
                  self.tr("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
                  self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
                 "<p>" + self.tr("Version") + " " + __version__ + "</p>" + \
-                "<p>" + "(c) 2014 Sergio Barrachina Mir" + "</p>" + \
+                "<p>" + "(c) 2014-15 Sergio Barrachina Mir" + "</p>" + \
                 "<p>" + self.tr("<p>Based on the graphical frontend for Spim<br/>developed on 2008 by Gloria Edo Piñana.") + "</p>" + \
                 "<p>" + "<a href='http://lorca.act.uji.es/projects/qtarmsim/'>http://lorca.act.uji.es/projects/qtarmsim/</a>" + "</p>" + \
                 "</html>"
@@ -886,7 +890,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             if memtype == 'ROM':
                 ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
                 armsim_lines = self.simulator.getDisassemble(hex_start, ninsts)
-                self.ui.textEditARMSim.setText('\n'.join(armsim_lines))
+                self.ui.simCodeEditor.setPlainText('\n'.join(armsim_lines))
                 self.highlight_pc_line()
         self.ui.treeViewMemory.expandAll()
         self.ui.treeViewMemory.resizeColumnToContents(0)
@@ -921,7 +925,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if errmsg:
             QtGui.QMessageBox.warning(self, self.tr("Connection to ARMSim failed\n\n"), "{}".format(errmsg))
             return False
-        self.ui.textEditMessages.append("<b>Connected to ARMSim. ARMSim version info follows.</b><br/>")
+        self.ui.textEditMessages.append("<b>Connected to ARMSim (ARMSim version info follows.</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
         self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(self.simulator.current_port), 2000)

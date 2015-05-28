@@ -118,6 +118,7 @@ class LeftArea(QtGui.QWidget):
             while (maxLines >= 10):
                 maxLines /= 10
                 digits += 1
+            digits = min(2, digits)
             width = 5 + self.codeEditor.fontMetrics().width(u"9") * digits
         return width
 
@@ -181,11 +182,11 @@ class CodeEditor(QtGui.QPlainTextEdit):
             self.syntaxHighlighter = SyntaxHighlighterClass(self.document())
         # Set extra highligth selections (current line and special keywords)
         self.setCurrentHighlightedLineNumber(0)
-        self.setHighlightSelections()
+        self.updateHighlightSelections()
         # Connect signals
         self.connect(self, QtCore.SIGNAL('blockCountChanged(int)'), self.updateLeftAreaWidth)
         self.connect(self, QtCore.SIGNAL('updateRequest(QRect, int)'), self.updateLeftArea)
-        self.connect(self, QtCore.SIGNAL('cursorPositionChanged()'), self.setHighlightSelections)
+        self.connect(self, QtCore.SIGNAL('cursorPositionChanged()'), self.updateHighlightSelections)
 
     def setReadOnly(self, ro):
         """
@@ -204,6 +205,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
         @param lineNumber: the line number to be set.
         """
         self.currentHighlightedLineNumber = lineNumber
+        self.updateHighlightSelections()
 
     def getCurrentHightlightedLineNumber(self):
         """
@@ -250,7 +252,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self.updateLeftAreaWidth()
 
-    def setHighlightSelections(self):
+    def updateHighlightSelections(self):
         "Sets the selections to be highlighted"
         extraSelections = []
         extraSelections.append(self._getCurrentLineHighlightSelection())
