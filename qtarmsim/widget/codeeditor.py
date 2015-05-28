@@ -118,7 +118,7 @@ class LeftArea(QtGui.QWidget):
             while (maxLines >= 10):
                 maxLines /= 10
                 digits += 1
-            digits = min(2, digits)
+            digits = max(2, digits)
             width = 5 + self.codeEditor.fontMetrics().width(u"9") * digits
         return width
 
