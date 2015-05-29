@@ -299,11 +299,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if self.simulator and self.simulator.connected:
             self.simulator.clearBreakpoints()
         self.ui.simCodeEditor.clearBreakpoints()
-        try:
-            self.breakpoints.clear()
-        except AttributeError:
-            # Python 3.2 does not have clear() method for lists
-            self.breakpoints = []
+        self.breakpoints.clear()
 
 
     #################################################################################
@@ -332,8 +328,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
-        # Connect to breakpoint_changed from self.ui.simCodeEditor
-        # @todo: self.ui.simCodeEditor.breakpoint_changed.connect(self.breakpointChanged)
+        # Connect to self.uji.simCodeEditor set and clear breakpoint signals
+        self.ui.simCodeEditor.setBreakpointSignal.connect(self.setBreakpoint)
+        self.ui.simCodeEditor.clearBreakpointSignal.connect(self.clearBreakpoint)
         # Connect register edited on registers model to self.registerEdited
         self.registersModel.register_edited.connect(self.registerEdited)
         # Connect memory edited on memory model to self.memoryEdited
@@ -424,18 +421,24 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.checkFileActions()
 
 
-    def breakpointChanged(self, set_breakpoint, hex_address):
-        errmsg = ""
-        if set_breakpoint:
-            errmsg = self.simulator.setBreakpoint(hex_address)
-            if not errmsg:
-                self.breakpoints.append(hex_address)
-        else:
-            errmsg = self.simulator.clearBreakpoint(hex_address)
-            if not errmsg:
-                self.breakpoints.remove(hex_address)
+    def setBreakpoint(self, lineNumber, text):
+        "Sets a breakpoint on the memory address obtained from text"
+        hex_address = text.split(" ")[0][1:-1]
+        errmsg = self.simulator.setBreakpoint(hex_address)
         if errmsg:
-            QtGui.QMessageBox.warning(self, self.trUtf8("Breakpoints Error"), errmsg)
+            QtGui.QMessageBox.warning(self, self.trUtf8("Set breakpoint error"), errmsg)
+        else:
+            self.breakpoints.append(hex_address)
+
+
+    def clearBreakpoint(self, lineNumber, text):
+        "Clears a breakpoint from the memory address obtained from text"
+        hex_address = text.split(" ")[0][1:-1]
+        errmsg = self.simulator.clearBreakpoint(hex_address)
+        if errmsg:
+            QtGui.QMessageBox.warning(self, self.trUtf8("Clear breakpoint error"), errmsg)
+        else:
+            self.breakpoints.remove(hex_address)
 
 
     def registerEdited(self, reg_name, hex_value):
