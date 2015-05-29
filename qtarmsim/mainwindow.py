@@ -22,7 +22,6 @@ import sys
 
 import PySide
 from PySide import QtCore, QtGui
-#from PySide.Qsci import QsciScintilla
 
 
 from . version import __version__
@@ -240,8 +239,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def isSourceCodeModified(self):
         "Asks sourceCodeEditor if its contents have been modified"
-        #return self.ui.sourceCodeEditor.SendScintilla(QsciScintilla.SCI_GETMODIFY)
-        pass
+        return self.ui.sourceCodeEditor.document().isModified()
 
 
     def updateWindowTitle(self):
@@ -323,7 +321,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Tab changes
         self.ui.tabWidgetCode.currentChanged.connect(self.onTabChange)
         # sourceCodeEditor modification changes 
-        #self.ui.sourceCodeEditor.modificationChanged.connect(self.sourceCodeChanged)
+        self.ui.sourceCodeEditor.textChanged.connect(self.sourceCodeChanged)
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
@@ -415,9 +413,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(self, self.trUtf8("Assembly Error"), msg)
 
 
-    def sourceCodeChanged(self, changed):
-        if changed:
-            self.current_source_code_assembled = False
+    def sourceCodeChanged(self):
+        self.current_source_code_assembled = False
         self.checkFileActions()
 
 
@@ -458,12 +455,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if not self.isSourceCodeModified():
             return QtGui.QMessageBox.Discard
         msg =   "The document '{}' has been modified.\n" \
-                "Do you want to save the changes, or discard them?".format(os.path.basename(self.file_name))
+                "Do you want to save the changes?".format(os.path.basename(self.file_name))
         reply = QtGui.QMessageBox.question(self, 'Close Document', 
-                                           msg, QtGui.QMessageBox.Save, QtGui.QMessageBox.Discard, QtGui.QMessageBox.Cancel)
+                                           msg,
+                                           QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel,
+                                           QtGui.QMessageBox.Save)
         if reply == QtGui.QMessageBox.Save:
             self.doSave()
         return reply
+    
 
 
     #################################################################################
@@ -473,7 +473,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def setFileName(self, file_name):
         "Sets the filename and updates the window title accordingly"
         self.file_name = file_name if file_name else self.trUtf8("untitled.s")
-        #self.ui.sourceCodeEditor.SendScintilla(QsciScintilla.SCI_SETSAVEPOINT) # Inform QsciScintilla that the modifications have been saved
+        self.ui.sourceCodeEditor.document().setModified(False)
         self.checkFileActions()
 
 
@@ -486,7 +486,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # 2) Set file name to default untitled name
         self.setFileName("")
         # 3) Clear sourceCodeEditor
-        #self.ui.sourceCodeEditor.SendScintilla(QsciScintilla.SCI_CLEARALL)
+        self.ui.sourceCodeEditor.clear()
         # 4) Clear breakpoints when creating a new file
         self.clearBreakpoints()
 
@@ -504,7 +504,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                                                      self._getDirectory(),
                                                      self.trUtf8("ARM assembler files (*.s);;ARM C files (*.c)"))
         # @warning: file_name should return a string, but on Python 3.3.5, PySide 1.2.2, and Qt 4.8.5, it returns a tuple (file_name, 'ARM assembler files (*.s)')
-        # @todo: check why this is happening and remove the following hack
+        # @todo: check why this is happening and remove the following hack and this comment
         if type(file_name) == tuple:
             file_name = file_name[0]
         if file_name:
@@ -563,6 +563,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         new_file_name = QtGui.QFileDialog.getSaveFileName(self, self.trUtf8("Save File"),
                                                       new_file_name,
                                                       self.trUtf8("ARM assembler files (*.s);;ARM C files (*.c)"))
+        # @warning: file_name should return a string, but on Python 3.3.5, PySide 1.2.2, and Qt 4.8.5, it returns a tuple (file_name, 'ARM assembler files (*.s)')
+        # @todo: check why this is happening and remove the following hack and this comment
+        if type(new_file_name) == tuple:
+            new_file_name = new_file_name[0]
         if new_file_name != '':
             return self.saveFile(new_file_name)
         else:
@@ -571,17 +575,27 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def saveFile(self, file_name):
         "Saves the contents of the source editor on the given file name"
+        # @deprecated: old version due to qscintilla particularities
+        #=======================================================================
+        # asm_file = QtCore.QFile(file_name)
+        # # @warning: as qscintilla messes up CRLFs and LFs on Windows, the file is not opened in text mode (| QtCore.QFile.Text)
+        # if not asm_file.open(QtCore.QFile.WriteOnly): 
+        #     QtGui.QMessageBox.warning(self, self.trUtf8("Error"),
+        #             self.trUtf8("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
+        #     return False
+        # # As \r\n can be mixed with \n, replace each \r\n by a \n
+        # text = self.ui.sourceCodeEditor.text().replace('\r\n', '\n')
+        # if sys.platform == "win32":
+        #     text = text.replace('\n', '\r\n')
+        #=======================================================================
+        
         asm_file = QtCore.QFile(file_name)
-        # @warning: as qscintilla messes up CRLFs and LFs on Windows, the file is not opened in text mode (| QtCore.QFile.Text)
-        if not asm_file.open(QtCore.QFile.WriteOnly): 
+        if not asm_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text): 
             QtGui.QMessageBox.warning(self, self.trUtf8("Error"),
                     self.trUtf8("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
-        # As \r\n can be mixed with \n, replace each \r\n by a \n
-        text = self.ui.sourceCodeEditor.text().replace('\r\n', '\n')
-        if sys.platform == "win32":
-            text = text.replace('\n', '\r\n')
-        asm_file.write(text.encode('utf-8')); # @todo: let user decide which encoding (including sys.getdefaultencoding())
+        text = self.ui.sourceCodeEditor.document().toPlainText()
+        asm_file.write(text.encode('utf-8')) # @todo: let user decide which encoding (including sys.getdefaultencoding())
         asm_file.close()
         self.statusBar().showMessage(self.trUtf8("File saved"), 2000)
         # Set file name
