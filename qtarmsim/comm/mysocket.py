@@ -176,7 +176,7 @@ class MySocket:
             try:
                 line = self.receive_line()
             except socket.timeout:
-                print("TimeOut Error")
+                print("A time out error has occurred")
                 print("\n".join(lines))
                 raise
             lines.append(line)
