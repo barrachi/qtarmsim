@@ -165,6 +165,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Add an ARMCodeEditor to tabSource
         self.ui.sourceCodeEditor = ARMCodeEditor(self.ui.tabSource)
         self.ui.sourceCodeEditor.setObjectName(_fromUtf8("sourceCodeEditor"))
+        self.ui.sourceCodeEditor.setFocus()
         self.ui.verticalLayoutSource.addWidget(self.ui.sourceCodeEditor)
 
         # Add a read only ARMCodeEditor to tabARMSim
