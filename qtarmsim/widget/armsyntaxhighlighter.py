@@ -59,7 +59,7 @@ class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         labelFormat = QtGui.QTextCharFormat()
         labelFormat.setForeground(QtGui.QColor('black'))
         labelFormat.setFontWeight(QtGui.QFont.Bold)
-        for pattern in ['^\\s*\\D[^\\s]*:', ]:
+        for pattern in ['^\\s*[^\\d\\s][\\w]*:', ]:
             self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), labelFormat))
         # Add highlighting rules and format for ARM comments
         commentFormat = QtGui.QTextCharFormat()

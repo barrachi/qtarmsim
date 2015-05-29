@@ -37,7 +37,7 @@ class ARMCodeEditor(CodeEditor):
         registers = ['r{}'.format(n) for n in range(0, 16)] + ['sp', 'SP', 'lr', 'LR', 'pc', 'PC']
         # Labels
         labels = []
-        labelQRegExp = QtCore.QRegExp('^\\s*\\D[^\\s]*:')
+        labelQRegExp = QtCore.QRegExp('^\\s*[^\\d\\s][\\w]*:')
         cursor = QtGui.QTextCursor(self.document())
         while not cursor.isNull() and not cursor.atEnd():
             cursor = self.document().find(labelQRegExp, cursor, QtGui.QTextDocument.FindWholeWords)
