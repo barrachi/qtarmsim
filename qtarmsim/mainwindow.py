@@ -154,9 +154,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def show(self, *args, **kwargs):
         "Method called when the window is ready to be shown"
         super(QtARMSimMainWindow, self).show(*args, **kwargs)
-        # checkFileActions checkShowActions and enableSimulatorActions have to be called after the window is shown
-        self.checkFileActions()
-        self.checkShowActions()
+        # updateFileActions updateShowActions and enableSimulatorActions have to be called after the window is shown
+        self.updateFileActions()
+        self.updateShowActions()
         self.enableSimulatorActions(False)
 
 
@@ -248,7 +248,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.setWindowTitle(title_txt)
 
 
-    def checkFileActions(self):
+    def updateFileActions(self):
         "Enables/disables actions related to file management and updates window title accordingly"
         if self.isSourceCodeModified():
             self.ui.actionSave.setEnabled(True)
@@ -259,7 +259,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.updateWindowTitle()
 
 
-    def checkShowActions(self):
+    def updateShowActions(self):
         "Modifies the checked state of the show/hide actions depending on their widgets visibility"
         self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
         self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
@@ -415,7 +415,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def sourceCodeChanged(self):
         self.current_source_code_assembled = False
-        self.checkFileActions()
+        self.updateFileActions()
 
 
     def setBreakpoint(self, lineNumber, text):
@@ -474,7 +474,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         "Sets the filename and updates the window title accordingly"
         self.file_name = file_name if file_name else self.trUtf8("untitled.s")
         self.ui.sourceCodeEditor.document().setModified(False)
-        self.checkFileActions()
+        self.updateFileActions()
 
 
     def doNew(self):
@@ -707,7 +707,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.restoreState(self.initialWindowState)
         # status bar is not automatically restored, restore it manually
         self.ui.statusBar.setVisible(True)
-        self.checkShowActions()
+        self.updateShowActions()
 
     def doPreferences(self):
         preferences = PreferencesDialog(self)
