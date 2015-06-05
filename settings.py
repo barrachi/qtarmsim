@@ -33,12 +33,11 @@ class Settings():
     
             # Python versions supported
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.2',
             'Programming Language :: Python :: 3.3',
             'Programming Language :: Python :: 3.4',
             ]
         self.keywords = ['ARM', 'simulator', 'assembler', 'disassembler', 'debugger']
-
+        self.requires = ['PySide >= 1.2.1', ]
 
     def _get_version(self):
         """Gets version from 'qtarmsim/version.py'."""
