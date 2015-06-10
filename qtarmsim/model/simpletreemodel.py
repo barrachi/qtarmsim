@@ -19,7 +19,7 @@
 ###########################################################################
 
 
-from PyQt4 import QtCore
+from PySide import QtCore
 
 
 class TreeItem(object):

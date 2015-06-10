@@ -3,7 +3,7 @@
 
 import sys
 import time
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 
 class MyCustomWidget(QtGui.QWidget):

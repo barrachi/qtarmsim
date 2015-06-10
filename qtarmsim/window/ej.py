@@ -6,7 +6,7 @@
 #Construir el diálogo para introducir los parámetros de ejecución
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.ejec import Ui_Ejecutar
 
 ##Clase que define el diálogo parámetros de ejecución que hereda de la clase QDialog del módulo QtGui
@@ -58,10 +58,10 @@ class Ejecutar(QtGui.QDialog):
      
     ##Método para asociar signals de los botones del diálogo y slots
     def createActions(self):
-        self.aceptarButton = QtGui.QAction(self.tr("Aceptar"), self)
+        self.aceptarButton = QtGui.QAction(self.trUtf8("Aceptar"), self)
         self.connect(self.ui.aceptarButton,QtCore.SIGNAL("clicked()"),self.accept)
         
-        self.cancelarButton = QtGui.QAction(self.tr("Cancelar"), self)
+        self.cancelarButton = QtGui.QAction(self.trUtf8("Cancelar"), self)
         self.connect(self.ui.cancelarButton,QtCore.SIGNAL("clicked()"),self.reject)
 
         

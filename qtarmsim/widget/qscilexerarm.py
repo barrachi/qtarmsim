@@ -24,8 +24,8 @@
 
 import re
 
-from PyQt4.Qsci import QsciLexerCustom
-from PyQt4.QtGui import QColor
+from PySide.Qsci import QsciLexerCustom
+from PySide.QtGui import QColor
 
 
 class QsciLexerARM(QsciLexerCustom):

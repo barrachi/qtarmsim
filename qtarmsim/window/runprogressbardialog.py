@@ -19,7 +19,7 @@
 # Adapted from:
 # http://stackoverflow.com/questions/19442443/busy-indication-with-pyqt-progress-bar
 
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 from .. comm.responses import ExecuteResponse
 from .. comm.exceptions import RunTimeOut
@@ -34,7 +34,7 @@ class RunProgressBarDialog(QtGui.QDialog):
         self.layout = QtGui.QVBoxLayout(self)
         
         # Create a label and a progress bar and add them to the main layout
-        self.label = QtGui.QLabel(self.tr("Running..."), self)
+        self.label = QtGui.QLabel(self.trUtf8("Running..."), self)
         self.layout.addWidget(self.label)
         self.progressBar = QtGui.QProgressBar(self)
         self.progressBar.setRange(0,1)
@@ -69,7 +69,7 @@ class RunProgressBarDialog(QtGui.QDialog):
         return self.response
 
 class RunThread(QtCore.QThread):
-    taskFinished = QtCore.pyqtSignal(str, str, list, list, str)
+    taskFinished = QtCore.Signal(str, str, list, list, str)
 
     def __init__(self, simulator):
         super(RunThread, self).__init__()

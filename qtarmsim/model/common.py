@@ -16,7 +16,7 @@
 #                                                                         #
 ###########################################################################
 
-from PyQt4.Qt import QObject
+from PySide.QtCore import QObject
 
 class InputToHex(QObject):
     """
@@ -29,7 +29,7 @@ class InputToHex(QObject):
 
 
     def html_error(self, err_msg):
-        return self.tr("""
+        return self.trUtf8("""
         <p>{0}</p>
         <p>Allowed inputs are:</p>
         <ul>
@@ -65,7 +65,7 @@ class InputToHex(QObject):
                                              wrong
         """
         if type(text) != str:
-            err_msg = self.tr("Input value '{}' was not an string").format(text)
+            err_msg = self.trUtf8("Input value '{}' was not an string").format(text)
             return (None, self.html_error(err_msg))
         if len(text) == 0:
             return (None, '')
@@ -83,13 +83,13 @@ class InputToHex(QObject):
         try:
             num = int(text, base=0)
         except ValueError:
-            err_msg = self.tr("No conversion found for input '{}'.").format(text)
+            err_msg = self.trUtf8("No conversion found for input '{}'.").format(text)
             return (None, self.html_error(err_msg))
         if num < self.MAX_NEG:
-            err_msg = self.tr("Input '{}' is lower than the maximum negative value that can be represented with 32 bits.").format(text)
+            err_msg = self.trUtf8("Input '{}' is lower than the maximum negative value that can be represented with 32 bits.").format(text)
             return (None, self.html_error(err_msg))
         if num > self.MAX_POS:
-            err_msg = self.tr("Input '{}' is greater than the maximum positive value that can be represented with 32 bits.").format(text)
+            err_msg = self.trUtf8("Input '{}' is greater than the maximum positive value that can be represented with 32 bits.").format(text)
             return (None, self.html_error(err_msg))
         if num < 0:
             # Make complement to two

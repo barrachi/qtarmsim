@@ -4,7 +4,7 @@
 #Construir el diálogo para añadir o elminar puntos de ruptura en el programa 
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.breakpo import Ui_Break
 
 ##Clase que define el diálogo puntos de ruptura que hereda de la clase QDialog del módulo QtGui
@@ -19,7 +19,7 @@ class Breakpoi(QtGui.QDialog):
         
         self.dirEdit = QtGui.QLineEdit()
   
-        self.addButton = QtGui.QPushButton(self.tr("&Añadir"))
+        self.addButton = QtGui.QPushButton(self.trUtf8("&Añadir"))
         self.addButton.setGeometry(QtCore.QRect(300,20,75,23))
         self.addButton.setObjectName("addButton")
 
@@ -170,7 +170,7 @@ class Breakpoi(QtGui.QDialog):
             self.padre.ptosrup.insertItem(0, item)
             self.dirEdit.clear()
         else:
-            QtGui.QMessageBox.information(self, self.tr("Error"), self.tr("La entrada no es correcta"))
+            QtGui.QMessageBox.information(self, self.trUtf8("Error"), self.trUtf8("La entrada no es correcta"))
             self.dirEdit.clear()
             
             

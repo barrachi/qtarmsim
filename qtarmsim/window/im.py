@@ -6,7 +6,7 @@
 
 
 import sys
-from PyQt4 import QtCore, QtGui, Qt
+from PySide import QtCore, QtGui
 from ..ui.imprimir import Ui_Imprimir
 
 ##Clase que define el diálogo imprimir valor que hereda de la clase QDialog del módulo QtGui
@@ -59,10 +59,10 @@ class Imprimir(QtGui.QDialog):
     
     ##Método para asociar signals de los botones del diálogo y slots
     def createActions(self):
-        self.aceptarButton = QtGui.QAction(self.tr("Aceptar"), self)
+        self.aceptarButton = QtGui.QAction(self.trUtf8("Aceptar"), self)
         self.connect(self.ui.aceptarButton,QtCore.SIGNAL("clicked()"),self.imp_accept)
         
-        self.cancelarButton = QtGui.QAction(self.tr("Cancelar"), self)
+        self.cancelarButton = QtGui.QAction(self.trUtf8("Cancelar"), self)
         self.connect(self.ui.cancelarButton,QtCore.SIGNAL("clicked()"),self.reject)
         
     ##Método asociado al cambio de selección en comboBox
@@ -83,7 +83,7 @@ class Imprimir(QtGui.QDialog):
     def imp_accept(self):
         if self.ui.comboBox.currentIndex()==1:
             if (self.ui.fromEdit.text()=="") or (self.ui.toEdit.text()==""):
-                QtGui.QMessageBox.information(self, self.tr("Error"), self.tr("El rango de memoria introducido es incorrecto"))  
+                QtGui.QMessageBox.information(self, self.trUtf8("Error"), self.trUtf8("El rango de memoria introducido es incorrecto"))  
                 return
             else:
                 cad="Imprimiendo contenido de memoria desde " + self.ui.fromEdit.text() + " hasta " + self.ui.toEdit.text()
