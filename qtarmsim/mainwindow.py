@@ -953,7 +953,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if errmsg:
             QtGui.QMessageBox.warning(self, self.trUtf8("Connection to ARMSim failed\n\n"), "{}".format(errmsg))
             return False
-        self.ui.textEditMessages.append("<b>Connected to ARMSim (ARMSim version info follows.</b><br/>")
+        self.ui.textEditMessages.append("<b>Connected to ARMSim (ARMSim version info follows).</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
         self.statusBar().showMessage(self.trUtf8("Connected to ARMSim at port {}").format(self.simulator.current_port), 2000)
