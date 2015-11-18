@@ -3,9 +3,9 @@
 
 ###########################################################################
 #                                                                         #
-#  This file is part of Qt ARMSim.                                        #
+#  This file is part of QtARMSim.                                         #
 #                                                                         #
-#  Qt ARMSim is free software: you can redistribute it and/or modify      #
+#  QtARMSim is free software: you can redistribute it and/or modify       #
 #  it under the terms of the GNU General Public License as published by   #
 #  the Free Software Foundation; either version 3 of the License, or      #
 #  (at your option) any later version.                                    #
@@ -32,7 +32,7 @@ import shutil
 import qtarmsim
 
 name = 'qtarmsim'
-desc = 'Qt ARMSim'
+desc = 'QtARMSim'
 
 print("prueba")
 sys.stdout.write("hola\n")
@@ -110,7 +110,7 @@ def install():
 
 
 def uninstall():
-    print("Qt ARMSim shortcuts were successfully removed.")
+    print("QtARMSim shortcuts were successfully removed.")
 
 
 if __name__ == '__main__':

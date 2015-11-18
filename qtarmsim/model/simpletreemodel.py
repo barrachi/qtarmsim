@@ -2,11 +2,11 @@
 
 ###########################################################################
 #                                                                         #
-#  This file is part of Qt ARMSim. It is a derivative work from original  #
+#  This file is part of QtARMSim.  It is a derivative work from original  #
 #  simpletreemodel.py which was part of the example classes of the        #
 #  Qt Toolkit Copyright (C) 2005-2005 Trolltech AS.                       #
 #                                                                         #
-#  Qt ARMSim is free software: you can redistribute it and/or modify      #
+#  QtARMSim is free software: you can redistribute it and/or modify       #
 #  it under the terms of the GNU General Public License as published by   #
 #  the Free Software Foundation; either version 3 of the License, or      #
 #  (at your option) any later version.                                    #

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ###########################################################################
-#  Qt ARMSim -- A Qt graphical interface to ARMSim                        #
+#  QtARMSim -- A Qt graphical interface to ARMSim                         #
 #                                                                         #
 #  Copyright 2014-15 Sergio Barrachina Mir <barrachi@uji.es>              #
 #                                                                         #
@@ -34,7 +34,7 @@ from . mainwindow import QtARMSimMainWindow
 def _help():
     print("""Usage: qtarmsim.py [options] [asmfile.s]
 
-Qt ARMSim is a graphical frontend to the ARMSim ARM simulator. It provides
+QtARMSim is a graphical frontend to the ARMSim ARM simulator. It provides
 an easy to use multiplatform ARM emulation environment that has been designed
 to be used on Computer Architecture Introductory courses.
 

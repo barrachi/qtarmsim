@@ -1,5 +1,5 @@
 @
-@ Qt ARMSim example (http://lorca.act.uji.es/projects/qtarmism/
+@ QtARMSim example (http://lorca.act.uji.es/projects/qtarmism/
 @
 	.data
 a:	.word 0x20

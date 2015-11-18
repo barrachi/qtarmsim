@@ -2,9 +2,9 @@
 
 ###########################################################################
 #                                                                         #
-#  This file is part of Qt ARMSim.                                        #
+#  This file is part of QtARMSim.                                         #
 #                                                                         #
-#  Qt ARMSim is free software: you can redistribute it and/or modify      #
+#  QtARMSim is free software: you can redistribute it and/or modify       #
 #  it under the terms of the GNU General Public License as published by   #
 #  the Free Software Foundation; either version 3 of the License, or      #
 #  (at your option) any later version.                                    #
@@ -110,7 +110,7 @@ class DefaultSettings():
 
 
 class QtARMSimMainWindow(QtGui.QMainWindow):
-    "Main window of the Qt ARMSim application."
+    "Main window of the QtARMSim application."
 
     
     def __init__(self, parent=None, verbose=False):
@@ -245,7 +245,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def updateWindowTitle(self):
         modified_txt = self.trUtf8(" [modified] - ") if self.isSourceCodeModified() else " - "
-        title_txt = "{}{}{}".format(os.path.basename(self.file_name), modified_txt, "Qt ARMSim")
+        title_txt = "{}{}{}".format(os.path.basename(self.file_name), modified_txt, "QtARMSim")
         self.setWindowTitle(title_txt)
 
 
@@ -843,7 +843,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def welcome_message(self):
-        return "<b>Qt ARMSim " + self.trUtf8("version") + " " + __version__ + "</b><br></br>\n" + \
+        return "<b>QtARMSim " + self.trUtf8("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014-15 Sergio Barrachina Mir<br></br>\n" + \
                  self.trUtf8("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
                  self.trUtf8("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
@@ -862,9 +862,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 "</html>"
 
     def doAbout_Qt_ARMSim(self):
-        "Shows the About Qt ARMSim dialog"
+        "Shows the About QtARMSim dialog"
         QtGui.QMessageBox.about(self,
-                                self.trUtf8("About Qt ARMSim"),
+                                self.trUtf8("About QtARMSim"),
                                 self.about_message(),
                                 )
 

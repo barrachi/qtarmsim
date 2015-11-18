@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This script automatically grabs oxygen icons required by Qt ARMSim
+# This script automatically grabs oxygen icons required by QtARMSim
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 UIPATH="${SCRIPTPATH}/../../ui"

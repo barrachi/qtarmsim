@@ -1,5 +1,5 @@
-Qt ARMSim development
-=====================
+QtARMSim development
+====================
 
 How to distribute a new version
 -------------------------------
@@ -29,7 +29,7 @@ next command can be executed::
 ``qtarmsim_winpostinstall.py`` script does not get called, therefore
 the main motivation of using this method is lost. The ``postinstall``
 script should create a desktop shortcut and a menu shortcut on Windows
-with the appropriate Qt ARMSim icon.
+with the appropriate QtARMSim icon.
 
 
 Install python on Wine

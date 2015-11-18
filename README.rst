@@ -1,7 +1,7 @@
-Qt ARMSim
-=========
+QtARMSim
+========
 
-Qt ARMSim is a graphical frontend to the ARMSim ARM simulator. It
+QtARMSim is a graphical frontend to the ARMSim ARM simulator. It
 provides an easy to use multiplatform ARM emulation environment that
 has been designed to be used on Computer Architecture Introductory
 courses.
@@ -12,5 +12,5 @@ is the graphical part of what was planned to be a Qt graphical
 interface to the SPIM simulator.
 
 The ARMSim ARM simulator, Copyright (c) 2014-15 by Germán Fabregat,
-is included with Qt ARMSim.  It can be found on the ``armsim/``
+is included with QtARMSim.  It can be found on the ``armsim/``
 subdirectory.

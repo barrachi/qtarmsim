@@ -204,7 +204,7 @@ Please, manually convert the file to &apos;utf-8&apos; and load it again.</sourc
     </message>
     <message>
         <location filename="mainwindow.py" line="867"/>
-        <source>About Qt ARMSim</source>
+        <source>About QtARMSim</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

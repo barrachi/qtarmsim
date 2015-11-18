@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string notr="true">Qt ARMSim</string>
+   <string notr="true">QtARMSim</string>
   </property>
   <property name="tabShape">
    <enum>QTabWidget::Rounded</enum>
@@ -314,7 +314,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidgetMessages">
    <property name="whatsThis">
-    <string>The Messages dock shows Qt ARMSim and ARMSim messages</string>
+    <string>The Messages dock shows QtARMSim and ARMSim messages</string>
    </property>
    <property name="allowedAreas">
     <set>Qt::BottomDockWidgetArea</set>
@@ -386,7 +386,7 @@
     </iconset>
    </property>
    <property name="text">
-    <string>About Qt ARMSim</string>
+    <string>About QtARMSim</string>
    </property>
    <property name="statusTip">
     <string>Sobre spim</string>
@@ -403,7 +403,7 @@
     </iconset>
    </property>
    <property name="text">
-    <string>Qt ArmSim &amp;Help</string>
+    <string>QtARMSim &amp;Help</string>
    </property>
    <property name="shortcut">
     <string>F1</string>

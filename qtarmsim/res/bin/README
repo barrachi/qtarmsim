@@ -2,7 +2,7 @@ Instructions
 ============
 
 The files in this directory are used to automatically grab the icons
-required by Qt ARMSim from the oxygen iconset.
+required by QtARMSim from the oxygen iconset.
 
 For doing this, you should run the following commands in order::
 
