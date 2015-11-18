@@ -31,7 +31,6 @@ from PySide import QtCore, QtGui
 #from PySide.Qsci import QTextEdit
 #from .qscilexerarm import QsciLexerARM
 
-
 class SimpleARMEditor(QtGui.QTextEdit):
 
     # breakpoint_changed signal, parameters are if set or unset (True/False) and hex_address
@@ -44,15 +43,6 @@ class SimpleARMEditor(QtGui.QTextEdit):
     
     def __init__(self, parent=None, disassemble=False):
         super(SimpleARMEditor, self).__init__(parent)
-
-        # Set the default font
-        font = QtGui.QFont()
-        font.setFamily('Courier')
-        font.setStyleHint(QtGui.QFont.Monospace)
-        font.setPointSize(10)
-        #self.setFont(font)
-        #self.setMarginsFont(font)
-        #self.setMarginsBackgroundColor(QtGui.QColor("#CCCCCC"))
 
         # Marker related variables
         self.breakpoints = {}

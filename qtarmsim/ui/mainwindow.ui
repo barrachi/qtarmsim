@@ -242,11 +242,6 @@
        <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="font">
-        <font>
-         <family>Courier</family>
-        </font>
-       </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
@@ -290,11 +285,6 @@
     <layout class="QVBoxLayout" name="dockWidgetMemoryLayout">
      <item>
       <widget class="MyQTreeView" name="treeViewMemory">
-       <property name="font">
-        <font>
-         <family>Courier</family>
-        </font>
-       </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>

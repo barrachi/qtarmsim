@@ -16,9 +16,9 @@
 #                                                                         #
 ###########################################################################
 
-from PySide.QtCore import QObject
+from PySide import QtCore, QtGui
 
-class InputToHex(QObject):
+class InputToHex(QtCore.QObject):
     """
     Class that handles the conversion between a user input value and an
     hexadecimal representation of that input.
@@ -95,4 +95,12 @@ class InputToHex(QObject):
             # Make complement to two
             num = self.MAX_POS + num + 1
         return ("0x{:08X}".format(num), '')
-        
+
+
+def getMonoSpacedFont():
+    font = QtGui.QFont("fake font name") # @warning: fake name needed to setStyleHint work
+    font.setStyleHint(QtGui.QFont.TypeWriter)
+    if not QtGui.QFontInfo(font).fixedPitch():
+        font.setStyleHint(QtGui.QFont.Monospace)
+    font.setPointSize(10)
+    return font

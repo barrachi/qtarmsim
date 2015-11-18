@@ -20,7 +20,7 @@ from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 
 from . simpletreemodel import TreeModel, TreeItem
-from . common import InputToHex
+from . common import InputToHex, getMonoSpacedFont
 
 
 class MemoryBank():
@@ -64,12 +64,8 @@ class MemoryModel(TreeModel):
         super(MemoryModel, self).__init__(parent)
         self.rootItem = TreeItem(("Address", "Value"))
         # Set fonts
-        self.q_font = QtGui.QFont()
-        self.q_font_last = QtGui.QFont()
-        for font in self.q_font, self.q_font_last:
-            font.setFamily("Courier")
-            font.setPointSize(10)
-            font.setStyleHint(QtGui.QFont.Monospace)
+        self.q_font = getMonoSpacedFont()
+        self.q_font_last = getMonoSpacedFont()
         self.q_font_last.setWeight(QtGui.QFont.Black)
 
     def data(self, index, role):

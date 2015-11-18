@@ -99,7 +99,7 @@ class LeftArea(QtGui.QWidget):
                 if (block.isVisible() and bottom >= event.rect().top()):
                     number = blockNumber + 1
                     painter.setPen(QtGui.QColor('black'))
-                    painter.drawText(0, top, self.width(), self.codeEditor.fontMetrics().height(), QtCore.Qt.AlignRight, u"{}".format(number))
+                    painter.drawText(-4, top, self.width(), self.codeEditor.fontMetrics().height(), QtCore.Qt.AlignRight, u"{}".format(number))
                 block = block.next()
                 top = bottom
                 bottom = top + self.codeEditor.blockBoundingRect(block).height()
@@ -108,7 +108,7 @@ class LeftArea(QtGui.QWidget):
     def width(self):
         "Returns the leftArea width based on the number of blocks in the associated editor and the width of the used font"
         if self.codeEditor.isReadOnly():
-            width = 5 + self.codeEditor.fontMetrics().width(u"9") * 2
+            width = 8 + self.codeEditor.fontMetrics().width(u"9") * 2
         else:
             digits = 1
             maxLines = max(1, self.codeEditor.blockCount())
@@ -116,7 +116,7 @@ class LeftArea(QtGui.QWidget):
                 maxLines /= 10
                 digits += 1
             digits = max(2, digits)
-            width = 5 + self.codeEditor.fontMetrics().width(u"9") * digits
+            width = 8 + self.codeEditor.fontMetrics().width(u"9") * digits
         return width
 
     def wheelEvent(self, event):

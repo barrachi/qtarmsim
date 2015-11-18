@@ -189,10 +189,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.statusBar().addPermanentWidget(self.flagsLabel, 0)
         self.flagsText = QtGui.QLabel("- - - -")
         self.flagsText.setFrameStyle(QtGui.QFrame.Sunken | QtGui.QFrame.StyledPanel)
-        font = QtGui.QFont()
-        font.setFamily('Courier')
-        font.setFixedPitch(True)
-        font.setPointSize(12)
+        font = QtGui.QFont("fake font name") # @warning: fake name needed to setStyleHint work
+        font.setStyleHint(QtGui.QFont.TypeWriter)
+        if not QtGui.QFontInfo(font).fixedPitch():
+            font.setStyleHint(QtGui.QFont.Monospace)
+        font.setPointSize(10)
         self.flagsText.setFont(font)
         self.flagsText.setToolTip("<b>Condition flag bits in the Application Processor Status Register</b>"
                                   "<p>Negative: The N flag is set by an instruction if the result is negative.</p>"
