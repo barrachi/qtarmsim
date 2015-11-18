@@ -47,12 +47,14 @@ class PreferencesDialog(QtGui.QDialog):
     def ARMSimDirectoryClicked(self):
         dirname = self.ui.lineEditARMSimDirectory.text()
         dirname = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8('Select ARMSim working directory'), dirname)
-        self.ui.lineEditARMSimDirectory.setText(dirname)
+        if dirname!='':
+            self.ui.lineEditARMSimDirectory.setText(dirname)
 
     def ARMGccCommandClicked(self):
         fname = self.ui.lineEditARMGccCommand.text()
-        fname = QtGui.QFileDialog.getOpenFileName(self, self.trUtf8('Select file'), fname)
-        self.ui.lineEditARMGccCommand.setText(fname)
+        (fname, selectedFilter) = QtGui.QFileDialog.getOpenFileName(self, self.trUtf8('Select file'), fname)
+        if fname != '':
+            self.ui.lineEditARMGccCommand.setText(fname)
 
     def accept(self):
         s = self.parent().settings
