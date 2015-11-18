@@ -165,10 +165,11 @@ class CodeEditor(QtGui.QPlainTextEdit):
         "CodeEditor initialization"
         super(CodeEditor, self).__init__(parent, *args, **kwargs)
         # Set the default font and tab width
-        self.myFont = QtGui.QFont()
+        self.myFont = QtGui.QFont("fake font name") # @warning: fake name needed to setStyleHint work
+        self.myFont.setStyleHint(QtGui.QFont.TypeWriter)
+        if not QtGui.QFontInfo(self.myFont).fixedPitch():
+            self.myFont.setStyleHint(QtGui.QFont.Monospace)
         self.myFontPointSize = 10
-        self.myFont.setFamily('Courier')
-        self.myFont.setStyleHint(QtGui.QFont.Monospace)
         self.myFont.setPointSize(self.myFontPointSize)
         self.setFont(self.myFont)
         self.setTabStopWidth(8 * self.fontMetrics().width('9'));
@@ -180,7 +181,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
         # Set syntax highlighter
         if SyntaxHighlighterClass != None:
             self.syntaxHighlighter = SyntaxHighlighterClass(self.document())
-        # Set extra highligth selections (current line and special keywords)
+        # Set extra highlight selections (current line and special keywords)
         self.setCurrentHighlightedLineNumber(0)
         self.updateHighlightSelections()
         # Connect signals
