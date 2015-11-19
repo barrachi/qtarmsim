@@ -236,6 +236,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
                 cursor.movePosition(QtGui.QTextCursor.Up, QtGui.QTextCursor.MoveAnchor, cursorBlockNumber - self.currentHighlightedLineNumber)
             else:
                 cursor.movePosition(QtGui.QTextCursor.Down, QtGui.QTextCursor.MoveAnchor, self.currentHighlightedLineNumber - cursorBlockNumber)
+            self.setTextCursor(cursor)
         return cursor
 
     def resizeEvent(self, *args, **kwargs):
@@ -275,7 +276,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
         return selection
 
     def _getCurrentWordHighlightSelections(self):
-        "Returns highlight selections for those word in the document that match the current word under the cursor (only if the current word is a special keyword)"
+        "Returns highlight selections for those words in the document that match the current word under the cursor (only if the current word is a special keyword)"
         words = self._getKeywordsToHighlight()
         cursor = self.textCursor()
         currentLine = cursor.blockNumber()
