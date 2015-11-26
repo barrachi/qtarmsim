@@ -80,6 +80,7 @@ class Memory
       return b if d == 0
       return nil if d < 0
     end
+    return nil
   end
 
   #access
