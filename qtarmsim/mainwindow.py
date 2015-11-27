@@ -101,6 +101,13 @@ class DefaultSettings():
             fname = which(name)
             if fname:
                 break
+        if not fname: # Use bundled GNU Gcc if no native cross compiler is found
+            if sys.platform == "linux":
+                fname = os.path.join(module_path, "gcc-arm", "linux32", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc")
+            elif sys.platform == "win32":
+                fname = os.path.join(module_path, "gcc-arm", "win32", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc")
+            elif sys.platform == "darwin":
+                fname = os.path.join(module_path, "gcc-arm", "macos", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc")
         fname = fname if fname else ""
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
