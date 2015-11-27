@@ -19,3 +19,5 @@ dist/
 tmp/qtarmsim-*
 build/
 qtarmsim/test/add.o
+CHANGELOG.html
+INSTALL.html
