@@ -920,6 +920,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
                 armsim_lines = self.simulator.getDisassemble(hex_start, ninsts)
                 self.ui.simCodeEditor.setPlainText('\n'.join(armsim_lines))
+                self.ui.simCodeEditor.clearDecorations()
                 self.highlight_pc_line()
         self.ui.treeViewMemory.expandAll()
         self.ui.treeViewMemory.resizeColumnToContents(0)

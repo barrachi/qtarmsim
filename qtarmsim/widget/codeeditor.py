@@ -46,7 +46,8 @@ class LeftArea(QtGui.QWidget):
         super(LeftArea, self).__init__(codeEditor)
         self.codeEditor = codeEditor
         self.clearBreakpoints()
-    
+        self.clearLinesWithBackground()
+
     def sizeHint(self):
         "Returns the size hint of this widget"
         return QtCore.QSize(self.codeEditor.width(), 0)
@@ -78,6 +79,10 @@ class LeftArea(QtGui.QWidget):
             stopPoints = [(x + xOffset, y + yOffset) for (x, y) in stopPoints]
             while (block.isValid() and top <= event.rect().bottom()):
                 if (block.isVisible() and bottom >= event.rect().top()):
+                    if blockNumber in self.linesWithBackground:
+                        painter.fillRect(QtCore.QRectF(width/4.0, top, width/2.0, height), QtGui.QColor('white'))
+                        painter.fillRect(QtCore.QRectF(width/4.0+1, top, width/2.0-2, height), self.linesWithBackground[blockNumber])
+                        # painter.fillRect(QtCore.QRectF(width/2.0-1, top, 2, height), self.linesWithBackground[blockNumber].darker(110))
                     if blockNumber == self.codeEditor.getCurrentHightlightedLineNumber():
                         painter.setBrush(QtGui.QBrush(QtGui.QColor('blue').lighter(190)))
                         painter.setPen(QtGui.QColor('blue'))
@@ -153,6 +158,31 @@ class LeftArea(QtGui.QWidget):
             self.breakpoints[lineNumber] = text
             self.codeEditor.setBreakpointSignal.emit(lineNumber, text)
 
+    def clearLinesWithBackground(self):
+        try:
+            self.linesWithBackground.clear()
+        except AttributeError:
+            self.linesWithBackground = {}
+        self.currentHighlightedLineNumber = -1
+        self.currentBgColor = QtGui.QColor('blue').lighter(140)
+
+    def setCurrentHighlightedLineNumber(self, lineNumber):
+        """
+        Sets the previous highlighted line background properties.
+
+        @param lineNumber: the line number of the current highlighted number.
+        """
+        if self.currentHighlightedLineNumber == -1:
+            self.currentHighlightedLineNumber = lineNumber
+        elif self.currentHighlightedLineNumber != lineNumber:
+            if self.currentHighlightedLineNumber != lineNumber -1:
+                # Change background color when a branch is executed
+                (h, s, v, a) = self.currentBgColor.getHsv()
+                print(h, s, v, a)
+                self.currentBgColor.setHsv((h-50) % 360, s, v, a)
+            self.linesWithBackground[self.currentHighlightedLineNumber]  = QtGui.QColor(self.currentBgColor)
+            self.currentHighlightedLineNumber = lineNumber
+
 
 
 class CodeEditor(QtGui.QPlainTextEdit):
@@ -203,6 +233,10 @@ class CodeEditor(QtGui.QPlainTextEdit):
         "Calls leftArea clearBreakpoints method"
         self.leftArea.clearBreakpoints()
 
+    def clearDecorations(self):
+        "Calls leftArea clearLinesWithBackground method"
+        self.leftArea.clearLinesWithBackground()
+
     def setCurrentHighlightedLineNumber(self, lineNumber):
         """
         Sets the stored currentHighlightedLineNumber variable.
@@ -210,6 +244,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
         @param lineNumber: the line number to be set.
         """
         self.currentHighlightedLineNumber = lineNumber
+        self.leftArea.setCurrentHighlightedLineNumber(lineNumber)
         self.updateHighlightSelections()
 
     def getCurrentHightlightedLineNumber(self):
