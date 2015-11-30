@@ -40,12 +40,34 @@ class Settings():
         self.scripts = ['qtarmsim_winpostinstall.py']
         self.package_data = {
                              'qtarmsim': ['armsim/*',
-                                          'test/add.s',
+                                          'gcc-arm/README.rst',
+                                          'gcc-arm/linux32/g++_arm_none_eabi/README',
+                                          'gcc-arm/linux32/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
+                                          'gcc-arm/linux32/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
+                                          'gcc-arm/linux32/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2',
+                                          'gcc-arm/linux32/g++_arm_none_eabi/arm-none-eabi/bin/as',
+                                          'gcc-arm/linux64/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
+                                          'gcc-arm/linux64/g++_arm_none_eabi/README',
+                                          'gcc-arm/linux64/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.9.3/collect2',
+                                          'gcc-arm/linux64/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.9.3/__empty_dir__',
+                                          'gcc-arm/linux64/g++_arm_none_eabi/arm-none-eabi/bin/as',
+                                          'gcc-arm/macos/g++_arm_none_eabi/README',
+                                          'gcc-arm/macos/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
+                                          'gcc-arm/macos/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
+                                          'gcc-arm/macos/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2',
+                                          'gcc-arm/macos/g++_arm_none_eabi/arm-none-eabi/bin/as',
+                                          'gcc-arm/win32/g++_arm_none_eabi/README',
+                                          'gcc-arm/win32/g++_arm_none_eabi/bin/arm-none-eabi-gcc.exe',
+                                          'gcc-arm/win32/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
+                                          'gcc-arm/win32/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2.exe',
+                                          'gcc-arm/win32/g++_arm_none_eabi/arm-none-eabi/bin/as.exe',
                                           'html/*.html',
                                           'html/img/*',
                                           'res/desktop/qtarmsim.desktop',
-                                          'res/images/qtarmsim.png'],
-                             }
+                                          'res/images/qtarmsim.png',
+                                          'test/add.s',
+                                         ],
+                            }
         self.data_files = [('share/applications', ['qtarmsim/res/desktop/qtarmsim.desktop']),
                            ('share/pixmaps', ['qtarmsim/res/images/qtarmsim.png']),]
         # See https://pypi.python.org/pypi?%3Aaction=list_classifiers

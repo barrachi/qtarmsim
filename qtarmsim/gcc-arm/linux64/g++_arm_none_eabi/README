@@ -1,0 +1,5 @@
+
+This directory contains part of the GNU Gcc compiler toolchain
+targeting the ARM EABI platform. The GNU Gcc compiler was generated on
+a Gentoo 64 bit machine from the source package available at
+https://launchpad.net/gcc-arm-embedded/
