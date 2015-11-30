@@ -3,7 +3,7 @@ QtARMSim
 
 QtARMSim is a graphical frontend to the ARMSim ARM simulator. It
 provides an easy to use multiplatform ARM emulation environment that
-has been designed to be used on Computer Architecture Introductory
+has been designed to be used on Computer Architecture introductory
 courses.
 
 It is based on a previous work of Gloria Edo Piñana, who developed
@@ -11,6 +11,6 @@ It is based on a previous work of Gloria Edo Piñana, who developed
 is the graphical part of what was planned to be a Qt graphical
 interface to the SPIM simulator.
 
-The ARMSim ARM simulator, Copyright (c) 2014-15 by Germán Fabregat,
-is included with QtARMSim.  It can be found on the ``armsim/``
+The ARMSim ARM simulator, Copyright (c) 2014-15 by Germán Fabregat, is
+bundled with QtARMSim.  It can be found on the ``armsim/``
 subdirectory.
