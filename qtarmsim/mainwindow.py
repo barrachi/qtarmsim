@@ -105,7 +105,7 @@ class DefaultSettings():
             if sys.platform == "linux":
                 fname = os.path.join(module_path, "gcc-arm", "linux32", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc")
             elif sys.platform == "win32":
-                fname = os.path.join(module_path, "gcc-arm", "win32", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc")
+                fname = os.path.join(module_path, "gcc-arm", "win32", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc.exe")
             elif sys.platform == "darwin":
                 fname = os.path.join(module_path, "gcc-arm", "macos", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc")
         fname = fname if fname else ""
