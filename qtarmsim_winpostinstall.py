@@ -1,4 +1,4 @@
-#!python.exe
+#!python3
 # -*- coding: utf-8 -*-
 
 ###########################################################################
@@ -33,9 +33,6 @@ import qtarmsim
 
 name = 'qtarmsim'
 desc = 'QtARMSim'
-
-print("prueba")
-sys.stdout.write("hola\n")
 
 try:
     # When this script is run from inside the bdist_wininst installer,
