@@ -336,7 +336,12 @@ class ARMSimConnector():
         """
         Sets the memory at the given hex_address with the given hex_value.
         """
-        self.mysocket.send_line("SET MEMORY WORD AT {} WITH {}".format(hex_address, hex_value))
+        if len(hex_value) > 6:
+            self.mysocket.send_line("SET MEMORY WORD AT {} WITH {}".format(hex_address, hex_value))
+        elif len(hex_value) > 4:
+            self.mysocket.send_line("SET MEMORY HALF AT {} WITH {}".format(hex_address, hex_value))
+        else:
+            self.mysocket.send_line("SET MEMORY BYTE AT {} WITH {}".format(hex_address, hex_value))
         line = self.mysocket.receive_line()
         if line != 'OK':
             return "Error when trying to set the memory word at '{}' with the value '{}'.\n".format(hex_address, hex_value)

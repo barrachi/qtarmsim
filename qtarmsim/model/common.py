@@ -16,6 +16,7 @@
 #                                                                         #
 ###########################################################################
 
+import math
 from PySide import QtCore, QtGui
 
 class InputToHex(QtCore.QObject):
@@ -24,46 +25,46 @@ class InputToHex(QtCore.QObject):
     hexadecimal representation of that input.
     """
     
-    MAX_NEG = -1 << 31
-    MAX_POS = (1 << 32) -1
-
 
     def html_error(self, err_msg):
         return self.trUtf8("""
         <p>{0}</p>
         <p>Allowed inputs are:</p>
         <ul>
-          <li>A string enclosed either on '' or on "". It will be encoded as
-          UTF-8. Only the first 4 bytes will be kept.</li>
-          
           <li>A number either on decimal, hexadecimal, binary or octal. The
-          prefixes '0x', '0b', and '0o' must be used to indicate hexadecimal,
+          prefixes '0x', '0b', and '0o' should be used to indicate hexadecimal,
           binary and octal, respectively.</li>
           </li>
+          <li>A string enclosed either on '' or on "". The string will be encoded
+          using UTF-8.</li>
         </ul>
         """).format(err_msg)
 
         
-    def convert(self, text):
+    def convert(self, text, bits = 32):
         """
         Converts the given text to an hexadecimal value with 8 digits.
         
         The following kinds of conversion are supported:
     
-         - from a string using the format '[:alnum:]*' or "[:alnum:]*", only the
-           first 4 bytes will be returned.
-         
          - from a number in base 10, 16, 2, or 8. The number must be between
             [-MAX_NEG, +MAX_POS].
         
-        @param text: a string representing the chars or the number to be represented
+         - from an UTF8 string using the format '[:alnum:]*' or "[:alnum:]*".
          
+        @param text: a string representing the chars or the number to be represented
+        @param bits: number of bits allowed
+
         @return: a pair (hex_value, err_msg) hex_value is an string with the
                                              hexadecimal value if everything went
                                              OK, or None otherwise, err_msg provides
                                              an error message in case something went
                                              wrong
         """
+        MAX_NEG = -1 << bits-1
+        MAX_POS = (1 << bits) -1
+        HEX_DIGITS = math.ceil(bits/4)
+        BYTES = int(HEX_DIGITS/2)
         if type(text) != str:
             err_msg = self.trUtf8("Input value '{}' was not an string").format(text)
             return (None, self.html_error(err_msg))
@@ -74,27 +75,30 @@ class InputToHex(QtCore.QObject):
             if (text[0] == "'" and text[-1] == "'") or (text[0] == '"' and text[-1] == '"'):
                 if len(text) == 2:
                     # Empty string, return 0
-                    return ('0x00000000', '')
+                    return ('0x'+ '0' * HEX_DIGITS, '')
                 # Non empty string, convert to bytes, left padding with 0s and reverse (little-endian)
                 bytes_list = ["{:02X}".format(b) for b in bytes(text[1:-1], 'utf-8')]
+                if len(bytes_list) > bits/8:
+                    err_msg = self.trUtf8("The UTF-8 string '{}' can not been represented with {} bits.").format(text, bits)
+                    return (None, self.html_error(err_msg))
                 bytes_list.reverse()
-                bytes_list = ["00"]*3 + bytes_list 
-                return ("0x{}".format("".join(bytes_list[-4:])), '')
+                bytes_list = ["00"]*BYTES + bytes_list
+                return ("0x{}".format("".join(bytes_list[-BYTES:])), '')
         try:
             num = int(text, base=0)
         except ValueError:
             err_msg = self.trUtf8("No conversion found for input '{}'.").format(text)
             return (None, self.html_error(err_msg))
-        if num < self.MAX_NEG:
-            err_msg = self.trUtf8("Input '{}' is lower than the maximum negative value that can be represented with 32 bits.").format(text)
+        if num < MAX_NEG:
+            err_msg = self.trUtf8("Input '{}' is lower than the maximum negative value that can be represented with {} bits.").format(text, bits)
             return (None, self.html_error(err_msg))
-        if num > self.MAX_POS:
-            err_msg = self.trUtf8("Input '{}' is greater than the maximum positive value that can be represented with 32 bits.").format(text)
+        if num > MAX_POS:
+            err_msg = self.trUtf8("Input '{}' is greater than the maximum positive value that can be represented with {} bits.").format(text, bits)
             return (None, self.html_error(err_msg))
         if num < 0:
             # Make complement to two
-            num = self.MAX_POS + num + 1
-        return ("0x{:08X}".format(num), '')
+            num = MAX_POS + num + 1
+        return ("0x{:0{}X}".format(num, HEX_DIGITS), '')
 
 
 def getMonoSpacedFont():

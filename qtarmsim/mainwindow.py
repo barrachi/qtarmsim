@@ -23,11 +23,14 @@ import sys
 
 import PySide
 from PySide import QtCore, QtGui
+from PySide.QtCore import Qt
 
 
 from . version import __version__
 from . comm.armsimconnector import ARMSimConnector
 from . model.memorymodel import MemoryModel
+from . model.memorybywordproxymodel import MemoryByWordProxyModel
+from . model.memorydumpproxymodel import MemoryDumpProxyModel
 from . model.registersmodel import RegistersModel
 from . res import main_rc, oxygen_rc  # @UnusedImport
 from . ui.mainwindow import Ui_MainWindow
@@ -172,7 +175,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def extendUi(self):
-        "Extends the Ui with new objects and links the tree views with their models"
+        "Extends the Ui with new objects, links the views with their models, and tabifies bottom dock widgets"
         # Add an ARMCodeEditor to tabSource
         self.ui.sourceCodeEditor = ARMCodeEditor(self.ui.tabSource)
         self.ui.sourceCodeEditor.setObjectName(_fromUtf8("sourceCodeEditor"))
@@ -192,7 +195,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
           
         # memoryModel
         self.memoryModel = MemoryModel(self)
-        self.ui.treeViewMemory.setModel(self.memoryModel)
+        memoryByWordProxyModel = MemoryByWordProxyModel(self)
+        memoryByWordProxyModel.setSourceModel(self.memoryModel)
+        self.ui.treeViewMemory.setModel(memoryByWordProxyModel)
 
         # Status bar with flags indicator
         self.statusBar().addWidget(QtGui.QLabel(""), 10) # No permanent
@@ -213,6 +218,23 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                                   "<p>oVerflow: The V flag works the same as the C flag, but for signed operations.</p>")
         self.statusBar().addPermanentWidget(self.flagsText, 0)
 
+        # Remove default tabs of self.ui.tabWidgetMemoryDump
+        self.ui.tabWidgetMemoryDump.clear()
+
+        # Tabify bottom dock widgets
+        bottomDocks = []
+        if self.dockWidgetArea(self.ui.dockWidgetMessages) == Qt.BottomDockWidgetArea:
+            bottomDocks.append(self.ui.dockWidgetMessages)
+        if self.dockWidgetArea(self.ui.dockWidgetMemoryDump) == Qt.BottomDockWidgetArea:
+            bottomDocks.append(self.ui.dockWidgetMemoryDump)
+        if self.dockWidgetArea(self.ui.dockWidgetLCDDisplay) == Qt.BottomDockWidgetArea:
+            bottomDocks.append(self.ui.dockWidgetLCDDisplay)
+        if len(bottomDocks) > 1:
+            self.tabifyDockWidget(bottomDocks[0], bottomDocks[1])
+            if len(bottomDocks) > 2:
+                for i in range(1, len(bottomDocks)-1):
+                    self.splitDockWidget(bottomDocks[i], bottomDocks[i+1], Qt.Horizontal)
+            bottomDocks[0].raise_()
 
     def readSettings(self):
         "Reads the settings from the settings file or initializes them from defaultSettings"
@@ -345,7 +367,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Connect register edited on registers model to self.registerEdited
         self.registersModel.register_edited.connect(self.registerEdited)
         # Connect memory edited on memory model to self.memoryEdited
-        self.memoryModel.memory_edited.connect(self.memoryEdited)
+        self.memoryModel.memoryEdited.connect(self.memoryEdited)
 
     def eventFilter(self, source, event):
         if (event.type() == QtCore.QEvent.Close and isinstance(source, QtGui.QDockWidget)):
@@ -914,9 +936,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
 
     def updateMemory(self):
-        "Updates the memory dock upon ARMSim data."
+        "Updates the memory docks upon ARMSim data."
         # Process memory info
         self.memoryModel.reset()
+        self.ui.tabWidgetMemoryDump.clear()
+        memoryBank = 0
         for (memtype, hex_start, hex_end) in self.simulator.getMemoryBanks():
             # Dump memory
             start = int(hex_start, 16)
@@ -933,6 +957,21 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.ui.simCodeEditor.setPlainText('\n'.join(armsim_lines))
                 self.ui.simCodeEditor.clearDecorations()
                 self.highlight_pc_line()
+            # Add a page to tabWidgetMemoryDump
+            memoryDumpProxyModel = MemoryDumpProxyModel()
+            memoryDumpProxyModel.setSourceModel(self.memoryModel, memoryBank)
+            memoryBank += 1
+            memoryDumpView = QtGui.QTableView()
+            memoryDumpView.setModel(memoryDumpProxyModel)
+            memoryDumpView.resizeColumnsToContents()
+            memoryDumpView.resizeRowsToContents()
+            self.ui.tabWidgetMemoryDump.addTab(memoryDumpView, "{}".format(memtype))
+        # Show first tab with RAM memory
+        for i in range(self.ui.tabWidgetMemoryDump.count()):
+            if self.ui.tabWidgetMemoryDump.tabText(i) == "RAM":
+                self.ui.tabWidgetMemoryDump.setCurrentIndex(i)
+                break
+        # Modify the layout of treeViewMemory
         self.ui.treeViewMemory.expandAll()
         self.ui.treeViewMemory.resizeColumnToContents(0)
         self.ui.treeViewMemory.resizeColumnToContents(1)

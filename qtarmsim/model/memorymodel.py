@@ -21,188 +21,167 @@ from PySide.QtCore import Qt
 
 from . simpletreemodel import TreeModel, TreeItem
 from . common import InputToHex, getMonoSpacedFont
+from qtarmsim.widget.myqtreeview import MyQTreeView
 
+import sys
 
 class MemoryBank():
     
-    def __init__(self, memtype, start, nbytes):
-        """Initializes the memory bank class.
+    def __init__(self, memType, start, nBytes):
+        """Initializes a memory bank instance.
         
+        @param memType: The memory type, one of RAM or ROM.
         @param start: The starting address in hexadecimal.
-        @param end: The last address in hexadecimal.
-        @param memtype: The memory type, one of RAM or ROM.  
+        @param nBytes: The number of bytes.
         """
-        self.memtype = memtype
+        self.memType = memType
         self.start = int(start, 16)
-        self.end = self.start + nbytes - 1
-        if nbytes % 4:
-            self.end += 4 - nbytes % 4
-        self.length = int((self.end-self.start)/4) + 1
+        self.length = nBytes
+        # Round memory size to a word boundary
+        if (nBytes % 4):
+            self.length += (4 - nBytes % 4)
+        self.end = self.start + self.length - 1
 
-    def addressToRow(self, hex_address):
-        "Given an hexadecimal hex_address, returns the corresponding row"
-        int_address = int(hex_address, 16)
-        return int((int_address - self.start)/4)
-    
+    def addressToRow(self, hexAddress):
+        "Given an hexadecimal hexAddress, returns the corresponding row"
+        intAddress = int(hexAddress, 16)
+        return (intAddress - self.start)
+
 
 class MemoryModel(TreeModel):
+    """
+    Tree model that manages the memory banks of a given simulation and their contents.
+    """
 
-    memory_banks = []
-    
-    previously_modified_words = []
-    modified_words = []
-    q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
-    q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
+    memoryBanks = []
 
-    # memory_edited, parameters are hex address and hex value
-    memory_edited = QtCore.Signal('QString', 'QString')
+    modifiedBytes = []
+    previouslyModifiedBytes = []
 
-    # InputToHex object
-    input2hex = InputToHex()
+    # memoryEdited signal, parameters are hex address and hex value
+    memoryEdited = QtCore.Signal('QString', 'QString')
 
     def __init__(self, parent=None):
+        """
+        Initializes the memory model.
+        """
         super(MemoryModel, self).__init__(parent)
         self.rootItem = TreeItem(("Address", "Value"))
         # Set fonts
-        self.q_font = getMonoSpacedFont()
-        self.q_font_last = getMonoSpacedFont()
-        self.q_font_last.setWeight(QtGui.QFont.Black)
+        self.qFont = getMonoSpacedFont()
+        self.qFontLast = getMonoSpacedFont()
+        self.qFontLast.setWeight(QtGui.QFont.Black)
+        # Set brushes
+        self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
+        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
 
-    def data(self, index, role):
-        if not index.isValid():
-            return None
-        item = index.internalPointer()
-        # Memory bank
-        if item.parent() == self.rootItem:
-            if role == Qt.FontRole:
-                return self.q_font
-            elif role != QtCore.Qt.DisplayRole:
-                return None
-            return item.data(index.column())
-        # Register
-        if role == Qt.DisplayRole:
-            return item.data(index.column())
-        elif role == Qt.BackgroundRole and self.modified_words.count((index.parent().row(), index.row())):
-            return self.q_brush_last
-        elif role == Qt.BackgroundRole and self.previously_modified_words.count((index.parent().row(), index.row())):
-            return self.q_brush_previous
-        elif role == Qt.FontRole:
-            if self.modified_words.count((index.parent().row(), index.row())):
-                return self.q_font_last
-            else:
-                return self.q_font
-        else:
-            return None
-
-    def flags(self, index):
-        if not index.isValid():
-            return False
-        item = index.internalPointer()
-        if item.parent() == self.rootItem:
-            return Qt.ItemIsEnabled
-        if  index.column() == 0:
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
-        if item.parent().data(0)[:3] == 'ROM':
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
-        return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
-
-    def setData(self, index, value, role = Qt.EditRole):
-        (hex_value, err_msg) = self.input2hex.convert(value)
-        if not hex_value:
-            if err_msg:
-                QtGui.QMessageBox.warning(None, self.trUtf8("Input error"), err_msg)
-            return False
-        item = index.internalPointer()
-        hex_address = item.data(0)
-        item.setData(1, hex_value)
-        self.memory_edited.emit(hex_address, hex_value)
-        return True
-
-    def appendMemoryBank(self, memtype, hex_start, membytes):
+    def appendMemoryBank(self, memType, hex_start, membytes):
+        """
+        Adds a new memory bank to the memory model and populates it.
+        """
         self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
-        self.memory_banks.append(MemoryBank(memtype, hex_start, len(membytes)))
-        memory_bank_item = TreeItem(("{} {}".format(memtype, hex_start), ""), self.rootItem)
+        self.memoryBanks.append(MemoryBank(memType, hex_start, len(membytes)))
+        memory_bank_item = TreeItem(("{} {}".format(memType, hex_start), ""), self.rootItem)
         self.rootItem.appendChild(memory_bank_item)
-        word = []
-        address = self.memory_banks[-1].start
-        for byte in membytes:
-            word.append(byte[2:])
-            if len(word) == 4:
-                hex_address = "0x{0:0{1}X}".format(address, 8)
-                hex_word = '0x{}{}{}{}'.format(word[3], word[2], word[1], word[0])
-                memory_item = TreeItem([hex_address, hex_word], memory_bank_item)
-                memory_bank_item.appendChild(memory_item)
-                word.clear()
-                address += 4
-        # Form the last word with the remaining 1-3 membytes, if any 
-        if len(word):
-            while len(word) < 4:
-                word.append('00')
-            hex_address = "0x{0:0{1}X}".format(address, 8) 
-            hex_word = '0x{}{}{}{}'.format(word[3], word[2], word[1], word[0])
-            memory_item = TreeItem([hex_address, hex_word], memory_bank_item)
+        address = self.memoryBanks[-1].start
+        # Round memory bytes to a word boundary
+        if len(membytes) % 4 != 0:
+            membytes += ['0x00']*(4 - len(membytes) % 4)
+        # Add the bytes to the model
+        for hexByte in membytes:
+            hexAddress = "0x{0:0{1}X}".format(address, 8)
+            memory_item = TreeItem([hexAddress, hexByte], memory_bank_item)
             memory_bank_item.appendChild(memory_item)
+            address += 1
         self.emit(QtCore.SIGNAL("layoutChanged()"))
 
-
-    def getMemoryBank(self, hex_address):
-        int_address = int(hex_address, 16)
-        mb_row = 0
-        for memory_bank in self.memory_banks:
-            if memory_bank.start <= int_address <= memory_bank.end:
-                return (mb_row, memory_bank)
-            mb_row += 1
+    def getMemoryBank(self, hexAddress):
+        """
+        Returns the memory bank that holds the given memory address.
+        """
+        intAddress = int(hexAddress, 16)
+        mbRow = 0
+        for memoryBank in self.memoryBanks:
+            if memoryBank.start <= intAddress <= memoryBank.end:
+                return (mbRow, memoryBank)
+            mbRow += 1
         return (-1, None)
     
-    def getIndex(self, hex_address):
-        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToRow(hex_address)
-        return self.createIndex(memory_row, 0, self.rootItem.child(mb_row).child(memory_row))
+    def getIndex(self, hexAddress):
+        """
+        Returns the model index that references the given memory address.
+        """
+        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
+        memoryRow = memoryBank.addressToRow(hexAddress)
+        return self.createIndex(memoryRow, 0, self.rootItem.child(mbRow).child(memoryRow))
 
-    def setByte(self, hex_address, hex_byte):
-        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToRow(hex_address)
-        memory_item = self.rootItem.child(mb_row).child(memory_row)
-        hex_word = memory_item.data(1)
-        pos = 3 - int(hex_address, 16) % 4
-        word_bytes = [hex_word[2:4], hex_word[4:6], hex_word[6:8], hex_word[8:10]]
-        word_bytes[pos] = hex_byte[2:]
-        hex_word = "0x" + "".join(word_bytes)
-        memory_item.setData(1, hex_word)
-        self.modified_words.append((mb_row, memory_row))
-        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 1, self.rootItem.child(mb_row)))
+    def setByte(self, hexAddress, hexByte, emitMemoryEdited = False):
+        """
+        Stores the given byte at the given address.
+        """
+        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
+        memoryRow = memoryBank.addressToRow(hexAddress)
+        memoryItem = self.rootItem.child(mbRow).child(memoryRow)
+        memoryItem.setData(1, hexByte)
+        self.modifiedBytes.append((mbRow, memoryRow))
+        self.dataChanged.emit(self.createIndex(memoryRow, 0, self.rootItem.child(mbRow)),
+                              self.createIndex(memoryRow, 1, self.rootItem.child(mbRow)))
+        if emitMemoryEdited:
+            self.memoryEdited.emit(hexAddress, hexByte)
 
-    def setWord(self, hex_address, hex_word):
-        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToRow(hex_address)
-        memory_item = self.rootItem.child(mb_row).child(memory_row)
-        memory_item.setData(1, hex_word)
-        self.modified_words.append((mb_row, memory_row))
-        self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 1, self.rootItem.child(mb_row)))
+    def setWord(self, hexAddress, hexWord, emitMemoryEdited = False):
+        """
+        Stores the given word (4 bytes) at the given address (following Little Endian memory organization).
+        """
+        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
+        memoryRowStart = memoryBank.addressToRow(hexAddress)
+        for i in range(4):
+            hexByte = "0x{}".format(hexWord[2+i*2:4+i*2])
+            memoryRow = memoryRowStart + 3 - i # 3-i due to Little Endian
+            memoryItem = self.rootItem.child(mbRow).child(memoryRow)
+            memoryItem.setData(1, hexByte)
+            self.modifiedBytes.append((mbRow, memoryRow))
+        self.dataChanged.emit(self.createIndex(memoryRow    , 0, self.rootItem.child(mbRow)),
+                              self.createIndex(memoryRow + 3, 1, self.rootItem.child(mbRow)))
+        if emitMemoryEdited:
+            self.memoryEdited.emit(hexAddress, hexWord)
 
-    def getWord(self, hex_address):
-        (mb_row, memory_bank) = self.getMemoryBank(hex_address)
-        memory_row = memory_bank.addressToRow(hex_address)
-        memory_item = self.rootItem.child(mb_row).child(memory_row)
-        return memory_item.data(1)
+    def getWord(self, hexAddress):
+        """
+        Returns the word (4 bytes) at the given address (following Little Endian memory organization).
+        """
+        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
+        memoryRowStart = memoryBank.addressToRow(hexAddress)
+        hexWord = "0x"
+        for i in range(4):
+            memoryRow = memoryRowStart + 3 - i # 3-i due to Little Endian
+            memoryItem = self.rootItem.child(mbRow).child(memoryRow)
+            hexWord += memoryItem.data(1)[2:]
     
     def reset(self):
         """
         Resets the model to its original state in any attached views.
         """
         self.beginResetModel()
-        self.memory_banks.clear()
+        self.memoryBanks.clear()
         self.rootItem.childItems.clear()
         self.clearHistory()
         self.endResetModel()
-        
+
     def clearHistory(self):
-        self.previously_modified_words.clear()
-        self.modified_words.clear()
-        
+        """
+        Clears the history of previously modified bytes.
+        """
+        self.previouslyModifiedBytes.clear()
+        self.modifiedBytes.clear()
+
     def stepHistory(self):
-        copy_of_previous = self.previously_modified_words[:]
-        self.previously_modified_words = self.modified_words[:]
-        self.modified_words.clear()
-        for (mb_row, memory_row) in copy_of_previous + self.previously_modified_words:
-            self.dataChanged.emit(self.createIndex(memory_row, 0, self.rootItem.child(mb_row)), self.createIndex(memory_row, 1, self.rootItem.child(mb_row)))
+        """
+        Steps one the history of previously modified bytes.
+        """
+        copyOfPrevious = self.previouslyModifiedBytes[:]
+        self.previouslyModifiedBytes = self.modifiedBytes[:]
+        self.modifiedBytes.clear()
+        for (mbRow, memoryRow) in copyOfPrevious + self.previouslyModifiedBytes:
+            self.dataChanged.emit(self.createIndex(memoryRow, 0, self.rootItem.child(mbRow)),
+                                  self.createIndex(memoryRow, 1, self.rootItem.child(mbRow)))

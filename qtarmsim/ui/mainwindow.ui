@@ -348,6 +348,50 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="dockWidgetMemoryDump">
+   <property name="whatsThis">
+    <string>The Memory Dump dock shows the memory dump of the simulated system</string>
+   </property>
+   <property name="windowTitle">
+    <string>Memory Dump</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetMemoryDumpContents">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QTabWidget" name="tabWidgetMemoryDump">
+       <property name="tabPosition">
+        <enum>QTabWidget::West</enum>
+       </property>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>Tab 1</string>
+        </attribute>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>Tab 2</string>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidgetLCDDisplay">
+   <property name="whatsThis">
+    <string>The LCD Display shows the output of a simulated LCD Display Device</string>
+   </property>
+   <property name="windowTitle">
+    <string>LCD Display</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetLCDContents"/>
+  </widget>
   <action name="actionWhats_This">
    <property name="icon">
     <iconset theme="system-help">
