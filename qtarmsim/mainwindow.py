@@ -198,6 +198,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         memoryByWordProxyModel = MemoryByWordProxyModel(self)
         memoryByWordProxyModel.setSourceModel(self.memoryModel)
         self.ui.treeViewMemory.setModel(memoryByWordProxyModel)
+        self.ui.memoryLCDView.setModel(self.memoryModel, '0x20070000', 32, 6)
 
         # Status bar with flags indicator
         self.statusBar().addWidget(QtGui.QLabel(""), 10) # No permanent
@@ -300,6 +301,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
         self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
         self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
+        self.ui.actionShow_Memory_Dump.setChecked(self.ui.dockWidgetMemoryDump.isVisible())
+        self.ui.actionShow_LCD_Display.setChecked(self.ui.dockWidgetLCDDisplay.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
  
 
@@ -360,6 +363,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
+        self.ui.dockWidgetMemoryDump.installEventFilter(self)
+        self.ui.dockWidgetLCDDisplay.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
         # Connect to self.uji.simCodeEditor set and clear breakpoint signals
         self.ui.simCodeEditor.setBreakpointSignal.connect(self.setBreakpoint)
@@ -375,6 +380,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.ui.actionShow_Registers.setChecked(False)
             elif source is self.ui.dockWidgetMemory:
                 self.ui.actionShow_Memory.setChecked(False)
+            elif source is self.ui.dockWidgetMemoryDump:
+                self.ui.actionShow_MemoryDump.setChecked(False)
+            elif source is self.ui.dockWidgetLCDDisplay:
+                self.ui.actionShow_LCD_Display.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
                 self.ui.actionShow_Messages.setChecked(False)
         return super(QtARMSimMainWindow, self).eventFilter(source, event)
@@ -732,6 +741,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def doShow_Memory(self):
         "Shows or hides the Memory dock widget"
         self._doShow(self.ui.dockWidgetMemory, self.ui.actionShow_Memory)
+
+    def doShow_Memory_Dump(self):
+        "Shows or hides the Memory Dump dock widget"
+        self._doShow(self.ui.dockWidgetMemoryDump, self.ui.actionShow_Memory_Dump)
+
+    def doShow_LCD_Display(self):
+        "Shows or hides the Memory dock widget"
+        self._doShow(self.ui.dockWidgetLCDDisplay, self.ui.actionShow_LCD_Display)
 
     def doShow_Messages(self):
         "Shows or hides the Messages dock widget"

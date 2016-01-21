@@ -141,6 +141,8 @@
     <addaction name="actionShow_Registers"/>
     <addaction name="actionShow_Memory"/>
     <addaction name="actionShow_Messages"/>
+    <addaction name="actionShow_Memory_Dump"/>
+    <addaction name="actionShow_LCD_Display"/>
     <addaction name="separator"/>
     <addaction name="actionRestore_Default_Layout"/>
     <addaction name="separator"/>
@@ -390,14 +392,45 @@
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetLCDContents"/>
+   <widget class="QWidget" name="dockWidgetLCDContents">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="MemoryLCDView" name="memoryLCDView"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionWhats_This">
    <property name="icon">
     <iconset theme="system-help">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/categories/system-help.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/categories/system-help.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>What's &amp;This?</string>
@@ -415,9 +448,8 @@
   <action name="actionAbout_Qt_ARMSim">
    <property name="icon">
     <iconset theme="help-about">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>About QtARMSim</string>
@@ -432,9 +464,8 @@
   <action name="actionHelp">
    <property name="icon">
     <iconset theme="help-contents">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/help-contents.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/help-contents.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>QtARMSim &amp;Help</string>
@@ -446,9 +477,8 @@
   <action name="actionAbout_ARMSim">
    <property name="icon">
     <iconset theme="help-about">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>About ARMSim</string>
@@ -457,9 +487,8 @@
   <action name="actionNew">
    <property name="icon">
     <iconset theme="document-new">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/document-new.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/document-new.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;New...</string>
@@ -471,9 +500,8 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset theme="document-open">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/document-open.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/document-open.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Open...</string>
@@ -488,9 +516,8 @@
   <action name="actionSave">
    <property name="icon">
     <iconset theme="document-save">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/document-save.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/document-save.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -502,9 +529,8 @@
   <action name="actionSave_As">
    <property name="icon">
     <iconset theme="document-save-as">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/document-save-as.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/document-save-as.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Save &amp;As...</string>
@@ -513,9 +539,8 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset theme="application-exit">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/application-exit.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/application-exit.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -542,9 +567,8 @@
   <action name="actionRun">
    <property name="icon">
     <iconset theme="system-run">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/system-run.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/system-run.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Run</string>
@@ -556,9 +580,8 @@
   <action name="actionStepInto">
    <property name="icon">
     <iconset theme="debug-step-into">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/debug-step-into.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/debug-step-into.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Step &amp;Into</string>
@@ -638,9 +661,8 @@
   <action name="action_Undo">
    <property name="icon">
     <iconset theme="edit-undo">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/edit-undo.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/edit-undo.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Undo</string>
@@ -652,9 +674,8 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset theme="edit-redo">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/edit-redo.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/edit-redo.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Re&amp;do</string>
@@ -666,9 +687,8 @@
   <action name="actionCut">
    <property name="icon">
     <iconset theme="edit-cut">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/edit-cut.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/edit-cut.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Cu&amp;t</string>
@@ -680,9 +700,8 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset theme="edit-copy">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/edit-copy.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/edit-copy.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Copy</string>
@@ -694,9 +713,8 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset theme="edit-paste">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/edit-paste.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/edit-paste.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Paste</string>
@@ -708,9 +726,8 @@
   <action name="actionSelect_All">
    <property name="icon">
     <iconset theme="edit-select-all">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/edit-select-all.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/edit-select-all.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Select &amp;All</string>
@@ -733,9 +750,8 @@
   <action name="actionStepOver">
    <property name="icon">
     <iconset theme="debug-step-over">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/debug-step-over.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/debug-step-over.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Step &amp;Over</string>
@@ -750,9 +766,8 @@
   <action name="actionRestart">
    <property name="icon">
     <iconset theme="view-refresh">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/view-refresh.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/view-refresh.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Re&amp;start</string>
@@ -767,9 +782,8 @@
   <action name="actionResume">
    <property name="icon">
     <iconset theme="debug-run">
-     <normaloff/>
-     <normalon>:/themes/oxygen/48x48/actions/debug-run.png</normalon>
-    </iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>
+     <normalon>:/themes/oxygen/48x48/actions/debug-run.png</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Resu&amp;me</string>
@@ -781,12 +795,33 @@
     <string>F8</string>
    </property>
   </action>
+  <action name="actionShow_Memory_Dump">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Memory &amp;Dump</string>
+   </property>
+  </action>
+  <action name="actionShow_LCD_Display">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show &amp;LCD Display</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
    <class>MyQTreeView</class>
    <extends>QTreeView</extends>
    <header>..widget.myqtreeview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MemoryLCDView</class>
+   <extends>QTableView</extends>
+   <header>..widget.memorylcdview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

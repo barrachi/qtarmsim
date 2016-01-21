@@ -47,7 +47,7 @@ class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
         self.qFontLast.setWeight(QtGui.QFont.Black)
         # Set brushes
         self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
-        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
+        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
 
     def setSourceModel(self, model, memoryBankRow=0):
         super(MemoryDumpProxyModel, self).setSourceModel(model)
