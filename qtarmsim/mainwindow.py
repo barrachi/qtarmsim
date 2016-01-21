@@ -198,7 +198,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         memoryByWordProxyModel = MemoryByWordProxyModel(self)
         memoryByWordProxyModel.setSourceModel(self.memoryModel)
         self.ui.treeViewMemory.setModel(memoryByWordProxyModel)
-        self.ui.memoryLCDView.setModel(self.memoryModel, '0x20070000', 32, 6)
+        self.ui.memoryLCDView.setModel(self.memoryModel, '0x20070000', 40, 6)
 
         # Status bar with flags indicator
         self.statusBar().addWidget(QtGui.QLabel(""), 10) # No permanent
@@ -895,21 +895,27 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def welcome_message(self):
         return "<b>QtARMSim " + self.trUtf8("version") + " " + __version__ + "</b><br></br>\n" + \
-                 "(c) 2014-15 Sergio Barrachina Mir<br></br>\n" + \
+                 "(c) 2014-16 Sergio Barrachina Mir<br></br>\n" + \
                  self.trUtf8("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
                  self.trUtf8("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
-                "<p>" + self.trUtf8("Version") + " " + __version__ + "</p>" + \
-                "<p>" + "(c) 2014-15 Sergio Barrachina Mir" + "</p>" + \
-                "<p>" + self.trUtf8("<p>Based on the graphical frontend for Spim<br/>developed on 2008 by Gloria Edo Piñana.") + "</p>" + \
+                "<p><b>" + self.trUtf8("Version") + " " + __version__ + "</b></p>" + \
+                "<p>" + "(c) 2014-16 Sergio Barrachina Mir" + "</p>" + \
                 "<p>" + "<a href='http://lorca.act.uji.es/projects/qtarmsim/'>http://lorca.act.uji.es/projects/qtarmsim/</a>" + "</p>" + \
                 "<p></p>" + \
                 "<p>" + self.trUtf8("Running on ") + \
                 "Python " + sys.version.split(" ")[0] + ", " + \
                 "PySide " + PySide.__version__ + ", and " + \
                 "Qt " + QtCore.__version__ + "." + \
+                "</p>" + \
+                "<hr/>" + \
+                self.trUtf8("<p><b>Acknowledgments</b></p>") + \
+                "<p></p>" + \
+                self.trUtf8("<p>Initial development of QtARMSim was based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.</p>") + \
+                self.trUtf8("<p>Most of the ARM keywords and directives used on the assembler editor syntax highlighter are from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik.</p>") + \
+                self.trUtf8("<p>The font used at the LCD Display is 'lcd plus' by SaintGeorge.</p>") + \
                 "</html>"
 
     def doAbout_Qt_ARMSim(self):

@@ -5,7 +5,7 @@
     </qresource>
     
     <qresource prefix="" >
-      <file>fonts/lcd2.ttf</file>
+      <file>fonts/lcd plus.ttf</file>
     </qresource>
 
     <qresource prefix="">

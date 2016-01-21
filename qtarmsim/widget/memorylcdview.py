@@ -62,6 +62,8 @@ class MemoryLCDView(QtGui.QTableView):
         #    self.resizeColumnToContents(j)
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
+        for i in range(self.LCDColumns):
+            self.setColumnWidth(i, self.columnWidth(i)-8)
         self.setFixedWidth(18 + 18 + 8 + sum([self.columnWidth(i) for i in range(self.LCDColumns)]))
         self.setFixedHeight(18 + 18 + 8 + sum([self.rowHeight(i) for i in range(self.LCDRows)]))
         #self.setCursor(Qt.OpenHandCursor)

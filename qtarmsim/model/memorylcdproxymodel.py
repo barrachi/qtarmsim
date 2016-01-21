@@ -45,10 +45,10 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
     def __init__(self, parent=None):
         super(MemoryLCDProxyModel, self).__init__(parent)
         # Set font
-        id = QtGui.QFontDatabase.addApplicationFont(":/fonts/lcd2.ttf")
-        self.qFont = QtGui.QFont("LCD Display Grid")
-        self.qFont.setPointSize(12)
-        # self.qFont.setBold(True)
+        id = QtGui.QFontDatabase.addApplicationFont(":/fonts/lcd plus.ttf")
+        self.qFont = QtGui.QFont("lcd plus")
+        self.qFont.setPointSize(24)
+        #self.qFont.setBold(True)
         # Set brush
         self.qBrush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 30), Qt.SolidPattern)
         # 120, 174, 77, 0), Qt.SolidPattern)
