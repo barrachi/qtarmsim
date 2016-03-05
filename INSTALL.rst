@@ -45,7 +45,7 @@ dependencies issuing (as root)::
 To install QtARMSim, ARMSim, and their dependencies on Windows,
 please follow the next steps:
 
-1. Download and install a Python 3.4 version (**no a 3.5 version**,
+1. Download and install a Python 3.4 version (**not a 3.5 version**,
    as Python 3.5, at least 3.5.1rc1, does not install the ``pip``
    command and is not yet supported by PySide for Windows) from the
    `Python download page for windows
@@ -143,7 +143,7 @@ command on GNU/Linux::
 
   $ sudo pip3 install --upgrade qtarmsim
 
-Or the equivalent one on Windows::
+Or the equivalent command on Windows::
 
   C:\Python34> Scripts\pip3.exe install --upgrade qtarmsim
 

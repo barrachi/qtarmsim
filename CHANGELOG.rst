@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+0.3.4 (2016-01-21)
+^^^^^^^^^^^^^^^^^^
+
+- Added a memory dump dock widget that allows to see and edit the
+  memory at byte level. It also shows the ASCII equivalent of each
+  byte.
+- Added a LCD display dock widget that provides a simple output
+  system. It has a size of 32x6 and each character is mapped to a
+  memory position starting a 0x20070000.
+
+
 0.3.3 (2015-11-28)
 ^^^^^^^^^^^^^^^^^^
 
