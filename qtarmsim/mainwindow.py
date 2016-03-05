@@ -896,7 +896,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def welcome_message(self):
         return "<b>QtARMSim " + self.trUtf8("version") + " " + __version__ + "</b><br></br>\n" + \
                  "(c) 2014-16 Sergio Barrachina Mir<br></br>\n" + \
-                 self.trUtf8("Based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.<br></br>\n") + \
                  self.trUtf8("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
