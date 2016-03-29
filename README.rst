@@ -7,7 +7,7 @@ has been designed to be used on Computer Architecture introductory
 courses.
 
 It is based on a previous work of Gloria Edo Piñana, who developed
-`GlSpim <http://lorca.act.uji.es/projects/glspim/>`_ on 2008.  GlSpim
+`GlSpim <http://lorca.act.uji.es/project/glspim/>`_ on 2008.  GlSpim
 is the graphical part of what was planned to be a Qt graphical
 interface to the SPIM simulator.
 

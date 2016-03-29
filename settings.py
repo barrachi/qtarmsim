@@ -33,7 +33,7 @@ class Settings():
         self.version = self._get_version()
         self.description = 'Qt graphical frontend to ARMSim'
         self.long_description = read('README.rst') + '\n\n' + read('INSTALL.rst') + '\n\n' + read('CHANGELOG.rst')
-        self.url = 'http://lorca.act.uji.es/projects/qtarmsim/'
+        self.url = 'http://lorca.act.uji.es/project/qtarmsim/'
         self.author = 'Sergio Barrachina Mir'
         self.email = 'barrachi@uji.es'
         self.license = 'GPLV3+'
