@@ -8,7 +8,7 @@ other hand, ARMSim, which is bundled with QtARMSim, has the next
 dependencies: `Ruby <https://www.ruby-lang.org/en/>`_ and the `GNU Gcc
 toolchain targeting the ARM EABI platform <http://gcc.gnu.org/>`_. The
 next subsections describe how to install QtARMSim, ARMSim, and their
-dependencies on GNU/Linux and on Windows.
+dependencies on GNU/Linux, Windows and Mac OS X.
 
 
 1.1 Installing QtARMSim on GNU/Linux
@@ -45,13 +45,17 @@ dependencies issuing (as root)::
 To install QtARMSim, ARMSim, and their dependencies on Windows,
 please follow the next steps:
 
-1. Download and install a Python 3.4 version (**not a 3.5 version**,
-   as Python 3.5, at least 3.5.1rc1, does not install the ``pip``
-   command and is not yet supported by PySide for Windows) from the
-   `Python download page for windows
+1. Download and install a 32 bits Python 3.4 version from the `Python
+   download page for windows
    <https://www.python.org/downloads/windows/>`_. During the
    installation process, you must say yest to '``Add python.exe to
-   Path``'.
+   Path``'. **Be sure that you do NOT install**:
+
+   - A Python 3.5 version, as Python 3.5, at least 3.5.1rc1, does
+     not install the ``pip`` command and PySide does not provide
+     binaries for Python 3.5 yet.
+   - A 64 bits Python, because PySide does not provide Windows
+     binaries for 64bits Python yet.
 
 2. Download and install Ruby from `Ruby Installer for Windows page
    <http://rubyinstaller.org/>`_. During the installation process,
@@ -78,7 +82,7 @@ please follow the next steps:
 4. Install QtARMSim using the ``pip3`` command. On the same directory
    of the previous step, run the following command::
 
-     C:\Python34> Scripts\pip3.exe install qtarmsim
+     C:\Python34> Scripts\pip3.exe install QtARMSim
 
    After installing QtARMSim, its executable will be at: ``C:\Python34\Scripts\qtarmsim.exe``.
 
@@ -89,7 +93,36 @@ please follow the next steps:
    ``C:\Python34\Lib\site-packages\qtarmsim\armsim``.
 
 
-1.3 Installing the GNU Gcc toolchain targeting the ARM EABI
+1.3 Installing QtARMSim on Mac OS X
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To install QtARMSim, ARMSim, and their dependencies on Mac OS X,
+please follow the next steps:
+
+1. Install the MacPorts package manager
+   (https://www.macports.org/). Although the next instructions rely on
+   having MacPorts, the Homebrew package manager (http://brew.sh/)
+   could be used instead.
+
+2. Install Python 3.4::
+
+     sudo port install python34
+
+3. Install Ruby::
+
+     sudo port install rubi23
+
+4. Install PySide::
+
+     sudo port install py34-pyside
+
+5. Install QtARMSim::
+
+     sudo pip3 install QtARMSim
+
+
+
+1.4 Installing the GNU Gcc toolchain targeting the ARM EABI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Starting with version 0.3.1 of QtARMSim, the required part of the GNU
@@ -143,9 +176,14 @@ command on GNU/Linux::
 
   $ sudo pip3 install --upgrade qtarmsim
 
-Or the equivalent command on Windows::
+On Windows::
 
   C:\Python34> Scripts\pip3.exe install --upgrade qtarmsim
+
+On Mac OS X::
+
+  sudo pip3 install --upgrade qtarmsim
+
 
 
 4. Uninstalling QtARMSim
@@ -155,6 +193,10 @@ To uninstall QtARMSim on GNU/Linux, execute the following command::
 
   $ sudo pip3 uninstall qtarmsim
 
-Or the equivalent command on Windows::
+On Windows::
 
   C:\Python34> Scripts\pip3.exe uninstall qtarmsim
+
+On Mac OS X::
+
+  sudo pip3 uninstall qtarmsim
