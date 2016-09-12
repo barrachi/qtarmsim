@@ -608,11 +608,14 @@ assemble = Proc.new { |entrada|
   Dir.chdir($path)
   fline = nf
   cline = '"' + $compiler + '"' + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
-  eline = '2> ' + fline + '.err'
-  lline = '> ' + fline + '.lst'
+  #eline = '2> ' + fline + '.err'
+  eline = fline + '.err'
+  #lline = '> ' + fline + '.lst'
+  lline = fline + '.lst'
   #$warn = nil
   puts cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline
-  if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
+  #if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
+  if system(cline + ' '  + fline + '.s ', :out => lline, :err => eline)
     blocks = read_ELF(fline + '.o')
     procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     procesador.memory.add_block(blocks[1])
