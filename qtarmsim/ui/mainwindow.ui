@@ -50,7 +50,7 @@
       <property name="minimumSize">
        <size>
         <width>400</width>
-        <height>400</height>
+        <height>300</height>
        </size>
       </property>
       <property name="tabPosition">
@@ -212,8 +212,8 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>86</width>
-     <height>108</height>
+     <width>180</width>
+     <height>100</height>
     </size>
    </property>
    <property name="toolTip">
@@ -265,7 +265,7 @@
    <property name="minimumSize">
     <size>
      <width>180</width>
-     <height>172</height>
+     <height>100</height>
     </size>
    </property>
    <property name="toolTip">
