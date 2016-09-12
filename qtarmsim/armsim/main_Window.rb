@@ -210,7 +210,7 @@ class MainWindow < Frame
   def update_imem
     pc = @proc.reg(15)
     idx = @listpc.find_index(pc)
-    if idx == nil
+    if idx.nil?
       @imem.each do |sizer|
         word = @proc.memory_half(pc)
         word2 = @proc.memory_half(pc + 2)

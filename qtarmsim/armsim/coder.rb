@@ -21,7 +21,7 @@ class Coder
   def decode(words, dir = nil)
     res = Instruction.new(words, dir)
     type = get_type(words)
-    type = :udef if type == nil
+    type = :udef if type.nil?
     res.type = type
     res.operands = get_operands(words, type)
     return res

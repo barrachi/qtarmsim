@@ -561,7 +561,7 @@ module ThumbII_Defs
       cad += ' ' + op
       cad += ',' unless ind == final
     end
-    SET[auto][0] + ((itcond == nil) ? 's' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? 's' : itcond) + cad
   }
 
   #basef_to_s
@@ -583,7 +583,7 @@ module ThumbII_Defs
       cad += ' ' + op
       cad += ',' unless ind == final
     end
-    SET[auto][0] + ((itcond == nil) ? '' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? '' : itcond) + cad
   }
 
   #nomod_to_s
@@ -626,7 +626,7 @@ module ThumbII_Defs
       cad += ' ' + op
       cad += ',' unless ind == final
     end
-    (itcond == nil) ? SET[auto][0] + cad : 'ERROR: no permitida en bloque IT'
+    (itcond.nil?) ? SET[auto][0] + cad : 'ERROR: no permitida en bloque IT'
   }
 
   #lslit1_to_s
@@ -640,7 +640,7 @@ module ThumbII_Defs
   lslit1_to_s = Proc.new {|auto, operandos, itcond|
     if operandos[2] == 0
       op_s = ibonito(auto, operandos)
-      (itcond == nil) ? 'movs ' + op_s[0] + ', ' + op_s[1] : 'ERROR: no permitida en bloque IT'
+      (itcond.nil?) ? 'movs ' + op_s[0] + ', ' + op_s[1] : 'ERROR: no permitida en bloque IT'
     else
       base_to_s.call(auto, operandos, itcond)
     end
@@ -693,7 +693,7 @@ module ThumbII_Defs
   idxbase_to_s = Proc.new {|auto, operandos, itcond|
     op_s = ibonito(auto, operandos)
     cad = ' ' + op_s[0] + ', [' + op_s[1] + ', ' + op_s[2] + ']'
-    SET[auto][0] + ((itcond == nil) ? '' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? '' : itcond) + cad
   }
 
   #idx_to_s
@@ -710,7 +710,7 @@ module ThumbII_Defs
   idx_to_s = Proc.new {|auto, operandos, itcond|
     op_s = ibonito(auto, operandos)
     cad = ' ' + op_s[0] + ', [' + op_s[1] + ']'
-    SET[auto][0] + ((itcond == nil) ? '' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? '' : itcond) + cad
   }
 
   #idxsp_to_s
@@ -727,7 +727,7 @@ module ThumbII_Defs
   idxsp_to_s = Proc.new {|auto, operandos, itcond|
     op_s = ibonito(auto, operandos)
     cad = ' ' + op_s[0] + ', [sp, ' + op_s[1] + ']'
-    SET[auto][0] + ((itcond == nil) ? '' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? '' : itcond) + cad
   }
 
   #opsp_to_s
@@ -744,7 +744,7 @@ module ThumbII_Defs
   opsp_to_s = Proc.new {|auto, operandos, itcond|
     op_s = ibonito(auto, operandos)
     cad = (op_s.length == 2) ? ' ' + op_s[0] + ', sp, ' + op_s[1] :  ' sp, sp, ' + op_s[0]
-    SET[auto][0] + ((itcond == nil) ? '' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? '' : itcond) + cad
   }
 
   #oppc_to_s
@@ -761,7 +761,7 @@ module ThumbII_Defs
   oppc_to_s = Proc.new {|auto, operandos, itcond|
     op_s = ibonito(auto, operandos)
     cad = ' ' + op_s[0] + ', pc, ' + op_s[1]
-    SET[auto][0] + ((itcond == nil) ? '' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? '' : itcond) + cad
   }
 
   #idxpc_to_s
@@ -778,7 +778,7 @@ module ThumbII_Defs
   idxpc_to_s = Proc.new {|auto, operandos, itcond|
     op_s = ibonito(auto, operandos)
     cad = ' ' + op_s[0] + ', [pc, ' + op_s[1] + ']'
-    SET[auto][0] + ((itcond == nil) ? '' : itcond) + cad
+    SET[auto][0] + ((itcond.nil?) ? '' : itcond) + cad
   }
 
   #cps_to_s
@@ -795,7 +795,7 @@ module ThumbII_Defs
    cad = 'i' + ((operandos[0] == 0) ? 'e' : 'd') + ' '
    cad += 'i' if (operandos[1] & 2) == 2
    cad += 'f' if (operandos[1] & 1) == 1
-  (itcond == nil) ? SET[auto][0] + cad : 'ERROR: no permitida en bloque IT'
+  (itcond.nil?) ? SET[auto][0] + cad : 'ERROR: no permitida en bloque IT'
   }
 
   #push_to_s
@@ -857,7 +857,7 @@ module ThumbII_Defs
   bcond_to_s = Proc.new {|auto, operandos, itcond|
     op_s = ibonito(auto, operandos)
     cad = SET[auto][0] + op_s[0] + ' ' + op_s[1]
-    (itcond == nil) ? cad : 'ERROR: no permitida en bloque IT'
+    (itcond.nil?) ? cad : 'ERROR: no permitida en bloque IT'
   }
 
   #it_to_s
@@ -902,7 +902,7 @@ module ThumbII_Defs
     else
       $itlist = nil unless itcond.nil? #
       cad += ' ' + op_s[1]
-      (itcond == nil) ? SET[auto][0] + cad : 'ERROR: no permitida en bloque IT'
+      (itcond.nil?) ? SET[auto][0] + cad : 'ERROR: no permitida en bloque IT'
     end
   }
 
@@ -2149,7 +2149,7 @@ module ThumbII_Defs
   # @return[Hash]
   add_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     op1 = op[:f1]
     op2 = op[:f2]
     eop1 = op1 + ((op1 & 0x80000000) << 1)
@@ -2175,7 +2175,7 @@ module ThumbII_Defs
       v = (dbits == 1 || dbits == 2) ? 1 : 0
       data[:flags] = {c: c, v: v, z: z, n: n}
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2187,7 +2187,7 @@ module ThumbII_Defs
   # @return[Hash]
   and_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     op1 = op[:f1]
     op2 = op[:f2]
     res = op1 & op2
@@ -2196,7 +2196,7 @@ module ThumbII_Defs
       n = ((res & 0x80000000) == 0) ? 0 : 1
       data[:flags] = {z: z, n: n}
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2208,7 +2208,7 @@ module ThumbII_Defs
   # @return[Hash]
   eor_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     op1 = op[:f1]
     op2 = op[:f2]
     res = op1 ^ op2
@@ -2217,7 +2217,7 @@ module ThumbII_Defs
       n = ((res & 0x80000000) == 0) ? 0 : 1
       data[:flags] = {z: z, n: n}
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2229,7 +2229,7 @@ module ThumbII_Defs
   # @return[Hash]
   orr_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     op1 = op[:f1]
     op2 = op[:f2]
     res = op1 | op2
@@ -2238,7 +2238,7 @@ module ThumbII_Defs
       n = ((res & 0x80000000) == 0) ? 0 : 1
       data[:flags] = {z: z, n: n}
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2251,14 +2251,14 @@ module ThumbII_Defs
   mov_e = Proc.new {|op|
     data = Hash.new
     if op[:error].nil?
-      data[:usr_regs] = [op[:d]] unless op[:d] == nil
+      data[:usr_regs] = [op[:d]] unless op[:d].nil?
       res = op[:f1]
       if op[:fg]
         z = (res == 0) ? 1 : 0
         n = ((res & 0x80000000) == 0) ? 0 : 1
         data[:flags] = {z: z, n: n}
       end
-      data[:usr_regs] << res unless op[:d] == nil
+      data[:usr_regs] << res unless op[:d].nil?
     else
       data[:error] = op[:error]
     end
@@ -2273,7 +2273,7 @@ module ThumbII_Defs
   # @return[Hash]
   mul_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     op1 = op[:f1]
     op2 = op[:f2]
     res = (op1 * op2) & 0xFFFFFFFF
@@ -2282,7 +2282,7 @@ module ThumbII_Defs
       n = ((res & 0x80000000) == 0) ? 0 : 1
       data[:flags] = {z: z, n: n}
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2310,12 +2310,12 @@ module ThumbII_Defs
   # @return[Hash]
   lsl_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     if op[:sa] == 0
       res = op[:f1]
     else
       c = (op[:f1] << (op[:sa] - 1)) & 0x80000000 == 0 ? 0 : 1
-      res = (op[:f1] << op[:sa]) & 0xFFFFFFFF
+      res = op[:f1] << op[:sa]
     end
     if op[:fg]
       z = (res == 0) ? 1 : 0
@@ -2323,7 +2323,7 @@ module ThumbII_Defs
       data[:flags] = {z: z, n: n}
       data[:flags][:c] = c unless op[:sa] == 0
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2336,7 +2336,7 @@ module ThumbII_Defs
   # @return[Hash]
   asr_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     if op[:sa] == 0
       res = op[:f1]
     else
@@ -2352,7 +2352,7 @@ module ThumbII_Defs
       data[:flags] = {z: z, n: n}
       data[:flags][:c] = c unless op[:sa] == 0
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2365,7 +2365,7 @@ module ThumbII_Defs
   # @return[Hash]
   lsr_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     if op[:sa] == 0
       res = op[:f1]
     else
@@ -2379,7 +2379,7 @@ module ThumbII_Defs
       data[:flags] = {z: z, n: n}
       data[:flags][:c] = c unless op[:sa] == 0
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 
@@ -2392,13 +2392,13 @@ module ThumbII_Defs
   # @return[Hash]
   ror_e = Proc.new {|op|
     data = Hash.new
-    data[:usr_regs] = [op[:d]] unless op[:d] == nil
+    data[:usr_regs] = [op[:d]] unless op[:d].nil?
     if op[:sa] == 0
       res = op[:f1]
     else
       desp = op[:sa] & 0x1F
       msc = ((1 << desp) - 1) << (32 - desp)
-      res = (((op[:f1] << (32 - desp)) & msc) | ((op[:f1] >> desp) & ~msc)) & 0xFFFFFFFF
+      res = (((op[:f1] << (32 - desp)) & msc) | ((op[:f1] >> desp) & ~msc))
     end
     if op[:fg]
       z = (res == 0) ? 1 : 0
@@ -2406,7 +2406,7 @@ module ThumbII_Defs
       data[:flags] = {z: z, n: n}
       data[:flags][:c] = n unless op[:sa] == 0
     end
-    data[:usr_regs] << res unless op[:d] == nil
+    data[:usr_regs] << res unless op[:d].nil?
     data
   }
 

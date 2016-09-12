@@ -28,7 +28,7 @@ class Core
   #Reset del sistema y configuración de memoria. Indicamos la arquitectura que entiende el core
   def initialize(arch, block = nil)
     @arch = arch
-    memoria = (block == nil) ? Memory.new(0x10000000, 1024, 0, 'Data RAM') : Memory.new(block)
+    memoria = (block.nil?) ? Memory.new(0x10000000, 1024, 0, 'Data RAM') : Memory.new(block)
     #b = Memory_block.new(0x20000000, 128, 0, 'Stack')
     #b.fill_from_val
     #memoria.add_block(b)

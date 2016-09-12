@@ -63,7 +63,7 @@ class Memory
   #Si el bloque intersecta alguno de los existentes no lo inserta y devuelve nil
   # @param [Memory_block] b
   def add_block(b)
-    return nil unless @data.find_index(b) == nil
+    return nil unless @data.find_index(b).nil?
     @data << b
     @data.sort!
   end
@@ -92,7 +92,8 @@ class Memory
   # @param [Integer] dir
   # @param [Integer] data
   def access(type, dir, data = nil)
-    (b = find_block(dir)) == nil ? :errnoblock : b.access(type, dir - b.origen, data)
+    b = find_block(dir)
+    b.nil? ? :errnoblock : b.access(type, dir - b.origen, data)
   end
 
   #reset
