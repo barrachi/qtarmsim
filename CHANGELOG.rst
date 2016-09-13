@@ -1,6 +1,20 @@
 Changelog
 ---------
 
+0.3.5 (2016-09-12)
+^^^^^^^^^^^^^^^^^^
+
+- Improved the Mac OS X compatibility and added installation
+  instructions for this platform.
+- Changed the minimum size of the code editor container to accommodate
+  lower resolution screens.
+- ARMSim: (i) LSL result is now bounded to 32 bits; (ii) command
+  redirection is performed explicitily to avoid an error on newer
+  Windows versions; and (iii) the method used to compare whether
+  memory blocks where not defined has been changed to avoid errors on
+  Ruby with version >= 2.3.
+  
+
 0.3.4 (2016-01-21)
 ^^^^^^^^^^^^^^^^^^
 
