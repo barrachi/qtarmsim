@@ -176,6 +176,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def extendUi(self):
         "Extends the Ui with new objects, links the views with their models, and tabifies bottom dock widgets"
+        # On Mac OS X set native menu bar property to False (otherwise it is not shown)
+        if sys.platform == 'darwin':
+            self.ui.menubar.setNativeMenuBar(False)
+
         # Add an ARMCodeEditor to tabSource
         self.ui.sourceCodeEditor = ARMCodeEditor(self.ui.tabSource)
         self.ui.sourceCodeEditor.setObjectName(_fromUtf8("sourceCodeEditor"))
