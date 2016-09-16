@@ -26,7 +26,7 @@ class Memory
   # @param [Integer] val
   # @param [String] desc
   def initialize(orig = 0, tam = 1024, val = 0, desc = 'Main memory')
-    b = orig.is_a?(Memory_block) ? orig : Memory_block.new(orig, tam, val, desc).fill_from_val
+    b = orig.is_a?(Memory_block) ? orig : Memory_block.new(orig, tam, :ram_le, val, desc).fill_from_val
     @data = [b]
   end
 
@@ -51,8 +51,8 @@ class Memory
   # @param [Integer] tam
   # @param [Integer] val
   # @param [String] desc
-  def add_region(orig, tam, val = 0, desc ='Unknown')
-    b = Memory_block.new(orig, tam, val, desc)
+  def add_region(orig, tam, val = 0, tipo = :ram_le, desc ='Unknown')
+    b = Memory_block.new(orig, tam, tipo, val, desc)
     add_block(b)
   end
 

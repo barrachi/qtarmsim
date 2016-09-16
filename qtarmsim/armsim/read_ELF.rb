@@ -16,7 +16,7 @@ ELFSYMTYPE = ['No type', 'Data object', 'Function or code', 'Section', 'File']
 STT_FUNC = 2
 SHN_COMMON = 65522
 SHN_NAME  = 65521
-ORIG_CODE = 0x00001000
+ORIG_CODE = 0x00180000
 ORIG_DATA = 0x20070000
 END_DATA =  0x20070800
 ORIG_EXTERN = 0x00004000
@@ -116,6 +116,7 @@ class ELF_File < File
   attr_accessor :rel_idx            #Array de indices de las tablas de reubicacion
   attr_accessor :wks                #well known sections. Aquí ponemos las secciones concidas con nombre, en un hash
   attr_accessor :wks_orig           #Inicios de la secciones. text y data fijos, rodata y bss calculados
+  attr_accessor :externSymbols
 
   def initialize(*)
     @rel_idx = Array.new
@@ -300,7 +301,11 @@ class ELF_File < File
     @symbols.each do |symbol|
       symsection = symbol.data[:shndx]
       bind = (symbol.data[:info] >> 4) & 0x0F
-      $warn << "Símbolo «%s» no definido." % symbol.name if bind == 1
+      if bind == 1
+        if @externSymbols.nil? || @externSymbols[symbol.name].nil?
+          $warn << "Símbolo «%s» no definido." % symbol.name
+        end
+      end
       next if symsection == SHN_NAME
       #Si no tiene nombre lo bautizamos con sección:número de símbolo
       symname = (symbol.name.length == 0) ? "SEC%d:S%d" % [symsection, symbol.idx]: symbol.name
@@ -313,9 +318,13 @@ class ELF_File < File
         symaddress = bssdir
         bssdir += symbol.data[:size]
       elsif symsection == 0
-        #Esto lo arreglaría el linker, nosotros tenemos un contador de externos que crece en pasos de SIZE_EXTERN
-        symaddress = externdir
-        externdir += SIZE_EXTERN
+        #Esto lo arreglaría el linker, nosotros vemos si el simbolo está en los del firmware o usamos un contador de externos que crece en pasos de SIZE_EXTERN
+        if @externSymbols.nil? || (firmaddress = @externSymbols[symname]).nil?
+          symaddress = externdir
+          externdir += SIZE_EXTERN
+        else
+          symaddress = firmaddress
+        end
       else
         symaddress = @wks_orig[@sections[symsection].name]
         symaddress += symbol.data[:value] unless symaddress.nil?

@@ -4,6 +4,7 @@
 require 'socket'
 require 'shell'
 require 'rbconfig'
+require 'fileutils'
 require_relative 'thumbII_Defs'
 require_relative 'instruction'
 require_relative 'coder'
@@ -12,11 +13,15 @@ require_relative 'memory'
 require_relative 'memory_block'
 require_relative 'read_ELF'
 
+FIRMWARE = 'C:/Users/G/Desktop/Firmware.o'
 GCC = 'C:/devkitPro/devkitARM/bin/arm-none-eabi-gcc.exe'
 CL1 = '-mcpu=cortex-m1 -mthumb -c'
 CL3 = '-mcpu=cortex-m3 -mthumb -c'
 
-ORIG_CODE = 0x00001000  # Repetido en read_ELF. Ver
+ORIG_CODE = 0x00180000  # Repetido en read_ELF. Ver
+ORIG_DISP = 0x20080000  # Display
+ORIG_FIRMWARE = 0x00190000# Firmware
+SIZE_DISP = 0x400       # 1K
 
 Errores = { orden: "Orden no reconocida\r\n",
             args:  "Argumentos erróneos\r\n",
@@ -156,7 +161,7 @@ end
 # @param [Array] entrada
 # @return [String]
 show_version = Proc.new { |entrada|
-  res = "V 1.2\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
+  res = "V 1.3\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
 }
 
 #show_register
@@ -608,15 +613,24 @@ assemble = Proc.new { |entrada|
   Dir.chdir($path)
   fline = nf
   cline = '"' + $compiler + '"' + ' ' + $args + ' -Wa,-alcd' + ' -o ' + fline + '.o'
-  eline = '2> ' + fline + '.err'
-  lline = '> ' + fline + '.lst'
+  #eline = '2> ' + fline + '.err'
+  eline = fline + '.err'
+  #lline = '> ' + fline + '.lst'
+  lline = fline + '.lst'
   #$warn = nil
   puts cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline
-  if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
+  #if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
+  if system(cline + ' '  + fline + '.s ', :out => lline, :err => eline)
     blocks = read_ELF(fline + '.o')
     procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     procesador.memory.add_block(blocks[1])
     procesador.memory.symbolTable = blocks[2]
+    disp = Memory_block.new(ORIG_DISP, SIZE_DISP, :ram_le, 32, 'Display')
+    disp.fill_from_val
+    procesador.memory.add_block(disp)
+    #rom2 = Memory_block.new(0x21000000, SIZE_DISP, :rom_le, 0, 'Firmware')
+    #rom2.fill_from_val
+    procesador.memory.add_block($firmware)
     $symbol_table = blocks[2]
     dirPC = $symbol_table['main']
     dirPC = ORIG_CODE if dirPC.nil?
@@ -640,11 +654,13 @@ assemble = Proc.new { |entrada|
     end
     res = res + "EOF\r\n"
   end
+  #FileUtils.copy(fline + '.o ', FIRMWARE)
   File.delete(fline + '.err')
   File.delete(fline + '.lst')
   Dir.chdir(old_dir)
   res
 }
+
 
 #exit
 #--------
@@ -773,8 +789,10 @@ class MainServer < TCPServer
   end
 end
 
-def read_ELF(name)
+def read_ELF(name, firmware = FALSE)
   ELF_File.open(name, 'rb') do |file|
+    file.externSymbols = $firmTable
+    file.wks_orig['.text'] = ORIG_FIRMWARE if firmware
     e_ident = file.get_array(16)
     magic = e_ident[1].chr + e_ident[2].chr + e_ident[3].chr
     puts("MAGIC: 0x%02X %s" % [e_ident[0], magic])
@@ -901,7 +919,7 @@ class ServerApp
     p host_os
     lpath = File.expand_path(File.dirname($0))
     Shell.cd(lpath)
-    blocks = read_ELF('complex.o')
+    blocks = read_ELF('Firmware.o', TRUE)
     puerto = ARGV.length == 0 ? 8070 : ARGV[0].to_i
     @procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     @procesador.memory.add_block(blocks[1])
@@ -909,6 +927,8 @@ class ServerApp
     $symbol_table = blocks[2]
     $use_symbols = false
     @procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
+    $firmware = blocks[0]
+    $firmTable = blocks[2]
     $server = MainServer.new(@procesador, puerto)
     $compiler = GCC
     $args = CL1
