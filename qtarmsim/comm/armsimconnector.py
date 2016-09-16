@@ -46,7 +46,8 @@ class ARMSimConnector():
         self.setConnected(False, None)
         self.version = None
         self.messages = []
-        
+
+
     def setConnected(self, connected, port):
         """
         Sets properties related to the connected status:
@@ -59,13 +60,13 @@ class ARMSimConnector():
         else:
             self.connected = False
             self.current_port = None
-            
-        
+
+
     def connect(self, command, working_directory, server, port):
         """
         Connects with ARMSim.
-        
-        @return: errmsg    An error msg with every connection error (\n as separator), None otherwise   
+
+        @return: errmsg    An error msg with every connection error (\n as separator), None otherwise
         """
 
         #=======================================================================
@@ -160,7 +161,7 @@ class ARMSimConnector():
     def doConnect(self, server, port):
         """
         Tries to connect to the given server and port.
-        
+
         @return: True if successfully connected, False otherwise.
         """
         # 1) Try to connect to the given port
@@ -190,7 +191,7 @@ class ARMSimConnector():
         self.mysocket.sock.settimeout(5.0)
         self.setConnected(True, port)
         return True
-    
+
     def disconnect(self):
         """
         Ends the simulator connection.
@@ -203,23 +204,23 @@ class ARMSimConnector():
         if self.armsim_process and self.armsim_process.poll() == None:
             self.armsim_process.kill()
         self.connected = False
-        
+
     def getVersion(self):
         """
         Gets the ARMSim Version. This method is also used to confirm that we are speaking to ARMSim and not to another server.
-        
+
         @return: The ARMSim Version text.
         """
         self.mysocket.send_line("SHOW VERSION")
         version_lines = self.mysocket.receive_lines_till_eof()
-        self.version = "\n".join(version_lines) 
+        self.version = "\n".join(version_lines)
         return self.version
-    
+
     #@todo: add this to the grammar document
     def setSettings(self, setting_name, setting_value):
         """
         Sets configuration options.
-        
+
         @return: Error message (or None)
         """
         translated_setting_name = {"ARMGccCommand": "COMPILER",
@@ -237,24 +238,24 @@ class ARMSimConnector():
                     "Error message was '{}'.".format(setting_name, line)
         return None
 
-        
+
     def _parseRegister(self, line):
         """
         Parses a line with register content information.
-        
-        @return: A pair (register number, hexadecimal content). 
+
+        @return: A pair (register number, hexadecimal content).
         """
         try:
             (reg, hex_value) = self.re_regexpr.search(line).groups()
         except AttributeError:
             print("ERROR: Could not parse register from '{}'!".format(line))
             raise
-        return (int(reg), hex_value) 
-    
+        return (int(reg), hex_value)
+
     def getRegisters(self):
         """
         Gets all the registers from ARMSim.
-        
+
         @return: An array with pairs (register, contents of that register in hexadecimal)
         """
         if not self.connected:
@@ -289,7 +290,7 @@ class ARMSimConnector():
     def getMemoryBanks(self):
         """
         Gets the memory banks available at the simulator.
-        
+
         @return: An array of tuples as (memory type, hexadecimal start address, hexadecimal end address).
         """
         self.mysocket.send_line("SYSINFO MEMORY")
@@ -309,8 +310,8 @@ class ARMSimConnector():
     def _parseMemory(self, line):
         """
         Parses a line with memory content information.
-        
-        @return: A pair (hexadecimal address, hexadecimal byte content) 
+
+        @return: A pair (hexadecimal address, hexadecimal byte content)
         """
         try:
             (hex_address, hex_byte) = self.re_memexpr.search(line).groups()
@@ -318,11 +319,11 @@ class ARMSimConnector():
             print("ERROR: Could not parse memory byte from '{}'".format(line))
             raise
         return ((hex_address, hex_byte))
-    
+
     def getMemory(self, hex_start, nbytes):
         """
         Gets nbytes at most from memory starting at hex_start.
-        
+
         @return: An array of pairs of the form (hexadecimal memory address, hexadecimal byte).
         """
         self.mysocket.send_line("DUMP MEMORY {} {}".format(hex_start, nbytes))
@@ -331,7 +332,7 @@ class ARMSimConnector():
         for line in lines:
             memory_bytes.append(self._parseMemory(line))
         return memory_bytes
-            
+
     def setMemory(self, hex_address, hex_value):
         """
         Sets the memory at the given hex_address with the given hex_value.
@@ -370,22 +371,23 @@ class ARMSimConnector():
             else:
                 label = ""
             return "{:40};{:-4} {:10} {:20} {}".format(assembly, ln, label, source, comment)
-        
+
 
     def getDisassemble(self, hex_start, ninsts):
         """
         Gets the disassemble of ninsts instructions at most starting at hex_start memory address.
-        
+
         @return: An array of lines with a disassembled instruction in each.
         """
         self.mysocket.send_line("DISASSEMBLE {} {}".format(hex_start, ninsts))
-        return [self._prettyPrintLine(line) for line in self.mysocket.receive_lines_till_eof() ]
+        for line in self.mysocket.receive_lines_till_eof():
+            yield self._prettyPrintLine(line)
 
 
     def _getExecuteStep(self, ARMSim_command):
         """
         Gets the execute step response.
-        
+
         @return: An ExecuteResponse object.
         """
         self.mysocket.send_line("EXECUTE {}".format(ARMSim_command))
@@ -396,7 +398,7 @@ class ARMSimConnector():
         mode = ""
         errmsg_list = []
         for line in lines[2:]:
-            if line in ("AFFECTED REGISTERS", 
+            if line in ("AFFECTED REGISTERS",
                         "AFFECTED MEMORY",
                         "ERROR MESSAGE"):
                 mode = line
@@ -415,14 +417,14 @@ class ARMSimConnector():
 
     def getExecuteStepOver(self):
         return self._getExecuteStep("SUBROUTINE")
-    
+
     def getExecuteAll(self):
         try:
             response = self._getExecuteStep("ALL")
         except socket.timeout:
             raise RunTimeOut()
         return response
-        
+
     def setBreakpoint(self, hex_address):
         self.mysocket.send_line("SET BREAKPOINT AT {}".format(hex_address))
         line = self.mysocket.receive_line()
