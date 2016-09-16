@@ -22,7 +22,7 @@ import sys
 
 
 class MySocket:
-    
+
     MSGLEN = 1024
     NL = '\n'
     ORD_NL = 10
@@ -44,7 +44,7 @@ class MySocket:
     def server_bind(self, port):
         """
         Binds the socket to a given port and starts listening on that port.
-        
+
         This method should be used by a server application. Returns -1 if
         something goes wrong.
         """
@@ -69,7 +69,7 @@ class MySocket:
     def server_accept_connection(self):
         """
         Waits till a connection is done.
-        
+
         This is a blocking call. Should be used by a server application.
         """
         if self.verbose:
@@ -77,7 +77,7 @@ class MySocket:
         self.conn, addr = self.sock.accept()
         if self.verbose:
             print('Connected with ' + addr[0] + ':' + str(addr[1]))
-        
+
     def test_port_is_free(self, port):
         """
         Tests if a port is free by binding a new socket to the given port and closing it afterwards.
@@ -98,7 +98,7 @@ class MySocket:
     def connect_to(self, port, server="localhost"):
         """
         Establishes a connection to the given server at the given port.
-        
+
         This method should be used by a client application.
         """
         if self.verbose:
@@ -106,11 +106,11 @@ class MySocket:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((server, port))
         self.conn = self.sock
-        
+
     def get_lines(self):
         """
         Generator that serves each line of the received message at a time.
-        
+
         Example of use:
           lines = mysocket.get_lines()
           line = lines.next()
@@ -124,12 +124,12 @@ class MySocket:
                 yield line
             else:
                 break
-                
+
 
     def receive_line(self):
         """
         Returns a line from the line received queue or gets a new one.
-        
+
         @return: a line.
         """
         if len(self.pending_lines):
@@ -142,7 +142,7 @@ class MySocket:
             print("Received chunk of size: {}".format(len(chunk)))
             print("Contents:\n #{}#".format(chunk))
         data = chunk
-        # Grab more chunks while the other end does not disconnect AND the received chunk does not end with \n 
+        # Grab more chunks while the other end does not disconnect AND the received chunk does not end with \n
         while len(chunk)!=0 and chunk[-1] != self.ORD_NL:
             chunk = self.conn.recv(self.MSGLEN)
             if self.verbose:
@@ -151,7 +151,7 @@ class MySocket:
             data += chunk
         try:
             msg = data.decode(self.ENCODING)
-        except UnicodeDecodeError as e:
+        except UnicodeDecodeError:
             msg = data.decode('latin1')
         lines = [l.strip() for l in msg.strip().replace('\r\n', '\n').split('\n') if l.strip() != ""]
         if len(lines)>1:
@@ -163,13 +163,13 @@ class MySocket:
             return line
         else:
             return ""
-        
+
     def receive_lines_till_eof(self):
         """
         Receives lines until a line with the EOF word is received.
-        
+
         @return: An array with the received lines or an empty array if a timeout occurs.
-        """    
+        """
         lines = []
         line = ''
         while line != 'EOF':
@@ -179,18 +179,16 @@ class MySocket:
                 print("A time out error has occurred")
                 print("\n".join(lines))
                 raise
-            lines.append(line)
-        if line == 'EOF': 
-            return lines[:-1]
-        else: # timeout occurred
-            return []
-    
+            lines.append(line) # For debugging purposes only
+            if line != 'EOF':
+                yield line
+
     def send_line(self, msg):
         """
         Sends a line through the open connection.
         """
         self.conn.sendall(bytes(msg, self.ENCODING)+b'\r\n')
-        
+
     def close_connection(self):
         """
         Closes the current connection.
@@ -208,7 +206,7 @@ class MySocket:
         if self.verbose:
             print('Socket closed')
 
-            
+
     def exit_signal_handler(self, signal, frame):
         """
         Handler used to closes the socket when an exit signal is received. See __init__().
