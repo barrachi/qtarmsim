@@ -356,7 +356,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 try:
                     method = getattr(self, methodName)
                 except AttributeError:
-                    print("Method: {} not implemented yet!".format(methodName))
+                    if self.verbose:
+                        print("Method: {} not implemented yet!".format(methodName))
                     continue
                 action = getattr(self.ui, actionName)
                 self.connect(action, signalTriggered, method)
