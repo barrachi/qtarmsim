@@ -21,8 +21,8 @@ import platform
 import shutil
 import sys
 
-import PySide
 from PySide import QtCore, QtGui
+import PySide
 from PySide.QtCore import Qt
 
 
@@ -202,7 +202,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         memoryByWordProxyModel = MemoryByWordProxyModel(self)
         memoryByWordProxyModel.setSourceModel(self.memoryModel)
         self.ui.treeViewMemory.setModel(memoryByWordProxyModel)
-        self.ui.memoryLCDView.setModel(self.memoryModel, '0x20070000', 40, 6)
+        self.ui.memoryLCDView.setModel(self.memoryModel, '0x20080000', 40, 6)
 
         # Status bar with flags indicator
         self.statusBar().addWidget(QtGui.QLabel(""), 10) # No permanent
@@ -967,6 +967,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.memoryModel.reset()
         self.ui.tabWidgetMemoryDump.clear()
         memoryBank = 0
+        armsim_lines = []
         for (memtype, hex_start, hex_end) in self.simulator.getMemoryBanks():
             # Dump memory
             start = int(hex_start, 16)
@@ -979,7 +980,10 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             # if memtype == ROM then load the program into the ARMSim tab
             if memtype == 'ROM':
                 ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
-                armsim_lines = self.simulator.getDisassemble(hex_start, ninsts)
+                armsim_lines += ['@@ ----------------------------------------', 
+                                 '@@ DISASSEMBLED CODE STARTING AT {}'.format(hex_start),
+                                 '@@ ----------------------------------------' ]
+                armsim_lines += self.simulator.getDisassemble(hex_start, ninsts)
                 self.ui.simCodeEditor.setPlainText('\n'.join(armsim_lines))
                 self.ui.simCodeEditor.clearDecorations()
                 self.highlight_pc_line()
@@ -1001,6 +1005,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.treeViewMemory.expandAll()
         self.ui.treeViewMemory.resizeColumnToContents(0)
         self.ui.treeViewMemory.resizeColumnToContents(1)
+        self.ui.treeViewMemory.collapseAll()
 
 
     def connectToARMSim(self):
