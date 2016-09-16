@@ -26,7 +26,6 @@
 
 
 import sys
-import re
 
 from PySide import QtCore, QtGui
 
@@ -40,7 +39,6 @@ class LeftArea(QtGui.QWidget):
     On the other hand, if the associated editor is not read only, it will show the line number of each line of the code editor source.
     """
 
-
     def __init__(self, codeEditor):
         "Asociates this LeftArea instance with its CodeEditor parent"
         super(LeftArea, self).__init__(codeEditor)
@@ -51,7 +49,7 @@ class LeftArea(QtGui.QWidget):
     def sizeHint(self):
         "Returns the size hint of this widget"
         return QtCore.QSize(self.codeEditor.width(), 0)
-    
+
     def paintEvent(self, event):
         "Repaints (part of) the LeftArea Widget"
         super(LeftArea, self).paintEvent(event)
@@ -187,7 +185,7 @@ class LeftArea(QtGui.QWidget):
 
 class CodeEditor(QtGui.QPlainTextEdit):
     "CodeEditor is a simple code editor that is able to use a syntax highlighter and provides a left line number area."
-    
+
     setBreakpointSignal = QtCore.Signal('int', 'QString')
     clearBreakpointSignal = QtCore.Signal('int', 'QString')
 
@@ -222,13 +220,13 @@ class CodeEditor(QtGui.QPlainTextEdit):
     def setReadOnly(self, ro):
         """
         Sets the read only property to True or False.
-        
+
         @param ro: The value to be set.
         """
         if ro:
             self.updateLeftAreaWidth()
         return super(CodeEditor, self).setReadOnly(ro)
-    
+
     def clearBreakpoints(self):
         "Calls leftArea clearBreakpoints method"
         self.leftArea.clearBreakpoints()
@@ -261,8 +259,8 @@ class CodeEditor(QtGui.QPlainTextEdit):
     def _getCurrentHightlightedLineCursor(self):
         """
         Returns a cursor to the current highlighted line.
-        
-        The return value depends on whether the editor is read only of not.  If it is read only, it returns a cursor on the stored currentHighlightedLineNumber line. Otherwise, it returns the current cursor. 
+
+        The return value depends on whether the editor is read only of not.  If it is read only, it returns a cursor on the stored currentHighlightedLineNumber line. Otherwise, it returns the current cursor.
         """
         cursor = self.textCursor()
         if self.isReadOnly():
@@ -299,7 +297,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
         extraSelections.append(self._getCurrentLineHighlightSelection())
         extraSelections += self._getCurrentWordHighlightSelections()
         self.setExtraSelections(extraSelections)
-        
+
     def _getCurrentLineHighlightSelection(self):
         "Returns the current line highlight selection"
         lineColor = QtGui.QColor('blue').lighter(190)
@@ -314,7 +312,6 @@ class CodeEditor(QtGui.QPlainTextEdit):
         "Returns highlight selections for those words in the document that match the current word under the cursor (only if the current word is a special keyword)"
         words = self._getKeywordsToHighlight()
         cursor = self.textCursor()
-        currentLine = cursor.blockNumber()
         cursor.select(QtGui.QTextCursor.WordUnderCursor)
         currentWord = cursor.selectedText()
         lineColor = QtGui.QColor('yellow')
@@ -329,18 +326,17 @@ class CodeEditor(QtGui.QPlainTextEdit):
                     selection.cursor = hcursor
                     selections.append(selection)
         return selections
-        
+
     def _getKeywordsToHighlight(self):
         "Returns a list of keywords that should be highlighted when that keyword is under the cursor"
         return []
-
 
     def wheelEvent(self, event):
         "Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"
         if event.modifiers() == QtCore.Qt.ControlModifier:
             self.myFontPointSize += event.delta() / 120
             if self.myFontPointSize < 10:
-               self.myFontPointSize = 10
+                self.myFontPointSize = 10
             self.myFont.setPointSize(self.myFontPointSize)
             self.setFont(self.myFont)
             self.setTabStopWidth(8 * self.fontMetrics().width('9'));

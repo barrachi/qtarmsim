@@ -18,7 +18,6 @@
 
 
 import sys
-import re
 
 from PySide import QtCore, QtGui
 from . codeeditor import CodeEditor
@@ -27,7 +26,7 @@ from . armsyntaxhighlighter import ARMSyntaxHighlighter
 
 class ARMCodeEditor(CodeEditor):
     "CodeEditor with ARMSyntaxHighlighter"
-    
+
     def __init__(self, parent=None, *args, **kwargs):
         "ARMCodeEditor initialization"
         super(ARMCodeEditor, self).__init__(parent=parent, SyntaxHighlighterClass=ARMSyntaxHighlighter, *args, **kwargs)
