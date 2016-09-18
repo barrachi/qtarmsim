@@ -212,6 +212,8 @@ class CodeEditor(QtGui.QPlainTextEdit):
         # Set extra highlight selections (current line and special keywords)
         self.setCurrentHighlightedLineNumber(0)
         self.updateHighlightSelections()
+        # Set scrollLock to False
+        self.scrollLock = False
         # Connect signals
         self.connect(self, QtCore.SIGNAL('blockCountChanged(int)'), self.updateLeftAreaWidth)
         self.connect(self, QtCore.SIGNAL('updateRequest(QRect, int)'), self.updateLeftArea)
@@ -343,6 +345,10 @@ class CodeEditor(QtGui.QPlainTextEdit):
         else:
             super(CodeEditor, self).wheelEvent(event)
 
+    def scrollContentsBy(self, dx, dy):
+        "Overrides scrollContentsBy to allow appending text without scrolling"
+        if not self.scrollLock:
+            super(CodeEditor, self).scrollContentsBy(dx, dy)
 
 
 if __name__ == "__main__":
