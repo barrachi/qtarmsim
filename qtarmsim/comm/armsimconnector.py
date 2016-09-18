@@ -412,7 +412,12 @@ class ARMSimConnector():
         return self._getExecuteStep("STEP")
 
     def getExecuteStepOver(self):
-        return self._getExecuteStep("SUBROUTINE")
+        response = self._getExecuteStep("SUBROUTINE")
+        # Ignore errors due to the instruction not being a subroutine
+        if response.errmsg.find('No es subrutina') != -1:
+            response.result = 'SUCCESS'
+            response.errmsg = ''
+        return response
 
     def getExecuteAll(self):
         try:
