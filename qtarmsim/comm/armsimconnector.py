@@ -295,7 +295,6 @@ class ARMSimConnector():
         """
         self.mysocket.send_line("SYSINFO MEMORY")
         lines = self.mysocket.receive_lines_till_eof()
-
         memory_banks = []
         for line in lines:
             try:
@@ -327,11 +326,8 @@ class ARMSimConnector():
         @return: An array of pairs of the form (hexadecimal memory address, hexadecimal byte).
         """
         self.mysocket.send_line("DUMP MEMORY {} {}".format(hex_start, nbytes))
-        lines = self.mysocket.receive_lines_till_eof()
-        memory_bytes = []
-        for line in lines:
-            memory_bytes.append(self._parseMemory(line))
-        return memory_bytes
+        for line in self.mysocket.receive_lines_till_eof():
+            yield self._parseMemory(line)
 
     def setMemory(self, hex_address, hex_value):
         """
@@ -391,7 +387,7 @@ class ARMSimConnector():
         @return: An ExecuteResponse object.
         """
         self.mysocket.send_line("EXECUTE {}".format(ARMSim_command))
-        lines = self.mysocket.receive_lines_till_eof()
+        lines = [l for l in self.mysocket.receive_lines_till_eof()]
         response = ExecuteResponse()
         response.result = lines[0]
         response.assembly_line = lines[1].split(";")[0] # get rid of source code part
