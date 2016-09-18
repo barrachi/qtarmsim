@@ -28,7 +28,7 @@ class HighlightingRule:
     def __init__(self, patternTxt, format):
         self.pattern = QtCore.QRegExp(patternTxt)
         self.format = format
-    
+
 
 class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     "Class that can be used to parse and highlight ARM assembler code"
@@ -41,20 +41,29 @@ class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         keywordFormat = QtGui.QTextCharFormat()
         keywordFormat.setForeground(QtGui.QColor('darkBlue'))
         keywordFormat.setFontWeight(QtGui.QFont.Bold)
-        for pattern in ['\\b{}\\b'.format(s) for s in self.keywords.replace('\n', '').replace(' ', '').split(',')]:
-            self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), keywordFormat))
+        keywordsList = self.keywords.replace('\n', '').replace(' ', '').split(',')
+        keywordsDict = {}
+        for kw in keywordsList:
+            try:
+                keywordsDict[kw[:3]].append(kw[3:])
+            except KeyError:
+                keywordsDict[kw[:3]] = [kw[3:], ]
+        compactedKeywordsList = []
+        for key, value in keywordsDict.items():
+            compactedKeywordsList.append('{}({})'.format(key, '|'.join(value)))
+        pattern = '\\b({})\\b'.format('|'.join(compactedKeywordsList))
+        self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), keywordFormat))
         # Add highlighting rules and format for ARM assembler directives
         directiveFormat = QtGui.QTextCharFormat()
         directiveFormat.setForeground(QtGui.QColor('green'))
         directiveFormat.setFontWeight(QtGui.QFont.Bold)
-        for pattern in ['[.]{}\\b'.format(s) for s in self.directives.replace('\n', '').replace(' ', '').replace('.','').split(',')]:
-            self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), directiveFormat))
+        pattern = '[.]({})\\b'.format('|'.join(self.directives.replace('\n', '').replace(' ', '').replace('.','').split(',')))
+        self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), directiveFormat))
         # Add highlighting rules and format for ARM registers
         registerFormat = QtGui.QTextCharFormat()
         registerFormat.setForeground(QtGui.QColor('green'))
-        #registerFormat.setFontWeight(QtGui.QFont.Bold)
-        for pattern in ['\\br\\d\\b', '\\br1[0-5]{0,1}\\b', '\\b[sS][pP]\\b', '\\b[lL][rR]\\b', '\\b[pP][cC]\\b' ]:
-            self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), registerFormat))
+        pattern = '\\b({})\\b'.format('|'.join(['r\\d', 'r1[0-5]{0,1}', '[sS][pP]', '[lL][rR]', '[pP][cC]' ]))
+        self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), registerFormat))
         # Add highlighting rules and format for ARM labels
         labelFormat = QtGui.QTextCharFormat()
         labelFormat.setForeground(QtGui.QColor('black'))
@@ -64,8 +73,8 @@ class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         # Add highlighting rules and format for ARM comments
         commentFormat = QtGui.QTextCharFormat()
         commentFormat.setForeground(QtGui.QColor('gray'))
-        for pattern in ['@.*$', '^\\s*#.*$']:
-            self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), commentFormat))
+        pattern = '(@.*$|^\\s*#.*$)'
+        self.highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), commentFormat))
         
     def highlightBlock(self, text):
         "Parses a given block and applies the corresponding formats to the matched patterns"
