@@ -1,6 +1,21 @@
 Changelog
 ---------
 
+0.3.7 (2016-09-18)
+^^^^^^^^^^^^^^^^^^
+
+- Added firmware ROM that provides, among others, functions to display
+  strings and numbers on the LCD display. The new memory organization
+  consists of two ROM blocks and two RAM blocks. The first ROM block
+  is filled with the assembled user code. The second ROM, with the
+  firmware machine code. The first RAM can be used to store the user
+  program data. The second RAM is used by the LCD display.
+- The graphical interface now uses a thread to retrieve the memory
+  contents and the disassembled code from the two ROM blocks.
+- The regular expressions used to highlight the code on the editors
+  have been optimized to increase the highlighting process speed.
+
+
 0.3.5 (2016-09-12)
 ^^^^^^^^^^^^^^^^^^
 
@@ -9,7 +24,7 @@ Changelog
 - Changed the minimum size of the code editor container to accommodate
   lower resolution screens.
 - ARMSim: (i) LSL result is now bounded to 32 bits; (ii) command
-  redirection is performed explicitily to avoid an error on newer
+  redirection is performed explicitly to avoid an error on newer
   Windows versions; and (iii) the method used to compare whether
   memory blocks where not defined has been changed to avoid errors on
   Ruby with version >= 2.3.

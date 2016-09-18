@@ -84,13 +84,11 @@ please follow the next steps:
 
      C:\Python34> Scripts\pip3.exe install QtARMSim
 
-   After installing QtARMSim, its executable will be at: ``C:\Python34\Scripts\qtarmsim.exe``.
+After installing QtARMSim, its executable will be at: ``C:\Python34\Scripts\qtarmsim.exe``.
 
-   QtARMSim python source code under:
-   ``C:\Python34\Lib\site-packages\qtarmsim\``.
+QtARMSim python source code under: ``C:\Python34\Lib\site-packages\qtarmsim\``.
 
-   And the ARMSim ruby source code under:
-   ``C:\Python34\Lib\site-packages\qtarmsim\armsim``.
+And the ARMSim ruby source code under: ``C:\Python34\Lib\site-packages\qtarmsim\armsim``.
 
 
 1.3 Installing QtARMSim on Mac OS X
