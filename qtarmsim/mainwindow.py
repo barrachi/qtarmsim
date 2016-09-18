@@ -160,6 +160,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.current_source_code_assembled = False
         # Breakpoints
         self.breakpoints = []
+        # Spinner
+        self.spinnerLabel = QtGui.QLabel(self)
+        self.spinnerLabel.setMovie(QtGui.QMovie(":/images/ajax-loader.gif"))
+        # Worker threads
+        self.getMemoryThread = self.GetMemoryThread(self)
+        self.getMemoryThread.finished.connect(self.onGetMemoryThreadFinished)
         # Print welcome message on the Messages Window and show Ready on the status bar
         self.ui.textEditMessages.append(self.welcome_message())
         self.statusBar().showMessage(self.trUtf8("Ready"))
@@ -342,6 +348,27 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.breakpoints.clear()
 
 
+    def startSpinner(self):
+        """
+        Centers the spinner on the central widget and shows it
+        """
+        centralwidgetQRect = self.ui.centralwidget.geometry()
+        spinnerLabelQRect = self.spinnerLabel.geometry()
+        spinnerLabelQRect.moveTo(QtCore.QPoint(centralwidgetQRect.x() + centralwidgetQRect.width()/2, centralwidgetQRect.y() + centralwidgetQRect.height()/2))
+        self.spinnerLabel.setGeometry(spinnerLabelQRect)
+        self.spinnerLabel.show()
+        self.spinnerLabel.movie().start()
+        self.repaint()
+
+
+    def stopSpinner(self):
+        """
+        Hides the spinner
+        """
+        self.spinnerLabel.hide()
+        self.spinnerLabel.movie().stop()
+
+
     #################################################################################
     # Actions and events
     #################################################################################
@@ -430,6 +457,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             self.enableSimulatorActions(False)
             self.ui.tabWidgetCode.setCurrentIndex(0)
 
+
     def doAssemble(self):
         # If not connected, connect to the simulator
         if not self.simulator or (self.simulator and not self.simulator.connected):
@@ -447,6 +475,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if response.result == "SUCCESS":
             self.assembled(True)
             # Update registers and memory
+            self.startSpinner()
             self.updateRegisters()
             self.updateMemory()
         else:
@@ -961,33 +990,47 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         registers_model.clearHistory()
         self.updateFlags()
 
+    class GetMemoryThread(QtCore.QThread):
+        finished = QtCore.Signal(list)
+        def __init__(self, parent=None):
+            super(QtARMSimMainWindow.GetMemoryThread, self).__init__(parent)
+            self.parent = parent
+        def run(self):
+            memory_banks = []
+            for (memtype, hex_start, hex_end) in self.parent.simulator.getMemoryBanks():
+                # Dump memory
+                start = int(hex_start, 16)
+                end = int(hex_end, 16)
+                nbytes = end - start
+                membytes = []
+                for (hex_address, hex_byte) in self.parent.simulator.getMemory(hex_start, nbytes):  # @UnusedVariable address
+                    membytes.append(hex_byte)
+                armsim_lines = []
+                # if memtype == ROM then load the program into the ARMSim tab
+                if memtype == 'ROM':
+                    ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
+                    armsim_lines += ['@@ ----------------------------------------', 
+                                     '@@ DISASSEMBLED CODE STARTING AT {}'.format(hex_start),
+                                     '@@ ----------------------------------------' ]
+                    armsim_lines += self.parent.simulator.getDisassemble(hex_start, ninsts)
+                memory_banks.append({
+                                     'memtype': memtype,
+                                     'hex_start': hex_start,
+                                     'nbytes': nbytes,
+                                     'membytes': membytes,
+                                     'armsim_lines': armsim_lines,
+                                     })
+            self.finished.emit(memory_banks)
 
-    def updateMemory(self):
-        "Updates the memory docks upon ARMSim data."
+    def onGetMemoryThreadFinished(self, memory_banks):
         # Process memory info
         self.memoryModel.reset()
         self.ui.tabWidgetMemoryDump.clear()
         memoryBank = 0
         armsim_lines = []
-        for (memtype, hex_start, hex_end) in self.simulator.getMemoryBanks():
-            # Dump memory
-            start = int(hex_start, 16)
-            end = int(hex_end, 16)
-            nbytes = end - start
-            membytes = []
-            for (hex_address, hex_byte) in self.simulator.getMemory(hex_start, nbytes):  # @UnusedVariable address
-                membytes.append(hex_byte)
-            self.memoryModel.appendMemoryBank(memtype, hex_start, membytes)
-            # if memtype == ROM then load the program into the ARMSim tab
-            if memtype == 'ROM':
-                ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
-                armsim_lines += ['@@ ----------------------------------------', 
-                                 '@@ DISASSEMBLED CODE STARTING AT {}'.format(hex_start),
-                                 '@@ ----------------------------------------' ]
-                armsim_lines += self.simulator.getDisassemble(hex_start, ninsts)
-                self.ui.simCodeEditor.setPlainText('\n'.join(armsim_lines))
-                self.ui.simCodeEditor.clearDecorations()
-                self.highlight_pc_line()
+        for mb in memory_banks:
+            # Append the memory bank
+            self.memoryModel.appendMemoryBank(mb['memtype'], mb['hex_start'], mb['membytes'])
             # Add a page to tabWidgetMemoryDump
             memoryDumpProxyModel = MemoryDumpProxyModel()
             memoryDumpProxyModel.setSourceModel(self.memoryModel, memoryBank)
@@ -996,8 +1039,11 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             memoryDumpView.setModel(memoryDumpProxyModel)
             memoryDumpView.resizeColumnsToContents()
             memoryDumpView.resizeRowsToContents()
-            self.ui.tabWidgetMemoryDump.addTab(memoryDumpView, "{}".format(memtype))
-        # Show first tab with RAM memory
+            self.ui.tabWidgetMemoryDump.addTab(memoryDumpView, "{}".format(mb['memtype']))
+            # Add the dissambled lines
+            armsim_lines += mb['armsim_lines']
+            QtGui.QApplication.processEvents()
+        # Focus the first tab with RAM memory
         for i in range(self.ui.tabWidgetMemoryDump.count()):
             if self.ui.tabWidgetMemoryDump.tabText(i) == "RAM":
                 self.ui.tabWidgetMemoryDump.setCurrentIndex(i)
@@ -1007,7 +1053,26 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.treeViewMemory.resizeColumnToContents(0)
         self.ui.treeViewMemory.resizeColumnToContents(1)
         self.ui.treeViewMemory.collapseAll()
+        QtGui.QApplication.processEvents()
+        # Display the disassembled code
+        self.ui.simCodeEditor.setPlainText('')
+        self.ui.simCodeEditor.setCenterOnScroll(False)
+        tmp_count = 0
+        self.ui.simCodeEditor.scrollLock = True
+        for armsim_line in armsim_lines:
+            self.ui.simCodeEditor.appendPlainText(armsim_line)
+            if tmp_count > 10:
+                QtGui.QApplication.processEvents()
+                tmp_count = 0
+            tmp_count += 1
+        self.ui.simCodeEditor.scrollLock = False
+        self.ui.simCodeEditor.clearDecorations()
+        self.highlight_pc_line()
+        self.stopSpinner()
 
+    def updateMemory(self):
+        "Updates the memory widgets upon ARMSim data."
+        self.getMemoryThread.start()
 
     def connectToARMSim(self):
         self.simulator = None
