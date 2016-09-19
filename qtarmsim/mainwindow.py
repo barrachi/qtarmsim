@@ -163,6 +163,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Spinner
         self.spinnerLabel = QtGui.QLabel(self)
         self.spinnerLabel.setMovie(QtGui.QMovie(":/images/ajax-loader.gif"))
+        self.spinnerLabel.hide()
         # Worker threads
         self.getMemoryThread = self.GetMemoryThread(self)
         self.getMemoryThread.finished.connect(self.onGetMemoryThreadFinished)
