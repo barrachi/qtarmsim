@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+0.3.9 (2016-09-19)
+^^^^^^^^^^^^^^^^^^
+
+- ARMSim: updated firmware to provide a signed division function.
+
+
+0.3.8 (2016-09-19)
+^^^^^^^^^^^^^^^^^^
+
+- Bug corrected: waiting spinner ocluded File and Edit menus.
+
+
 0.3.7 (2016-09-18)
 ^^^^^^^^^^^^^^^^^^
 
