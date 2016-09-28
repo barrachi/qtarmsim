@@ -25,9 +25,9 @@ from PySide import QtCore, QtGui
 
 class HighlightingRule:
     "A highlighting rule consists of a QRegExp pattern and its associated QTextCharFormat"
-    def __init__(self, patternTxt, format):
+    def __init__(self, patternTxt, hrFormat):
         self.pattern = QtCore.QRegExp(patternTxt)
-        self.format = format
+        self.format = hrFormat
 
 
 class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
