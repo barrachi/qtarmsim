@@ -31,7 +31,7 @@ class PreferencesDialog(QtGui.QDialog):
         self.connect(self.ui.pushButtonARMSimRestoreDefaults, QtCore.SIGNAL('clicked()'), self.restoreARMSimDefaults)
         self.connect(self.ui.toolButtonARMSimDirectory, QtCore.SIGNAL('clicked()'), self.ARMSimDirectoryClicked)
         self.connect(self.ui.toolButtonARMGccCommand, QtCore.SIGNAL('clicked()'), self.ARMGccCommandClicked)
-        
+
     def setFromSettings(self, settings):
         # ARMSim tab
         self.ui.lineEditARMSimServer.setText(settings.value("ARMSimServer"))
@@ -40,10 +40,10 @@ class PreferencesDialog(QtGui.QDialog):
         self.ui.lineEditARMSimDirectory.setText(settings.value("ARMSimDirectory"))
         self.ui.lineEditARMGccCommand.setText(settings.value("ARMGccCommand"))
         self.ui.lineEditARMGccOptions.setText(settings.value("ARMGccOptions"))
-    
+
     def restoreARMSimDefaults(self):
         self.setFromSettings(self.parent().defaultSettings)
-        
+
     def ARMSimDirectoryClicked(self):
         dirname = self.ui.lineEditARMSimDirectory.text()
         dirname = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8('Select ARMSim working directory'), dirname)
@@ -59,11 +59,10 @@ class PreferencesDialog(QtGui.QDialog):
     def accept(self):
         s = self.parent().settings
         # ARMSim tab
-        s.setValue("ARMSimServer", self.ui.lineEditARMSimServer.text())
-        s.setValue("ARMSimPort", self.ui.spinBoxARMSimPort.text())
-        s.setValue("ARMSimCommand", self.ui.lineEditARMSimCommand.text())
-        s.setValue("ARMSimDirectory", self.ui.lineEditARMSimDirectory.text())
-        s.setValue("ARMGccCommand", self.ui.lineEditARMGccCommand.text())
-        s.setValue("ARMGccOptions", self.ui.lineEditARMGccOptions.text())
+        s.setValue("ARMSimServer", self.ui.lineEditARMSimServer.text().strip())
+        s.setValue("ARMSimPort", self.ui.spinBoxARMSimPort.text().strip())
+        s.setValue("ARMSimCommand", self.ui.lineEditARMSimCommand.text().strip())
+        s.setValue("ARMSimDirectory", self.ui.lineEditARMSimDirectory.text().strip())
+        s.setValue("ARMGccCommand", self.ui.lineEditARMGccCommand.text().strip())
+        s.setValue("ARMGccOptions", self.ui.lineEditARMGccOptions.text().strip())
         return super(PreferencesDialog, self).accept()
-    
