@@ -118,7 +118,7 @@ class DefaultSettings():
         fname = fname if fname else ""
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
-        
+
     def _setDirectoryDefaults(self):
         self._LastUsedDirectory = QtCore.QDir.currentPath()
 
@@ -126,7 +126,6 @@ class DefaultSettings():
 class QtARMSimMainWindow(QtGui.QMainWindow):
     "Main window of the QtARMSim application."
 
-    
     def __init__(self, parent=None, verbose=False):
         # Call super.__init__()
         super(QtARMSimMainWindow, self).__init__()
@@ -150,6 +149,12 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.helpWindow = HelpWindow()
         # Connect actions
         self.connectActions()
+        # Editor flags
+        self.editorFlags = {
+            'selectionAvailable': False,
+            'redoAvailable': False,
+            'undoAvailable': False,
+        }
         # Saves the initial WindowState of the interface
         self.initialWindowState = self.saveState()
         # Read the settings
@@ -177,6 +182,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         super(QtARMSimMainWindow, self).show(*args, **kwargs)
         # updateFileActions updateShowActions and enableSimulatorActions have to be called after the window is shown
         self.updateFileActions()
+        self.updateEditActions()
         self.updateShowActions()
         self.enableSimulatorActions(False)
 
@@ -203,7 +209,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.registersModel = RegistersModel(self)
         self.ui.treeViewRegisters.setModel(self.registersModel)
         self.ui.treeViewRegisters.expandAll()
-          
+
         # memoryModel
         self.memoryModel = MemoryModel(self)
         memoryByWordProxyModel = MemoryByWordProxyModel(self)
@@ -272,7 +278,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # End migration of settings versions
         #-----------------------------------------------------------------------------
         self.settings.setValue("ConfVersion", 2)
-        for setting in ("ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMGccCommand", "ARMGccOptions", 
+        for setting in ("ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMGccCommand", "ARMGccOptions",
                         "LastUsedDirectory"):
             if not self.settings.value(setting):
                 self.settings.setValue(setting, self.defaultSettings.value(setting))
@@ -306,6 +312,16 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.updateWindowTitle()
 
 
+    def updateEditActions(self, onSimulator=False):
+        "Enables/disables actions related to edit menu"
+        self.ui.action_Undo.setEnabled(not onSimulator and self.editorFlags['undoAvailable'])
+        self.ui.actionRedo.setEnabled(not onSimulator and self.editorFlags['redoAvailable'])
+        self.ui.actionCut.setEnabled(not onSimulator and self.editorFlags['selectionAvailable'])
+        self.ui.actionCopy.setEnabled(not onSimulator and self.editorFlags['selectionAvailable'])
+        self.ui.actionPaste.setEnabled(not onSimulator and QtGui.QApplication.clipboard().text()!='')
+        self.ui.actionSelect_All.setEnabled(not onSimulator)
+
+
     def updateShowActions(self):
         "Modifies the checked state of the show/hide actions depending on their widgets visibility"
         self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
@@ -315,29 +331,31 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.ui.actionShow_Memory_Dump.setChecked(self.ui.dockWidgetMemoryDump.isVisible())
         self.ui.actionShow_LCD_Display.setChecked(self.ui.dockWidgetLCDDisplay.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
- 
 
-    def enableSimulatorActions(self, enabled):
+
+    def enableSimulatorActions(self, onSimulator):
         "Enables/disables actions that depend on being on the simulator tab"
         #--
-        self.ui.actionResume.setEnabled(enabled)
-        self.ui.actionStepInto.setEnabled(enabled)
-        self.ui.actionStepOver.setEnabled(enabled)
-        self.ui.actionRestart.setEnabled(enabled)
+        self.updateEditActions(onSimulator)
         #--
-        self.ui.actionRun.setEnabled(enabled)
+        self.ui.actionResume.setEnabled(onSimulator)
+        self.ui.actionStepInto.setEnabled(onSimulator)
+        self.ui.actionStepOver.setEnabled(onSimulator)
+        self.ui.actionRestart.setEnabled(onSimulator)
         #--
-        self.ui.actionBreakpoints.setEnabled(enabled)
+        self.ui.actionRun.setEnabled(onSimulator)
         #--
-        self.ui.actionReset_Registers.setEnabled(enabled)
-        self.ui.actionReset_Memory.setEnabled(enabled)
+        self.ui.actionBreakpoints.setEnabled(onSimulator)
         #--
-        self.ui.treeViewRegisters.setEnabled(enabled)
-        self.ui.treeViewMemory.setEnabled(enabled)
-        self.ui.actionAbout_ARMSim.setEnabled(enabled)
+        self.ui.actionReset_Registers.setEnabled(onSimulator)
+        self.ui.actionReset_Memory.setEnabled(onSimulator)
         #--
-        self.flagsLabel.setEnabled(enabled)
-        self.flagsText.setEnabled(enabled)
+        self.ui.treeViewRegisters.setEnabled(onSimulator)
+        self.ui.treeViewMemory.setEnabled(onSimulator)
+        self.ui.actionAbout_ARMSim.setEnabled(onSimulator)
+        #--
+        self.flagsLabel.setEnabled(onSimulator)
+        self.flagsText.setEnabled(onSimulator)
 
     def clearBreakpoints(self):
         """
@@ -391,8 +409,13 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.connect(action, signalTriggered, method)
         # Tab changes
         self.ui.tabWidgetCode.currentChanged.connect(self.onTabChange)
-        # sourceCodeEditor modification changes 
+        # Clipboard changes
+        QtGui.QApplication.clipboard().changed.connect(self.updateEditActions)
+        # sourceCodeEditor modification changes
         self.ui.sourceCodeEditor.textChanged.connect(self.sourceCodeChanged)
+        self.ui.sourceCodeEditor.selectionChanged.connect(self.sourceCodeSelectionChanged)
+        self.ui.sourceCodeEditor.redoAvailable.connect(self.sourceCodeRedoAvailable)
+        self.ui.sourceCodeEditor.undoAvailable.connect(self.sourceCodeUndoAvailable)
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
@@ -438,7 +461,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             if len(text) < 10:
                 msg =   "It seems that there is no source code to assemble.\n" \
                         "Do you really want to proceed?"
-                reply = QtGui.QMessageBox.question(self, 'Empty source code?', 
+                reply = QtGui.QMessageBox.question(self, 'Empty source code?',
                          msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.No:
                     self.ui.tabWidgetCode.setCurrentIndex(0)
@@ -497,6 +520,21 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.updateFileActions()
 
 
+    def sourceCodeSelectionChanged(self):
+        self.editorFlags['selectionAvailable'] = self.ui.sourceCodeEditor.textCursor().selectedText()!=''
+        self.updateEditActions()
+
+
+    def sourceCodeRedoAvailable(self, redoAvailable):
+        self.editorFlags['redoAvailable'] = redoAvailable
+        self.updateEditActions()
+
+
+    def sourceCodeUndoAvailable(self, undoAvailable):
+        self.editorFlags['undoAvailable'] = undoAvailable
+        self.updateEditActions()
+
+
     def setBreakpoint(self, lineNumber, text):
         "Sets a breakpoint on the memory address obtained from text"
         hex_address = text.split(" ")[0][1:-1]
@@ -535,14 +573,14 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             return QtGui.QMessageBox.Discard
         msg =   "The document '{}' has been modified.\n" \
                 "Do you want to save the changes?".format(os.path.basename(self.file_name))
-        reply = QtGui.QMessageBox.question(self, 'Close Document', 
+        reply = QtGui.QMessageBox.question(self, 'Close Document',
                                            msg,
                                            QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard | QtGui.QMessageBox.Cancel,
                                            QtGui.QMessageBox.Save)
         if reply == QtGui.QMessageBox.Save:
             self.doSave()
         return reply
-    
+
 
 
     #################################################################################
@@ -658,7 +696,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         #=======================================================================
         # asm_file = QtCore.QFile(file_name)
         # # @warning: as qscintilla messes up CRLFs and LFs on Windows, the file is not opened in text mode (| QtCore.QFile.Text)
-        # if not asm_file.open(QtCore.QFile.WriteOnly): 
+        # if not asm_file.open(QtCore.QFile.WriteOnly):
         #     QtGui.QMessageBox.warning(self, self.trUtf8("Error"),
         #             self.trUtf8("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
         #     return False
@@ -667,9 +705,9 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # if sys.platform == "win32":
         #     text = text.replace('\n', '\r\n')
         #=======================================================================
-        
+
         asm_file = QtCore.QFile(file_name)
-        if not asm_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text): 
+        if not asm_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
             QtGui.QMessageBox.warning(self, self.trUtf8("Error"),
                     self.trUtf8("Could not write to file '{0}':\n{1}.").format(file_name, asm_file.errorString()))
             return False
@@ -687,6 +725,30 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def doQuit(self):
         "Quits the program"
         self.close()
+
+
+
+    #################################################################################
+    # Edit menu actions
+    #################################################################################
+
+    def do_Undo(self):
+        self.ui.sourceCodeEditor.undo()
+
+    def doRedo(self):
+        self.ui.sourceCodeEditor.redo()
+
+    def doCut(self):
+        self.ui.sourceCodeEditor.cut()
+
+    def doCopy(self):
+        self.ui.sourceCodeEditor.copy()
+
+    def doPaste(self):
+        self.ui.sourceCodeEditor.paste()
+
+    def doSelect_All(self):
+        self.ui.sourceCodeEditor.selectAll()
 
 
     #################################################################################
@@ -857,7 +919,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     def parar(self):
         QtGui.QMessageBox.warning(self, self.trUtf8("Detener ejecución"),
                             self.trUtf8("Quieres detener la ejecución del programa?"), QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
-                            
+
 
     ## Acción asociada a actionLimpiar_Consola
     #
@@ -873,7 +935,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
     # Función para poner todos los registros a 0
     def limpiar_registros(self):
         self.mens.append(self.trUtf8("Limpiando registros"))
-     
+
     ## Acción asociada a actionRecargar
     #
     # Función para volver a ensamblar el archivo actual en el simulador
@@ -1010,7 +1072,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 # if memtype == ROM then load the program into the ARMSim tab
                 if memtype == 'ROM':
                     ninsts = int(nbytes/2) # Maximum number of instructions in the given ROM
-                    armsim_lines += ['@@ ----------------------------------------', 
+                    armsim_lines += ['@@ ----------------------------------------',
                                      '@@ DISASSEMBLED CODE STARTING AT {}'.format(hex_start),
                                      '@@ ----------------------------------------' ]
                     armsim_lines += self.parent.simulator.getDisassemble(hex_start, ninsts)
@@ -1116,4 +1178,3 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 QtGui.QMessageBox.warning(self, self.trUtf8("ARMSim set setting failed"), "\n{}\n".format(errmsg))
                 return False
         return True
-                                        
