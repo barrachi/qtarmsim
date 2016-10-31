@@ -22,7 +22,7 @@ the ARM platform is already bundled with QtARMSim. Finally, QtARMSim
 itself can be installed using the ``pip3`` command. (If after
 installing ``python3``, the ``pip3`` command is not available, it can
 be manually installed by saving `get-pip.py
-<https://raw.github.com/pypa/pip/master/contrib/get-pip.py>`_, and
+<https://bootstrap.pypa.io/get-pip.py>`_, and
 executing: ``sudo python3 get-pip.py``.)
 
 For example, on Ubuntu you can install QtARMSim, ARMSim and their
