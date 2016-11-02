@@ -1,8 +1,17 @@
 Changelog
 ---------
 
-0.3.9 (2016-09-19)
-^^^^^^^^^^^^^^^^^^
+0.3.11 (2016-10-30)
+^^^^^^^^^^^^^^^^^^^
+
+- The Edit menu actions have been implemented.
+- Settings values are now automatically stripped to avoid errors due to
+  misplaced spaces.
+- ARMSim: updated firmware to correct a bug on sdivide subroutine.
+
+
+0.3.10 (2016-09-19)
+^^^^^^^^^^^^^^^^^^^
 
 - ARMSim: updated firmware to provide a signed division function.
 
@@ -10,7 +19,7 @@ Changelog
 0.3.8 (2016-09-19)
 ^^^^^^^^^^^^^^^^^^
 
-- Bug corrected: waiting spinner ocluded File and Edit menus.
+- Bug corrected: waiting spinner occluded File and Edit menus.
 
 
 0.3.7 (2016-09-18)
@@ -40,7 +49,7 @@ Changelog
   Windows versions; and (iii) the method used to compare whether
   memory blocks where not defined has been changed to avoid errors on
   Ruby with version >= 2.3.
-  
+
 
 0.3.4 (2016-01-21)
 ^^^^^^^^^^^^^^^^^^
