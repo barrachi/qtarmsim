@@ -108,7 +108,7 @@ please follow the next steps:
 
 3. Install Ruby::
 
-     sudo port install rubi23
+     sudo port install ruby23
 
 4. Install PySide::
 
