@@ -2,18 +2,18 @@ Instructions
 ============
 
 The files in this directory are used to automatically grab the icons
-required by QtARMSim from the oxygen iconset.
+required by QtARMSim from the breeze iconset.
 
 For doing this, you should run the following commands in order::
 
-    $ ./get_oxygen_icons.sh
-    $ ./create_oxygen_qrc.sh
+    $ ./get_breeze_icons.sh
+    $ ./create_breeze_qrc.sh
 
 
 Requirements
 ============
 
-The oxygen iconset should be installed on '/usr/share/icons/oxygen'.
+The breeze iconset should be installed on '/usr/share/icons/breeze'.
 
 
 Credits
@@ -22,5 +22,5 @@ Credits
 The next files are from the Oxygen Icons by Oxygen Team package
 (https://github.com/pasnox/oxygen-icons-png):
 
-  * create_oxygen_qrc.sh (based on create_qrc.sh)
+  * create_breeze_qrc.sh (based on create_qrc.sh)
   * qrcgen.py (as is)

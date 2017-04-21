@@ -428,9 +428,9 @@
   </widget>
   <action name="actionWhats_This">
    <property name="icon">
-    <iconset theme="system-help">
+    <iconset theme="help-whatsthis">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/categories/system-help.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/help-whatsthis.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>What's &amp;This?</string>
@@ -449,7 +449,7 @@
    <property name="icon">
     <iconset theme="help-about">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/help-about.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>About QtARMSim</string>
@@ -465,7 +465,7 @@
    <property name="icon">
     <iconset theme="help-contents">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/help-contents.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/22/help-contents.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>QtARMSim &amp;Help</string>
@@ -478,7 +478,7 @@
    <property name="icon">
     <iconset theme="help-about">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/help-about.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/help-about.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>About ARMSim</string>
@@ -488,7 +488,7 @@
    <property name="icon">
     <iconset theme="document-new">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/document-new.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/document-new.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;New...</string>
@@ -501,7 +501,7 @@
    <property name="icon">
     <iconset theme="document-open">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/document-open.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/document-open.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Open...</string>
@@ -517,7 +517,7 @@
    <property name="icon">
     <iconset theme="document-save">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/document-save.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/document-save.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -530,7 +530,7 @@
    <property name="icon">
     <iconset theme="document-save-as">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/document-save-as.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/document-save-as.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Save &amp;As...</string>
@@ -540,7 +540,7 @@
    <property name="icon">
     <iconset theme="application-exit">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/application-exit.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/application-exit.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -568,7 +568,7 @@
    <property name="icon">
     <iconset theme="system-run">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/system-run.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/system-run.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Run</string>
@@ -581,7 +581,7 @@
    <property name="icon">
     <iconset theme="debug-step-into">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/debug-step-into.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/debug-step-into.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Step &amp;Into</string>
@@ -662,7 +662,7 @@
    <property name="icon">
     <iconset theme="edit-undo">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/edit-undo.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/edit-undo.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Undo</string>
@@ -675,7 +675,7 @@
    <property name="icon">
     <iconset theme="edit-redo">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/edit-redo.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/edit-redo.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Re&amp;do</string>
@@ -688,7 +688,7 @@
    <property name="icon">
     <iconset theme="edit-cut">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/edit-cut.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/edit-cut.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Cu&amp;t</string>
@@ -701,7 +701,7 @@
    <property name="icon">
     <iconset theme="edit-copy">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/edit-copy.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/edit-copy.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Copy</string>
@@ -714,7 +714,7 @@
    <property name="icon">
     <iconset theme="edit-paste">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/edit-paste.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/edit-paste.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>&amp;Paste</string>
@@ -727,7 +727,7 @@
    <property name="icon">
     <iconset theme="edit-select-all">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/edit-select-all.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/edit-select-all.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Select &amp;All</string>
@@ -751,7 +751,7 @@
    <property name="icon">
     <iconset theme="debug-step-over">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/debug-step-over.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/debug-step-over.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Step &amp;Over</string>
@@ -767,7 +767,7 @@
    <property name="icon">
     <iconset theme="view-refresh">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/view-refresh.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/32/view-refresh.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Re&amp;start</string>
@@ -783,7 +783,7 @@
    <property name="icon">
     <iconset theme="debug-run">
      <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:/themes/oxygen/48x48/actions/debug-run.png</normalon>../../../../../../.designer/backup</iconset>
+     <normalon>:themes/breeze/24/debug-run.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Resu&amp;me</string>

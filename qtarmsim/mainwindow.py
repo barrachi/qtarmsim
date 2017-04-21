@@ -32,7 +32,7 @@ from . model.memorymodel import MemoryModel
 from . model.memorybywordproxymodel import MemoryByWordProxyModel
 from . model.memorydumpproxymodel import MemoryDumpProxyModel
 from . model.registersmodel import RegistersModel
-from . res import main_rc, oxygen_rc  # @UnusedImport
+from . res import main_rc, breeze_rc # oxygen_rc  # @UnusedImport
 from . ui.mainwindow import Ui_MainWindow
 from . widget.armcodeeditor import ARMCodeEditor
 from . window.br import Breakpoi
@@ -992,13 +992,13 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def welcome_message(self):
         return "<b>QtARMSim " + self.trUtf8("version") + " " + __version__ + "</b><br></br>\n" + \
-                 "(c) 2014-16 Sergio Barrachina Mir<br></br>\n" + \
+                 "(c) 2014-17 Sergio Barrachina Mir<br></br>\n" + \
                  self.trUtf8("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
                 "<p><b>" + self.trUtf8("Version") + " " + __version__ + "</b></p>" + \
-                "<p>" + "(c) 2014-16 Sergio Barrachina Mir" + "</p>" + \
+                "<p>" + "(c) 2014-17 Sergio Barrachina Mir" + "</p>" + \
                 "<p>" + "<a href='http://lorca.act.uji.es/projects/qtarmsim/'>http://lorca.act.uji.es/projects/qtarmsim/</a>" + "</p>" + \
                 "<p></p>" + \
                 "<p>" + self.trUtf8("Running on ") + \
@@ -1011,7 +1011,8 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 "<p></p>" + \
                 self.trUtf8("<p>Initial development of QtARMSim was based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.</p>") + \
                 self.trUtf8("<p>Most of the ARM keywords and directives used on the assembler editor syntax highlighter are from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik.</p>") + \
-                self.trUtf8("<p>The font used at the LCD Display is 'lcd plus' by SaintGeorge.</p>") + \
+                self.trUtf8("<p>GUI icons from the KDE Breeze theme icons.</p>") + \
+                self.trUtf8("<p>The LCD Display font is 'lcd plus' by SaintGeorge.</p>") + \
                 "</html>"
 
     def doAbout_Qt_ARMSim(self):
