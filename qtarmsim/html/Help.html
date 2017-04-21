@@ -14,13 +14,13 @@
 
 <body>
   <h1>QtARMSim User Manual</h1>
-  
+
   <p><b>Table of contents</b></p>
 
   <p><a href="#Firmware">1. ARMSim firmware API</a><br/></p>
   <!--- &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Archivo">1.1 Menu
   File</a><br/> -->
-  
+
 
   <h2><a name="Firmware"></a>1. ARMSim firmware API</h2>
 
@@ -54,7 +54,7 @@
   r0 and the remainder in r1. The remainder always has the sign of the
   dividend ─unless the division is exact─.</p>
 
-  <p>If r1 is 0 both quotient and remainder will be 0xFFFFFFFF which
+  <p>If r1 is 0 both quotient and remainder will be 0x7FFFFFFF which
   is an impossible result for a correct 32 bit division.</p>
 
   <p>If the dividend is 0x80000000 and the divisor is -1 the quotient
@@ -156,6 +156,6 @@
   <p>Does not verify if the coordinates are inside or outside the
   display; nor if the number is printed in two rows
   or finishes out of the display area.</p>
-  
+
 </body>
 </html>
