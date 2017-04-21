@@ -33,7 +33,7 @@ from .common import InputToHex, getMonoSpacedFont
 
 
 class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
-    
+
     @QtCore.Slot(QtCore.QModelIndex, QtCore.QModelIndex)
     def sourceDataChanged(self, topLeft, bottomRight):
         self.dataChanged.emit(self.mapFromSource(topLeft), \
@@ -47,16 +47,15 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
         # Set font
         id = QtGui.QFontDatabase.addApplicationFont(":/fonts/lcd plus.ttf")
         self.qFont = QtGui.QFont("lcd plus")
-        self.qFont.setPointSize(24)
-        #self.qFont.setBold(True)
+        self.myFontPointSize = 24
+        self.qFont.setPointSize(self.myFontPointSize)
         # Set brush
         self.qBrush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 30), Qt.SolidPattern)
-        # 120, 174, 77, 0), Qt.SolidPattern)
         # Initial values of LCDRows, LCDColumns, and memoryBankRow
         self.LCDRows = 0
         self.LCDColumns = 0
         self.memoryBankRow = -1
-        
+
     def setSourceModel(self, model, hexStartAddress, LCDColumns, LCDRows):
         super(MemoryLCDProxyModel, self).setSourceModel(model)
         self.hexStartAddress = hexStartAddress
@@ -79,7 +78,7 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
             self.dataChanged.emit(self.createIndex(0,0), self.createIndex(self.LCDRows-1, self.LCDColumns-1))
 
     def mapFromSource(self, index):
-        # If index is root or a memory bank item, return QModelIndex() 
+        # If index is root or a memory bank item, return QModelIndex()
         if index == QtCore.QModelIndex() or index.parent() == QtCore.QModelIndex or self.memoryBankRow == -1:
             return QtCore.QModelIndex()
         # At this point, index should point to a memory address
@@ -121,7 +120,7 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
             return chr(n)
         else:
             return '·'
-        
+
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             if self.memoryBankRow != -1 and self.mapToSource(index).isValid():
@@ -136,11 +135,17 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
             return Qt.AlignCenter
         else:
             return None
-         
+
     def headerData(self, section, orientation, role):
         return None
- 
+
     def flags(self, index):
         if not index.isValid():
             return False
         return Qt.ItemIsEnabled
+
+    def changeFontSize(self, incr):
+        self.myFontPointSize += incr
+        if self.myFontPointSize < 10:
+            self.myFontPointSize = 10
+        self.qFont.setPointSize(self.myFontPointSize)
