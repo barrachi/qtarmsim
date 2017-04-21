@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+inkscape tarjeta_anverso.svg --export-dpi=600 --export-pdf=tarjeta_anverso.pdf
+
+inkscape tarjeta_reverso.svg --export-dpi=600 --export-pdf=tarjeta_reverso.pdf
