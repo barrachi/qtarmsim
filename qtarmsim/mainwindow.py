@@ -227,7 +227,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         font.setStyleHint(QtGui.QFont.TypeWriter)
         if not QtGui.QFontInfo(font).fixedPitch():
             font.setStyleHint(QtGui.QFont.Monospace)
-        font.setPointSize(10)
+        font.setPointSize(QtGui.QFont().pointSize()) # Using the system default font point size
         self.flagsText.setFont(font)
         self.flagsText.setToolTip("<b>Condition flag bits in the Application Processor Status Register</b>"
                                   "<p>Negative: The N flag is set by an instruction if the result is negative.</p>"

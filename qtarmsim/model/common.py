@@ -24,7 +24,7 @@ class InputToHex(QtCore.QObject):
     Class that handles the conversion between a user input value and an
     hexadecimal representation of that input.
     """
-    
+
 
     def html_error(self, err_msg):
         return self.trUtf8("""
@@ -40,18 +40,18 @@ class InputToHex(QtCore.QObject):
         </ul>
         """).format(err_msg)
 
-        
+
     def convert(self, text, bits = 32):
         """
         Converts the given text to an hexadecimal value with 8 digits.
-        
+
         The following kinds of conversion are supported:
-    
+
          - from a number in base 10, 16, 2, or 8. The number must be between
             [-MAX_NEG, +MAX_POS].
-        
+
          - from an UTF8 string using the format '[:alnum:]*' or "[:alnum:]*".
-         
+
         @param text: a string representing the chars or the number to be represented
         @param bits: number of bits allowed
 
@@ -106,5 +106,5 @@ def getMonoSpacedFont():
     font.setStyleHint(QtGui.QFont.TypeWriter)
     if not QtGui.QFontInfo(font).fixedPitch():
         font.setStyleHint(QtGui.QFont.Monospace)
-    font.setPointSize(10)
+    font.setPointSize(QtGui.QFont().pointSize()) # Using the system default font point size
     return font

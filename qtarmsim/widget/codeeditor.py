@@ -197,7 +197,7 @@ class CodeEditor(QtGui.QPlainTextEdit):
         self.myFont.setStyleHint(QtGui.QFont.TypeWriter)
         if not QtGui.QFontInfo(self.myFont).fixedPitch():
             self.myFont.setStyleHint(QtGui.QFont.Monospace)
-        self.myFontPointSize = 10
+        self.myFontPointSize = QtGui.QFont().pointSize() # Using the system default font point size
         self.myFont.setPointSize(self.myFontPointSize)
         self.setFont(self.myFont)
         self.setTabStopWidth(8 * self.fontMetrics().width('9'));
