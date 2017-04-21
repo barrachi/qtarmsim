@@ -189,9 +189,15 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
 
     def extendUi(self):
         "Extends the Ui with new objects, links the views with their models, and tabifies bottom dock widgets"
-        # On Mac OS X set native menu bar property to False (otherwise it is not shown)
+
+        # Mac OS X quirks
         if sys.platform == 'darwin':
-            self.ui.menubar.setNativeMenuBar(False)
+            # On Mac OS X there are two options to display the menu bar (o no menu bar will be shown):
+            # 1. Set the native menu bar property to False (self.ui.menubar.setNativeMenuBar(False)):
+            #    The menu bar will be displayed on top of the tool bar (as in KDE)
+            # 2. Set the parent of the menu bar to None (self.ui.menubar.setParent(None)):
+            #    The menu bar will be displayed on the system menu
+            self.ui.menubar.setParent(None)
 
         # Add an ARMCodeEditor to tabSource
         self.ui.sourceCodeEditor = ARMCodeEditor(self.ui.tabSource)
