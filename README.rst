@@ -11,6 +11,6 @@ It is based on a previous work of Gloria Edo Piñana, who developed
 is the graphical part of what was planned to be a Qt graphical
 interface to the SPIM simulator.
 
-The ARMSim ARM simulator, Copyright (c) 2014-16 by Germán Fabregat, is
+The ARMSim ARM simulator, Copyright (c) 2014-17 by Germán Fabregat, is
 bundled with QtARMSim.  It can be found on the ``armsim/``
 subdirectory.

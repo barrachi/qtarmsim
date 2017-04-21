@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+0.3.12 (2017-04-21)
+^^^^^^^^^^^^^^^^^^^
+
+- Changed the icon set to the KDE Breeze one.
+- LCD Display not rescaling correctly on some desktop environments fixed.
+- LCD display can now be zoomed with CTRL+mouse wheel.
+- Editors and panels now honor the system default point size.
+- Now the menu bar is displayed on the system menu bar on Mac OS X.
+
+
 0.3.11 (2016-10-30)
 ^^^^^^^^^^^^^^^^^^^
 
@@ -13,7 +23,7 @@ Changelog
 0.3.10 (2016-09-19)
 ^^^^^^^^^^^^^^^^^^^
 
-- ARMSim: updated firmware to provide a signed division function.
+- ARMSim: updated firmware to provide a signed division subroutine.
 
 
 0.3.8 (2016-09-19)
@@ -97,7 +107,7 @@ Changelog
 0.2.7 (2014-11-05)
 ^^^^^^^^^^^^^^^^^^
 
-- Last revision of the first functional QtARMSim version. This version
-  was used on the first semester of an introductory course on Computer
-  Architecture at Jaume I University. Last version with PyQt and
-  QScintilla dependencies.
+- Last revision of the first functional QtARMSim implementation. This
+  implementation  was used on the first semester of an introductory
+  course on Computer Architecture at Jaume I University. This is the
+  last version of that implementation, which used PyQt and QScintilla.

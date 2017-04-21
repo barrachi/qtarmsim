@@ -97,10 +97,9 @@ And the ARMSim ruby source code under: ``C:\Python34\Lib\site-packages\qtarmsim\
 To install QtARMSim, ARMSim, and their dependencies on Mac OS X,
 please follow the next steps:
 
-1. Install the MacPorts package manager
-   (https://www.macports.org/). Although the next instructions rely on
-   having MacPorts, the Homebrew package manager (http://brew.sh/)
-   could be used instead.
+1. Install the MacPorts package manager (https://www.macports.org/) or
+   the Homebrew package manager (http://brew.sh/). The next instructions
+   are for the MacPorts package manager.
 
 2. Install Python 3.4::
 
@@ -117,7 +116,6 @@ please follow the next steps:
 5. Install QtARMSim::
 
      sudo pip3 install QtARMSim
-
 
 
 1.4 Installing the GNU Gcc toolchain targeting the ARM EABI
@@ -181,7 +179,6 @@ On Windows::
 On Mac OS X::
 
   sudo pip3 install --upgrade qtarmsim
-
 
 
 4. Uninstalling QtARMSim
