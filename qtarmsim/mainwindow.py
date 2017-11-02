@@ -728,6 +728,19 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         # Return
         return True
 
+
+    def doPrint(self):
+        "Prints the current ARM assembler source file or the disassembled code"
+        printer = PySide.QtGui.QPrinter(PySide.QtGui.QPrinter.HighResolution)
+        printDialog = PySide.QtGui.QPrintDialog(printer, self)
+        printDialog.setOption(PySide.QtGui.QAbstractPrintDialog.PrintToFile, True)
+        if printDialog.exec_() == PySide.QtGui.QDialog.Accepted:
+            if self.ui.tabWidgetCode.currentIndex() == 0:
+                self.ui.sourceCodeEditor.print_(printer)
+            else:
+                self.ui.simCodeEditor.print_(printer)
+
+
     def doQuit(self):
         "Quits the program"
         self.close()
