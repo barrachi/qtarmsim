@@ -294,6 +294,8 @@ class ELF_File < File
   def relocate
     $warn = Array.new
     symbolTable = Hash.new
+    #
+    bindTable = Hash.new
     code =  @sections[@wks['.text']].data.nil? ? BLOCK0 : @sections[@wks['.text']].data.dup
     data = @sections[@wks['.data']].data.nil? ? [0, 0, 0, 0] : @sections[@wks['.data']].data.dup
     bssdir = @wks_orig['.bss']
@@ -333,6 +335,7 @@ class ELF_File < File
       if !symaddress.nil?
         symaddress = symaddress & 0xFFFFFFFE if symbol.data[:info] & 0x0F == STT_FUNC
         symbolTable[symname] = symaddress
+        bindTable[symname] = bind
       end
     end
     @relocations.each_with_index do |rel, idx|
@@ -401,7 +404,7 @@ class ELF_File < File
     p symbolTable
     p bcode
     p bdata
-    return [bcode, bdata, symbolTable]
+    return [bcode, bdata, symbolTable, bindTable]
   end
 
 end

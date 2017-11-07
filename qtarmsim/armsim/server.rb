@@ -13,7 +13,7 @@ require_relative 'memory'
 require_relative 'memory_block'
 require_relative 'read_ELF'
 
-FIRMWARE = 'C:/Users/G/Desktop/Firmware.o'
+FIRMWARE = 'C:/Users/fabregat/Desktop/Firmware.o'
 GCC = 'C:/devkitPro/devkitARM/bin/arm-none-eabi-gcc.exe'
 CL1 = '-mcpu=cortex-m1 -mthumb -c'
 CL3 = '-mcpu=cortex-m3 -mthumb -c'
@@ -929,6 +929,11 @@ class ServerApp
     @procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
     $firmware = blocks[0]
     $firmTable = blocks[2]
+    #p blocks[3]
+    blocks[3].each do |key, bind|
+      $firmTable.delete(key) unless bind == 1
+    end
+    #p $firmTable
     $server = MainServer.new(@procesador, puerto)
     $compiler = GCC
     $args = CL1
