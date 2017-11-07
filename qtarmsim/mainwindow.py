@@ -1032,6 +1032,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
                 self.trUtf8("<p>Most of the ARM keywords and directives used on the assembler editor syntax highlighter are from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik.</p>") + \
                 self.trUtf8("<p>GUI icons from the KDE Breeze theme icons.</p>") + \
                 self.trUtf8("<p>The LCD Display font is 'lcd plus' by SaintGeorge.</p>") + \
+                self.trUtf8("<p>Firmaware software floating point support thanks to Qfplib: an ARM Cortex-M0 floating-point library in 1 kbyte.</p>") + \
                 "</html>"
 
     def doAbout_Qt_ARMSim(self):
