@@ -469,7 +469,7 @@ module ThumbII_Defs
     i2 = (s == j2) ? 1 : 0
     imm3 = (s * 4 + i1 * 2 + i2) << 21
     imm = (imm3 & 0x0E00000) | (imm10 & 0x1FF800) | imm11
-    imm = (s == 1) ? 0 - ((imm^0xEFFFFF) + 1) : imm
+    imm = (s == 1) ? 0 - (((imm^0xEFFFFF) + 1) & 0xEFFFFF) : imm
     if $address != nil
       busca = $address + 4 + imm * 2
       res = $symbol_table.key(busca) if $use_symbols
