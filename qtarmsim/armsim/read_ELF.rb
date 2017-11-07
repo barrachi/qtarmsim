@@ -301,7 +301,8 @@ class ELF_File < File
     @symbols.each do |symbol|
       symsection = symbol.data[:shndx]
       bind = (symbol.data[:info] >> 4) & 0x0F
-      if bind == 1
+     # if bind == 1
+     if (bind == 1) && (symsection == 0)
         if @externSymbols.nil? || @externSymbols[symbol.name].nil?
           $warn << "Símbolo «%s» no definido." % symbol.name
         end
@@ -369,6 +370,20 @@ class ELF_File < File
             result = ((immediate + (symaddress - poffset)) & 0xFFFFFFFF) >> 1
             #result = (addend & 0xF800F800) | (result & 0x7FF) | ((result << 5) & 0x7FF0000)
             result = (addend & 0xF800F800) | ((result & 0x7FF) << 16) | ((result  & 0x3FF800) >> 11)
+            p "result: %08X" % result
+          when 102
+            p "addend: %08X" % addend
+            p "symaddress: %08X" % symaddress
+            p "offset: %08X" % poffset
+            #result = addend + (((symaddress - poffset) & 0xFFE) >> 1)
+            result = addend + ((symaddress - poffset) >> 1)
+            p "result: %08X" % result
+          when 103
+            p "addend: %08X" % addend
+            p "symaddress: %08X" % symaddress
+            p "offset: %08X" % poffset
+            #result = addend + (((symaddress - poffset) & 0x1FE) >> 1)
+            result = addend + ((symaddress - poffset) >> 1)
             p "result: %08X" % result
           else
             result = addend
