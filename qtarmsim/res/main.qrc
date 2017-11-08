@@ -1,19 +1,11 @@
 <!DOCTYPE RCC><RCC version="1.0">
-    <qresource prefix="" > 
+    <qresource prefix="" >
       <file>images/logo.svg</file>
       <file>images/lcd.png</file>
       <file>images/ajax-loader.gif</file>
     </qresource>
-    
+
     <qresource prefix="" >
       <file>fonts/lcd plus.ttf</file>
     </qresource>
-
-    <qresource prefix="">
-      <file>dictionary/reg.txt</file>
-      <file>dictionary/data.txt</file>
-      <file>dictionary/text.txt</file>
-      <file>dictionary/mens.txt</file>
-    </qresource>
 </RCC>
-

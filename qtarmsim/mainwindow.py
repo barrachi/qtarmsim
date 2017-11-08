@@ -21,8 +21,8 @@ import platform
 import shutil
 import sys
 
-from PySide import QtCore, QtGui
 import PySide
+from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
 
 
@@ -35,15 +35,8 @@ from . model.registersmodel import RegistersModel
 from . res import main_rc, breeze_rc # oxygen_rc  # @UnusedImport
 from . ui.mainwindow import Ui_MainWindow
 from . widget.armcodeeditor import ARMCodeEditor
-from . window.br import Breakpoi
-from . window.co import Conso
-from . window.ej import Ejecutar
 from . window.help import HelpWindow
-from . window.im import Imprimir
-from . window.mu import Multipasos
-from . window.op import Opciones
 from . window.preferencesdialog import PreferencesDialog
-from . window.va import Valor
 from . window.connectprogressbardialog import ConnectProgressBarDialog
 from . modulepath import module_path
 from . window.runprogressbardialog import RunProgressBarDialog
@@ -140,12 +133,7 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         self.setFileName("")
         # Set the application icon
         self.setWindowIcon(QtGui.QIcon(":/images/logo.svg"))
-        # Breakpoint dialog initialization
-        self.br = Breakpoi(self)
-        # Breakpoints list
-        self.ptosrup = QtGui.QListWidget(self.br)
-        # Console and help windows initialization
-        self.consoleWindow = Conso()
+        # Help windows initialization
         self.helpWindow = HelpWindow()
         # Connect actions
         self.connectActions()
@@ -883,92 +871,6 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
             if self.simulator and self.simulator.connected:
                 self.sendSettingsToARMSim()
 
-    ## Acción asociada a actionOpciones2
-    #
-    # Abre el diálogo de opciones del Spim
-    def opciones_2(self):
-        opc = Opciones(self)
-        opc.exec_()
-
-    ## Acción asociada a actionImprimir
-    #
-    # Abre el diálogo que permite imprimir valores en el panel de mensajes
-    def imp(self):
-        im = Imprimir(self)
-        im.exec_()
-
-
-    ## Acción asociada a actionEjecutar
-    #
-    # Abre el diálogo de parámetros de ejecución del simulador
-    def ejecutar(self):
-        eje = Ejecutar(self)
-        eje.exec_()
-
-    ## Acción asociada a actionEjecuci_n_multipasos
-    #
-    # Abre el diálogo para seleccionar el número de pasos a ejecutar
-    def ejecutar_multi(self):
-        ej = Multipasos(self)
-        ej.exec_()
-
-
-    ## Acción asociada a actionEjecuci_n_pasos
-    def ejecutar_single(self):
-        self.mens.append(self.trUtf8("Ejecutando instrucción"))
-
-    ## Acción asociada a actionPunto_de_corte
-    #
-    # Abre el diálogo que permite añadir y suprimir puntos de ruptura
-    def cortes(self):
-        self.br.layout.addWidget(self.ptosrup)
-        self.br.exec_()
-
-    ## Acción asociada a actionFijar_valor
-    #
-    # Abre el diálogo que permite asignar un valor a un registro
-    def fijar_valor(self):
-        va = Valor(self)
-        va.exec_()
-
-
-    ## Acción asociada al botón de parar ejecución de la barra de herramientas
-    #
-    # Función para parar la ejecución en curso
-    def parar(self):
-        QtGui.QMessageBox.warning(self, self.trUtf8("Detener ejecución"),
-                            self.trUtf8("Quieres detener la ejecución del programa?"), QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No | QtGui.QMessageBox.Escape)
-
-
-    ## Acción asociada a actionLimpiar_Consola
-    #
-    # Función para limpiar la consola
-    def conso_clear(self):
-        self.mens.append(self.trUtf8("Limpiando consola"))
-        self.consoleWindow.consolEdit.clear()
-
-
-
-    ## Acción asociada a actionLimpiar_registros
-    #
-    # Función para poner todos los registros a 0
-    def limpiar_registros(self):
-        self.mens.append(self.trUtf8("Limpiando registros"))
-
-    ## Acción asociada a actionRecargar
-    #
-    # Función para volver a ensamblar el archivo actual en el simulador
-    def recargar(self):
-        self.mens.append(self.trUtf8("Recargando el archivo actual"))
-
-
-    ## Acción asociada a actionReinicializar
-    #
-    # Función para restaurar el contenido de los registros y la memoria
-    def reinicializar(self):
-        self.mens.append(self.trUtf8("Restaurando contenidos de registros y memoria"))
-
-
     def closeEvent(self, event):
         "Called when the main window is closed. Saves state and performs clean up actions."
         if self.checkCurrentFileState() == QtGui.QMessageBox.Cancel:
@@ -981,33 +883,25 @@ class QtARMSimMainWindow(QtGui.QMainWindow):
         if self.simulator and self.simulator.connected:
             self.simulator.disconnect()
         # Close windows
-        self.consoleWindow.close()
         self.helpWindow.close()
         # Accept event
         event.accept()
 
-
     def showEvent(self, event):
         "Method called when the show event is received"
         super(QtARMSimMainWindow, self).showEvent(event)
-        if self.consoleWindow.isVisible() == True:
-            self.consoleWindow.showNormal()
         if self.helpWindow.isVisible() == True:
             self.helpWindow.showNormal()
 
     def hideEvent(self, event):
         "Method called when the hide event is received, minimizes the other app windows"
         super(QtARMSimMainWindow, self).hideEvent(event)
-        if self.consoleWindow.isVisible() == True:
-            self.consoleWindow.showMinimized()
         if self.helpWindow.isVisible() == True:
             self.helpWindow.showMinimized()
-
 
     def doWhats_This(self):
         "Activates the What's This? mode"
         QtGui.QWhatsThis.enterWhatsThisMode()
-
 
     def welcome_message(self):
         return "<b>QtARMSim " + self.trUtf8("version") + " " + __version__ + "</b><br></br>\n" + \
