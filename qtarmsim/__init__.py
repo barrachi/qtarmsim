@@ -25,10 +25,11 @@ import os
 import signal
 import sys
 
-from PySide import QtGui
+import PySide
+from PySide import QtGui, QtSvg, QtXml # @warning: QtSvg and QtXml must be imported for SVG icons support
 
 
-from . mainwindow import QtARMSimMainWindow 
+from . mainwindow import QtARMSimMainWindow
 
 
 def _help():
@@ -70,7 +71,13 @@ def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     # Create the application
-    app = QtGui.QApplication(sys.argv)
+    qApp = QtGui.QApplication(sys.argv)
+    # ------------------------------------------------------------
+    #  In order to use SVG images on @##!![] Windows, you need to import QtSvg and QtXml and also ensure that the plugins directory is imported properly.
+    #  https://stackoverflow.com/questions/9933358/pyside-svg-image-formats-not-found
+    # ------------------------------------------------------------
+    for plugins_dir in [os.path.join(p, "plugins") for p in PySide.__path__]:
+        qApp.addLibraryPath(plugins_dir)
     # Process the command line options
     (file_name, verbose) = _getopts()
     # Create the main window and show it
@@ -80,8 +87,8 @@ def main():
     if file_name:
         main_window.readFile(file_name)
     # Enter the main loop of the application
-    sys.exit(app.exec_())
-    
-    
+    sys.exit(qApp.exec_())
+
+
 if __name__ == "__main__":
     main()
