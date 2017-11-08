@@ -1,6 +1,21 @@
 Changelog
 ---------
 
+0.3.14 (2017-11-08)
+^^^^^^^^^^^^^^^^^^^
+
+- Added SVG icon support explicitly: the toolbar icons now will be
+  also shown on Windows.
+- ARMSyntaxHighlighter rules are now generated only the first time.
+- ARMSim:
+  + Added support for floating point operations including Qfplib: an
+    ARM Cortex-M0 floating-point library in 1 kbyte.
+  + Corrected minor bug: .global declared labels generated a linking
+    error.
+  + Corrected minor bug: negative displacements on 'bl' instructions
+    where incorrectly displayed.
+
+
 0.3.13 (2017-11-02)
 ^^^^^^^^^^^^^^^^^^^
 
@@ -11,7 +26,8 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^
 
 - Changed the icon set to the KDE Breeze one.
-- LCD Display not rescaling correctly on some desktop environments fixed.
+- LCD Display not rescaling correctly on some desktop environments
+  fixed.
 - LCD display can now be zoomed with CTRL+mouse wheel.
 - Editors and panels now honor the system default point size.
 - Now the menu bar is displayed on the system menu bar on Mac OS X.
@@ -21,8 +37,8 @@ Changelog
 ^^^^^^^^^^^^^^^^^^^
 
 - The Edit menu actions have been implemented.
-- Settings values are now automatically stripped to avoid errors due to
-  misplaced spaces.
+- Settings values are now automatically stripped to avoid errors due
+  to misplaced spaces.
 - ARMSim: updated firmware to correct a bug on sdivide subroutine.
 
 

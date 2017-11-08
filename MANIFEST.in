@@ -1,6 +1,9 @@
 # Additional files to be included in the distribution
 
-include settings.py setup_extra.py 
+include settings.py setup_extra.py
 include CHANGELOG.rst DEVELOPMENT.rst README.rst INSTALL.rst
 include GPL.txt LICENSE.txt
 include qtarmsim.ico
+
+prune tmp
+prune third_party
