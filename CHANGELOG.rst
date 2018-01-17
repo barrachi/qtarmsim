@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+0.3.15 (2018-1-17)
+^^^^^^^^^^^^^^^^^^^
+ - Added support in the simulator to showing jump labels instead of
+   their addresses.
+ - Corrected errata on Qfp library acknowledgements.
+ - Removed legacy code from GlSpim.
+
+
 0.3.14 (2017-11-08)
 ^^^^^^^^^^^^^^^^^^^
 
