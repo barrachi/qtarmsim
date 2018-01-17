@@ -36,7 +36,7 @@ Errores = { orden: "Orden no reconocida\r\n",
             path: "El directorio no existe o no es correcto\r\n",
             exe: "El archivo no existe o no es ejecutable\r\n",
             file_s: "El archivo .s no existe\r\n",
-            errnoalign: "Acesso no alineado en dirección",
+            errnoalign: "Acceso no alineado a la dirección",
             errnoblock: "Memoria inexistente en dirección"
 }
 
@@ -161,7 +161,7 @@ end
 # @param [Array] entrada
 # @return [String]
 show_version = Proc.new { |entrada|
-  res = "V 1.3\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
+  res = "V 1.4\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
 }
 
 #show_register
@@ -590,6 +590,26 @@ config_path = Proc.new { |entrada|
   res = "OK\r\n"
 }
 
+#config_labels
+#-------------
+#Activa o desactiva el uso de etiquetas en el desensamblado
+# @param [Array] entrada
+# @return [String]
+
+config_labels = Proc.new { |entrada|
+  case entrada[0]
+    when 'TRUE'
+      $use_symbols = true
+      res = "OK\r\n"
+    when 'FALSE'
+      $use_symbols = false
+      res = "OK\r\n"
+    else
+      res = Errores[:args]
+  end
+  res
+}
+
 #sysinfo_memory
 #--------------
 #Devuelve la información de la memoria.
@@ -700,8 +720,9 @@ Set = { 'REGISTER' => [1, set_register, [:regname, 'WITH', :hexvalue]],
 }
 
 Config = { 'COMPILER' => [1, config_compiler, [:exe]],
-        'ARGS' => [1, config_args, [:cad]],
-        'PATH' => [1, config_path, [:path]]
+           'ARGS' => [1, config_args, [:cad]],
+           'PATH' => [1, config_path, [:path]],
+           'USELABELS' => [1, config_labels, [:keyword]]
 }
 
 Sysinfo = { 'MEMORY' => [1, sysinfo_memory, []]
