@@ -32,7 +32,7 @@ Changelog
 - LCD Display not rescaling correctly on some desktop environments
   fixed.
 - LCD display can now be zoomed with CTRL+mouse wheel.
-- Editors and panels now honor the system default point size.
+- Editors and panels now honour the system default point size.
 - Now the menu bar is displayed on the system menu bar on Mac OS X.
 
 0.3.11 (2016-10-30)
@@ -95,9 +95,9 @@ Changelog
 - Fixed an error on the Preferences Dialog which prevented to select
   the ``ARMSim directory`` and the ``Gcc ARM command line`` using the
   corresponding directory/file selector dialogs.
-- ARMSim. Fixed the simulation of shift instructions: only the 8 least
+- ARMSim: Fixed the simulation of shift instructions: only the 8 least
   significant bits are now used to obtain the shift amount.
-- ARMSim. Fixed the behaviour when memory outside the current memory
+- ARMSim.: Fixed the behaviour when memory outside the current memory
   map is accessed: each wrong access now raises a memory access error.
 - Bundled a reduced set of the GNU compiler toolchain. To reduce the
   package size, only those files actually required to assemble an
