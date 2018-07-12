@@ -15,7 +15,7 @@
 <body>
   <h1>QtARMSim User Manual</h1>
 
-  <p><b>Table of contents</b></p>
+  <p><strong>Table of contents</strong></p>
 
   <p><a href="#Firmware">1. ARMSim firmware API</a><br/></p>
   <!--- &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Archivo">1.1 Menu
@@ -27,7 +27,7 @@
   <p>This section describes the Application Programming Interface
   (API) of the ARMSim firmware, which
   provides <a href="#Arithmetic">arithmetic</a>
-  and <a href="#Display">display</a> functions.</p></p>
+  and <a href="#Display">display</a> functions.</p>
 
   <p>Please note that all the functions of the API follow the ARM
   convention for parameter passing and return. Thus, i) passed values
@@ -38,7 +38,7 @@
 
   <h3><a name="Arithmetic"></a>1.1 Arithmetic functions</h3>
 
-  <h4><tt>divide(unsigned int dividend, unsigned int divisor)</tt></h4>
+  <h4><samp>divide(unsigned int dividend, unsigned int divisor)</samp></h4>
 
   <p>Performs the 32 bits unsigned division dividend/divisor, where r0
   holds the dividend and r1 the divisor. The quotient is returned in
@@ -47,7 +47,7 @@
   <p>If r1 is 0 both quotient and remainder will be 0xFFFFFFFF which
   is an impossible result for a correct 32 bit division.</p>
 
-  <h4><tt>sdivide(int dividend, int divisor)</tt></h4>
+  <h4><samp>sdivide(int dividend, int divisor)</samp></h4>
 
   <p>Performs the 32 bits signed division dividend/divisor, where r0
   holds the dividend and r1 the divisor. The quotient is returned in
@@ -61,7 +61,7 @@
   returned is 0x80000000 as the positive range is exceeded. All the
   other combinations work as expected.</p>
 
-  <h4><tt>sqrt(unsigned int val)</tt></h4>
+  <h4><samp>sqrt(unsigned int val)</samp></h4>
 
   <p>Returns in r0 the positive, integer square root of the value
   passed in r0.</p>
@@ -69,18 +69,18 @@
 
   <h3><a name="Display"></a>1.2 Display functions</h3>
 
-  <h4><tt>cls()</tt></h4>
+  <h4><samp>cls()</samp></h4>
 
   <p>Clears the display by filling it with the space character. Does
   not require nor return any value.</p>
 
-  <h4><tt>fill(char c)</tt></h4>
+  <h4><samp>fill(char c)</samp></h4>
 
   <p>Fills the display with the character passed in the LSB of
   r0. Does not return any value.</p>
 
 
-  <h4><tt>printString(int column, int row, char *str)</tt></h4>
+  <h4><samp>printString(int column, int row, char *str)</samp></h4>
 
   <p>Shows the ASCIZ string whose address is passed in r2 starting at
   the display coordinates (column, row) where column is in r0 and row
@@ -93,7 +93,7 @@
   display; nor if the string is printed in two rows
   or finishes out of the display area.</p>
 
-  <h4><tt>printInt(int column, int row, int val)</tt></h4>
+  <h4><samp>printInt(int column, int row, int val)</samp></h4>
 
   <p>Shows the signed decimal value passed in r2 starting at the
   display coordinates (column, row) where column is in r0 and row in
@@ -107,7 +107,7 @@
   or finishes out of the display area.</p>
 
 
-  <h4><tt>printUInt(int column, int row, unsigned int val)</tt></h4>
+  <h4><samp>printUInt(int column, int row, unsigned int val)</samp></h4>
 
   <p>Shows the unsigned decimal value passed in r2 starting at the
   display coordinates (column, row) where column is in r0 and row in
@@ -120,7 +120,7 @@
   display; nor if the number is printed in two rows
   or finishes out of the display area.</p>
 
-  <h4><tt>printWord(int column, int row, unsigned int val)</tt></h4>
+  <h4><samp>printWord(int column, int row, unsigned int val)</samp></h4>
 
   <p>Shows the hexadecimal value of the word passed in r2 starting at
   the display coordinates (column, row) where column is in r0 and row
@@ -132,7 +132,7 @@
   display; nor if the number is printed in two rows
   or finishes out of the display area.</p>
 
-  <h4><tt>printHalf(int column, int row, unsigned int val)</tt></h4>
+  <h4><samp>printHalf(int column, int row, unsigned int val)</samp></h4>
 
   <p>Shows the hexadecimal value of the half word passed in r2
   starting at the display coordinates (column, row) where column is in
@@ -145,7 +145,7 @@
   or finishes out of the display area.</p>
 
 
-  <h4><tt>printByte(int column, int row, unsigned int val)</tt></h4>
+  <h4><samp>printByte(int column, int row, unsigned int val)</samp></h4>
 
   <p>Shows the hexadecimal value of the byte passed in r2 starting at
   the display coordinates (column, row) where column is in r0 and row

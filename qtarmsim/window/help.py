@@ -19,33 +19,32 @@
 import os
 import sys
 
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtWidgets
+
+from ..modulepath import module_path
+from ..ui.help import Ui_Help
 
 
-from .. modulepath import module_path
-from .. ui.help import Ui_Help
+class HelpWindow(QtWidgets.QWidget):
+    """Help window"""
 
-
-
-class HelpWindow(QtGui.QWidget):
-    "Help window"
-    
     def __init__(self, parent=None):
-        super(HelpWindow, self).__init__()
+        super(HelpWindow, self).__init__(parent)
         self.ui = Ui_Help()
         self.ui.setupUi(self)
         rect = self.contentsRect()
-        self.editor = QtGui.QTextBrowser(self)
+        self.editor = QtWidgets.QTextBrowser(self)
         self.editor.setReadOnly(1)
         self.editor.setAcceptRichText(1)
         self.editor.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
         self.editor.setOpenLinks(1)
         self.editor.setGeometry(rect)
         # @todo: check the following sentence
-        policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored,
-                                   QtGui.QSizePolicy.Ignored)
+        policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored,
+                                       QtWidgets.QSizePolicy.Ignored)
         self.editor.setSizePolicy(policy)
-        url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "html", self.trUtf8("Help.html")))
+        # noinspection PyTypeChecker
+        url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "html", self.tr("Help.html")))
         self.editor.setSource(url)
 
     def resizeEvent(self, event):
@@ -53,9 +52,10 @@ class HelpWindow(QtGui.QWidget):
         rect = self.contentsRect()
         self.editor.setGeometry(rect)
         event.accept()
-        
+
+
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     helpWindow = HelpWindow()
     helpWindow.show()
     sys.exit(app.exec_())

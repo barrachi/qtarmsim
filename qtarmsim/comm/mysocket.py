@@ -22,7 +22,6 @@ import sys
 
 
 class MySocket:
-
     MSGLEN = 1024
     NL = '\n'
     ORD_NL = 10
@@ -89,7 +88,7 @@ class MySocket:
         Returns True if the port was free when the test was conducted.
         """
         err = self.server_bind(port)
-        if err==0:
+        if err == 0:
             self.close_socket()
             return True
         else:
@@ -125,7 +124,6 @@ class MySocket:
             else:
                 break
 
-
     def receive_line(self):
         """
         Returns a line from the line received queue or gets a new one.
@@ -143,7 +141,7 @@ class MySocket:
             print("Contents:\n #{}#".format(chunk))
         data = chunk
         # Grab more chunks while the other end does not disconnect AND the received chunk does not end with \n
-        while len(chunk)!=0 and chunk[-1] != self.ORD_NL:
+        while len(chunk) != 0 and chunk[-1] != self.ORD_NL:
             chunk = self.conn.recv(self.MSGLEN)
             if self.verbose:
                 print("Received chunk of size: {}".format(len(chunk)))
@@ -154,7 +152,7 @@ class MySocket:
         except UnicodeDecodeError:
             msg = data.decode('latin1')
         lines = [l.strip() for l in msg.strip().replace('\r\n', '\n').split('\n') if l.strip() != ""]
-        if len(lines)>1:
+        if len(lines) > 1:
             self.pending_lines = lines[1:]
         if len(lines):
             line = lines[0]
@@ -179,7 +177,7 @@ class MySocket:
                 print("A time out error has occurred")
                 print("\n".join(lines))
                 raise
-            lines.append(line) # For debugging purposes only
+            lines.append(line)  # For debugging purposes only
             if line != 'EOF':
                 yield line
 
@@ -187,7 +185,7 @@ class MySocket:
         """
         Sends a line through the open connection.
         """
-        self.conn.sendall(bytes(msg, self.ENCODING)+b'\r\n')
+        self.conn.sendall(bytes(msg, self.ENCODING) + b'\r\n')
 
     def close_connection(self):
         """
@@ -205,7 +203,6 @@ class MySocket:
         self.sock.close()
         if self.verbose:
             print('Socket closed')
-
 
     def exit_signal_handler(self, signal, frame):
         """

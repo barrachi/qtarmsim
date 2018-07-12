@@ -16,6 +16,7 @@
 #                                                                         #
 ###########################################################################
 
-## RunTimeout exception
+
+# RunTimeout exception
 class RunTimeOut(Exception):
     pass

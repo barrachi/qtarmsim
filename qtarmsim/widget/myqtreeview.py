@@ -16,18 +16,19 @@
 #                                                                         #
 ###########################################################################
 
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtWidgets
 
-class MyQTreeView(QtGui.QTreeView):
-    
+
+class MyQTreeView(QtWidgets.QTreeView):
+
     def sizeHint(self):
         """
         If there is no model yet, just return a 0x0 size.
         Else, compute the total width and set the minimum and maximum sizes of the parent dock widget
         """
-        if self.model() == None:
-            return QtCore.QSize(0,0)
-        width=0
+        if self.model() is None:
+            return QtCore.QSize(0, 0)
+        width = 0
         my_vertical_scrollbar = self.verticalScrollBar()
         my_dock = self.parent().parent()
         self.resizeColumnToContents(0)
@@ -39,5 +40,5 @@ class MyQTreeView(QtGui.QTreeView):
             width += my_vertical_scrollbar.width()
         self.setMinimumSize(width, 0)
         # @todo: the extra width should be obtained automatically
-        my_dock.setMinimumWidth(width+15)
+        my_dock.setMinimumWidth(width + 15)
         return QtCore.QSize(width, 0)

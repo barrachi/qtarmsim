@@ -19,20 +19,20 @@
 
 import sys
 
-from PySide import QtCore, QtGui
-from . codeeditor import CodeEditor
-from . armsyntaxhighlighter import ARMSyntaxHighlighter
+from PySide2 import QtCore, QtGui, QtWidgets
+from .codeeditor import CodeEditor
+from .armsyntaxhighlighter import ARMSyntaxHighlighter
 
 
 class ARMCodeEditor(CodeEditor):
-    "CodeEditor with ARMSyntaxHighlighter"
+    """CodeEditor with ARMSyntaxHighlighter"""
 
     def __init__(self, parent=None, *args, **kwargs):
-        "ARMCodeEditor initialization"
+        """ARMCodeEditor initialization"""
         super(ARMCodeEditor, self).__init__(parent=parent, SyntaxHighlighterClass=ARMSyntaxHighlighter, *args, **kwargs)
 
     def _getKeywordsToHighlight(self):
-        "Returns which keywords should be highlighted on the text when the same keyword is under the cursor"
+        """Returns which keywords should be highlighted on the text when the same keyword is under the cursor"""
         registers = ['r{}'.format(n) for n in range(0, 16)] + ['sp', 'SP', 'lr', 'LR', 'pc', 'PC']
         # Labels
         labels = []
@@ -46,14 +46,12 @@ class ARMCodeEditor(CodeEditor):
         return registers + labels
 
 
-
-
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     armEditor = ARMCodeEditor()
     armEditor.setPlainText(open("../../examples/add.s").read())
     armEditor.setWindowTitle("ARM Code Editor Example")
     armEditor.setGeometry(QtCore.QRect(200, 200, 600, 400))
-    #armEditor.setReadOnly(True)
+    # armEditor.setReadOnly(True)
     armEditor.show()
     sys.exit(app.exec_())

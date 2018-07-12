@@ -19,49 +19,49 @@
 # Adapted from:
 # http://stackoverflow.com/questions/19442443/busy-indication-with-pyqt-progress-bar
 
-from PySide import QtGui, QtCore
+from PySide2 import QtCore, QtWidgets
 
 
-class ConnectProgressBarDialog(QtGui.QDialog):
+class ConnectProgressBarDialog(QtWidgets.QDialog):
 
     def __init__(self, simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort, parent=None):
         self.errmsg = ""
-        
+
         super(ConnectProgressBarDialog, self).__init__(parent)
         self.setWindowTitle("Connecting...")
-        self.layout = QtGui.QVBoxLayout(self)
-        
+        self.layout = QtWidgets.QVBoxLayout(self)
+
         # Create a label and a progress bar and add them to the main layout
-        self.label = QtGui.QLabel(self.trUtf8("Connecting to ARMSim..."), self)
+        self.label = QtWidgets.QLabel(self.tr("Connecting to ARMSim..."), self)
         self.layout.addWidget(self.label)
-        self.progressBar = QtGui.QProgressBar(self)
-        self.progressBar.setRange(0,1)
+        self.progressBar = QtWidgets.QProgressBar(self)
+        self.progressBar.setRange(0, 1)
         self.layout.addWidget(self.progressBar)
 
         # Cancel button        
-        self.buttonBox = QtGui.QDialogButtonBox(self)
+        self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel)
         self.layout.addWidget(self.buttonBox)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), self.reject)
 
-        #button = QtGui.QPushButton("Start", self)
-        #self.layout.addWidget(button)      
-        #button.clicked.connect(self.a)
+        # button = QtWidgets.QPushButton("Start", self)
+        # self.layout.addWidget(button)
+        # button.clicked.connect(self.a)
 
         self.myLongTask = ConnectThread(simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort)
         self.myLongTask.taskFinished.connect(self.onFinished)
-        self.progressBar.setRange(0,0)
+        self.progressBar.setRange(0, 0)
         self.myLongTask.start()
 
-
     def onFinished(self, errmsg):
-        self.progressBar.setRange(0,1) # Stop the pulsation
+        self.progressBar.setRange(0, 1)  # Stop the pulsation
         self.errmsg = errmsg
         self.accept()
 
     def getMsg(self):
         return self.errmsg
+
 
 class ConnectThread(QtCore.QThread):
     taskFinished = QtCore.Signal(str)
@@ -73,7 +73,7 @@ class ConnectThread(QtCore.QThread):
         self.ARMSimDirectory = ARMSimDirectory
         self.ARMSimServer = ARMSimServer
         self.ARMSimPort = ARMSimPort
-        
+
     def run(self):
         errmsg = self.simulator.connect(self.ARMSimCommand,
                                         self.ARMSimDirectory,

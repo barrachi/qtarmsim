@@ -45,8 +45,17 @@
     </size>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMaximumSize</enum>
+    </property>
     <item>
      <widget class="QTabWidget" name="tabWidgetCode">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>400</width>
@@ -90,7 +99,7 @@
      <x>0</x>
      <y>0</y>
      <width>880</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -117,12 +126,6 @@
     <addaction name="actionStepOver"/>
     <addaction name="separator"/>
     <addaction name="actionRestart"/>
-    <addaction name="separator"/>
-    <addaction name="actionBreakpoints"/>
-    <addaction name="separator"/>
-    <addaction name="actionReset_Registers"/>
-    <addaction name="actionReset_Memory"/>
-    <addaction name="actionClear_Console"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -215,7 +218,7 @@
    <property name="minimumSize">
     <size>
      <width>180</width>
-     <height>100</height>
+     <height>126</height>
     </size>
    </property>
    <property name="toolTip">
@@ -228,7 +231,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>Registers</string>
+    <string>Re&amp;gisters</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -267,7 +270,7 @@
    <property name="minimumSize">
     <size>
      <width>180</width>
-     <height>100</height>
+     <height>126</height>
     </size>
    </property>
    <property name="toolTip">
@@ -280,7 +283,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>Memory</string>
+    <string>&amp;Memory</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -357,7 +360,7 @@
     <string>The Memory Dump dock shows the memory dump of the simulated system</string>
    </property>
    <property name="windowTitle">
-    <string>Memory Dump</string>
+    <string>Memory &amp;Dump</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -389,7 +392,7 @@
     <string>The LCD Display shows the output of a simulated LCD Display Device</string>
    </property>
    <property name="windowTitle">
-    <string>LCD Display</string>
+    <string>&amp;LCD Display</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -454,7 +457,7 @@
      <normalon>:themes/breeze/32/help-about.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
-    <string>About QtARMSim</string>
+    <string>&amp;About QtARMSim</string>
    </property>
    <property name="statusTip">
     <string>Sobre spim</string>
@@ -483,7 +486,7 @@
      <normalon>:themes/breeze/32/help-about.svg</normalon>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
-    <string>About ARMSim</string>
+    <string>A&amp;bout ARMSim</string>
    </property>
   </action>
   <action name="actionNew">
@@ -564,21 +567,6 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionReset_Registers">
-   <property name="text">
-    <string>Reset R&amp;egisters</string>
-   </property>
-  </action>
-  <action name="actionReset_Memory">
-   <property name="text">
-    <string>Reset &amp;Memory</string>
-   </property>
-  </action>
-  <action name="actionClear_Console">
-   <property name="text">
-    <string>Clear &amp;Console</string>
-   </property>
-  </action>
   <action name="actionRun">
    <property name="icon">
     <iconset theme="system-run">
@@ -606,14 +594,6 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
-   </property>
-  </action>
-  <action name="actionBreakpoints">
-   <property name="text">
-    <string>&amp;Breakpoints</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+B</string>
    </property>
   </action>
   <action name="actionShow_Statusbar">
@@ -662,7 +642,7 @@
   </action>
   <action name="actionRestore_Default_Layout">
    <property name="text">
-    <string>Restore Default &amp;Layout</string>
+    <string>Rest&amp;ore Default Layout</string>
    </property>
    <property name="shortcut">
     <string>F3</string>
@@ -670,7 +650,7 @@
   </action>
   <action name="actionPreferences">
    <property name="text">
-    <string>&amp;Preferences...</string>
+    <string>P&amp;references...</string>
    </property>
   </action>
   <action name="action_Undo">
@@ -792,22 +772,6 @@
    </property>
    <property name="shortcut">
     <string>F4</string>
-   </property>
-  </action>
-  <action name="actionResume">
-   <property name="icon">
-    <iconset theme="debug-run">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/debug-run.svg</normalon>../../../../../../.designer/backup</iconset>
-   </property>
-   <property name="text">
-    <string>Resu&amp;me</string>
-   </property>
-   <property name="toolTip">
-    <string>Resume Execution</string>
-   </property>
-   <property name="shortcut">
-    <string>F8</string>
    </property>
   </action>
   <action name="actionShow_Memory_Dump">

@@ -87,8 +87,8 @@ class QtCompile(Command):
         pass
 
     def run(self):
-        # Run pysyde-uic
-        CMD = 'pyside-uic'
+        # Run pysyde2-uic
+        CMD = 'pyside2-uic'
         inputFileNames = findFiles('.', ('*.ui',))
         for fileName in inputFileNames:
             outputFileName = os.path.splitext(fileName)[0] + '.py'
@@ -97,12 +97,13 @@ class QtCompile(Command):
             error = call(cmdArray) #, cwd = os.getcwd())
             if error:
                 sys.exit(-1)
-        # Run pyside-rcc
-        CMD = 'pyside-rcc'
+        # Run pyside2-rcc
+        CMD = 'pyside2-rcc'
         inputFileNames = findFiles('.', ('*.qrc',))
         for fileName in inputFileNames:
             outputFileName = os.path.splitext(fileName)[0] + '_rc.py'
-            cmdArray = [CMD, '-py3', '-o', outputFileName, fileName]
+            # cmdArray = [CMD, '-py3', '-o', outputFileName, fileName]
+            cmdArray = [CMD, '-o', outputFileName, fileName]
             print("Executing {}...".format(' '.join(cmdArray)))
             error = call(cmdArray)
             if error:
@@ -114,8 +115,8 @@ class QtCompile(Command):
         error = call(cmdArray)
         if error:
             sys.exit(-1)
-        # Run pyside-lupdate
-        CMD = 'pyside-lupdate'
+        # Run pyside2-lupdate
+        CMD = 'pyside2-lupdate'
         cmdArray = [CMD, './qtarmsim/qtarmsim.pro']
         print("Executing {}...".format(' '.join(cmdArray)))
         error = call(cmdArray)

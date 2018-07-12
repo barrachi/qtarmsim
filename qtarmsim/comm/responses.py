@@ -17,8 +17,8 @@
 ###########################################################################
 
 ## Execute response container
-class ExecuteResponse():
-    
+class ExecuteResponse:
+
     def __init__(self):
         self.result = ""
         self.assembly_line = ""
@@ -26,9 +26,10 @@ class ExecuteResponse():
         self.memory = []
         self.errmsg = ""
 
+
 ## Assemble response container
-class AssembleResponse():
-    
+class AssembleResponse:
+
     def __init__(self):
         self.result = ""
         self.errmsg = ""

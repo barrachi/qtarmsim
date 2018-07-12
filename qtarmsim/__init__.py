@@ -3,7 +3,7 @@
 ###########################################################################
 #  QtARMSim -- A Qt graphical interface to ARMSim                         #
 #                                                                         #
-#  Copyright 2014-15 Sergio Barrachina Mir <barrachi@uji.es>              #
+#  Copyright 2014-18 Sergio Barrachina Mir <barrachi@uji.es>              #
 #                                                                         #
 #  This program is free software: you can redistribute it and/or modify   #
 #  it under the terms of the GNU General Public License as published by   #
@@ -25,12 +25,11 @@ import os
 import signal
 import sys
 
-import PySide
-from PySide import QtGui, QtSvg, QtXml # @warning: QtSvg and QtXml must be imported for SVG icons support
+import PySide2
+from PySide2 import QtCore, QtSvg, QtXml, QtWidgets  # @warning: QtSvg and QtXml must be imported for SVG icons support
 
-
-from . mainwindow import QtARMSimMainWindow
-
+from .mainwindow import QtARMSimMainWindow
+from .modulepath import module_path
 
 def _help():
     print("""Usage: qtarmsim.py [options] [asmfile.s]
@@ -50,10 +49,10 @@ Please, report bugs to <barrachi@uji.es>.
 
 
 def _getopts():
-    "Processes the options passed to the executable"
+    """Processes the options passed to the executable"""
     verbose = False
     file_name = ""
-    optlist, args = getopt.getopt(sys.argv[1:],         # @UnusedVariable
+    optlist, args = getopt.getopt(sys.argv[1:],  # @UnusedVariable
                                   'vh',
                                   ['verbose', 'help', ])
     for opt, arg in optlist:  # @UnusedVariable arg
@@ -64,28 +63,36 @@ def _getopts():
             verbose = True
     if len(args) and args[0][-2:] in ('.s', '.c'):
         file_name = args[0]
-    return (file_name, verbose)
+    return file_name, verbose
 
 
 def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     # Create the application
-    qApp = QtGui.QApplication(sys.argv)
+    qApp = QtWidgets.QApplication(sys.argv)
     # ------------------------------------------------------------
-    #  In order to use SVG images on @##!![] Windows, you need to import QtSvg and QtXml and also ensure that the plugins directory is imported properly.
+    #  In order to use SVG images on @##!![] Windows, you need to import QtSvg and QtXml and also ensure that
+    #  the plugins directory is properly imported.
     #  https://stackoverflow.com/questions/9933358/pyside-svg-image-formats-not-found
     # ------------------------------------------------------------
-    for plugins_dir in [os.path.join(p, "plugins") for p in PySide.__path__]:
+    for plugins_dir in [os.path.join(p, "plugins") for p in PySide2.__path__]:
         qApp.addLibraryPath(plugins_dir)
     # Process the command line options
     (file_name, verbose) = _getopts()
     # Create the main window and show it
-    main_window = QtARMSimMainWindow(verbose = verbose)
+    main_window = QtARMSimMainWindow(verbose=verbose)
     main_window.show()
     # If there is a file_name from the command line, open it
     if file_name:
         main_window.readFile(file_name)
+    # Set style
+    # print(QtWidgets.QStyleFactory.keys())
+    # qApp.setStyle("Fusion")
+    url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "stylesheets", "lightblue.css"))
+    f = open(url.toLocalFile())
+    qApp.setStyleSheet("".join(f.readlines()))
+    f.close()
     # Enter the main loop of the application
     sys.exit(qApp.exec_())
 

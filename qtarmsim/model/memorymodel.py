@@ -16,17 +16,18 @@
 #                                                                         #
 ###########################################################################
 
-from PySide import QtGui, QtCore
-from PySide.QtCore import Qt
+from PySide2 import QtGui, QtCore
+from PySide2.QtCore import Qt
 
-from . simpletreemodel import TreeModel, TreeItem
-from . common import InputToHex, getMonoSpacedFont
+from .simpletreemodel import TreeModel, TreeItem
+from .common import InputToHex, getMonoSpacedFont
 from qtarmsim.widget.myqtreeview import MyQTreeView
 
 import sys
 
-class MemoryBank():
-    
+
+class MemoryBank:
+
     def __init__(self, memType, start, nBytes):
         """Initializes a memory bank instance.
         
@@ -38,14 +39,14 @@ class MemoryBank():
         self.start = int(start, 16)
         self.length = nBytes
         # Round memory size to a word boundary
-        if (nBytes % 4):
+        if nBytes % 4:
             self.length += (4 - nBytes % 4)
         self.end = self.start + self.length - 1
 
     def addressToRow(self, hexAddress):
-        "Given an hexadecimal hexAddress, returns the corresponding row"
+        """Given an hexadecimal hexAddress, returns the corresponding row"""
         intAddress = int(hexAddress, 16)
-        return (intAddress - self.start)
+        return intAddress - self.start
 
 
 class MemoryModel(TreeModel):
@@ -86,7 +87,7 @@ class MemoryModel(TreeModel):
         address = self.memoryBanks[-1].start
         # Round memory bytes to a word boundary
         if len(membytes) % 4 != 0:
-            membytes += ['0x00']*(4 - len(membytes) % 4)
+            membytes += ['0x00'] * (4 - len(membytes) % 4)
         # Add the bytes to the model
         for hexByte in membytes:
             hexAddress = "0x{0:0{1}X}".format(address, 8)
@@ -103,10 +104,10 @@ class MemoryModel(TreeModel):
         mbRow = 0
         for memoryBank in self.memoryBanks:
             if memoryBank.start <= intAddress <= memoryBank.end:
-                return (mbRow, memoryBank)
+                return mbRow, memoryBank
             mbRow += 1
-        return (-1, None)
-    
+        return -1, None
+
     def getIndex(self, hexAddress):
         """
         Returns the model index that references the given memory address.
@@ -115,7 +116,7 @@ class MemoryModel(TreeModel):
         memoryRow = memoryBank.addressToRow(hexAddress)
         return self.createIndex(memoryRow, 0, self.rootItem.child(mbRow).child(memoryRow))
 
-    def setByte(self, hexAddress, hexByte, emitMemoryEdited = False):
+    def setByte(self, hexAddress, hexByte, emitMemoryEdited=False):
         """
         Stores the given byte at the given address.
         """
@@ -129,19 +130,20 @@ class MemoryModel(TreeModel):
         if emitMemoryEdited:
             self.memoryEdited.emit(hexAddress, hexByte)
 
-    def setWord(self, hexAddress, hexWord, emitMemoryEdited = False):
+    def setWord(self, hexAddress, hexWord, emitMemoryEdited=False):
         """
         Stores the given word (4 bytes) at the given address (following Little Endian memory organization).
         """
         (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
         memoryRowStart = memoryBank.addressToRow(hexAddress)
         for i in range(4):
-            hexByte = "0x{}".format(hexWord[2+i*2:4+i*2])
-            memoryRow = memoryRowStart + 3 - i # 3-i due to Little Endian
+            hexByte = "0x{}".format(hexWord[2 + i * 2:4 + i * 2])
+            memoryRow = memoryRowStart + 3 - i  # 3-i due to Little Endian
             memoryItem = self.rootItem.child(mbRow).child(memoryRow)
             memoryItem.setData(1, hexByte)
             self.modifiedBytes.append((mbRow, memoryRow))
-        self.dataChanged.emit(self.createIndex(memoryRow    , 0, self.rootItem.child(mbRow)),
+        # noinspection PyUnboundLocalVariable
+        self.dataChanged.emit(self.createIndex(memoryRow, 0, self.rootItem.child(mbRow)),
                               self.createIndex(memoryRow + 3, 1, self.rootItem.child(mbRow)))
         if emitMemoryEdited:
             self.memoryEdited.emit(hexAddress, hexWord)
@@ -154,10 +156,10 @@ class MemoryModel(TreeModel):
         memoryRowStart = memoryBank.addressToRow(hexAddress)
         hexWord = "0x"
         for i in range(4):
-            memoryRow = memoryRowStart + 3 - i # 3-i due to Little Endian
+            memoryRow = memoryRowStart + 3 - i  # 3-i due to Little Endian
             memoryItem = self.rootItem.child(mbRow).child(memoryRow)
             hexWord += memoryItem.data(1)[2:]
-    
+
     def reset(self):
         """
         Resets the model to its original state in any attached views.

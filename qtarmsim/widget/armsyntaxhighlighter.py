@@ -16,16 +16,18 @@
 #                                                                         #
 ###########################################################################
 
-#===============================================================================
-# References:
+# =========================================================================
+#  References:
 #   http://doc.qt.io/qt-5/qtwidgets-richtext-syntaxhighlighter-example.html
-#===============================================================================
+# =========================================================================
 
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtGui
+
 
 def generateHighlightingRules():
     #
-    # Most of the following ARM keywords and directives were obtained from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik
+    # Most of the following ARM keywords and directives were obtained from the listings ARM definition for LaTeX (c)
+    # 2013 by Jacques Supcik
     #
     keywords = """
                 adc,adcal,adcals,adccc,adcccs,adccs,adccss,adceq,adceqs,
@@ -476,12 +478,12 @@ def generateHighlightingRules():
     directiveFormat = QtGui.QTextCharFormat()
     directiveFormat.setForeground(QtGui.QColor('green'))
     directiveFormat.setFontWeight(QtGui.QFont.Bold)
-    pattern = '[.]({})\\b'.format('|'.join(directives.replace('\n', '').replace(' ', '').replace('.','').split(',')))
+    pattern = '[.]({})\\b'.format('|'.join(directives.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), directiveFormat))
     # Add highlighting rules and format for ARM registers
     registerFormat = QtGui.QTextCharFormat()
     registerFormat.setForeground(QtGui.QColor('green'))
-    pattern = '\\b({})\\b'.format('|'.join(['r\\d', 'r1[0-5]{0,1}', '[sS][pP]', '[lL][rR]', '[pP][cC]' ]))
+    pattern = '\\b({})\\b'.format('|'.join(['r\\d', 'r1[0-5]{0,1}', '[sS][pP]', '[lL][rR]', '[pP][cC]']))
     highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), registerFormat))
     # Add highlighting rules and format for ARM labels
     labelFormat = QtGui.QTextCharFormat()
@@ -498,25 +500,25 @@ def generateHighlightingRules():
 
 
 class HighlightingRule:
-    "A highlighting rule consists of a QRegExp pattern and its associated QTextCharFormat"
+    """A highlighting rule consists of a QRegExp pattern and its associated QTextCharFormat"""
     def __init__(self, patternTxt, hrFormat):
         self.pattern = QtCore.QRegExp(patternTxt)
         self.format = hrFormat
 
 
 class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
-    "Class that can be used to parse and highlight ARM assembler code"
+    """Class that can be used to parse and highlight ARM assembler code"""
 
     highlightingRules = generateHighlightingRules()
 
     def __init__(self, parent):
-        "Initializes the different patterns and their respective formats"
+        """Initializes the different patterns and their respective formats"""
         super(ARMSyntaxHighlighter, self).__init__(parent)
 
     def highlightBlock(self, text):
-        "Parses a given block and applies the corresponding formats to the matched patterns"
+        """Parses a given block and applies the corresponding formats to the matched patterns"""
         # First, apply the patterns and formats from self.highlightingRules
-        #------------------------------------------------
+        # ------------------------------------------------
         for rule in self.highlightingRules:
             index = rule.pattern.indexIn(text)
             while index >= 0:
@@ -524,7 +526,7 @@ class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
                 self.setFormat(index, length, rule.format)
                 index = rule.pattern.indexIn(text, index + length)
         # Then, deal with multiline comments
-        #------------------------------------------------
+        # ------------------------------------------------
         commentStartExpression = QtCore.QRegExp('/\\*')
         commentEndExpression = QtCore.QRegExp('\\*/')
         multilineCommentFormat = QtGui.QTextCharFormat()

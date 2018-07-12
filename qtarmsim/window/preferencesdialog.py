@@ -17,14 +17,15 @@
 ###########################################################################
 
 
-from PySide import QtGui, QtCore
+from PySide2 import QtGui, QtCore, QtWidgets
 
-from .. ui.preferences import Ui_PreferencesDialog
+from ..ui.preferences import Ui_PreferencesDialog
 
-class PreferencesDialog(QtGui.QDialog):
+
+class PreferencesDialog(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_PreferencesDialog()
         self.ui.setupUi(self)
         self.setFromSettings(self.parent().settings)
@@ -46,13 +47,13 @@ class PreferencesDialog(QtGui.QDialog):
 
     def ARMSimDirectoryClicked(self):
         dirname = self.ui.lineEditARMSimDirectory.text()
-        dirname = QtGui.QFileDialog.getExistingDirectory(self, self.trUtf8('Select ARMSim working directory'), dirname)
-        if dirname!='':
+        dirname = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr('Select ARMSim working directory'), dirname)
+        if dirname != '':
             self.ui.lineEditARMSimDirectory.setText(dirname)
 
     def ARMGccCommandClicked(self):
         fname = self.ui.lineEditARMGccCommand.text()
-        (fname, selectedFilter) = QtGui.QFileDialog.getOpenFileName(self, self.trUtf8('Select file'), fname)
+        (fname, selectedFilter) = QtWidgets.QFileDialog.getOpenFileName(self, self.tr('Select file'), fname)
         if fname != '':
             self.ui.lineEditARMGccCommand.setText(fname)
 

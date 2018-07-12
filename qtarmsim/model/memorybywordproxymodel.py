@@ -18,22 +18,20 @@
 
 import sys
 
-from PySide import QtGui, QtCore
-from PySide.QtCore import Qt
-from qtarmsim.widget.myqtreeview import MyQTreeView
+from PySide2 import QtGui, QtCore, QtWidgets
+from PySide2.QtCore import Qt
 
-from . memorymodel import MemoryModel
-from . common import InputToHex, getMonoSpacedFont
+from .common import InputToHex, getMonoSpacedFont
+from .memorymodel import MemoryModel
 
 
-class MemoryByWordProxyModel(QtGui.QSortFilterProxyModel):
-    
+class MemoryByWordProxyModel(QtCore.QSortFilterProxyModel):
     # InputToHex helper object
     input2hex = InputToHex()
 
     @QtCore.Slot(QtCore.QModelIndex, QtCore.QModelIndex)
     def sourceDataChanged(self, topLeft, bottomRight):
-        self.dataChanged.emit(self.mapFromSource(topLeft), \
+        self.dataChanged.emit(self.mapFromSource(topLeft),
                               self.mapFromSource(bottomRight))
 
     def __init__(self, parent=None):
@@ -44,7 +42,7 @@ class MemoryByWordProxyModel(QtGui.QSortFilterProxyModel):
         self.qFontLast.setWeight(QtGui.QFont.Black)
         # Set brushes
         self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
-        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern) 
+        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
 
     def setSourceModel(self, model):
         super(MemoryByWordProxyModel, self).setSourceModel(model)
@@ -55,13 +53,13 @@ class MemoryByWordProxyModel(QtGui.QSortFilterProxyModel):
             firstColumnData = sourceParent.internalPointer().child(sourceRow).data(0)
         except AttributeError:
             return True
-        if  firstColumnData[0:2] != "0x":
+        if firstColumnData[0:2] != "0x":
             return True
         elif firstColumnData[-1:] in ('0', '4', '8', 'C', 'c'):
             return True
         else:
             return False
-         
+
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return None
@@ -84,24 +82,24 @@ class MemoryByWordProxyModel(QtGui.QSortFilterProxyModel):
                 hexBytes = []
                 byteMemoryBank = sourceModelIndex.parent().internalPointer()
                 byteRow = sourceModelIndex.row()
-                for i in range(3,-1,-1):
+                for i in range(3, -1, -1):
                     hexBytes.append(byteMemoryBank.child(byteRow + i).data(1)[2:])
                 return '0x' + ''.join(hexBytes)
         elif role == Qt.BackgroundRole:
             # If any of the bytes is in modifiedBytes, return qBrushLast
             for i in range(4):
-                if (byteMemoryBankRow, byteRow+i) in self.sourceModel().modifiedBytes:
+                if (byteMemoryBankRow, byteRow + i) in self.sourceModel().modifiedBytes:
                     return self.qBrushLast
             # If not, if any of the bytes is in previouslyModifiedBytes, return qBrushPrevious
             for i in range(4):
-                if (byteMemoryBankRow, byteRow+i) in self.sourceModel().previouslyModifiedBytes:
+                if (byteMemoryBankRow, byteRow + i) in self.sourceModel().previouslyModifiedBytes:
                     return self.qBrushPrevious
             # If not, return None
             return None
         elif role == Qt.FontRole:
             # If any of the bytes is in modifiedBytes, return qFontLast
             for i in range(4):
-                if (byteMemoryBankRow, byteRow+i) in self.sourceModel().modifiedBytes:
+                if (byteMemoryBankRow, byteRow + i) in self.sourceModel().modifiedBytes:
                     return self.qFontLast
             else:
                 return self.qFont
@@ -115,17 +113,17 @@ class MemoryByWordProxyModel(QtGui.QSortFilterProxyModel):
         item = sourceModelIndex.internalPointer()
         if item.parent() == self.sourceModel().rootItem:
             return Qt.ItemIsEnabled
-        if  index.column() == 0:
+        if index.column() == 0:
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
         if item.parent().data(0)[:3] == 'ROM':
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
 
-    def setData(self, index, value, role = Qt.EditRole):
+    def setData(self, index, value, role=Qt.EditRole):
         (hexValue, err_msg) = self.input2hex.convert(value)
         if not hexValue:
             if err_msg:
-                QtGui.QMessageBox.warning(None, self.trUtf8("Input error"), err_msg)
+                QtWidgets.QMessageBox.warning(None, self.tr("Input error"), err_msg)
             return False
         sourceModelIndex = self.mapToSource(index)
         item = sourceModelIndex.internalPointer()
@@ -140,8 +138,8 @@ if __name__ == "__main__":
     #
     #    python3 -m qtarmsim.model.memorybywordproxymodel
     #
-    app = QtGui.QApplication(sys.argv)
-    mainWindow = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    mainWindow = QtWidgets.QMainWindow()
     # Memory model
     memoryModel = MemoryModel(app)
     memoryModel.appendMemoryBank('ROM', '0x10010000', ['0x{:02X}'.format(i) for i in range(24)])
@@ -150,7 +148,7 @@ if __name__ == "__main__":
     filterProxy = MemoryByWordProxyModel(app)
     filterProxy.setSourceModel(memoryModel)
     # treeViewMemory
-    treeViewMemory = QtGui.QTreeView()
+    treeViewMemory = QtWidgets.QTreeView()
     treeViewMemory.setModel(filterProxy)
     treeViewMemory.expandAll()
     treeViewMemory.resizeColumnToContents(0)

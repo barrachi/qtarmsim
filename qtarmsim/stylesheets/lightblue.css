@@ -1,0 +1,47 @@
+QDockWidget
+{
+    border: 1px solid #444;
+    color:  #eff0f1;
+}
+
+QDockWidget::title
+{
+    text-align: center;
+    background-color: #475058;
+}
+
+QDockWidget::close-button
+{
+    color: black;
+    background-color: #eff0f1;
+}
+
+QDockWidget::float-button
+{
+    background-color: #eff0f1;
+}
+
+
+QMainWindow::separator
+{
+    background-color: #d3d3d3;
+    color: black;
+    width: 3px;
+    height: 3px;
+    /*
+    background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #161616, stop: 0.5 #151515, stop: 0.6 #212121, stop:1 #343434);
+    color: white;
+    padding-left: 4px;
+    border: 1px solid #4c4c4c;
+    spacing: 3px; /* spacing between items in the tool bar */
+}
+
+QMainWindow::separator:hover
+{
+    background-color: #e5e5ff;
+    /* background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #d7801a, stop:0.5 #b56c17 stop:1 #ffa02f);
+    color: white;
+    padding-left: 4px;
+    border: 1px solid #6c6c6c;
+    spacing: 3px; /* spacing between items in the tool bar */
+}

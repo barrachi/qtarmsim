@@ -26,27 +26,25 @@ import sys
 import tempfile
 import time
 
+from .mysocket import MySocket
+from .responses import ExecuteResponse, AssembleResponse
+from .exceptions import RunTimeOut
 
-from . mysocket import MySocket
-from . responses import ExecuteResponse, AssembleResponse
-from . exceptions import RunTimeOut
 
-class ARMSimConnector():
-
+class ARMSimConnector:
     # Regular expressions as static properties (computed once)
     re_regexpr = re.compile("r([0-9]+): (0[xX][0-9a-fA-F]+)")
     re_membanksexpr = re.compile("([^.:]+).*(0[xX][0-9A-Fa-f]*).*-.*(0[xX][0-9A-Fa-f]*)")
     re_memexpr = re.compile("(0[xX][0-9a-fA-F]+): (0[xX][0-9a-fA-F]+)")
 
-    def __init__(self, verbose = False):
+    def __init__(self, verbose=False):
         # Set properties default values
         self.verbose = verbose
-        self.mysocket = MySocket(verbose = verbose)
+        self.mysocket = MySocket(verbose=verbose)
         self.armsim_process = None
         self.setConnected(False, None)
         self.version = None
         self.messages = []
-
 
     def setConnected(self, connected, port):
         """
@@ -61,7 +59,6 @@ class ARMSimConnector():
             self.connected = False
             self.current_port = None
 
-
     def connect(self, command, working_directory, server, port):
         """
         Connects with ARMSim.
@@ -69,9 +66,9 @@ class ARMSimConnector():
         @return: errmsg    An error msg with every connection error (\n as separator), None otherwise
         """
 
-        #=======================================================================
+        # =======================================================================
         # Option A) server is a remote server
-        #=======================================================================
+        # =======================================================================
         if server != "localhost" and server != "127.0.0.1":
             # Try to connect to the given server and port
             self.messages.append("\nTrying to connect to remote ARMSim on port {}...".format(port))
@@ -80,9 +77,9 @@ class ARMSimConnector():
             else:
                 return "Could not connect to remote ARMSim server at {}:{}".format(server, port)
 
-        #=======================================================================
+        # =======================================================================
         # Option B) server is localhost
-        #=======================================================================
+        # =======================================================================
         # If and only if self.current_port is set, try to connect to the given server and self.current_port
         if self.current_port:
             self.messages.append("\nTrying to connect to running ARMSim on port {}...".format(self.current_port))
@@ -90,7 +87,7 @@ class ARMSimConnector():
                 return None
         # Search for a free port
         free_port = 0
-        rest_of_ports = list(range(port+1, port+20))
+        rest_of_ports = list(range(port + 1, port + 20))
         tmpsocket = MySocket()
         for current_port in [port, ] + rest_of_ports:
             self.messages.append("\nTesting if port {} is free...".format(current_port))
@@ -101,62 +98,62 @@ class ARMSimConnector():
             else:
                 self.messages.append("Port {} is already being used.".format(current_port))
         if free_port == 0:
-            return  "Could not find any port available in the range {}..{}\n\n" \
-                    "Please, change the port setting on the preferences dialog.\n".format(port, rest_of_ports[-1])
+            return "Could not find any port available in the range {}..{}\n\n" \
+                   "Please, change the port setting on the preferences dialog.\n".format(port, rest_of_ports[-1])
         # Try to run armsim on the found free_port
+        # noinspection PyUnboundLocalVariable
         cmd = shlex.split(command) + [str(current_port), ]
         self.messages.append("\nLaunching '{}'...".format(" ".join(cmd)))
         try:
             if sys.platform == "win32":
                 self.armsim_process = subprocess.Popen(cmd,
-                                                       cwd = working_directory
+                                                       cwd=working_directory
                                                        )
             else:
                 self.armsim_process = subprocess.Popen(cmd,
-                                                       cwd = working_directory,
-                                                       stderr = subprocess.PIPE
+                                                       cwd=working_directory,
+                                                       stderr=subprocess.PIPE
                                                        )
-        except Exception as e:
-            return  "Could not launch the next command:\n" \
-                    "    '{}'\n\n" \
-                    "on the directory:\n" \
-                    "    '{}'\n\n" \
-                    "Error was:\n" \
-                    "    [Errno {}] {}".format(" ".join(cmd), working_directory, e.errno, e.strerror)
+        except OSError as e:
+            return "Could not launch the next command:\n" \
+                   "    '{}'\n\n" \
+                   "on the directory:\n" \
+                   "    '{}'\n\n" \
+                   "Error was:\n" \
+                   "    [Errno {}] {}".format(" ".join(cmd), working_directory, e.errno, e.strerror)
         self.messages.append("Launched")
         # Try to connect to armsim
         self.messages.append("\nConnecting to ARMSim on port {}".format(free_port))
         chances = 0
-        while self.armsim_process.poll() == None and not self.doConnect(server, free_port) and chances < 30:
+        while self.armsim_process.poll() is None and not self.doConnect(server, free_port) and chances < 30:
             time.sleep(.1)
             chances += 1
         # Check if self.armsim_process is still alive and we have not consumed all the chances
-        if self.armsim_process.poll() == None and chances < 30:
+        if self.armsim_process.poll() is None and chances < 30:
             # Return no error message
             return None
         # Get stderr
         stderr = ""
         if sys.platform != "win32":
             try:
-                (stdout, stderr) = self.armsim_process.communicate(timeout = 1)  # @UnusedVariable stdout
+                (stdout, stderr) = self.armsim_process.communicate(timeout=1)  # @UnusedVariable stdout
             except:
                 pass
         # Kill current ARMSim process (if it is still alive)
-        if self.armsim_process.poll() == None:
+        if self.armsim_process.poll() is None:
             self.armsim_process.kill()
         # Check previously got stderr, only return now if it is a ruby error
         if stderr and stderr.decode(sys.stderr.encoding).count("ruby"):
-            return  "Could not launch the next command:\n" \
-                    "    '{}'\n\n" \
-                    "on the directory:\n" \
-                    "    '{}'\n\n" \
-                    "The error was:\n" \
-                    "    {}".format(" ".join(cmd), working_directory, stderr.decode(sys.stderr.encoding))
+            return "Could not launch the next command:\n" \
+                   "    '{}'\n\n" \
+                   "on the directory:\n" \
+                   "    '{}'\n\n" \
+                   "The error was:\n" \
+                   "    {}".format(" ".join(cmd), working_directory, stderr.decode(sys.stderr.encoding))
         return "Could not bind ARMSim to any port between {} and {}.\n" \
-                "\n" \
-                "The following messages were reported while trying to establish a connection.\n" \
-                "   {}".format(port, rest_of_ports[-1], "\n   ".join(self.messages))
-
+               "\n" \
+               "The following messages were reported while trying to establish a connection.\n" \
+               "   {}".format(port, rest_of_ports[-1], "\n   ".join(self.messages))
 
     def doConnect(self, server, port):
         """
@@ -179,7 +176,7 @@ class ARMSimConnector():
         self.mysocket.sock.settimeout(2)  # Set getVersion timeout to 2 seconds
         try:
             self.getVersion()
-        except socket.timeout as e:
+        except socket.timeout:
             self.messages.append("Timeout occurred.")
             self.mysocket.close_socket()
             return False
@@ -201,13 +198,14 @@ class ARMSimConnector():
         self.mysocket.close_connection()
         self.mysocket.close_socket()
         # Kill current ARMSim process (if it is still alive)
-        if self.armsim_process and self.armsim_process.poll() == None:
+        if self.armsim_process and self.armsim_process.poll() is None:
             self.armsim_process.kill()
         self.connected = False
 
     def getVersion(self):
         """
-        Gets the ARMSim Version. This method is also used to confirm that we are speaking to ARMSim and not to another server.
+        Gets the ARMSim Version. This method is also used to confirm that we are speaking to ARMSim and not to
+        another server.
 
         @return: The ARMSim Version text.
         """
@@ -216,7 +214,7 @@ class ARMSimConnector():
         self.version = "\n".join(version_lines)
         return self.version
 
-    #@todo: add this to the grammar document
+    # @todo: add this to the grammar document
     def setSettings(self, setting_name, setting_value):
         """
         Sets configuration options.
@@ -231,13 +229,12 @@ class ARMSimConnector():
             self.mysocket.send_line("CONFIG {} {}".format(translated_setting_name, setting_value))
         except BrokenPipeError:
             return "Error when trying to configure the '{}' setting on ARMSim.\n" \
-                    "The pipe is broken.".format(setting_name)
+                   "The pipe is broken.".format(setting_name)
         line = self.mysocket.receive_line()
         if line != 'OK':
             return "Error when trying to configure the '{}' setting on ARMSim.\n" \
-                    "Error message was '{}'.".format(setting_name, line)
+                   "Error message was '{}'.".format(setting_name, line)
         return None
-
 
     def _parseRegister(self, line):
         """
@@ -250,7 +247,7 @@ class ARMSimConnector():
         except AttributeError:
             print("ERROR: Could not parse register from '{}'!".format(line))
             raise
-        return (int(reg), hex_value)
+        return int(reg), hex_value
 
     def getRegisters(self):
         """
@@ -305,7 +302,6 @@ class ARMSimConnector():
             memory_banks.append((memtype, hex_start, hex_end))
         return memory_banks
 
-
     def _parseMemory(self, line):
         """
         Parses a line with memory content information.
@@ -317,7 +313,7 @@ class ARMSimConnector():
         except AttributeError:
             print("ERROR: Could not parse memory byte from '{}'".format(line))
             raise
-        return ((hex_address, hex_byte))
+        return hex_address, hex_byte
 
     def getMemory(self, hex_start, nbytes):
         """
@@ -341,10 +337,12 @@ class ARMSimConnector():
             self.mysocket.send_line("SET MEMORY BYTE AT {} WITH {}".format(hex_address, hex_value))
         line = self.mysocket.receive_line()
         if line != 'OK':
-            return "Error when trying to set the memory word at '{}' with the value '{}'.\n".format(hex_address, hex_value)
+            return "Error when trying to set the memory word at '{}' with the value '{}'.\n".format(hex_address,
+                                                                                                    hex_value)
         return None
 
-    def _prettyPrintLine(self, line):
+    @staticmethod
+    def _prettyPrintLine(line):
         if line.count(';') == 0:
             return line
         else:
@@ -368,7 +366,6 @@ class ARMSimConnector():
                 label = ""
             return "{:40};{:-4} {:10} {:20} {}".format(assembly, ln, label, source, comment)
 
-
     def getDisassemble(self, hex_start, ninsts):
         """
         Gets the disassemble of ninsts instructions at most starting at hex_start memory address.
@@ -378,7 +375,6 @@ class ARMSimConnector():
         self.mysocket.send_line("DISASSEMBLE {} {}".format(hex_start, ninsts))
         for line in self.mysocket.receive_lines_till_eof():
             yield self._prettyPrintLine(line)
-
 
     def _getExecuteStep(self, ARMSim_command):
         """
@@ -390,7 +386,7 @@ class ARMSimConnector():
         lines = [l for l in self.mysocket.receive_lines_till_eof()]
         response = ExecuteResponse()
         response.result = lines[0]
-        response.assembly_line = lines[1].split(";")[0] # get rid of source code part
+        response.assembly_line = lines[1].split(";")[0]  # get rid of source code part
         mode = ""
         errmsg_list = []
         for line in lines[2:]:
@@ -453,19 +449,17 @@ class ARMSimConnector():
         """
         self.mysocket.send_line("EXIT")
 
-
-
-#===============================================================================
-# ASSEMBLE fich[.s] (vamos, que la extensión es ignorada)
-# devuelve
-# SUCCESS en caso de que todo vaya bien
-# ERROR
-# lineas de error
-# devueltas por el
-# compilador
-# EOF
-# En caso de error, todas terminadas en \r\n.
-#===============================================================================
+    # ===============================================================================
+    # ASSEMBLE fich[.s] (vamos, que la extensión es ignorada)
+    # devuelve
+    # SUCCESS en caso de que todo vaya bien
+    # ERROR
+    # lineas de error
+    # devueltas por el
+    # compilador
+    # EOF
+    # En caso de error, todas terminadas en \r\n.
+    # ===============================================================================
 
     def _copyToTmpDir(self, src_fname):
         """
@@ -479,7 +473,7 @@ class ARMSimConnector():
         # Find the coding of the  original file
         encodings = ['utf-8', 'latin1', 'ascii']
         for i in range(len(encodings)):
-            f = open(src_fname, encoding = encodings[i])
+            f = open(src_fname, encoding=encodings[i])
             try:
                 f.read()
                 f.close()
@@ -489,7 +483,8 @@ class ARMSimConnector():
                 if i == len(encodings) - 1:
                     raise e
         # Open the file with the correct encoding
-        f = open(src_fname, encoding = encodings[i])
+        # noinspection PyUnboundLocalVariable
+        f = open(src_fname, encoding=encodings[i])
         dest = open(dst_fname, 'w')
         for line in f:
             dest.write(line)
@@ -516,7 +511,7 @@ class ARMSimConnector():
             # Directory was not empty (don't raise an exception just for that ;-) )
             pass
 
-    #@todo: add this to the grammar document
+    # @todo: add this to the grammar document
     def doAssemble(self, fname):
         response = AssembleResponse()
         tmp_fname = self._copyToTmpDir(fname)

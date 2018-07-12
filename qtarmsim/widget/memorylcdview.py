@@ -18,15 +18,14 @@
 
 import sys
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide2 import QtCore, QtWidgets
+from PySide2.QtCore import Qt
 
-from .. model.memorymodel import MemoryModel
-from .. model.memorylcdproxymodel import MemoryLCDProxyModel
+from ..model.memorylcdproxymodel import MemoryLCDProxyModel
+from ..model.memorymodel import MemoryModel
 
 
-
-class MemoryLCDView(QtGui.QTableView):
+class MemoryLCDView(QtWidgets.QTableView):
 
     def __init__(self, parent=None):
         super(MemoryLCDView, self).__init__(parent)
@@ -46,11 +45,10 @@ class MemoryLCDView(QtGui.QTableView):
         """)
         self.verticalScrollBar().setDisabled(True)
         self.horizontalScrollBar().setDisabled(True)
-        self.setFrameStyle(QtGui.QFrame.NoFrame)
+        self.setFrameStyle(QtWidgets.QFrame.NoFrame)
 
-
-    def setModel(self, memoryModel, hexStartAddress, LCDColumns = 32, LCDRows = 6):
-        "Sets the memory model and the number of columns and rows of the LCD display"
+    def setModel(self, memoryModel, hexStartAddress, LCDColumns=32, LCDRows=6):
+        """Sets the memory model and the number of columns and rows of the LCD display"""
         self.memoryLCDProxyModel = MemoryLCDProxyModel()
         self.memoryLCDProxyModel.setSourceModel(memoryModel, hexStartAddress, LCDColumns, LCDRows)
         super(MemoryLCDView, self).setModel(self.memoryLCDProxyModel)
@@ -58,18 +56,16 @@ class MemoryLCDView(QtGui.QTableView):
         self.LCDRows = LCDRows
         self.resize()
 
-
     def resize(self):
-        "Resizes the columns and rows of the LCD to its contents size, and then fixes the total width and height of the LCD."
+        """Resizes the columns and rows of the LCD to its contents size, and then fixes the total width and height of the LCD."""
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
         self.setFixedWidth(18 + 18 + 8 + sum([self.columnWidth(i) for i in range(self.LCDColumns)]))
         self.setFixedHeight(18 + 18 + 8 + sum([self.rowHeight(i) for i in range(self.LCDRows)]))
         self.repaint()
 
-
     def wheelEvent(self, event):
-        "Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"
+        """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
         if event.modifiers() == QtCore.Qt.ControlModifier:
             self.memoryLCDProxyModel.changeFontSize(event.delta() / 120)
             self.resize()
@@ -83,8 +79,8 @@ if __name__ == "__main__":
     #
     #    python3 -m qtarmsim.widget.memorylcdview
     #
-    app = QtGui.QApplication(sys.argv)
-    mainWindow = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    mainWindow = QtWidgets.QMainWindow()
     mainWindow.setGeometry(200, 200, 1000, 400)
     # Memory model
     memoryModel = MemoryModel(app)

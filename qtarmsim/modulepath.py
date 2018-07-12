@@ -16,10 +16,10 @@
 #                                                                         #
 ###########################################################################
 
-'''
+"""
  module_path has the correct module path depending on whether the application is
  frozen (by cx_freeze) or not.
-'''
+"""
 
 import os
 import sys

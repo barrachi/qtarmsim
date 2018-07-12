@@ -21,19 +21,19 @@
 
 import sys
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2.QtCore import Qt
 
 from .memorymodel import MemoryModel
 
-from . common import InputToHex, getMonoSpacedFont
+from .common import InputToHex, getMonoSpacedFont
 
 
-class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
-    
+class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
+
     @QtCore.Slot(QtCore.QModelIndex, QtCore.QModelIndex)
     def sourceDataChanged(self, topLeft, bottomRight):
-        self.dataChanged.emit(self.mapFromSource(topLeft), \
+        self.dataChanged.emit(self.mapFromSource(topLeft),
                               self.mapFromSource(bottomRight))
 
     # InputToHex helper object
@@ -67,19 +67,19 @@ class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
             return QtCore.QModelIndex()
         # At this point, index should point to a memory address of the memory bank specified at setSourceModel()
         memoryAddress = int(index.internalPointer().data(0), 16)
-        row = int((memoryAddress - self.memoryBankStartAddress)/16)
+        row = int((memoryAddress - self.memoryBankStartAddress) / 16)
         column = (memoryAddress - self.memoryBankStartAddress) % 16
         return self.createIndex(row, column)
 
     def mapToSource(self, index):
         if not index.isValid() or index.column() == 16:
             return QtCore.QModelIndex()
-        memoryRow = index.row()*16 + index.column()
+        memoryRow = index.row() * 16 + index.column()
         return self.sourceModel().index(memoryRow, 0, self.memoryBankIndex)
 
     def rowCount(self, parent):
         if not parent.isValid():
-            return int(self.memoryBankItem.childCount()/16)
+            return int(self.memoryBankItem.childCount() / 16)
         else:
             return 0
 
@@ -95,20 +95,21 @@ class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
     def parent(self, index):
         return QtCore.QModelIndex()
 
-    def _chr(self, hexByte):
+    @staticmethod
+    def _chr(hexByte):
         n = int(hexByte, 16)
-        if n >= 32 and n <= 126:
+        if 32 <= n <= 126:
             return chr(n)
         else:
             return '·'
-        
+
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             if index.column() < 16:
                 return self.mapToSource(index).internalPointer().data(1)[2:]
             else:
                 chars = []
-                byteRow = index.row()*16
+                byteRow = index.row() * 16
                 for i in range(16):
                     try:
                         item = self.memoryBankItem.child(byteRow + i)
@@ -117,7 +118,7 @@ class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
                     chars.append(self._chr(item.data(1)[2:]))
                 return ''.join(chars)
         elif role == Qt.BackgroundRole:
-            byteRow = index.row()*16 + index.column()
+            byteRow = index.row() * 16 + index.column()
             byteMemoryBankRow = self.memoryBankRow
             # If the current byte is in modifiedBytes, return qBrushLast
             if (byteMemoryBankRow, byteRow) in self.sourceModel().modifiedBytes:
@@ -128,7 +129,7 @@ class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
             # If not, return None
             return None
         elif role == Qt.FontRole:
-            byteRow = index.row()*16 + index.column()
+            byteRow = index.row() * 16 + index.column()
             byteMemoryBankRow = self.memoryBankRow
             if (byteMemoryBankRow, byteRow) in self.sourceModel().modifiedBytes:
                 return self.qFontLast
@@ -136,18 +137,18 @@ class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
                 return self.qFont
         else:
             return None
-         
+
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal: 
+            if orientation == Qt.Horizontal:
                 if section < 16:
                     return "{:X}".format(section)
                 else:
                     return "ASCII"
             elif orientation == Qt.Vertical:
-                byteRow = section*16
+                byteRow = section * 16
                 return self.memoryBankItem.child(byteRow).data(0)
- 
+
     def flags(self, index):
         if not index.isValid():
             return False
@@ -160,16 +161,17 @@ class MemoryDumpProxyModel(QtGui.QAbstractProxyModel):
         else:
             return Qt.ItemIsEditable | Qt.ItemIsEnabled
 
-    def setData(self, index, value, role = Qt.EditRole):
+    def setData(self, index, value, role=Qt.EditRole):
         (hexValue, errMsg) = self.input2hex.convert(value, 8)
         if not hexValue:
             if errMsg:
-                QtGui.QMessageBox.warning(None, self.trUtf8("Input error"), errMsg)
+                QtWidgets.QMessageBox.warning(None, self.tr("Input error"), errMsg)
             return False
         item = self.mapToSource(index).internalPointer()
         hexAddress = item.data(0)
         self.sourceModel().setByte(hexAddress, hexValue, True)
         return True
+
 
 if __name__ == "__main__":
     #
@@ -177,8 +179,8 @@ if __name__ == "__main__":
     #
     #    python3 -m qtarmsim.model.memorydumpproxymodel
     #
-    app = QtGui.QApplication(sys.argv)
-    mainWindow = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    mainWindow = QtWidgets.QMainWindow()
     mainWindow.setGeometry(200, 200, 1000, 400)
     # Memory model
     memoryModel = MemoryModel(app)
@@ -188,7 +190,7 @@ if __name__ == "__main__":
     memoryDumpProxyModel = MemoryDumpProxyModel()
     memoryDumpProxyModel.setSourceModel(memoryModel, 1)
     # Memory dump view
-    memoryDumpView = QtGui.QTableView()
+    memoryDumpView = QtWidgets.QTableView()
     memoryDumpView.setModel(memoryDumpProxyModel)
     memoryDumpView.resizeColumnsToContents()
     memoryDumpView.resizeRowsToContents()

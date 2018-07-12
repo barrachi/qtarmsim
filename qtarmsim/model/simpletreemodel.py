@@ -19,7 +19,7 @@
 ###########################################################################
 
 
-from PySide import QtCore
+from PySide2 import QtCore
 
 
 class TreeItem(object):
@@ -118,7 +118,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         return self.createIndex(parentItem.row(), 0, parentItem)
 
     def rowCount(self, index):
-        "Returns the number of childs of item pointed by index"
+        """Returns the number of childs of item pointed by index"""
         if index.column() > 0:
             return 0
         if not index.isValid():
@@ -128,7 +128,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         return item.childCount()
 
     def columnCount(self, index):
-        "Returns the number of data elements of item pointed by index"
+        """Returns the number of data elements of item pointed by index"""
         if index.isValid():
             return index.internalPointer().columnCount()
         else:

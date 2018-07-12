@@ -25,18 +25,17 @@
 #    python3 -m qtarmsim.widget.memorylcdview
 #
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide2 import QtCore, QtGui
+from PySide2.QtCore import Qt
 
-from .memorymodel import MemoryModel
-from .common import InputToHex, getMonoSpacedFont
+from .common import InputToHex
 
 
-class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
+class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
 
     @QtCore.Slot(QtCore.QModelIndex, QtCore.QModelIndex)
     def sourceDataChanged(self, topLeft, bottomRight):
-        self.dataChanged.emit(self.mapFromSource(topLeft), \
+        self.dataChanged.emit(self.mapFromSource(topLeft),
                               self.mapFromSource(bottomRight))
 
     # InputToHex helper object
@@ -45,6 +44,7 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
     def __init__(self, parent=None):
         super(MemoryLCDProxyModel, self).__init__(parent)
         # Set font
+        # noinspection PyTypeChecker,PyCallByClass
         id = QtGui.QFontDatabase.addApplicationFont(":/fonts/lcd plus.ttf")
         self.qFont = QtGui.QFont("lcd plus")
         self.myFontPointSize = 24
@@ -75,7 +75,7 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
             self.memoryBankItem = self.sourceModel().rootItem.child(self.memoryBankRow)
             self.memoryBankIndex = self.sourceModel().createIndex(self.memoryBankRow, 0, self.memoryBankItem)
             self.memoryBankStartAddress = int(self.memoryBankItem.data(0).split(" ")[1], 16)
-            self.dataChanged.emit(self.createIndex(0,0), self.createIndex(self.LCDRows-1, self.LCDColumns-1))
+            self.dataChanged.emit(self.createIndex(0, 0), self.createIndex(self.LCDRows - 1, self.LCDColumns - 1))
 
     def mapFromSource(self, index):
         # If index is root or a memory bank item, return QModelIndex()
@@ -87,7 +87,7 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
             return QtCore.QModelIndex()
         # At this point, index should point to a memory address of the memory bank specified at setSourceModel()
         memoryAddress = int(index.internalPointer().data(0), 16)
-        row = int((memoryAddress - self.startAddress)/self.LCDColumns)
+        row = int((memoryAddress - self.startAddress) / self.LCDColumns)
         column = (memoryAddress - self.startAddress) % self.LCDColumns
         if 0 <= row < self.LCDRows and 0 <= column < self.LCDColumns:
             return self.createIndex(row, column)
@@ -97,7 +97,7 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
     def mapToSource(self, index):
         if not index.isValid() or self.memoryBankRow == -1:
             return QtCore.QModelIndex()
-        memoryRow = index.row()*self.LCDColumns + index.column() + (self.startAddress-self.memoryBankStartAddress)
+        memoryRow = index.row() * self.LCDColumns + index.column() + (self.startAddress - self.memoryBankStartAddress)
         return self.sourceModel().index(memoryRow, 0, self.memoryBankIndex)
 
     def rowCount(self, parent):
@@ -114,9 +114,10 @@ class MemoryLCDProxyModel(QtGui.QAbstractProxyModel):
     def parent(self, index):
         return QtCore.QModelIndex()
 
-    def _chr(self, hexByte):
+    @staticmethod
+    def _chr(hexByte):
         n = int(hexByte, 16)
-        if n >= 32 and n <= 126:
+        if 32 <= n <= 126:
             return chr(n)
         else:
             return '·'
