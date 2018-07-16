@@ -1,161 +1,304 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html;
-	charset=utf-8" /> <meta name="Author" content="Sergio
-	Barrachina Mir and Germán Fabregat Llueca" />
-	<meta name="Description" content="QtARMSim: a graphical
-	interface for the ARMSim simulator" />
-	<title>QtARMSim: a graphical interface for the ARMSim
-	simulator</title>
+    <meta http-equiv="Content-Type" content="text/html;	charset=utf-8"/>
+    <meta name="Author" content="Sergio	Barrachina Mir and Germán Fabregat Llueca"/>
+    <meta name="Description" content="QtARMSim: a graphical	interface for the ARMSim simulator"/>
+    <title>QtARMSim: a graphical interface for the ARMSim simulator</title>
 </head>
 
 <body>
-  <h1>QtARMSim User Manual</h1>
 
-  <p><strong>Table of contents</strong></p>
+<h1>QtARMSim User Manual</h1>
 
-  <p><a href="#Firmware">1. ARMSim firmware API</a><br/></p>
-  <!--- &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Archivo">1.1 Menu
-  File</a><br/> -->
+<p><strong>Table of contents</strong></p>
 
-
-  <h2><a name="Firmware"></a>1. ARMSim firmware API</h2>
-
-  <p>This section describes the Application Programming Interface
-  (API) of the ARMSim firmware, which
-  provides <a href="#Arithmetic">arithmetic</a>
-  and <a href="#Display">display</a> functions.</p>
-
-  <p>Please note that all the functions of the API follow the ARM
-  convention for parameter passing and return. Thus, i) passed values
-  use the registers from r0 to r3, then the stack if required; ii)
-  values are returned using r0 and r1 if required; and iii) all the
-  functions modify only registers r0 to r3, while all the other are
-  preserved.</p>
-
-  <h3><a name="Arithmetic"></a>1.1 Arithmetic functions</h3>
-
-  <h4><samp>divide(unsigned int dividend, unsigned int divisor)</samp></h4>
-
-  <p>Performs the 32 bits unsigned division dividend/divisor, where r0
-  holds the dividend and r1 the divisor. The quotient is returned in
-  r0 and the remainder in r1.</p>
-
-  <p>If r1 is 0 both quotient and remainder will be 0xFFFFFFFF which
-  is an impossible result for a correct 32 bit division.</p>
-
-  <h4><samp>sdivide(int dividend, int divisor)</samp></h4>
-
-  <p>Performs the 32 bits signed division dividend/divisor, where r0
-  holds the dividend and r1 the divisor. The quotient is returned in
-  r0 and the remainder in r1. The remainder always has the sign of the
-  dividend ─unless the division is exact─.</p>
-
-  <p>If r1 is 0 both quotient and remainder will be 0x7FFFFFFF which
-  is an impossible result for a correct 32 bit division.</p>
-
-  <p>If the dividend is 0x80000000 and the divisor is -1 the quotient
-  returned is 0x80000000 as the positive range is exceeded. All the
-  other combinations work as expected.</p>
-
-  <h4><samp>sqrt(unsigned int val)</samp></h4>
-
-  <p>Returns in r0 the positive, integer square root of the value
-  passed in r0.</p>
+<ol>
+    <li><a href="#Firmware">ARMSim own firmware API</a></li>
+    <li><a href="#Qfplib">Qfplib (floating point library) API</a></li>
+</ol>
 
 
-  <h3><a name="Display"></a>1.2 Display functions</h3>
+<h2><a name="Firmware"></a>1. ARMSim own firmware API</h2>
 
-  <h4><samp>cls()</samp></h4>
+<p>This section describes the Application Programming Interface (API) of the ARMSim own firmware, which provides
+    <a href="#Arithmetic">arithmetic</a> and <a href="#Display">display</a> subroutines.</p>
 
-  <p>Clears the display by filling it with the space character. Does
-  not require nor return any value.</p>
+<p>Please note that all the subroutines of this API follow the ARM convention for parameter passing and return. Thus,
+    i) passed values use the registers from r0 to r3, and then the stack if required; ii) values are returned using r0,
+    and r1 if required; and iii) all the subroutines modify only registers r0 to r3, while all the other are
+    preserved.</p>
 
-  <h4><samp>fill(char c)</samp></h4>
+<h3><a name="Arithmetic"></a>1.1 Arithmetic subroutines</h3>
 
-  <p>Fills the display with the character passed in the LSB of
-  r0. Does not return any value.</p>
+<h4><samp>divide(unsigned int dividend, unsigned int divisor)</samp></h4>
 
+<p>Performs the 32 bits unsigned division dividend/divisor, where r0
+    holds the dividend and r1 the divisor. The quotient is returned in
+    r0 and the remainder in r1.</p>
 
-  <h4><samp>printString(int column, int row, char *str)</samp></h4>
+<p>If r1 is 0 both quotient and remainder will be 0xFFFFFFFF which
+    is an impossible result for a correct 32 bit division.</p>
 
-  <p>Shows the ASCIZ string whose address is passed in r2 starting at
-  the display coordinates (column, row) where column is in r0 and row
-  in r1.</p>
+<h4><samp>sdivide(int dividend, int divisor)</samp></h4>
 
-  <p>The number of characters printed, i.e., the length of the string,
-  is returned in r0.</p>
+<p>Performs the 32 bits signed division dividend/divisor, where r0
+    holds the dividend and r1 the divisor. The quotient is returned in
+    r0 and the remainder in r1. The remainder always has the sign of the
+    dividend ─unless the division is exact─.</p>
 
-  <p>Does not verify if the coordinates are inside or outside the
-  display; nor if the string is printed in two rows
-  or finishes out of the display area.</p>
+<p>If r1 is 0 both quotient and remainder will be 0x7FFFFFFF which
+    is an impossible result for a correct 32 bit division.</p>
 
-  <h4><samp>printInt(int column, int row, int val)</samp></h4>
+<p>If the dividend is 0x80000000 and the divisor is -1 the quotient
+    returned is 0x80000000 as the positive range is exceeded. All the
+    other combinations work as expected.</p>
 
-  <p>Shows the signed decimal value passed in r2 starting at the
-  display coordinates (column, row) where column is in r0 and row in
-  r1.</p>
+<h4><samp>sqrt(unsigned int val)</samp></h4>
 
-  <p>Only significant characters, plus a - sign if required, are
-  printed. The number of characters printed is returned in r0.</p>
-
-  <p>Does not verify if the coordinates are inside or outside the
-  display; nor if the number is printed in two rows
-  or finishes out of the display area.</p>
-
-
-  <h4><samp>printUInt(int column, int row, unsigned int val)</samp></h4>
-
-  <p>Shows the unsigned decimal value passed in r2 starting at the
-  display coordinates (column, row) where column is in r0 and row in
-  r1.</p>
-
-  <p>Only significance characters are printed. The number of
-  characters printed is returned in r0.</p>
-
-  <p>Does not verify if the coordinates are inside or outside the
-  display; nor if the number is printed in two rows
-  or finishes out of the display area.</p>
-
-  <h4><samp>printWord(int column, int row, unsigned int val)</samp></h4>
-
-  <p>Shows the hexadecimal value of the word passed in r2 starting at
-  the display coordinates (column, row) where column is in r0 and row
-  in r1.</p>
-
-  <p>All 8 characters are printed, no value is returned.</p>
-
-  <p>Does not verify if the coordinates are inside or outside the
-  display; nor if the number is printed in two rows
-  or finishes out of the display area.</p>
-
-  <h4><samp>printHalf(int column, int row, unsigned int val)</samp></h4>
-
-  <p>Shows the hexadecimal value of the half word passed in r2
-  starting at the display coordinates (column, row) where column is in
-  r0 and row in r1.</p>
-
-  <p>All 4 characters are printed, no value is returned.</p>
-
-  <p>Does not verify if the coordinates are inside or outside the
-  display; nor if the number is printed in two rows
-  or finishes out of the display area.</p>
+<p>Returns in r0 the positive, integer square root of the value
+    passed in r0.</p>
 
 
-  <h4><samp>printByte(int column, int row, unsigned int val)</samp></h4>
+<h3><a name="Display"></a>1.2 Display subroutines</h3>
 
-  <p>Shows the hexadecimal value of the byte passed in r2 starting at
-  the display coordinates (column, row) where column is in r0 and row
-  in r1.</p>
+<h4><samp>cls()</samp></h4>
 
-  <p>All 2 characters are printed, no value is returned.</p>
+<p>Clears the display by filling it with the space character. Does
+    not require nor return any value.</p>
 
-  <p>Does not verify if the coordinates are inside or outside the
-  display; nor if the number is printed in two rows
-  or finishes out of the display area.</p>
+<h4><samp>fill(char c)</samp></h4>
+
+<p>Fills the display with the character passed in the LSB of
+    r0. Does not return any value.</p>
+
+
+<h4><samp>printString(int column, int row, char *str)</samp></h4>
+
+<p>Shows the ASCIZ string whose address is passed in r2 starting at
+    the display coordinates (column, row) where column is in r0 and row
+    in r1.</p>
+
+<p>The number of characters printed, i.e., the length of the string,
+    is returned in r0.</p>
+
+<p>Does not verify if the coordinates are inside or outside the
+    display; nor if the string is printed in two rows
+    or finishes out of the display area.</p>
+
+<h4><samp>printInt(int column, int row, int val)</samp></h4>
+
+<p>Shows the signed decimal value passed in r2 starting at the
+    display coordinates (column, row) where column is in r0 and row in
+    r1.</p>
+
+<p>Only significant characters, plus a - sign if required, are
+    printed. The number of characters printed is returned in r0.</p>
+
+<p>Does not verify if the coordinates are inside or outside the
+    display; nor if the number is printed in two rows
+    or finishes out of the display area.</p>
+
+
+<h4><samp>printUInt(int column, int row, unsigned int val)</samp></h4>
+
+<p>Shows the unsigned decimal value passed in r2 starting at the
+    display coordinates (column, row) where column is in r0 and row in
+    r1.</p>
+
+<p>Only significance characters are printed. The number of
+    characters printed is returned in r0.</p>
+
+<p>Does not verify if the coordinates are inside or outside the
+    display; nor if the number is printed in two rows
+    or finishes out of the display area.</p>
+
+<h4><samp>printWord(int column, int row, unsigned int val)</samp></h4>
+
+<p>Shows the hexadecimal value of the word passed in r2 starting at
+    the display coordinates (column, row) where column is in r0 and row
+    in r1.</p>
+
+<p>All 8 characters are printed, no value is returned.</p>
+
+<p>Does not verify if the coordinates are inside or outside the
+    display; nor if the number is printed in two rows
+    or finishes out of the display area.</p>
+
+<h4><samp>printHalf(int column, int row, unsigned int val)</samp></h4>
+
+<p>Shows the hexadecimal value of the half word passed in r2
+    starting at the display coordinates (column, row) where column is in
+    r0 and row in r1.</p>
+
+<p>All 4 characters are printed, no value is returned.</p>
+
+<p>Does not verify if the coordinates are inside or outside the
+    display; nor if the number is printed in two rows
+    or finishes out of the display area.</p>
+
+
+<h4><samp>printByte(int column, int row, unsigned int val)</samp></h4>
+
+<p>Shows the hexadecimal value of the byte passed in r2 starting at
+    the display coordinates (column, row) where column is in r0 and row
+    in r1.</p>
+
+<p>All 2 characters are printed, no value is returned.</p>
+
+<p>Does not verify if the coordinates are inside or outside the
+    display; nor if the number is printed in two rows
+    or finishes out of the display area.</p>
+
+
+<h2><a name="Qfplib"></a>2. Qfplib (floating point library) API</h2>
+
+<p>The QtARMSim firmware includes a copy of the Qfplib floating point library. Thanks to this library, IEEE 754 single
+    precision floating point operations can be performed on the ARMSim simulator.</p>
+
+<p>Please note that all the subroutines of this API follow the ARM convention for parameter passing and return. Thus,
+    i) passed values use the registers from r0 to r3, and then the stack if required; ii) values are returned using r0,
+    and r1 if required; and iii) all the subroutines modify only registers r0 to r3, while all the other are
+    preserved.</p>
+
+<p>The next sections describe
+    the <a href="#qfpbasic">basic floating point operations</a>,
+    the <a href="#qfpconversion">conversion subroutines</a>,
+    the <a href="#qfpmath">mathematical subroutines</a>,
+    the <a href="#qfpstring">string conversion subroutines</a>,
+</p>
+
+<h3><a name="qfpbasic"></a>2.1 Basic floating point operations</h3>
+
+<h4><samp>qfp_fadd(float f1, float f2)</samp></h4>
+
+<p>Performs the floating point addition. r0 and r1 hold the operands, and the result is returned in r0.</p>
+
+<h4><samp>qfp_fsub(float m, float s)</samp></h4>
+
+<p>Performs the floating point substraction. r0 holds the minuend and r1 holds the subtrahend, and the result is
+    returned in r0.</p>
+
+<h4><samp>qfp_fmul(float f1, float f2)</samp></h4>
+
+<p>Performs the floating point multiplication. r0 and r1 hold the operands, and the result is returned in r0.</p>
+
+<h4><samp>qfp_fdiv(float dd, float ds)</samp></h4>
+
+<p>Performs the floating point division. r0 holds the dividend and r1 holds the divisor, and the quotient is returned
+    in r0.</p>
+
+<h4><samp>qfp_fcmp(float f1, float f2)</samp></h4>
+
+<p> Performs the comparison between the  floating point numbers in r0 -f1- and r1 -f2-. Returns in r0 an integer whose
+    value is 0 if both are equal, -1 if r0 &lt; r1  and +1 if r0 &gt; r1</p>
+
+<h3><a name="qfpconversion"></a>2.2 Conversion subroutines</h3>
+
+<h4><samp>qfp_float2int(float f)</samp></h4>
+
+<p>Converts the float in r0 to signed integer, rounding towards -Inf. The integer is returned in r0.</p>
+
+<h4><samp>qfp_float2fix(float f, int d)</samp></h4>
+
+<p>Converts the float in r0 to signed fixed point, with the number of fractionary bits in r1. The fixed point value is
+    returned in r0.</p>
+
+<h4><samp>qfp_float2uint(float f)</samp></h4>
+
+<p>Converts the float in r0 to unsigned integer, rounding towards 0 if positive. Any negative float returns 0.
+    The unsigned integer is returned in r0.</p>
+
+<h4><samp>qfp_float2ufix(float f, int d)</samp></h4>
+
+<p>Converts the float in r0 to unsigned fixed point, with the number of fractionary bits in r1. Any negative float
+    returns 0. The fixed point value is returned in r0.</p>
+
+<h4><samp>qfp_int2float(int i)</samp></h4>
+
+<p>Converts the signed integer in r0 to float. The floating point value is returned in r0.</p>
+
+<h4><samp>qfp_fix2float(int fx, int n)</samp></h4>
+
+<p>Converts the fixed point value in r0, with the number of fractionary bits in r1, to floating point. The floating
+    point value is returned in r0.</p>
+
+<h4><samp>qfp_uint2float(unsigned int u)</samp></h4>
+
+<p>Converts the unsigned integer in r0 to float. The floating point value is returned in r0.</p>
+
+<h4><samp>qfp_ufix2float(unsigned int fx, int n)</samp></h4>
+
+<p>Converts the unsigned fixed point value in r0, with the number of fractionary bits in r1, to floating point.
+    The floating point value is returned in r0.</p>
+
+<h3><a name="qfpmath"></a>2.3 Mathematical subroutines</h3>
+
+<h4><samp>qfp_fcos(float x)</samp></h4>
+
+<p>Returns in r0 the cosine of the angle held in r0, expressed in radians.</p>
+
+<h4><samp>qfp_fsin(float x)</samp></h4>
+
+<p>Returns in r0 the sine of the angle held in r0, expressed in radians.</p>
+
+<h4><samp>qfp_ftan(float x)</samp></h4>
+
+<p>Returns in r0 the tangent of the angle held in r0, expressed in radians.</p>
+
+<h4><samp>qfp_fatan2(float y, float x)</samp></h4>
+
+<p>Returns in r0 the angle in radians whose tangent is given by r0/r1. r0 -y- can be viewed as the sin of the angle
+    or the y coordinate of the end of a segment starting at the origin and whose angle with the x axis is returned
+    by the subroutine. Accordingly r1 -x- can be viewed as the cosine or the x coordinate.</p>
+
+<h4><samp>qfp_fexp(float x)</samp></h4>
+
+<p>Returns in r0 the value of e raised to r0.</p>
+
+<h4><samp>qfp_fln(float x)</samp></h4>
+
+<p>Returns in r0 the natural logarithm of r0.</p>
+
+<h4><samp>qfp_fsqrt(float x)</samp></h4>
+
+<p>Returns in r0 the square root of r0.</p>
+
+<h3><a name="qfpstring"></a>2.4 String conversion subroutines</h3>
+
+<h4><samp>qfp_float2str(float f, char *str, unsigned int format)</samp></h4>
+
+<p>Stores in the address given in r1 the string representing the floating point value present in r0. No value is
+    returned. When r2 is 0, a default format is used, otherwise the format is specified as follows
+    (bxx is bit xx of r2):
+    <ul>
+        <li>b7..b0: number of significant figures.</li>
+        <li>b15..b8: -(minimum exponent printable in F format).</li>
+        <li>b23..b16: maximum exponent printable in F format-1.</li>
+        <li>b24: output positive mantissas with ' '.</li>
+        <li>b25: output positive mantissas with '+'.</li>
+        <li>b26: output positive exponents with ' '.</li>
+        <li>b27: output positive exponents with '+'.</li>
+        <li>b28: suppress trailing zeros in fraction.</li>
+        <li>b29: fixed-point output: b7..0 give number of decimal places.</li>
+    </ul>
+</p>
+
+<p>The default format is 0x18060406.</p>
+
+<p>Note that if b28 is set (as it is in the default format value) the code will write the trailing decimal point and
+    zeros to the output buffer before truncating the string. Thus, it is essential that the output buffer is large
+    enough to accommodate these characters temporarily.</p>
+
+<p>Overall accuracy is sufficient to print all exactly-representable integers up to 10^8 correctly in 0x18160408
+    format</p>
+
+<h4><samp>qfp_str2float(float *f, char *str, char **endptr)</samp></h4>
+
+<p>Converts the string starting at the address contained in r1 to a float and stores it to the address contained in r0.
+    At the address contained in r2 is placed the address of the first non convertible character, unless r2 contains 0.
+    The return value in r0 is 0 in case of success or 1 in case of failure, that is, the string is not convertible.</p>
 
 </body>
 </html>
