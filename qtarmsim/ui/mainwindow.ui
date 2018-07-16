@@ -652,6 +652,9 @@
    <property name="text">
     <string>P&amp;references...</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
   </action>
   <action name="action_Undo">
    <property name="icon">
