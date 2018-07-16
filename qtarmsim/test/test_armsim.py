@@ -80,7 +80,7 @@ class CommunicationTestCase(unittest.TestCase):
             ERROR("Couldn't connect to the simulator. Please, check that the simulator\n"
                   "       is listening on port {}.".format(PORT))
         # Usual operation will be blocking(?), but here we put the timeout to 2 seconds
-        self.mysocket.sock.settimeout(2.0)  # Set timeout to 2 seconds
+        self.mysocket.socket.settimeout(2.0)  # Set timeout to 2 seconds
         self.mysocket.send_line("RESET REGISTERS")
         if self.mysocket.receive_line() != OK:
             ERROR('RESET REGISTERS should return an OK')

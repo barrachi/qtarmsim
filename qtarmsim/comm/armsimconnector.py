@@ -173,7 +173,7 @@ class ARMSimConnector:
             self.mysocket.close_socket()
             return False
         # 2) Try to get ARMSim version
-        self.mysocket.sock.settimeout(2)  # Set getVersion timeout to 2 seconds
+        self.mysocket.socket.settimeout(2)  # Set getVersion timeout to 2 seconds
         try:
             self.getVersion()
         except socket.timeout:
@@ -185,7 +185,7 @@ class ARMSimConnector:
             self.mysocket.close_socket()
             return False
         # Set timeout to something bigger for normal operations
-        self.mysocket.sock.settimeout(5.0)
+        self.mysocket.socket.settimeout(5.0)
         self.setConnected(True, port)
         return True
 
