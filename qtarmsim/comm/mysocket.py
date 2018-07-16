@@ -19,10 +19,11 @@
 import signal
 import socket
 import sys
+import time
 
 
 class MySocket:
-    MSGLEN = 1024
+    MSG_LENGTH = 1024
     NL = '\n'
     ORD_NL = 10
     ENCODING = 'utf8'
@@ -34,10 +35,12 @@ class MySocket:
         self.verbose = verbose
         self.conn = None
         self.pending_lines = []
+        self.socket = None
+        self.block_until_response = False
         try:
             signal.signal(signal.SIGINT, self.exit_signal_handler)
         except ValueError:
-            # If not in main thread signal will raise a ValueError
+            # If not in main thread, signal will raise a ValueError
             pass
 
     def server_bind(self, port):
@@ -49,18 +52,18 @@ class MySocket:
         """
         if self.verbose:
             print('Creating the socket')
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             if self.verbose:
                 print('Binding to port {}'.format(port))
-            self.sock.bind(('localhost', port))
+            self.socket.bind(('localhost', port))
         except socket.error as error:
-            sys.stderr.write('Bind failed. [Errno {}] {}\n'.format(str(error.errno), error.strerror))
+            sys.stderr.write('Bind failed. [errno {}] {}\n'.format(str(error.errno), error.strerror))
             return -1
         if self.verbose:
             print('Socket bind complete')
         # Only one listener
-        self.sock.listen(1)
+        self.socket.listen(1)
         if self.verbose:
             print('Socket now listening')
         return 0
@@ -73,9 +76,9 @@ class MySocket:
         """
         if self.verbose:
             print('Waiting for a connection')
-        self.conn, addr = self.sock.accept()
+        self.conn, address = self.socket.accept()
         if self.verbose:
-            print('Connected with ' + addr[0] + ':' + str(addr[1]))
+            print('Connected with ' + address[0] + ':' + str(address[1]))
 
     def test_port_is_free(self, port):
         """
@@ -102,16 +105,16 @@ class MySocket:
         """
         if self.verbose:
             print('Creating the socket')
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((server, port))
-        self.conn = self.sock
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((server, port))
+        self.conn = self.socket
 
     def get_lines(self):
         """
         Generator that serves each line of the received message at a time.
 
         Example of use:
-          lines = mysocket.get_lines()
+          lines = my_socket.get_lines()
           line = lines.next()
         """
         while True:
@@ -124,7 +127,7 @@ class MySocket:
             else:
                 break
 
-    def receive_line(self):
+    def _receive_line(self):
         """
         Returns a line from the line received queue or gets a new one.
 
@@ -135,14 +138,14 @@ class MySocket:
             if self.verbose:
                 print("Received line: {}".format(line))
             return line
-        chunk = self.conn.recv(self.MSGLEN)
+        chunk = self.conn.recv(self.MSG_LENGTH)
         if self.verbose:
             print("Received chunk of size: {}".format(len(chunk)))
             print("Contents:\n #{}#".format(chunk))
         data = chunk
         # Grab more chunks while the other end does not disconnect AND the received chunk does not end with \n
         while len(chunk) != 0 and chunk[-1] != self.ORD_NL:
-            chunk = self.conn.recv(self.MSGLEN)
+            chunk = self.conn.recv(self.MSG_LENGTH)
             if self.verbose:
                 print("Received chunk of size: {}".format(len(chunk)))
                 print("Contents: #{}#".format(chunk))
@@ -153,7 +156,7 @@ class MySocket:
             msg = data.decode('latin1')
         lines = [l.strip() for l in msg.strip().replace('\r\n', '\n').split('\n') if l.strip() != ""]
         if len(lines) > 1:
-            self.pending_lines = lines[1:]
+            self.pending_lines += lines[1:]
         if len(lines):
             line = lines[0]
             if self.verbose:
@@ -161,6 +164,16 @@ class MySocket:
             return line
         else:
             return ""
+
+    def receive_line(self):
+        """
+        Returns a line from self._receive_line() and clears the block_until_response flag.
+
+        @return: a line.
+        """
+        line = self._receive_line()
+        self.block_until_response = False
+        return line
 
     def receive_lines_till_eof(self):
         """
@@ -172,7 +185,7 @@ class MySocket:
         line = ''
         while line != 'EOF':
             try:
-                line = self.receive_line()
+                line = self._receive_line()
             except socket.timeout:
                 print("A time out error has occurred")
                 print("\n".join(lines))
@@ -180,11 +193,18 @@ class MySocket:
             lines.append(line)  # For debugging purposes only
             if line != 'EOF':
                 yield line
+        self.block_until_response = False
 
     def send_line(self, msg):
         """
         Sends a line through the open connection.
         """
+        # Avoid sending new commands to ARMSim until the block_until_response flag is cleared
+        while self.block_until_response:
+            time.sleep(.1)
+        if self.verbose:
+            print("Sending line: {}".format(msg))
+        self.block_until_response = True
         self.conn.sendall(bytes(msg, self.ENCODING) + b'\r\n')
 
     def close_connection(self):
@@ -200,12 +220,12 @@ class MySocket:
         """
         Closes the current socket.
         """
-        self.sock.close()
+        self.socket.close()
         if self.verbose:
             print('Socket closed')
 
-    def exit_signal_handler(self, signal, frame):
+    def exit_signal_handler(self, received_signal, frame):
         """
-        Handler used to closes the socket when an exit signal is received. See __init__().
+        Handler used to close the socket when an exit signal is received. See __init__().
         """
         self.close_socket()
