@@ -153,7 +153,7 @@ class LeftArea(QtWidgets.QWidget):
         find which line in the source code has been clicked on.
         """
         if self.codeEditor.isReadOnly() and event.button() == QtCore.Qt.LeftButton:
-            y = event.posF().y()
+            y = event.y()
             block = self.codeEditor.firstVisibleBlock()
             bottom = self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).bottom()
             height = self.codeEditor.blockBoundingRect(block).height()
