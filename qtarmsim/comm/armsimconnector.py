@@ -221,7 +221,8 @@ class ARMSimConnector:
 
         @return: Error message (or None)
         """
-        translated_setting_name = {"ARMGccCommand": "COMPILER",
+        translated_setting_name = {"ARMSimUseLabels": "USELABELS",
+                                   "ARMGccCommand": "COMPILER",
                                    "ARMGccOptions": "ARGS",
                                    "PATH": "PATH",
                                    }[setting_name]

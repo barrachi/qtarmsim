@@ -92,6 +92,7 @@ class DefaultSettings:
             self._ARMSimDirectory = ""
         self._ARMSimServer = "localhost"
         self._ARMSimPort = 8010
+        self._ARMSimUseLabels = 0
         gcc_names = ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc", "arm-linux-gnueabi-gcc"]
         if sys.platform == "win32":
             gcc_names = ["{}.exe".format(name) for name in gcc_names]
@@ -285,11 +286,12 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # -----------------------------------------------------------------------------
         # End migration of settings versions
         # -----------------------------------------------------------------------------
-        self.settings.setValue("ConfVersion", 2)
+        self.settings.setValue("ConfVersion", 3)
         for setting in (
-                "ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMGccCommand", "ARMGccOptions",
+                "ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMSimUseLabels",
+                "ARMGccCommand", "ARMGccOptions",
                 "LastUsedDirectory"):
-            if not self.settings.value(setting):
+            if self.settings.value(setting) is None:
                 self.settings.setValue(setting, self.defaultSettings.value(setting))
 
     def defaultGeometry(self):
@@ -1070,7 +1072,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         return self.sendSettingsToARMSim()
 
     def sendSettingsToARMSim(self):
-        for setting in [("ARMGccCommand", self.settings.value("ARMGccCommand")),
+        for setting in [("ARMSimUseLabels", "TRUE" if self.settings.value("ARMSimUseLabels") != "0" else "FALSE"),
+                        ("ARMGccCommand", self.settings.value("ARMGccCommand")),
                         ("ARMGccOptions", self.settings.value("ARMGccOptions"))]:
             errmsg = self.simulator.setSettings(setting[0], setting[1])
             if errmsg:

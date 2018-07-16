@@ -39,6 +39,7 @@ class PreferencesDialog(QtWidgets.QDialog):
         self.ui.spinBoxARMSimPort.setValue(int(settings.value("ARMSimPort")))
         self.ui.lineEditARMSimCommand.setText(settings.value("ARMSimCommand"))
         self.ui.lineEditARMSimDirectory.setText(settings.value("ARMSimDirectory"))
+        self.ui.useLabelsCheckBox.setChecked(settings.value("ARMSimUseLabels") != "0")
         self.ui.lineEditARMGccCommand.setText(settings.value("ARMGccCommand"))
         self.ui.lineEditARMGccOptions.setText(settings.value("ARMGccOptions"))
 
@@ -64,6 +65,7 @@ class PreferencesDialog(QtWidgets.QDialog):
         s.setValue("ARMSimPort", self.ui.spinBoxARMSimPort.text().strip())
         s.setValue("ARMSimCommand", self.ui.lineEditARMSimCommand.text().strip())
         s.setValue("ARMSimDirectory", self.ui.lineEditARMSimDirectory.text().strip())
+        s.setValue("ARMSimUseLabels", "1" if self.ui.useLabelsCheckBox.isChecked() else "0")
         s.setValue("ARMGccCommand", self.ui.lineEditARMGccCommand.text().strip())
         s.setValue("ARMGccOptions", self.ui.lineEditARMGccOptions.text().strip())
         return super(PreferencesDialog, self).accept()

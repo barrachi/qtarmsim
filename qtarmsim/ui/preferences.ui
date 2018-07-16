@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>PreferencesDialog</class>
  <widget class="QDialog" name="PreferencesDialog">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>660</width>
-    <height>388</height>
+    <height>498</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,9 +19,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
      <widget class="QWidget" name="tabARMSim">
       <attribute name="title">
        <string>ARMSim</string>
@@ -104,6 +104,20 @@
               </property>
               <property name="value">
                <number>8010</number>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="useLabelsLabel">
+              <property name="text">
+               <string>Use labels</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QCheckBox" name="useLabelsCheckBox">
+              <property name="toolTip">
+               <string>Use labels on the disassembled code instead of the corresponding numeric value</string>
               </property>
              </widget>
             </item>
@@ -231,11 +245,11 @@
   <tabstop>lineEditARMSimCommand</tabstop>
   <tabstop>lineEditARMSimDirectory</tabstop>
   <tabstop>toolButtonARMSimDirectory</tabstop>
+  <tabstop>useLabelsCheckBox</tabstop>
   <tabstop>lineEditARMGccCommand</tabstop>
   <tabstop>toolButtonARMGccCommand</tabstop>
   <tabstop>lineEditARMGccOptions</tabstop>
   <tabstop>pushButtonARMSimRestoreDefaults</tabstop>
-  <tabstop>buttonBox</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
