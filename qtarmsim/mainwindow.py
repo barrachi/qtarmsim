@@ -985,11 +985,24 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.finished.emit(memory_banks)
 
     def onGetMemoryThreadFinished(self, memory_banks):
+        # Display the disassembled code
+        self.ui.simCodeEditor.setPlainText('')
+        self.ui.simCodeEditor.setCenterOnScroll(False)
+        self.ui.simCodeEditor.scrollLock = True
+        for mb in memory_banks:
+            n_lines = len(mb['armsim_lines'])
+            for i in range(0, n_lines//30+1):
+                self.ui.simCodeEditor.appendPlainText('\n'.join(mb['armsim_lines'][i*30: min((i+1)*30, n_lines)]))
+                QtWidgets.QApplication.processEvents()
+        self.ui.simCodeEditor.scrollLock = False
+        self.ui.simCodeEditor.clearDecorations()
+        self.highlight_pc_line()
+        # Stop spinner now
+        self.stopSpinner()
         # Process memory info
         self.memoryModel.reset()
         self.ui.tabWidgetMemoryDump.clear()
         memoryBank = 0
-        armsim_lines = []
         for mb in memory_banks:
             # Append the memory bank
             self.memoryModel.appendMemoryBank(mb['memtype'], mb['hex_start'], mb['membytes'])
@@ -1002,8 +1015,6 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             memoryDumpView.resizeColumnsToContents()
             memoryDumpView.resizeRowsToContents()
             self.ui.tabWidgetMemoryDump.addTab(memoryDumpView, "{}".format(mb['memtype']))
-            # Add the disassembled lines
-            armsim_lines += mb['armsim_lines']
             QtWidgets.QApplication.processEvents()
         # Focus the first tab with RAM memory
         for i in range(self.ui.tabWidgetMemoryDump.count()):
@@ -1016,21 +1027,6 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.treeViewMemory.resizeColumnToContents(1)
         self.ui.treeViewMemory.collapseAll()
         QtWidgets.QApplication.processEvents()
-        # Display the disassembled code
-        self.ui.simCodeEditor.setPlainText('')
-        self.ui.simCodeEditor.setCenterOnScroll(False)
-        tmp_count = 0
-        self.ui.simCodeEditor.scrollLock = True
-        for armsim_line in armsim_lines:
-            self.ui.simCodeEditor.appendPlainText(armsim_line)
-            if tmp_count > 10:
-                QtWidgets.QApplication.processEvents()
-                tmp_count = 0
-            tmp_count += 1
-        self.ui.simCodeEditor.scrollLock = False
-        self.ui.simCodeEditor.clearDecorations()
-        self.highlight_pc_line()
-        self.stopSpinner()
 
     def updateMemory(self):
         """Updates the memory widgets upon ARMSim data."""
