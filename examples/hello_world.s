@@ -1,7 +1,7 @@
 	.data
 @	        0123456789012345678901234567890123456789
-s1:	.asciz "HELLO WORLD!                            "
-s2:	.asciz "This is QtARMSim LCD Display!           "
+s1:	.asciz "HELLO WORLD!"
+s2:	.asciz "This is QtARMSim LCD Display!"
 
 	.text
 main:
