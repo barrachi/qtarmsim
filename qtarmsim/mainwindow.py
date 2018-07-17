@@ -204,11 +204,16 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.sourceCodeEditor.setFocus()
         self.ui.verticalLayoutSource.addWidget(self.ui.sourceCodeEditor)
 
-        # Add a read only ARMCodeEditor to tabARMSim
-        self.ui.simCodeEditor = ARMCodeEditor(self.ui.tabARMSim)
-        self.ui.simCodeEditor.setReadOnly(True)  # disassemble mode
-        self.ui.simCodeEditor.setObjectName(_fromUtf8("simCodeEditor"))
-        self.ui.verticalLayoutARMSim.addWidget(self.ui.simCodeEditor)
+        # Add read only ARMCodeEditors to tabTabARMSim
+        self.ui.tabTabARMSim.clear()
+        self.ui.simCodeEditors = []
+        for i in range(0,3):
+            simCodeEditor = ARMCodeEditor(self.ui.tabTabARMSim)
+            simCodeEditor.setReadOnly(True)  # disassemble mode
+            simCodeEditor.setObjectName(_fromUtf8("simCodeEditor{}".format(i)))
+            self.ui.tabTabARMSim.addTab(simCodeEditor, "")
+            self.ui.tabTabARMSim.setTabEnabled(i, False)
+            self.ui.simCodeEditors.append(simCodeEditor)
 
         # Link tableViewRegisters with registersModel
         self.registersModel = RegistersModel(self)
@@ -361,7 +366,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         """
         if self.simulator and self.simulator.connected:
             self.simulator.clearBreakpoints()
-        self.ui.simCodeEditor.clearBreakpoints()
+        for simCodeEditor in self.ui.simCodeEditors:
+            simCodeEditor.clearBreakpoints()
         self.breakpoints.clear()
 
     def startSpinner(self):
@@ -419,8 +425,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.dockWidgetLCDDisplay.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
         # Connect to self.uji.simCodeEditor set and clear breakpoint signals
-        self.ui.simCodeEditor.setBreakpointSignal.connect(self.setBreakpoint)
-        self.ui.simCodeEditor.clearBreakpointSignal.connect(self.clearBreakpoint)
+        for simCodeEditor in self.ui.simCodeEditors:
+            simCodeEditor.setBreakpointSignal.connect(self.setBreakpoint)
+            simCodeEditor.clearBreakpointSignal.connect(self.clearBreakpoint)
         # Connect register edited on registers model to self.registerEdited
         self.registersModel.register_edited.connect(self.registerEdited)
         # Connect memory edited on memory model to self.memoryEdited
@@ -644,6 +651,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                                               err_msg)
                 if i == len(encodings) - 1:
                     raise e
+        if file_name[-2:] == '.c':
+            self.ui.sourceCodeEditor.setCMode()
+        else:
+            self.ui.sourceCodeEditor.setARMMode()
         self.ui.sourceCodeEditor.setPlainText(text)
         self.setFileName(file_name)
 
@@ -706,7 +717,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             if self.ui.tabWidgetCode.currentIndex() == 0:
                 self.ui.sourceCodeEditor.print_(printer)
             else:
-                self.ui.simCodeEditor.print_(printer)
+                self.ui.tabTabARMSim.currentWidget().print_(printer)
 
     def doQuit(self):
         """Quits the program"""
@@ -740,11 +751,14 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def highlight_pc_line(self):
         PC = self.registersModel.getRegister(15)
-        document = self.ui.simCodeEditor.document()
-        cursor = QtGui.QTextCursor(document)
-        cursor = document.find(QtCore.QRegExp("^\\[{}\\]".format(PC)), cursor, QtGui.QTextDocument.FindWholeWords)
-        if cursor:
-            self.ui.simCodeEditor.setCurrentHighlightedLineNumber(cursor.blockNumber())
+        for simCodeEditor in self.ui.simCodeEditors:
+            document = simCodeEditor.document()
+            cursor = QtGui.QTextCursor(document)
+            cursor = document.find(QtCore.QRegExp("^\\[{}\\]".format(PC)), cursor, QtGui.QTextDocument.FindWholeWords)
+            if cursor:
+                simCodeEditor.setCurrentHighlightedLineNumber(cursor.blockNumber())
+                self.ui.tabTabARMSim.setCurrentWidget(simCodeEditor)
+                break
 
     def _processExecutionResponse(self, response):
         self.ui.textEditMessages.append(response.assembly_line)
@@ -986,16 +1000,23 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def onGetMemoryThreadFinished(self, memory_banks):
         # Display the disassembled code
-        self.ui.simCodeEditor.setPlainText('')
-        self.ui.simCodeEditor.setCenterOnScroll(False)
-        self.ui.simCodeEditor.scrollLock = True
+        for simCodeEditor in self.ui.simCodeEditors:
+            simCodeEditor.setPlainText('')
+            simCodeEditor.setCenterOnScroll(False)
+            simCodeEditor.scrollLock = True
+            simCodeEditor.clearDecorations()
+        i = 0
         for mb in memory_banks:
-            n_lines = len(mb['armsim_lines'])
-            for i in range(0, n_lines//30+1):
-                self.ui.simCodeEditor.appendPlainText('\n'.join(mb['armsim_lines'][i*30: min((i+1)*30, n_lines)]))
-                QtWidgets.QApplication.processEvents()
-        self.ui.simCodeEditor.scrollLock = False
-        self.ui.simCodeEditor.clearDecorations()
+            if mb['armsim_lines']:
+                self.ui.tabTabARMSim.setTabEnabled(i, True)
+                self.ui.tabTabARMSim.setTabText(i, mb['hex_start'])
+                n_lines = len(mb['armsim_lines'])
+                for j in range(0, n_lines//30+1):
+                    self.ui.simCodeEditors[i].appendPlainText('\n'.join(mb['armsim_lines'][j*30: min((j+1)*30, n_lines)]))
+                    QtWidgets.QApplication.processEvents()
+                i += 1
+        for simCodeEditor in self.ui.simCodeEditors:
+            simCodeEditor.scrollLock = False
         self.highlight_pc_line()
         # Stop spinner now
         self.stopSpinner()

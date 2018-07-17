@@ -22,6 +22,7 @@ import sys
 from PySide2 import QtCore, QtGui, QtWidgets
 from .codeeditor import CodeEditor
 from .armsyntaxhighlighter import ARMSyntaxHighlighter
+from .csyntaxhighlighter import CSyntaxHighlighter
 
 
 class ARMCodeEditor(CodeEditor):
@@ -29,7 +30,9 @@ class ARMCodeEditor(CodeEditor):
 
     def __init__(self, parent=None, *args, **kwargs):
         """ARMCodeEditor initialization"""
-        super(ARMCodeEditor, self).__init__(parent=parent, SyntaxHighlighterClass=ARMSyntaxHighlighter, *args, **kwargs)
+        self.ARMSyntaxHighlighterClass = ARMSyntaxHighlighter
+        self.CSyntaxHighlighterClass = CSyntaxHighlighter
+        super(ARMCodeEditor, self).__init__(parent=parent, SyntaxHighlighterClass=self.ARMSyntaxHighlighterClass, *args, **kwargs)
 
     def _getKeywordsToHighlight(self):
         """Returns which keywords should be highlighted on the text when the same keyword is under the cursor"""
@@ -44,6 +47,15 @@ class ARMCodeEditor(CodeEditor):
                 labels.append(cursor.selectedText()[:-1].strip())
         # Return special keywords
         return registers + labels
+
+    def setARMMode(self):
+        self.syntaxHighlighter = self.ARMSyntaxHighlighterClass(self.document())
+        self.setTabStopWidth(8 * self.fontMetrics().width('9'))
+
+    def setCMode(self):
+        self.syntaxHighlighter = self.CSyntaxHighlighterClass(self.document())
+        self.setTabStopWidth(3 * self.fontMetrics().width('9'))
+
 
 
 if __name__ == "__main__":

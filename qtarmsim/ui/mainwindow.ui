@@ -70,10 +70,10 @@
       </property>
       <widget class="QWidget" name="tabSource">
        <property name="whatsThis">
-        <string>The Source Code tab is used to edit the assembler source code that is going to be simmulated</string>
+        <string>The Editor tab is used to edit the assembler  code that is going to be simmulated</string>
        </property>
        <attribute name="title">
-        <string>Source Code</string>
+        <string>Editor</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutSource"/>
       </widget>
@@ -87,7 +87,28 @@
        <attribute name="title">
         <string>ARMSim</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayoutARMSim"/>
+       <layout class="QVBoxLayout" name="verticalLayoutARMSim">
+        <item>
+         <widget class="QTabWidget" name="tabTabARMSim">
+          <property name="tabPosition">
+           <enum>QTabWidget::South</enum>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab_3">
+           <attribute name="title">
+            <string>Tab 1</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="tab_4">
+           <attribute name="title">
+            <string>Tab 2</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
