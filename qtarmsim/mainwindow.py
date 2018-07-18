@@ -1156,7 +1156,6 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.simulator.sendCommand(line)
 
     def terminalHistoryUp(self):
-        print('<<')
         self._terminal_history_cursor -= 1
         terminal_history = self.settings.value("TerminalHistory").split('::')
         if -self._terminal_history_cursor > len(terminal_history):
