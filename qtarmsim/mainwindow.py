@@ -211,15 +211,16 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.sourceCodeEditor.setFocus()
         self.ui.verticalLayoutSource.addWidget(self.ui.sourceCodeEditor)
 
-        # Add read only ARMCodeEditors to tabTabARMSim
+        # Clear default tabs in tabTabARMSim
         self.ui.tabTabARMSim.clear()
+
+        # Create three simCodeEditors
         self.ui.simCodeEditors = []
-        for i in range(0,3):
+        for i in range(3):
             simCodeEditor = ARMCodeEditor(self.ui.tabTabARMSim)
             simCodeEditor.setReadOnly(True)  # disassemble mode
             simCodeEditor.setObjectName(_fromUtf8("simCodeEditor{}".format(i)))
-            self.ui.tabTabARMSim.addTab(simCodeEditor, "")
-            self.ui.tabTabARMSim.setTabEnabled(i, False)
+            simCodeEditor.hide()
             self.ui.simCodeEditors.append(simCodeEditor)
 
         # Link tableViewRegisters with registersModel
@@ -1037,11 +1038,12 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             simCodeEditor.setCenterOnScroll(False)
             simCodeEditor.scrollLock = True
             simCodeEditor.clearDecorations()
+            simCodeEditor.hide()
         i = 0
+        self.ui.tabTabARMSim.clear()
         for mb in memory_banks:
             if mb['armsim_lines']:
-                self.ui.tabTabARMSim.setTabEnabled(i, True)
-                self.ui.tabTabARMSim.setTabText(i, mb['hex_start'])
+                self.ui.tabTabARMSim.addTab(self.ui.simCodeEditors[i], mb['hex_start'])
                 n_lines = len(mb['armsim_lines'])
                 for j in range(0, n_lines//30+1):
                     self.ui.simCodeEditors[i].appendPlainText('\n'.join(mb['armsim_lines'][j*30: min((j+1)*30, n_lines)]))
