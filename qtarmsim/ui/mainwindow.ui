@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>880</width>
-    <height>716</height>
+    <width>925</width>
+    <height>757</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -119,7 +119,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>880</width>
+     <width>925</width>
      <height>30</height>
     </rect>
    </property>
@@ -169,6 +169,7 @@
     <addaction name="actionShow_Messages"/>
     <addaction name="actionShow_Memory_Dump"/>
     <addaction name="actionShow_LCD_Display"/>
+    <addaction name="actionShow_Terminal"/>
     <addaction name="separator"/>
     <addaction name="actionRestore_Default_Layout"/>
     <addaction name="separator"/>
@@ -448,6 +449,35 @@
         </size>
        </property>
       </spacer>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidgetTerminal">
+   <property name="windowTitle">
+    <string>Termi&amp;nal</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetTerminalContents">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QTextBrowser" name="textBrowserTerminal"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLineEdit" name="lineEditTerminal"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonTerminal">
+         <property name="text">
+          <string>Send command</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -802,6 +832,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show Memory &amp;Dump</string>
    </property>
@@ -810,8 +843,22 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Show &amp;LCD Display</string>
+   </property>
+  </action>
+  <action name="actionShow_Terminal">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Term&amp;inal</string>
    </property>
   </action>
  </widget>

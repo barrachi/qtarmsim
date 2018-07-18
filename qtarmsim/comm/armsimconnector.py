@@ -26,6 +26,8 @@ import sys
 import tempfile
 import time
 
+from PySide2 import QtWidgets
+
 from .mysocket import MySocket
 from .responses import ExecuteResponse, AssembleResponse
 from .exceptions import RunTimeOut
@@ -530,3 +532,16 @@ class ARMSimConnector:
             response.errmsg = "\n".join(errmsg_list)
         self._disposeTmpDir(tmp_fname)
         return response
+
+    def sendCommand(self, line):
+        self.mysocket.send_line(line)
+        line = self.mysocket.receive_line()
+        QtWidgets.QApplication.processEvents()
+        self.mysocket.socket.settimeout(1)  # Set timeout of next lines to 1 second
+        while 1:
+            try:
+                self.mysocket.receive_line()
+            except socket.timeout:
+                break
+            QtWidgets.QApplication.processEvents()
+        self.mysocket.socket.settimeout(5)  # Restore default timeout of 5 seconds

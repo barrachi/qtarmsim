@@ -41,6 +41,7 @@ to be used on Computer Architecture Introductory courses.
 If an asmfile.s is provided, it will be opened.
 
 Options:
+   -d, --debug       provides a terminal to directly interact with ARMSim
    -v, --verbose     increments the output verbosity
    -h, --help        displays this help and exit
 
@@ -50,20 +51,23 @@ Please, report bugs to <barrachi@uji.es>.
 
 def _getopts():
     """Processes the options passed to the executable"""
+    debug = False
     verbose = False
     file_name = ""
     optlist, args = getopt.getopt(sys.argv[1:],  # @UnusedVariable
-                                  'vh',
-                                  ['verbose', 'help', ])
+                                  'dvh',
+                                  ['debug', 'verbose', 'help', ])
     for opt, arg in optlist:  # @UnusedVariable arg
         if opt in ('-h', '--help'):
             _help()
             sys.exit()
+        elif opt in ('-d', '--debug'):
+            debug = True
         elif opt in ('-v', '--verbose'):
             verbose = True
     if len(args) and args[0][-2:] in ('.s', '.c'):
         file_name = args[0]
-    return file_name, verbose
+    return file_name, debug, verbose
 
 
 def main():
@@ -79,9 +83,9 @@ def main():
     for plugins_dir in [os.path.join(p, "plugins") for p in PySide2.__path__]:
         qApp.addLibraryPath(plugins_dir)
     # Process the command line options
-    (file_name, verbose) = _getopts()
+    (file_name, debug, verbose) = _getopts()
     # Create the main window and show it
-    main_window = QtARMSimMainWindow(verbose=verbose)
+    main_window = QtARMSimMainWindow(debug=debug, verbose=verbose)
     main_window.show()
     # If there is a file_name from the command line, open it
     if file_name:

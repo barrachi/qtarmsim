@@ -20,6 +20,7 @@ import os
 import platform
 import shutil
 import sys
+import socket
 
 import PySide2
 from PySide2 import QtCore, QtGui, QtWidgets, QtPrintSupport
@@ -117,6 +118,7 @@ class DefaultSettings:
         fname = fname if fname else ""
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
+        self._TerminalHistory = "SHOW VERSION"
 
     # noinspection PyArgumentList
     def _setDirectoryDefaults(self):
@@ -127,10 +129,11 @@ class DefaultSettings:
 class QtARMSimMainWindow(QtWidgets.QMainWindow):
     """Main window of the QtARMSim application."""
 
-    def __init__(self, parent=None, verbose=False):
+    def __init__(self, parent=None, debug=False, verbose=False):
         # Call super.__init__()
         super(QtARMSimMainWindow, self).__init__(parent)
-        # Set verbosity
+        # Set debug and verbosity flags
+        self.debug = debug
         self.verbose = verbose
         # Load the user interface
         self.ui = Ui_MainWindow()
@@ -172,6 +175,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Print welcome message on the Messages Window and show Ready on the status bar
         self.ui.textEditMessages.append(self.welcome_message())
         self.statusBar().showMessage(self.tr("Ready"))
+        # Initialize number of received lines from simulator
+        self._received_lines_from_simulator = 0
+        # Initialize the terminal history cursor
+        self._terminal_history_cursor = 0
 
     def show(self, *args, **kwargs):
         """Method called when the window is ready to be shown"""
@@ -190,7 +197,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         if sys.platform == 'darwin':
             # Set unified title and toolbar on Mac
             QtWidgets.QMainWindow.setUnifiedTitleAndToolBarOnMac(true)
-            # @TODO: Delete the next comments if the previous line makes its work
+            # @TODO: Delete the next comments if the previous line makes it work
             # On Mac OS X there are two options to display the menu bar (o no menu bar will be shown):
             # 1. Set the native menu bar property to False (self.ui.menubar.setNativeMenuBar(False)):
             #    The menu bar will be displayed on top of the tool bar (as in KDE)
@@ -251,6 +258,11 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Remove default tabs of self.ui.tabWidgetMemoryDump
         self.ui.tabWidgetMemoryDump.clear()
 
+        # If not in debug mode, hide Terminal (action and dock)
+        if not self.debug:
+            self.ui.menu_Window.removeAction(self.ui.actionShow_Terminal)
+            self.ui.dockWidgetTerminal.hide()
+
         # Tabify bottom dock widgets
         bottomDocks = []
         if self.dockWidgetArea(self.ui.dockWidgetMessages) == Qt.BottomDockWidgetArea:
@@ -259,6 +271,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             bottomDocks.append(self.ui.dockWidgetMemoryDump)
         if self.dockWidgetArea(self.ui.dockWidgetLCDDisplay) == Qt.BottomDockWidgetArea:
             bottomDocks.append(self.ui.dockWidgetLCDDisplay)
+        if self.dockWidgetArea(self.ui.dockWidgetTerminal) == Qt.BottomDockWidgetArea:
+            bottomDocks.insert(0, self.ui.dockWidgetTerminal)
         if len(bottomDocks) > 1:
             self.tabifyDockWidget(bottomDocks[0], bottomDocks[1])
             if len(bottomDocks) > 2:
@@ -295,7 +309,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         for setting in (
                 "ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMSimUseLabels",
                 "ARMGccCommand", "ARMGccOptions",
-                "LastUsedDirectory"):
+                "LastUsedDirectory", "TerminalHistory"):
             if self.settings.value(setting) is None:
                 self.settings.setValue(setting, self.defaultSettings.value(setting))
 
@@ -340,6 +354,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
         self.ui.actionShow_Memory_Dump.setChecked(self.ui.dockWidgetMemoryDump.isVisible())
         self.ui.actionShow_LCD_Display.setChecked(self.ui.dockWidgetLCDDisplay.isVisible())
+        self.ui.actionShow_Terminal.setChecked(self.ui.dockWidgetTerminal.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
 
     def enableSimulatorActions(self, onSimulator):
@@ -423,6 +438,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.dockWidgetMemory.installEventFilter(self)
         self.ui.dockWidgetMemoryDump.installEventFilter(self)
         self.ui.dockWidgetLCDDisplay.installEventFilter(self)
+        self.ui.dockWidgetTerminal.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
         # Connect to self.uji.simCodeEditor set and clear breakpoint signals
         for simCodeEditor in self.ui.simCodeEditors:
@@ -432,6 +448,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.registersModel.register_edited.connect(self.registerEdited)
         # Connect memory edited on memory model to self.memoryEdited
         self.memoryModel.memoryEdited.connect(self.memoryEdited)
+        # Connect Terminal push button and Terminal line edit return to send line to simulator
+        self.ui.pushButtonTerminal.pressed.connect(self.sendLineToSimulator)
+        self.ui.lineEditTerminal.returnPressed.connect(self.sendLineToSimulator)
 
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.Close and isinstance(source, QtWidgets.QDockWidget):
@@ -443,8 +462,17 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 self.ui.actionShow_Memory_Dump.setChecked(False)
             elif source is self.ui.dockWidgetLCDDisplay:
                 self.ui.actionShow_LCD_Display.setChecked(False)
+            elif source is self.ui.dockWidgetTerminal:
+                self.ui.actionShow_Terminal.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
                 self.ui.actionShow_Messages.setChecked(False)
+        if event.type() == QtCore.QEvent.KeyPress and source == self.ui.dockWidgetTerminal:
+            if event.key() == Qt.Key_Up:
+                self.ui.lineEditTerminal.setText(self.terminalHistoryUp())
+                return True
+            elif event.key() == Qt.Key_Down:
+                self.ui.lineEditTerminal.setText(self.terminalHistoryDown())
+                return True
         return super(QtARMSimMainWindow, self).eventFilter(source, event)
 
     def onTabChange(self, tabIndex):
@@ -841,8 +869,12 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self._doShow(self.ui.dockWidgetMemoryDump, self.ui.actionShow_Memory_Dump)
 
     def doShow_LCD_Display(self):
-        """Shows or hides the Memory dock widget"""
+        """Shows or hides the LCD Display dock widget"""
         self._doShow(self.ui.dockWidgetLCDDisplay, self.ui.actionShow_LCD_Display)
+
+    def doShow_Terminal(self):
+        """Shows or hides the Terminal dock widget"""
+        self._doShow(self.ui.dockWidgetTerminal, self.ui.actionShow_Terminal)
 
     def doShow_Messages(self):
         """Shows or hides the Messages dock widget"""
@@ -1067,6 +1099,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                                                   "Please go to 'Edit, Preferences...' and set it.\n"))
             return False
         self.simulator = ARMSimConnector(verbose=self.verbose)
+        if self.debug:
+            self.simulator.mysocket.sentLine.connect(self.sentLineToSimulator)
+            self.simulator.mysocket.receivedLine.connect(self.receivedLineFromSimulator)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         connectProgressBarDialog = ConnectProgressBarDialog(self.simulator,
                                                             self.settings.value("ARMSimCommand"),
@@ -1097,3 +1132,48 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.warning(self, self.tr("ARMSim set setting failed"), "\n{}\n".format(errmsg))
                 return False
         return True
+
+    def sentLineToSimulator(self, line):
+        self._received_lines_from_simulator = 0
+        self.ui.textBrowserTerminal.append('> {}'.format(line))
+
+    def receivedLineFromSimulator(self, line):
+        self._received_lines_from_simulator += 1
+        if self._received_lines_from_simulator < 10:
+            self.ui.textBrowserTerminal.append('{}'.format(line))
+        elif self._received_lines_from_simulator == 10:
+            self.ui.textBrowserTerminal.append('[...]')
+
+    def sendLineToSimulator(self):
+        if self.simulator:
+            line = self.ui.lineEditTerminal.text()
+            self.ui.lineEditTerminal.clear()
+            sb = self.ui.textBrowserTerminal.verticalScrollBar()
+            sb.setValue(sb.maximum())
+            self.terminalHistoryPush(line)
+            self.simulator.sendCommand(line)
+
+    def terminalHistoryUp(self):
+        print('<<')
+        self._terminal_history_cursor -= 1
+        terminal_history = self.settings.value("TerminalHistory").split('::')
+        if -self._terminal_history_cursor > len(terminal_history):
+            self._terminal_history_cursor = -len(terminal_history)
+        return terminal_history[self._terminal_history_cursor]
+
+    def terminalHistoryDown(self):
+        self._terminal_history_cursor += 1
+        if self._terminal_history_cursor >= 0:  # new line (not in history)
+            self._terminal_history_cursor = 0
+            return ""
+        else:
+            terminal_history = self.settings.value("TerminalHistory").split('::')
+            return terminal_history[self._terminal_history_cursor]
+
+    def terminalHistoryPush(self, line):
+        self._terminal_history_cursor = 0
+        terminal_history = self.settings.value("TerminalHistory").split('::')
+        terminal_history.append(line)
+        if len(terminal_history) > 20:
+            terminal_history = terminal_history[-20:]
+        self.settings.setValue("TerminalHistory", '::'.join(terminal_history))

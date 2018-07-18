@@ -20,18 +20,24 @@ import signal
 import socket
 import sys
 import time
+from PySide2 import QtCore
 
 
-class MySocket:
+class MySocket(QtCore.QObject):
+
     MSG_LENGTH = 1024
     NL = '\n'
     ORD_NL = 10
     ENCODING = 'utf8'
 
+    sentLine = QtCore.Signal('QString')
+    receivedLine = QtCore.Signal('QString')
+
     def __init__(self, verbose=False):
         """
         Initializes the socket
         """
+        super(MySocket, self).__init__()
         self.verbose = verbose
         self.conn = None
         self.pending_lines = []
@@ -137,6 +143,7 @@ class MySocket:
             line = self.pending_lines.pop(0)
             if self.verbose:
                 print("Received line: {}".format(line))
+            self.receivedLine.emit(line)
             return line
         chunk = self.conn.recv(self.MSG_LENGTH)
         if self.verbose:
@@ -161,6 +168,7 @@ class MySocket:
             line = lines[0]
             if self.verbose:
                 print("Received line: {}".format(line))
+            self.receivedLine.emit(line)
             return line
         else:
             return ""
@@ -206,6 +214,7 @@ class MySocket:
             print("Sending line: {}".format(msg))
         self.block_until_response = True
         self.conn.sendall(bytes(msg, self.ENCODING) + b'\r\n')
+        self.sentLine.emit(msg)
 
     def close_connection(self):
         """

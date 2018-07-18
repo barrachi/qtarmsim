@@ -45,3 +45,9 @@ QMainWindow::separator:hover
     border: 1px solid #6c6c6c;
     spacing: 3px; /* spacing between items in the tool bar */
 }
+
+QTextBrowser#textBrowserTerminal
+{
+    background-color: #475058;
+    color: greenyellow;
+}
