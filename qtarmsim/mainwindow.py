@@ -18,9 +18,12 @@
 
 import os
 import platform
+import re
 import shutil
 import sys
-import socket
+import tempfile
+from functools import partial
+from glob import glob
 
 import PySide2
 from PySide2 import QtCore, QtGui, QtWidgets, QtPrintSupport
@@ -281,6 +284,32 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                     self.splitDockWidget(bottomDocks[i], bottomDocks[i + 1], Qt.Horizontal)
             bottomDocks[0].raise_()
 
+        # Examples menu
+        self.buildExamplesMenu(self.ui.menuExamples, os.path.join(module_path, "examples"))
+
+    def buildExamplesMenu(self, menu, path):
+        def _name_from_path(path_):
+            basename = os.path.basename(path_)
+            res = re.search('[0-9]+_(.*)', basename)
+            if res:
+                return res.groups()[0]
+            else:
+                return basename
+        files_or_dirs = glob(os.path.join(path, "*"))
+        files_or_dirs.sort()
+        for file_or_dir in files_or_dirs:
+            if os.path.isdir(file_or_dir):
+                new_menu = QtWidgets.QMenu(menu)
+                new_menu.setTitle(QtWidgets.QApplication.translate("Examples", _name_from_path(file_or_dir), None, -1))
+                self.buildExamplesMenu(new_menu, file_or_dir)
+                menu.addAction(new_menu.menuAction())
+            elif file_or_dir[-2:] in ('.s', '.c'):
+                action = QtWidgets.QAction(self)
+                action.setText(QtWidgets.QApplication.translate("Examples", _name_from_path(file_or_dir), None, -1))
+                action.setData(file_or_dir)
+                action.triggered.connect(partial(self.doOpenExample, action))
+                menu.addAction(action)
+
     def readSettings(self):
         """Reads the settings from the settings file or initializes them from defaultSettings"""
         self.defaultSettings = DefaultSettings()
@@ -501,6 +530,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.doAssemble()
         else:
             self.enableSimulatorActions(False)
+            self.ui.sourceCodeEditor.setFocus()
 
     def assembled(self, has_been_assembled):
         if has_been_assembled:
@@ -653,6 +683,23 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.clearBreakpoints()
             # Update LastUsedDirectory setting
             self.settings.setValue("LastUsedDirectory", os.path.dirname(file_name))
+
+    def doOpenExample(self, action):
+        """Opens an example file"""
+        if self.checkCurrentFileState() == QtWidgets.QMessageBox.Cancel:
+            return
+        file_name = action.data()
+        if file_name:
+            tmp_dir = tempfile.mkdtemp(".qtarmsim")
+            file_name_in_tmp = os.path.join(tmp_dir, os.path.basename(file_name))
+            shutil.copyfile(file_name, file_name_in_tmp)
+            self.readFile(file_name_in_tmp)
+            # Change to tab 0
+            self.ui.tabWidgetCode.setCurrentIndex(0)
+            # Clear breakpoints for the new read file
+            self.clearBreakpoints()
+            # Do not update LastUsedDirectory setting
+            pass
 
     def readFile(self, file_name):
         """Reads a file. Can be called using an argument from the command line"""
@@ -829,7 +876,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.simulator.setBreakpoint(hex_address)
 
     def doRun(self):
-        runProgressBarDialog = RunProgressBarDialog(self.simulator, self)
+        # @warning: Don't issue RunProgressBarDialog(self.simulator, **parent=self**)
+        #           After executing Examples > Registers > add.s the cursor on the editor is lost
+        runProgressBarDialog = RunProgressBarDialog(self.simulator)
         if not runProgressBarDialog.exec_():
             self.doRestart()
             return
