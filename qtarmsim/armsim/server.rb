@@ -36,7 +36,7 @@ Errores = { orden: "Orden no reconocida\r\n",
             path: "El directorio no existe o no es correcto\r\n",
             exe: "El archivo no existe o no es ejecutable\r\n",
             file_s: "El archivo .s no existe\r\n",
-            errnoalign: "Acceso no alineado a la dirección",
+            errnoalign: "Acesso no alineado en dirección",
             errnoblock: "Memoria inexistente en dirección"
 }
 
