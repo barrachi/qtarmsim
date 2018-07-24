@@ -34,13 +34,17 @@ For example, on Ubuntu you can install QtARMSim, ARMSim and their
 dependencies using::
 
    $ sudo apt-get install python3-pip ruby
+   $ # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
+   $ # for gosu dependencies
    $ sudo gem install gosu
    $ sudo pip3 install PySide2 QtARMSim
 
 On a Gentoo distribution, you can install QtARMSim, ARMSim and their
 dependencies issuing (as root)::
 
-   # emerge -av ruby mpg123
+   # emerge -av ruby
+   $ # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
+   $ # for gosu dependencies
    # gem install gosu
    # pip3 install PySide2 QtARMSim
 
