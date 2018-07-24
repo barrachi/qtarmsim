@@ -197,16 +197,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
            and puts in tabs the bottom dock widgets"""
 
         # Mac OS X quirks
-        if sys.platform == 'darwin':
-            # Set unified title and toolbar on Mac
-            QtWidgets.QMainWindow.setUnifiedTitleAndToolBarOnMac(true)
-            # @TODO: Delete the next comments if the previous line makes it work
-            # On Mac OS X there are two options to display the menu bar (o no menu bar will be shown):
-            # 1. Set the native menu bar property to False (self.ui.menubar.setNativeMenuBar(False)):
-            #    The menu bar will be displayed on top of the tool bar (as in KDE)
-            # 2. Set the parent of the menu bar to None (self.ui.menubar.setParent(None)):
-            #    The menu bar will be displayed on the system menu
-            # self.ui.menubar.setParent(None)
+        # @todo: check again the next on a MacOs (last time it didn't work)
+        # if sys.platform == 'darwin':
+        #     # Set unified title and toolbar on Mac
+        #     self.setUnifiedTitleAndToolBarOnMac(True)
 
         # Add an ARMCodeEditor to tabSource
         self.ui.sourceCodeEditor = ARMCodeEditor(self.ui.tabSource)
@@ -843,7 +837,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.registersModel.setRegister(reg_number, reg_value)
         for (hex_address, hex_byte) in response.memory:
             self.memoryModel.setByte(hex_address, hex_byte)
-            self.ui.treeViewMemory.scrollTo(self.memoryModel.getIndex(hex_address))
+            self.ui.treeViewMemory.expand(self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
+            self.ui.treeViewMemory.scrollTo(self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex(hex_address)))
         if response.result == "ERROR":
             self.ui.textEditMessages.append("<b>An error has occurred.</b>")
         elif response.result == "BREAKPOINT REACHED":
@@ -1126,11 +1121,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 self.ui.tabWidgetMemoryDump.setCurrentIndex(i)
                 break
         # Modify the layout of treeViewMemory
-        self.ui.treeViewMemory.expandAll()
-        self.ui.treeViewMemory.resizeColumnToContents(0)
-        self.ui.treeViewMemory.resizeColumnToContents(1)
-        self.ui.treeViewMemory.collapseAll()
+        # @todo: expand automatically the first RAM module
+        self.ui.treeViewMemory.expand(self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
         QtWidgets.QApplication.processEvents()
+        self.ui.treeViewMemory.updateGeometry()
 
     def updateMemory(self):
         """Updates the memory widgets upon ARMSim data."""

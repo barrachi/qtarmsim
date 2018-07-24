@@ -26,19 +26,14 @@ class MyQTreeView(QtWidgets.QTreeView):
         If there is no model yet, just return a 0x0 size.
         Else, compute the total width and set the minimum and maximum sizes of the parent dock widget
         """
-        if self.model() is None:
+        if self.model() is None or self.model().rowCount(QtCore.QModelIndex()) == 0:
             return QtCore.QSize(0, 0)
-        width = 0
-        my_vertical_scrollbar = self.verticalScrollBar()
-        my_dock = self.parent().parent()
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
-        for i in range(2):
-            width += self.columnWidth(i)
+        width = self.columnWidth(0) + self.columnWidth(1)
         # If the vertical scroll bar is visible, add its width
+        my_vertical_scrollbar = self.verticalScrollBar()
         if my_vertical_scrollbar.isVisible():
             width += my_vertical_scrollbar.width()
-        self.setMinimumSize(width, 0)
-        # @todo: the extra width should be obtained automatically
-        my_dock.setMinimumWidth(width + 15)
+        self.setMinimumWidth(width)
         return QtCore.QSize(width, 0)
