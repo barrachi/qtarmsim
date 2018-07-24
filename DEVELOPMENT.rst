@@ -4,22 +4,26 @@ QtARMSim development
 How to distribute a new version
 -------------------------------
 
-To create a source distribution and upload it to the `testpypi
-repository <https://testpypi.python.org/>`_::
+To create a source distribution::
+  $ python3 ./setup.py qtclean qtcompile sdist
 
+To check that the RST documents are valid::
   $ python3 ./setup.py checkdocs
-  $ python3 ./setup.py qtclean qtcompile sdist upload -r testpypi
 
-``checkdocs`` can be installed using::
-
+Where ``checkdocs`` can be installed using::
   $ pip3 install --user collective.checkdocs
 
-To test a source distribution ``tar.gz``::
-
+To test the source distribution ``dist/qtarmsim-x.x.x.tar.gz``::
   $ virtualenv --python=python3 testqtarmsim
   $ . testqtarmsim/bin/activate
   $ pip3 install dist/qtarmsim-x.y.z.tar.gz
   $ deactivate
+
+To upload it to the `testpypi repository <https://testpypi.python.org/>`_::
+   $ twine upload --repository-url https://test.pypi.org/legacy/ dist/qtarmsim-x.x.x.tar.gz
+
+To upload it to the `pypi repository <https://pypi.org/>`::
+  $ twine upload dist/qtarmsim-x.x.x.tar.gz
 
 
 How to build a binary installer for Windows

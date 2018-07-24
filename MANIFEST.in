@@ -5,5 +5,13 @@ include CHANGELOG.rst DEVELOPMENT.rst README.rst INSTALL.rst
 include GPL.txt LICENSE.txt
 include qtarmsim.ico
 
+prune docs
+prune examples
 prune tmp
 prune third_party
+prune distfiles
+prune qtarmsim/res/bin
+prune qtarmsim/res/breeze
+prune qtarmsim/res/fonts
+prune qtarmsim/res/oxygen
+prune qtarmsim/test
