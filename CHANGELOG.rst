@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.4.2 (2018-7-24)
+0.4.4 (2018-7-25)
 ^^^^^^^^^^^^^^^^^
 - Migrated to Qt for Python (PySide2).
 - Speeded up the filling of the simulator data.
