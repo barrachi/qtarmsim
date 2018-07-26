@@ -284,7 +284,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
     def buildExamplesMenu(self, menu, path):
         def _name_from_path(path_):
             basename = os.path.basename(path_)
-            res = re.search('[0-9]+_(.*)', basename)
+            basename = basename.replace('_', ' ')
+            res = re.search('[0-9]+ (.*)', basename)
             if res:
                 return res.groups()[0]
             else:

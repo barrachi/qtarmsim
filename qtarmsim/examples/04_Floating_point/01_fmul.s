@@ -1,6 +1,7 @@
 @
 @ This program:
-@ + stores the floating point numbers given by the strings in 'strf1' and 'strf2' in the variables 'f1' and 'f2',
+@ + stores the floating point numbers given by the strings in
+@     'strf1' and 'strf2' into the variables 'f1' and 'f2',
 @ + multiplies the floating point numbers in 'f1' and 'f2',
 @ + converts the result to a string,
 @ + and shows it on the LCD Display.
