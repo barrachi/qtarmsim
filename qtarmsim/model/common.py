@@ -75,12 +75,11 @@ class InputToHex(QtCore.QObject):
                 if len(text) == 2:
                     # Empty string, return 0
                     return '0x' + '0' * HEX_DIGITS, ''
-                # Non empty string, convert to bytes, left padding with 0s and reverse (little-endian)
+                # Non empty string, convert to bytes, left padding with 0s
                 bytes_list = ["{:02X}".format(b) for b in bytes(text[1:-1], 'utf-8')]
                 if len(bytes_list) > bits / 8:
                     err_msg = self.tr("The UTF-8 string '{}' can not been represented with {} bits.").format(text, bits)
                     return None, self.html_error(err_msg)
-                bytes_list.reverse()
                 bytes_list = ["00"] * BYTES + bytes_list
                 return "0x{}".format("".join(bytes_list[-BYTES:])), ''
         try:
@@ -115,3 +114,55 @@ def getMonoSpacedFont():
             font.setStyleHint(QtGui.QFont.TypeWriter)
     font.setPointSize(QtGui.QFont().pointSize())  # Using the system default font point size
     return font
+
+
+class DataTypes:
+
+    MAX_POSITIVE = (0, 0, 127, 0, 32767, 0, 0, 0, 2147483647)
+    CA2_VALUE= (0, 0, 256, 0, 65536, 0, 0, 0, 4294967296)
+
+    def __init__(self, hex_value):
+        self.hexadecimal = hex_value
+        hex_digits = len(self.hexadecimal) - 2 # - "0x"
+        if hex_digits not in (2, 4, 8):
+            raise RuntimeError("DataTypes class received an hexadecimal value of a length not supported")
+        # Unsigned integer
+        self.uint = int(self.hexadecimal, 16)
+        # Integer
+        self.int = self.uint if self.uint <= self.MAX_POSITIVE[hex_digits] else self.uint - self.CA2_VALUE[hex_digits]
+        # binary
+        if hex_digits == 2:
+            self.binary = "{:08b}".format(self.uint)
+        elif hex_digits == 4:
+            self.binary = "{:016b}".format(self.uint)
+        else:
+            self.binary = "{:032b}".format(self.uint)
+        self.binary = '0b' + self.binary
+        # ASCII
+        try:
+            self.ascii = self.uint.to_bytes(1, "big").decode("ascii", "replace")
+        except OverflowError:
+            self.ascii = "<small>Out of range</small>"
+        if not self.ascii.isprintable():
+            self.ascii = '�'
+        # UTF-8
+        try:
+            bytes = self.uint.to_bytes(4, "big").lstrip(b'\x00')
+            if len(bytes) == 0:
+                bytes = b'\x00'
+            self.utf8 = bytes.decode("utf-8", "replace")
+        except ValueError:
+            self.utf8 = "<small>Not UTF-8</small>"
+        except OverflowError:
+            self.utf8 = "<small>Out of range</small>"
+        if not self.utf8.isprintable():
+            self.utf8 = '�'
+        # UTF-32
+        try:
+            self.utf32 = chr(self.uint)
+        except ValueError:
+            self.utf32 = "<small>Not UTF-32</small>"
+        except OverflowError:
+            self.utf32 = "<small>Out of range</small>"
+        if not self.utf32.isprintable():
+            self.utf32 = '�'

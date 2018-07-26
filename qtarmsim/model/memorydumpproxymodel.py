@@ -26,7 +26,7 @@ from PySide2.QtCore import Qt
 
 from .memorymodel import MemoryModel
 
-from .common import InputToHex, getMonoSpacedFont
+from .common import InputToHex, getMonoSpacedFont, DataTypes
 
 
 class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
@@ -117,6 +117,27 @@ class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
                         break
                     chars.append(self._chr(item.data(1)[2:]))
                 return ''.join(chars)
+        elif role == Qt.ToolTipRole:
+            if index.column() >= 16:
+                return None
+            dt = DataTypes("0x{}".format(self.mapToSource(index).internalPointer().data(1)[2:]))
+            return """
+                <table>
+                <tr><td align="right"> Hexadecimal:</td><td><b>{0}</b></td></tr>
+                <tr><td align="right">      Binary:</td><td><b>{1}</b></td></tr>
+                <tr><td align="right">Unsigned int:</td><td align="right"><b>{2}</b></td></tr>
+                <tr><td align="right">     Integer:</td><td align="right"><b>{3}</b></td></tr>
+                <tr><td align="right">       ASCII:</td><td><b>{4}</b></td></tr>
+                <tr><td align="right">       UTF-8:</td><td><b>{5}</b></td></tr>
+                </table>
+            """.format(
+                dt.hexadecimal,
+                dt.binary,
+                dt.uint,
+                dt.int,
+                dt.ascii,
+                dt.utf8,
+            )
         elif role == Qt.BackgroundRole:
             byteRow = index.row() * 16 + index.column()
             byteMemoryBankRow = self.memoryBankRow

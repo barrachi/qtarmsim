@@ -21,7 +21,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt
 
 from .simpletreemodel import TreeModel, TreeItem
-from .common import InputToHex, getMonoSpacedFont
+from .common import InputToHex, getMonoSpacedFont, DataTypes
 
 
 class RegisterBank:
@@ -77,6 +77,27 @@ class RegistersModel(TreeModel):
         # Register
         if role == Qt.DisplayRole:
             return item.data(index.column())
+        elif role == Qt.ToolTipRole:
+            if index.column() == 0:
+                return None
+            dt = DataTypes(item.data(index.column()))
+            return """
+                <table>
+                <tr><td align="right"> Hexadecimal:</td><td><b>{0}</b></td></tr>
+                <tr><td align="right">Unsigned int:</td><td align="right"><b>{1}</b></td></tr>
+                <tr><td align="right">     Integer:</td><td align="right"><b>{2}</b></td></tr>
+                <tr><td align="right">       ASCII:</td><td><b>{3}</b></td></tr>
+                <tr><td align="right">       UTF-8:</td><td><b>{4}</b></td></tr>
+                <tr><td align="right">      UTF-32:</td><td><b>{5}</b></td></tr>
+                </table>
+            """.format(
+                dt.hexadecimal,
+                dt.uint,
+                dt.int,
+                dt.ascii,
+                dt.utf8,
+                dt.utf32
+            )
         elif role == Qt.BackgroundRole and self.modified_registers.count(index.row()):
             return self.q_brush_last
         elif role == Qt.BackgroundRole and self.previously_modified_registers.count(index.row()):

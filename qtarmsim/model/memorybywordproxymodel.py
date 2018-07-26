@@ -21,7 +21,7 @@ import sys
 from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtCore import Qt
 
-from .common import InputToHex, getMonoSpacedFont
+from .common import InputToHex, getMonoSpacedFont, DataTypes
 from .memorymodel import MemoryModel
 
 
@@ -85,6 +85,96 @@ class MemoryByWordProxyModel(QtCore.QSortFilterProxyModel):
                 for i in range(3, -1, -1):
                     hexBytes.append(byteMemoryBank.child(byteRow + i).data(1)[2:])
                 return '0x' + ''.join(hexBytes)
+        elif role == Qt.ToolTipRole:
+            if index.column() == 0:
+                return None
+            hexBytes = []
+            byteMemoryBank = sourceModelIndex.parent().internalPointer()
+            byteRow = sourceModelIndex.row()
+            for i in range(3, -1, -1):
+                hexBytes.append(byteMemoryBank.child(byteRow + i).data(1)[2:])
+            hex_value = '0x' + ''.join(hexBytes)
+            dt = DataTypes(hex_value)
+            html = """
+                <table>
+            """
+            html += """
+                <tr><th colspan="5" style="color: 'black'; background-color: 'gray'">1 Word</th></tr>
+                <tr><td align="right"> Hexadecimal:</td><td colspan="4"><b>{0}</b></td></tr>
+                <tr><td align="right">Unsigned int:</td><td colspan="4"><b>{1}</b></td></tr>
+                <tr><td align="right">     Integer:</td><td colspan="4"><b>{2}</b></td></tr>
+                <tr><td align="right">       ASCII:</td><td colspan="4"><b>{3}</b></td></tr>
+                <tr><td align="right">       UTF-8:</td><td colspan="4"><b>{4}</b></td></tr>
+                <tr><td align="right">      UTF-32:</td><td colspan="4"><b>{5}</b></td></tr>
+                """.format(
+                dt.hexadecimal,
+                dt.uint,
+                dt.int,
+                dt.ascii,
+                dt.utf8,
+                dt.utf32
+            )
+            half2_hex_value = '0x' + ''.join(hexBytes[0:2])
+            half1_hex_value = '0x' + ''.join(hexBytes[2:4])
+            dth2 = DataTypes(half2_hex_value)
+            dth1 = DataTypes(half1_hex_value)
+            html += """
+                <tr><th colspan="5" style="color: 'black'; background-color: 'gray'">2 Half-words</th></tr>
+                <tr><td align="right"> Hexadecimal:</td> <td colspan="2"><b>{}</b></td> <td colspan="2"><b>{}</b></td></tr>
+                <tr><td align="right">Unsigned int:</td> <td colspan="2"><b>{}</b></td> <td colspan="2"><b>{}</b></td></tr>
+                <tr><td align="right">     Integer:</td> <td colspan="2"><b>{}</b></td> <td colspan="2"><b>{}</b></td></tr>
+                <tr><td align="right">       UTF-8:</td> <td colspan="2"><b>{}</b></td> <td colspan="2"><b>{}</b></td></tr>
+                """.format(
+                dth1.hexadecimal,
+                dth2.hexadecimal,
+                dth1.uint,
+                dth2.uint,
+                dth1.int,
+                dth2.int,
+                dth1.utf8,
+                dth2.utf8,
+            )
+            byte4_hex_value = '0x' + hexBytes[0]
+            byte3_hex_value = '0x' + hexBytes[1]
+            byte2_hex_value = '0x' + hexBytes[2]
+            byte1_hex_value = '0x' + hexBytes[3]
+            dtb4 = DataTypes(byte4_hex_value)
+            dtb3 = DataTypes(byte3_hex_value)
+            dtb2 = DataTypes(byte2_hex_value)
+            dtb1 = DataTypes(byte1_hex_value)
+            html += """
+                <tr><th colspan="5" style="color: 'black'; background-color: 'gray'">4 bytes</th></tr>
+                <tr><td align="right"> Hexadecimal:</td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> </tr>
+                <tr><td align="right"> Binary:</td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> </tr>
+                <tr><td align="right">Unsigned int:</td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> </tr>
+                <tr><td align="right">     Integer:</td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> </tr>
+                <tr><td align="right">       ASCII:</td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> <td ><b>{}</b></td> </tr>
+                """.format(
+                dtb1.hexadecimal,
+                dtb2.hexadecimal,
+                dtb3.hexadecimal,
+                dtb4.hexadecimal,
+                dtb1.binary,
+                dtb2.binary,
+                dtb3.binary,
+                dtb4.binary,
+                dtb1.uint,
+                dtb2.uint,
+                dtb3.uint,
+                dtb4.uint,
+                dtb1.int,
+                dtb2.int,
+                dtb3.int,
+                dtb4.int,
+                dtb1.ascii,
+                dtb2.ascii,
+                dtb3.ascii,
+                dtb4.ascii,
+            )
+            html += """
+                </table>
+            """
+            return html
         elif role == Qt.BackgroundRole:
             # If any of the bytes is in modifiedBytes, return qBrushLast
             for i in range(4):
