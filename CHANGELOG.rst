@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.4.5 (2018-7-26)
+^^^^^^^^^^^^^^^^^
+- Added memory contents tooltips.
+- Added new example, LCD/ascii, and revised previous ones.
+- Changed the way the monospaced font is selected.
+
 0.4.4 (2018-7-25)
 ^^^^^^^^^^^^^^^^^
 - Migrated to Qt for Python (PySide2).
