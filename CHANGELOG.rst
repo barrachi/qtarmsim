@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-0.4.5 (2018-7-26)
+0.4.6 (2018-7-26)
 ^^^^^^^^^^^^^^^^^
 - Added memory contents tooltips.
 - Added new example, LCD/ascii, and revised previous ones.

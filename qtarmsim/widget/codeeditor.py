@@ -28,7 +28,7 @@
 import sys
 
 from PySide2 import QtCore, QtGui, QtWidgets
-
+from ..model.common import getMonoSpacedFont
 
 class LeftArea(QtWidgets.QWidget):
     """
@@ -216,12 +216,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         """CodeEditor initialization"""
         super(CodeEditor, self).__init__(parent, *args, **kwargs)
         # Set the default font and tab width
-        self.myFont = QtGui.QFont("fake font name")  # @warning: fake name needed to setStyleHint work
-        self.myFont.setStyleHint(QtGui.QFont.TypeWriter)
-        if not QtGui.QFontInfo(self.myFont).fixedPitch():
-            self.myFont.setStyleHint(QtGui.QFont.Monospace)
-        self.myFontPointSize = QtGui.QFont().pointSize()  # Using the system default font point size
-        self.myFont.setPointSize(self.myFontPointSize)
+        self.myFont = getMonoSpacedFont()
         self.setFont(self.myFont)
         self.setTabStopWidth(8 * self.fontMetrics().width('9'))
         # Disable wrap mode
