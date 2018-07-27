@@ -103,19 +103,6 @@ class InputToHex(QtCore.QObject):
         return "0x{:0{}X}".format(num, HEX_DIGITS), ''
 
 
-def getMonoSpacedFont():
-    font = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont)
-    # If the previous line does not work...
-    if not QtGui.QFontInfo(font).fixedPitch():
-        font = QtGui.QFont("Monospace")
-        font.setStyleHint(QtGui.QFont.Monospace)
-        # If we are not there yet...
-        if not QtGui.QFontInfo(font).fixedPitch():
-            font.setStyleHint(QtGui.QFont.TypeWriter)
-    font.setPointSize(QtGui.QFont().pointSize())  # Using the system default font point size
-    return font
-
-
 class DataTypes:
 
     MAX_POSITIVE = (0, 0, 127, 0, 32767, 0, 0, 0, 2147483647)
@@ -144,25 +131,28 @@ class DataTypes:
         except OverflowError:
             self.ascii = "<small>Out of range</small>"
         if not self.ascii.isprintable():
-            self.ascii = '�'
+            self.ascii = '·'
         # UTF-8
         try:
-            bytes = self.uint.to_bytes(4, "big").lstrip(b'\x00')
-            if len(bytes) == 0:
-                bytes = b'\x00'
-            self.utf8 = bytes.decode("utf-8", "replace")
+            utf8_bytes = self.uint.to_bytes(4, "big").lstrip(b'\x00')
         except ValueError:
             self.utf8 = "<small>Not UTF-8</small>"
         except OverflowError:
             self.utf8 = "<small>Out of range</small>"
+        else:
+            if len(utf8_bytes) == 0:
+                utf8_bytes = b'\x00'
+            self.utf8 = utf8_bytes.decode("utf-8", "replace")
+            if len(self.utf8) != 1:
+                self.utf8 = "<small>Not a UTF-8 char</small>"
         if not self.utf8.isprintable():
-            self.utf8 = '�'
+            self.utf8 = '·'
         # UTF-32
         try:
             self.utf32 = chr(self.uint)
         except ValueError:
-            self.utf32 = "<small>Not UTF-32</small>"
+            self.utf32 = "<small>Not a UTF-32 char</small>"
         except OverflowError:
             self.utf32 = "<small>Out of range</small>"
         if not self.utf32.isprintable():
-            self.utf32 = '�'
+            self.utf32 = '·'

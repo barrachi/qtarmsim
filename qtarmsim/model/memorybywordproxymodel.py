@@ -21,8 +21,9 @@ import sys
 from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtCore import Qt
 
-from .common import InputToHex, getMonoSpacedFont, DataTypes
+from .common import InputToHex, DataTypes
 from .memorymodel import MemoryModel
+from ..utils import getMonoSpacedFont
 
 
 class MemoryByWordProxyModel(QtCore.QSortFilterProxyModel):

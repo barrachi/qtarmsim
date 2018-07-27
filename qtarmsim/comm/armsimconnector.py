@@ -535,7 +535,7 @@ class ARMSimConnector:
 
     def sendCommand(self, line):
         self.mysocket.send_line(line)
-        line = self.mysocket.receive_line()
+        self.mysocket.receive_line()
         QtWidgets.QApplication.processEvents()
         self.mysocket.socket.settimeout(1)  # Set timeout of next lines to 1 second
         while 1:

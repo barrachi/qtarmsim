@@ -240,14 +240,14 @@ class CommunicationTestCase(unittest.TestCase):
         # --------------------------------------------------
         def get_breakpoints():
             line = ''
-            sim_breakpoints = []
+            breakpoints_ = []
             self.mysocket.send_line("SHOW BREAKPOINTS")
             while line != EOF:
                 line = self.mysocket.receive_line()
                 if line != EOF:
                     self.assertEqual(line[:2], "0x")
-                    sim_breakpoints.append(line)
-            return sim_breakpoints
+                    breakpoints_.append(line)
+            return breakpoints_
 
         # --------------------------------------------------
         # "Clear breakpoints" test (firs pass)
@@ -260,8 +260,8 @@ class CommunicationTestCase(unittest.TestCase):
         # "Set breakpoint" at test        
         # --------------------------------------------------
         breakpoints = ["0x10102020", "0x20203030", "0x30304040"]
-        for breakpoint in breakpoints:
-            self.mysocket.send_line("SET BREAKPOINT AT {}".format(breakpoint))
+        for breakpoint_ in breakpoints:
+            self.mysocket.send_line("SET BREAKPOINT AT {}".format(breakpoint_))
             self.assertEqual(self.mysocket.receive_line(), OK)
         sim_breakpoints = get_breakpoints()
         self.assertCountEqual(sim_breakpoints, breakpoints, "Stored breakpoints differ from setted ones")
@@ -303,26 +303,26 @@ def suite():
     # lines are required.
     manual_suite = True
     if manual_suite:
-        suite = unittest.TestSuite()
-        suite.addTest(CommunicationTestCase('test_show_version'))
-        suite.addTest(CommunicationTestCase('test_show_register_r0'))
-        suite.addTest(CommunicationTestCase('test_set_register_r1'))
+        suite_ = unittest.TestSuite()
+        suite_.addTest(CommunicationTestCase('test_show_version'))
+        suite_.addTest(CommunicationTestCase('test_show_register_r0'))
+        suite_.addTest(CommunicationTestCase('test_set_register_r1'))
 
-        suite.addTest(CommunicationTestCase('test_reset_registers'))
-        suite.addTest(CommunicationTestCase('test_show_memory_byte'))
-        suite.addTest(CommunicationTestCase('test_show_memory_half'))
-        suite.addTest(CommunicationTestCase('test_show_memory_word'))
-        suite.addTest(CommunicationTestCase('test_endianess'))
-        suite.addTest(CommunicationTestCase('test_reset_memory'))
+        suite_.addTest(CommunicationTestCase('test_reset_registers'))
+        suite_.addTest(CommunicationTestCase('test_show_memory_byte'))
+        suite_.addTest(CommunicationTestCase('test_show_memory_half'))
+        suite_.addTest(CommunicationTestCase('test_show_memory_word'))
+        suite_.addTest(CommunicationTestCase('test_endianess'))
+        suite_.addTest(CommunicationTestCase('test_reset_memory'))
 
-        suite.addTest(CommunicationTestCase('test_dump_registers'))
-        suite.addTest(CommunicationTestCase('test_set_memory_byte'))
-        suite.addTest(CommunicationTestCase('test_set_memory_half'))
-        suite.addTest(CommunicationTestCase('test_set_memory_word'))
+        suite_.addTest(CommunicationTestCase('test_dump_registers'))
+        suite_.addTest(CommunicationTestCase('test_set_memory_byte'))
+        suite_.addTest(CommunicationTestCase('test_set_memory_half'))
+        suite_.addTest(CommunicationTestCase('test_set_memory_word'))
 
-        suite.addTest(CommunicationTestCase('test_dump_memory'))
-        suite.addTest(CommunicationTestCase('test_breakpoints'))
-        return suite
+        suite_.addTest(CommunicationTestCase('test_dump_memory'))
+        suite_.addTest(CommunicationTestCase('test_breakpoints'))
+        return suite_
     else:
         return None
 

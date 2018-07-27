@@ -151,8 +151,8 @@ def do_DUMP_MEMORY(args, socket):
 def do_SHOW_BREAKPOINTS(args, socket):
     """SHOW BREAKPOINTS"""
     print("Showing breakpoints")
-    for breakpoint in BREAKPOINTS:
-        socket.send_line(breakpoint)
+    for breakpoint_ in BREAKPOINTS:
+        socket.send_line(breakpoint_)
     socket.send_line(EOF)
 
 
@@ -191,9 +191,9 @@ def do_SET_MEMORY(args, socket):
 
 def do_SET_BREAKPOINT_AT(args, socket):
     """SET BREAKPOINT AT address"""
-    breakpoint = args[3]
-    print("Setting breakpoint at {}".format(breakpoint))
-    BREAKPOINTS.append(breakpoint)
+    breakpoint_ = args[3]
+    print("Setting breakpoint at {}".format(breakpoint_))
+    BREAKPOINTS.append(breakpoint_)
     socket.send_line(OK)
 
 
@@ -203,14 +203,14 @@ def do_SET_BREAKPOINT_AT(args, socket):
 
 def do_RESET_REGISTERS(args, socket):
     global REGISTERS
-    print("Reseting registers")
+    print("Resetting registers")
     REGISTERS = _REGISTERS.copy()
     socket.send_line(OK)
 
 
 def do_RESET_MEMORY(args, socket):
     global MEMORY
-    print("Reseting memory")
+    print("Resetting memory")
     MEMORY = _MEMORY[:]
     socket.send_line(OK)
 
@@ -229,9 +229,9 @@ def do_CLEAR_BREAKPOINTS(args, socket):
 
 def do_CLEAR_BREAKPOINT_AT(args, socket):
     """CLEAR BREAKPOINT AT"""
-    breakpoint = args[3]
-    print("Clearing breakpoint at {}".format(breakpoint))
-    BREAKPOINTS.remove(breakpoint)
+    breakpoint_ = args[3]
+    print("Clearing breakpoint at {}".format(breakpoint_))
+    BREAKPOINTS.remove(breakpoint_)
     socket.send_line(OK)
 
 
@@ -246,24 +246,24 @@ def main():
     """Main part of the application"""
     getopts()
     # signal.signal(signal.SIGINT, signal_handler)
-    mysocket = MySocket(verbose=True)
-    mysocket.server_bind(PORT)
+    mysocket_ = MySocket(verbose=True)
+    mysocket_.server_bind(PORT)
     while True:
         print("")
-        mysocket.server_accept_connection()
-        lines_generator = mysocket.get_lines()
+        mysocket_.server_accept_connection()
+        lines_generator = mysocket_.get_lines()
         for line in lines_generator:
             args = line.split(' ')
             for n in range(len(args), 0, -1):
                 do_method_name = 'do_{}'.format('_'.join(args[0:n]))
                 do_method = globals().get(do_method_name)
                 if do_method:
-                    do_method(args, mysocket)
+                    do_method(args, mysocket_)
                     break
             else:
                 print(">>> Unsupported command: {}".format(line))
-    mysocket.close_connection()
-    mysocket.close_socket()
+    mysocket_.close_connection()
+    mysocket_.close_socket()
 
 
 if __name__ == "__main__":

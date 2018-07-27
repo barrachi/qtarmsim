@@ -24,9 +24,9 @@ import sys
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt
 
+from .common import InputToHex, DataTypes
 from .memorymodel import MemoryModel
-
-from .common import InputToHex, getMonoSpacedFont, DataTypes
+from ..utils import getMonoSpacedFont
 
 
 class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):

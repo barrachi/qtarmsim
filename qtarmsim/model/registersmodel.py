@@ -20,8 +20,9 @@
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt
 
+from .common import InputToHex, DataTypes
 from .simpletreemodel import TreeModel, TreeItem
-from .common import InputToHex, getMonoSpacedFont, DataTypes
+from ..utils import getMonoSpacedFont
 
 
 class RegisterBank:

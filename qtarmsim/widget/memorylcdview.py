@@ -47,10 +47,10 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.horizontalScrollBar().setDisabled(True)
         self.setFrameStyle(QtWidgets.QFrame.NoFrame)
 
-    def setModel(self, memoryModel, hexStartAddress, LCDColumns=32, LCDRows=6):
+    def setModel(self, memoryModel_, hexStartAddress, LCDColumns=32, LCDRows=6):
         """Sets the memory model and the number of columns and rows of the LCD display"""
         self.memoryLCDProxyModel = MemoryLCDProxyModel()
-        self.memoryLCDProxyModel.setSourceModel(memoryModel, hexStartAddress, LCDColumns, LCDRows)
+        self.memoryLCDProxyModel.setSourceModel(memoryModel_, hexStartAddress, LCDColumns, LCDRows)
         super(MemoryLCDView, self).setModel(self.memoryLCDProxyModel)
         self.LCDColumns = LCDColumns
         self.LCDRows = LCDRows

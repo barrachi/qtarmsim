@@ -20,10 +20,7 @@ from PySide2 import QtGui, QtCore
 from PySide2.QtCore import Qt
 
 from .simpletreemodel import TreeModel, TreeItem
-from .common import InputToHex, getMonoSpacedFont
-from qtarmsim.widget.myqtreeview import MyQTreeView
-
-import sys
+from ..utils import getMonoSpacedFont
 
 
 class MemoryBank:

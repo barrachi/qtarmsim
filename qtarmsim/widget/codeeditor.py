@@ -28,7 +28,10 @@
 import sys
 
 from PySide2 import QtCore, QtGui, QtWidgets
-from ..model.common import getMonoSpacedFont
+from PySide2.QtCore import Qt
+
+from ..utils import getMonoSpacedFont
+
 
 class LeftArea(QtWidgets.QWidget):
     """
@@ -120,7 +123,7 @@ class LeftArea(QtWidgets.QWidget):
                     number = blockNumber + 1
                     painter.setPen(QtGui.QColor('black'))
                     painter.drawText(-4, top, self.width(), self.codeEditor.fontMetrics().height(),
-                                     QtCore.Qt.AlignRight, u"{}".format(number))
+                                     Qt.AlignRight, u"{}".format(number))
                 block = block.next()
                 top = bottom
                 bottom = top + self.codeEditor.blockBoundingRect(block).height()
@@ -152,7 +155,7 @@ class LeftArea(QtWidgets.QWidget):
         Process the mouse press events: if the associated code editor is read only and the left button is clicked,
         find which line in the source code has been clicked on.
         """
-        if self.codeEditor.isReadOnly() and event.button() == QtCore.Qt.LeftButton:
+        if self.codeEditor.isReadOnly() and event.button() == Qt.LeftButton:
             y = event.y()
             block = self.codeEditor.firstVisibleBlock()
             bottom = self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).bottom()
@@ -355,7 +358,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
 
     def wheelEvent(self, event):
         """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
-        if event.modifiers() == QtCore.Qt.ControlModifier:
+        if event.modifiers() == Qt.ControlModifier:
             self.myFontPointSize += event.delta() / 120
             if self.myFontPointSize < 10:
                 self.myFontPointSize = 10
