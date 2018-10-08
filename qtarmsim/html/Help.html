@@ -154,8 +154,10 @@
 
 <h2><a name="Qfplib"></a>2. Qfplib (floating point library) API</h2>
 
-<p>The QtARMSim firmware includes a copy of the Qfplib floating point library. Thanks to this library, IEEE 754 single
-    precision floating point operations can be performed on the ARMSim simulator.</p>
+<p>The QtARMSim firmware includes Qfplib: an ARM Cortex-M0
+    floating-point library in 1 kbyte <code>&lt;https://www.quinapalus.com/qfplib.html&gt;</code>, (c) Mark Owen.
+    Thanks to this library, IEEE 754 single precision floating point operations can be performed on the ARMSim
+    simulator.</p>
 
 <p>Please note that all the subroutines of this API follow the ARM convention for parameter passing and return. Thus,
     i) passed values use the registers from r0 to r3, and then the stack if required; ii) values are returned using r0,

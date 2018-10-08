@@ -8,7 +8,6 @@ include qtarmsim.ico
 prune docs
 prune examples
 prune tmp
-prune third_party
 prune distfiles
 prune qtarmsim/res/bin
 prune qtarmsim/res/breeze

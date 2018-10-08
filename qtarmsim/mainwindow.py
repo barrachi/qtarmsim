@@ -1000,7 +1000,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                self.tr("<p>GUI icons from the KDE Breeze theme icons.</p>") + \
                self.tr("<p>The LCD Display font is 'lcd plus' by SaintGeorge.</p>") + \
                self.tr(
-                   "<p>Software floating point support thanks to Qfplib: an ARM Cortex-M0 floating-point library in 1 kbyte.</p>") + \
+                   "<p>Software floating point support thanks to <a href='https://www.quinapalus.com/qfplib.html'>Qfplib: an ARM Cortex-M0 floating-point library in 1 kbyte</a>, (c) Mark Owen.</p>") + \
                "</html>"
 
     def doAbout_Qt_ARMSim(self):

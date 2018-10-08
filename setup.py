@@ -51,8 +51,6 @@ setup(
         # Author details
         author = s.author,
         author_email = s.email,
-        # License
-        license = s.license,
         # Application classifiers
         classifiers = s.classifiers,
         # Application keywords

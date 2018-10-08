@@ -20,7 +20,7 @@ the next files were downloaded for each platform:
   * Win32:   ``gcc-arm-none-eabi-4.4.1-2010q1-188-win32.tar.gz``
   * MacOS:   ``gcc-arm-none-eabi-4.4.1-2010q1-188-macos.tar.gz``
 
-On the other hand, the the full Linux64 version was obtained by
+On the other hand, the full Linux64 version was obtained by
 downloading the ``gcc-arm-none-eabi-4_9-2015q3-20150921-src.tar.bz2``
 file from https://launchpad.net/gcc-arm-embedded/ and following the
 instructions for building the toolchain. The compilation was made on a

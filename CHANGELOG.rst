@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.4.8 (2018-10-8)
+^^^^^^^^^^^^^^^^^
+- Properly acknowledging Qfplib by Mark Owen.
+
 0.4.7 (2018-7-27)
 ^^^^^^^^^^^^^^^^^
 - Added memory contents tooltips.

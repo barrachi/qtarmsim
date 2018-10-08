@@ -32,7 +32,7 @@ class Settings():
         self.name = 'qtarmsim'
         self.version = self._get_version()
         self.description = 'Easy to use graphical ARM simulator'
-        self.long_description = read('README.rst') + '\n\n' + read('INSTALL.rst') + '\n\n' + read('CHANGELOG.rst')
+        self.long_description = read('README.rst') + '\n\n' + read('INSTALL.rst') + '\n\n' + read('LICENSE.rst') + '\n\n' + read('CHANGELOG.rst')
         self.url = 'http://lorca.act.uji.es/project/qtarmsim/'
         self.author = 'Sergio Barrachina Mir'
         self.email = 'barrachi@uji.es'
@@ -88,6 +88,7 @@ class Settings():
 
             # License long description
             'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+            'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
 
             # Python versions supported
             'Programming Language :: Python :: 3',
