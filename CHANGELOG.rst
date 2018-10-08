@@ -19,7 +19,7 @@ Changelog
 - Added ARMSim tabs to separate the source code of the different ROMs.
 - Added Qfplib (floating point library) API documentation to the help.
 - Added UseLabels ARMSim option.
-- Memory dock: first RAM is expanded by default and whenever a memory entry is modified it scrolls to its position
+- Memory dock: first RAM is expanded by default and whenever a memory entry is modified it scrolls to its position.
 
 0.3.16 (2018-1-17)
 ^^^^^^^^^^^^^^^^^^^
