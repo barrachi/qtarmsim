@@ -998,7 +998,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                self.tr(
                    "<p>Most of the ARM keywords and directives used on the assembler editor syntax highlighter are from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik.</p>") + \
                self.tr("<p>GUI icons from the KDE Breeze theme icons.</p>") + \
-               self.tr("<p>The LCD Display font is 'lcd plus' by SaintGeorge.</p>") + \
+               self.tr("<p>The LCD Display font is '1 Digit' by David Chung.</p>") + \
                self.tr(
                    "<p>Software floating point support thanks to <a href='https://www.quinapalus.com/qfplib.html'>Qfplib: an ARM Cortex-M0 floating-point library in 1 kbyte</a>, (c) Mark Owen.</p>") + \
                "</html>"

@@ -29,6 +29,13 @@ class MemoryLCDView(QtWidgets.QTableView):
 
     def __init__(self, parent=None):
         super(MemoryLCDView, self).__init__(parent)
+        # ------------------------------------------------------------
+        #  Instance attributes that will be properly initialized later
+        # ------------------------------------------------------------
+        self.memoryLCDProxyModel = None
+        self.LCDColumns = None
+        self.LCDRows = None
+        # ------------------------------------------------------------
         self.setGridStyle(Qt.NoPen)
         self.horizontalHeader().hide()
         self.verticalHeader().hide()
@@ -44,7 +51,7 @@ class MemoryLCDView(QtWidgets.QTableView):
             QTableView::item:hover {background: none;}
         """)
         self.verticalScrollBar().setDisabled(True)
-        self.horizontalScrollBar().setDisabled(True)
+        # self.horizontalScrollBar().setDisabled(True)
         self.setFrameStyle(QtWidgets.QFrame.NoFrame)
 
     def setModel(self, memoryModel_, hexStartAddress, LCDColumns=32, LCDRows=6):
@@ -57,7 +64,8 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.resize()
 
     def resize(self):
-        """Resizes the columns and rows of the LCD to its contents size, and then fixes the total width and height of the LCD."""
+        """Resize the columns and rows of the LCD to its contents size, and then fixes the total width and height of
+        the LCD."""
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
         self.setFixedWidth(18 + 18 + 8 + sum([self.columnWidth(i) for i in range(self.LCDColumns)]))
@@ -86,7 +94,7 @@ if __name__ == "__main__":
     memoryModel = MemoryModel(app)
     memoryModel.appendMemoryBank('ROM', '0x10010000', ['0x{:02X}'.format(i) for i in range(24)])
     memoryModel.appendMemoryBank('RAM', '0x20070000', ['0x{:02X}'.format(i) for i in range(65, 256)])
-    # Memory LCD Wiew
+    # Memory LCD View
     memoryLCDView = MemoryLCDView(mainWindow)
     memoryLCDView.setModel(memoryModel, '0x20070000', 32, 6)
     # Show main window and enter main loop

@@ -38,9 +38,9 @@ licensed under the GPLv2. Source code
 included under the ``3rdparty/`` directory. This part of the code
 is only available under the GPLv2 license.
 
-The `FontStruction “lcd plus”
-<http://fontstruct.com/fontstructions/show/457448)>`_, copyright
-“SaintGeorge”, licensed under a `Creative Commons Attribution Share
-Alike license <http://creativecommons.org/licenses/by-sa/3.0/>`_.
-Source code included under the ``3rdparty/`` directory.
+`1 Digit font <https://www.1001fonts.com/01-digit-font.html>`_,
+copyright David Chung, licensed under the
+`1001Fonts Free For Commercial Use License (FFC)
+<https://www.1001fonts.com/licenses/ffc.html>`_. Source code
+included under the ``3rdparty/`` directory.
 

@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.4.9 (2018-10-16)
+^^^^^^^^^^^^^^^^^^
+- Changed LCD font to "1 Digit" by David Chung.
+- Fixed bug that prevented code to be resized.
+
 0.4.8 (2018-10-8)
 ^^^^^^^^^^^^^^^^^
 - Properly acknowledging Qfplib by Mark Owen.

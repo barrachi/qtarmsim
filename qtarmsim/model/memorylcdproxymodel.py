@@ -43,12 +43,19 @@ class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
 
     def __init__(self, parent=None):
         super(MemoryLCDProxyModel, self).__init__(parent)
+        # ------------------------------------------------------------
+        #  Instance attributes that will be properly initialized later
+        # ------------------------------------------------------------
+        self.hexStartAddress = None
+        self.startAddress = None
+        self.memoryBankItem = None
+        self.memoryBankIndex = None
+        self.memoryBankStartAddress = None
+        # ------------------------------------------------------------
         # Set font
-        # noinspection PyTypeChecker,PyCallByClass
-        id = QtGui.QFontDatabase.addApplicationFont(":/fonts/lcd plus.ttf")
-        self.qFont = QtGui.QFont("lcd plus")
-        self.myFontPointSize = 24
-        self.qFont.setPointSize(self.myFontPointSize)
+        QtGui.QFontDatabase.addApplicationFont(":/fonts/01 Digit.ttf")
+        self.qFont = QtGui.QFont("01 digit")
+        self.qFont.setPointSize(10)
         # Set brush
         self.qBrush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 30), Qt.SolidPattern)
         # Initial values of LCDRows, LCDColumns, and memoryBankRow
@@ -145,8 +152,9 @@ class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
             return False
         return Qt.ItemIsEnabled
 
-    def changeFontSize(self, incr):
-        self.myFontPointSize += incr
-        if self.myFontPointSize < 10:
-            self.myFontPointSize = 10
-        self.qFont.setPointSize(self.myFontPointSize)
+    def changeFontSize(self, increment):
+        myFontPointSize = self.qFont.pointSize()
+        myFontPointSize += increment
+        if myFontPointSize < 10:
+            myFontPointSize = 10
+        self.qFont.setPointSize(myFontPointSize)

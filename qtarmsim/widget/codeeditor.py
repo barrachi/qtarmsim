@@ -46,8 +46,16 @@ class LeftArea(QtWidgets.QWidget):
     """
 
     def __init__(self, codeEditor):
-        """Asociates this LeftArea instance with its CodeEditor parent"""
+        """Associates this LeftArea instance with its CodeEditor parent"""
         super(LeftArea, self).__init__(codeEditor)
+        # ------------------------------------------------------------
+        #  Instance attributes that will be properly initialized later
+        # ------------------------------------------------------------
+        self.breakpoints = None
+        self.linesWithBackground = None
+        self.currentHighlightedLineNumber = None
+        self.currentBgColor = None
+        # ------------------------------------------------------------
         self.codeEditor = codeEditor
         self.clearBreakpoints()
         self.clearLinesWithBackground()
@@ -101,7 +109,7 @@ class LeftArea(QtWidgets.QWidget):
                                          self.linesWithBackground[blockNumber])
                         # painter.fillRect(QtCore.QRectF(width/2.0-1, top, 2, height),
                         #                  self.linesWithBackground[blockNumber].darker(110))
-                    if blockNumber == self.codeEditor.getCurrentHightlightedLineNumber():
+                    if blockNumber == self.codeEditor.getCurrentHighlightedLineNumber():
                         painter.setBrush(QtGui.QBrush(QtGui.QColor('blue').lighter(190)))
                         painter.setPen(QtGui.QColor('blue'))
                         arrowQPointsWithOffset = [QtCore.QPointF(x, top + y) for (x, y) in leftArrowPoints]
@@ -210,7 +218,8 @@ class LeftArea(QtWidgets.QWidget):
 
 
 class CodeEditor(QtWidgets.QPlainTextEdit):
-    """CodeEditor is a simple code editor that is able to use a syntax highlighter and provides a left line number area."""
+    """CodeEditor is a simple code editor that is able to use a syntax highlighter and provides a left line number
+    area. """
 
     setBreakpointSignal = QtCore.Signal('int', 'QString')
     clearBreakpointSignal = QtCore.Signal('int', 'QString')
@@ -218,6 +227,11 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
     def __init__(self, parent=None, SyntaxHighlighterClass=None, *args, **kwargs):
         """CodeEditor initialization"""
         super(CodeEditor, self).__init__(parent, *args, **kwargs)
+        # ------------------------------------------------------------
+        #  Instance attributes that will be properly initialized later
+        # ------------------------------------------------------------
+        self.currentHighlightedLineNumber = None
+        # ------------------------------------------------------------
         # Set the default font and tab width
         self.myFont = getMonoSpacedFont()
         self.setFont(self.myFont)
@@ -268,22 +282,24 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.leftArea.setCurrentHighlightedLineNumber(lineNumber)
         self.updateHighlightSelections()
 
-    def getCurrentHightlightedLineNumber(self):
+    def getCurrentHighlightedLineNumber(self):
         """
         Returns the current highlighted line number.
 
-        The return value depends on whether the editor is read only of not.  If it is read only, it returns the stored currentHighlightedLineNumber. Otherwise, it returns the line number where the current cursor is.
+        The return value depends on whether the editor is read only of not.  If it is read only, it returns the
+        stored currentHighlightedLineNumber. Otherwise, it returns the line number where the current cursor is.
         """
         if self.isReadOnly():
             return self.currentHighlightedLineNumber
         else:
             return self.textCursor().blockNumber()
 
-    def _getCurrentHightlightedLineCursor(self):
+    def _getCurrentHighlightedLineCursor(self):
         """
         Returns a cursor to the current highlighted line.
 
-        The return value depends on whether the editor is read only of not.  If it is read only, it returns a cursor on the stored currentHighlightedLineNumber line. Otherwise, it returns the current cursor.
+        The return value depends on whether the editor is read only of not.  If it is read only, it returns a cursor
+        on the stored currentHighlightedLineNumber line. Otherwise, it returns the current cursor.
         """
         cursor = self.textCursor()
         if self.isReadOnly():
@@ -298,11 +314,12 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         return cursor
 
     def resizeEvent(self, *args, **kwargs):
-        """Resizes the leftArea child widget when a resize event is triggered"""
+        """Resize the leftArea child widget when a resize event is triggered"""
         super(CodeEditor, self).resizeEvent(*args, **kwargs)
         cr = self.contentsRect()
         self.leftArea.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftArea.width(), cr.height()))
 
+    # noinspection PyUnusedLocal
     def updateLeftAreaWidth(self, newBlockCount=None):
         """Changes code editor left margin based on the width of the leftArea child widget"""
         self.setViewportMargins(self.leftArea.width(), 0, 0, 0)
@@ -328,7 +345,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         selection = QtWidgets.QTextEdit.ExtraSelection()
         selection.format.setBackground(lineColor)
         selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
-        selection.cursor = self._getCurrentHightlightedLineCursor()
+        selection.cursor = self._getCurrentHighlightedLineCursor()
         selection.cursor.clearSelection()
         return selection
 
@@ -342,13 +359,13 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         lineColor = QtGui.QColor('yellow')
         selections = []
         if currentWord in words:
-            hcursor = QtGui.QTextCursor(self.document())
-            while not hcursor.isNull() and not hcursor.atEnd():
-                hcursor = self.document().find(currentWord, hcursor, QtGui.QTextDocument.FindWholeWords)
-                if not hcursor.isNull():  # and hcursor.blockNumber() != currentLine:
+            cursor_ = QtGui.QTextCursor(self.document())
+            while not cursor_.isNull() and not cursor_.atEnd():
+                cursor_ = self.document().find(currentWord, cursor_, QtGui.QTextDocument.FindWholeWords)
+                if not cursor_.isNull():  # and cursor_.blockNumber() != currentLine:
                     selection = QtWidgets.QTextEdit.ExtraSelection()
                     selection.format.setBackground(lineColor)
-                    selection.cursor = hcursor
+                    selection.cursor = cursor_
                     selections.append(selection)
         return selections
 
@@ -358,11 +375,12 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
 
     def wheelEvent(self, event):
         """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
-        if event.modifiers() == Qt.ControlModifier:
-            self.myFontPointSize += event.delta() / 120
-            if self.myFontPointSize < 10:
-                self.myFontPointSize = 10
-            self.myFont.setPointSize(self.myFontPointSize)
+        if event.modifiers() == QtCore.Qt.ControlModifier:
+            myFontPointSize = self.myFont.pointSize()
+            myFontPointSize += event.delta() / 120
+            if myFontPointSize < 10:
+                myFontPointSize = 10
+            self.myFont.setPointSize(myFontPointSize)
             self.setFont(self.myFont)
             self.setTabStopWidth(8 * self.fontMetrics().width('9'))
         else:

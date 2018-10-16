@@ -28,7 +28,7 @@
 #    already installed.
 #
 
-#from distutils.core import setup
+# from distutils.core import setup
 import os
 
 from setuptools import setup, find_packages
@@ -36,37 +36,37 @@ from setuptools import setup, find_packages
 from settings import Settings
 from setup_extra import QtClean, QtCompile
 
-
 # Common settings used by distutils and cx_freeze
 s = Settings()
 
 # Setup
 setup(
-        # Application details
-        name = s.name,
-        version = s.version,
-        description = s.description,
-        url = s.url,
-        long_description = s.long_description,
-        # Author details
-        author = s.author,
-        author_email = s.email,
-        # Application classifiers
-        classifiers = s.classifiers,
-        # Application keywords
-        keywords = s.keywords,
+    # Application details
+    name=s.name,
+    version=s.version,
+    description=s.description,
+    url=s.url,
+    long_description=s.long_description,
+    # Author details
+    author=s.author,
+    author_email=s.email,
+    # Application classifiers
+    classifiers=s.classifiers,
+    # Application keywords
+    keywords=s.keywords,
 
-        # --------------------------------
-        #  distutils parameters
-        # --------------------------------
-        scripts = s.scripts,
-        packages = find_packages(exclude=['build', 'dist', 'distfiles', 'docs', 'examples', 'scripts', 'tmp']),
-        package_data = s.package_data,
-        data_files = s.data_files,
-        entry_points={
-            'gui_scripts': [
-                'qtarmsim=qtarmsim:main',
-            ],
-        },
-        cmdclass={'qtclean': QtClean, 'qtcompile': QtCompile}
-      )
+    # --------------------------------
+    #  distutils parameters
+    # --------------------------------
+    scripts=s.scripts,
+    packages=find_packages(exclude=['build', 'dist', 'distfiles', 'docs', 'examples', 'scripts', 'tmp']),
+    package_data=s.package_data,
+    data_files=s.data_files,
+    entry_points={
+        'gui_scripts': [
+            'qtarmsim=qtarmsim:main',
+        ],
+    },
+    cmdclass={'qtclean': QtClean, 'qtcompile': QtCompile},
+    install_requires=['PySide2']
+)
