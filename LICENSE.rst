@@ -38,9 +38,5 @@ licensed under the GPLv2. Source code
 included under the ``3rdparty/`` directory. This part of the code
 is only available under the GPLv2 license.
 
-`1 Digit font <https://www.1001fonts.com/01-digit-font.html>`_,
-copyright David Chung, licensed under the
-`1001Fonts Free For Commercial Use License (FFC)
-<https://www.1001fonts.com/licenses/ffc.html>`_. Source code
-included under the ``3rdparty/`` directory.
-
+`AlphaSmart 3000 <https://www.urbanfonts.com/fonts/AlphaSmart_3000.font>`_ font,
+designed by Colonel Sanders. Included under the ``3rdparty/`` directory.

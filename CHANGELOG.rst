@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.4.10 (2018-11-20)
+^^^^^^^^^^^^^^^^^^^
+- Added an scroll area inside the LCD Display dock widget (so that the LCD width does not force the whole simulator width).
+- Changed LCD font to "AlphaSmart 3000" by Colonel Sanders.
+- Added a new example of floating point operations usage, ``triangle.s``, under 'File > Examples > Floating point' menu.
+
 0.4.9 (2018-10-16)
 ^^^^^^^^^^^^^^^^^^
 - Changed LCD font to "1 Digit" by David Chung.
