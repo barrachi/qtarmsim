@@ -51,7 +51,7 @@ class MemoryLCDView(QtWidgets.QTableView):
             QTableView::item:hover {background: none;}
         """)
         self.verticalScrollBar().setDisabled(True)
-        # self.horizontalScrollBar().setDisabled(True)
+        self.horizontalScrollBar().setDisabled(True)
         self.setFrameStyle(QtWidgets.QFrame.NoFrame)
 
     def setModel(self, memoryModel_, hexStartAddress, LCDColumns=32, LCDRows=6):
