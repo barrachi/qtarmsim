@@ -6,6 +6,6 @@
     </qresource>
 
     <qresource prefix="" >
-      <file>fonts/01 Digit.ttf</file>
+      <file>fonts/AlphaSmart3000.ttf</file>
     </qresource>
 </RCC>

@@ -53,9 +53,9 @@ class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
         self.memoryBankStartAddress = None
         # ------------------------------------------------------------
         # Set font
-        QtGui.QFontDatabase.addApplicationFont(":/fonts/01 Digit.ttf")
-        self.qFont = QtGui.QFont("01 digit")
-        self.qFont.setPointSize(10)
+        QtGui.QFontDatabase.addApplicationFont(":/fonts/AlphaSmart3000.ttf")
+        self.qFont = QtGui.QFont("AlphaSmart 3000")
+        self.qFont.setPointSize(14)
         # Set brush
         self.qBrush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 30), Qt.SolidPattern)
         # Initial values of LCDRows, LCDColumns, and memoryBankRow
