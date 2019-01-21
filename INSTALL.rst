@@ -37,7 +37,7 @@ dependencies using::
    $ # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
    $ # for gosu dependencies
    $ sudo gem install gosu
-   $ sudo pip3 install PySide2 QtARMSim
+   $ sudo pip3 install PySide2==5.11.2 QtARMSim
 
 On a Gentoo distribution, you can install QtARMSim, ARMSim and their
 dependencies issuing (as root)::
@@ -46,7 +46,7 @@ dependencies issuing (as root)::
    $ # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
    $ # for gosu dependencies
    # gem install gosu
-   # pip3 install PySide2 QtARMSim
+   # pip3 install PySide2==5.11.2 QtARMSim
 
 **Note about PySide2.** If the command '``pip3 install PySide2``' fails
 to install ``PySide2``, you can follow the instructions in
@@ -83,7 +83,7 @@ please follow the next steps:
 
 5. Install ``PySide2`` using the ``pip3`` command::
 
-     PS C:\Users\Username> pip3 install PySide2
+     PS C:\Users\Username> pip3 install PySide2==5.11.2
 
    If the latest version of ``PySide2`` is not automatically installed,
    please follow the instructions in
@@ -124,7 +124,7 @@ please follow the next steps:
 
 6. Install ``PySide2``::
 
-     $ sudo pip install PySide2
+     $ sudo pip install PySide2==5.11.2
 
    If the latest version of ``PySide2`` is not automatically installed,
    please follow the instructions in

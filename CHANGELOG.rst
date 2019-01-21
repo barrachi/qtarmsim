@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.4.11 (2019-01-21)
+^^^^^^^^^^^^^^^^^^^
+- PySide2 5.12 has changed the signature of QAbstractItemModel.createIndex(), as it seems that they are going to do a regression, the INSTALL documentation has been changed to force the installation of PySide2 5.11 instead.
+
 0.4.10 (2018-11-20)
 ^^^^^^^^^^^^^^^^^^^
 - Added an scroll area inside the LCD Display dock widget (so that the LCD width does not force the whole simulator width).
