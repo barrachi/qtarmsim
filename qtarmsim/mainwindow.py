@@ -974,15 +974,15 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def welcome_message(self):
         return "<b>QtARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
-               "(c) 2014-18 Sergio Barrachina Mir<br></br>\n" + \
+               "(c) 2014-19 Sergio Barrachina Mir<br></br>\n" + \
                self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
                "<p><b>" + self.tr("Version") + " " + __version__ + "</b></p>" + \
-               "<p>" + "(c) 2014-18 Sergio Barrachina Mir" + "</p>" + \
+               "<p>" + "(c) 2014-19 Sergio Barrachina Mir" + "</p>" + \
                "<p>" + \
-               "<a href='http://lorca.act.uji.es/projects/qtarmsim/'>http://lorca.act.uji.es/projects/qtarmsim/</a>" + \
+               "<a href='http://lorca.act.uji.es/project/qtarmsim/'>http://lorca.act.uji.es/project/qtarmsim/</a>" + \
                "</p>" + \
                "<p></p>" + \
                "<p>" + self.tr("Running on ") + \

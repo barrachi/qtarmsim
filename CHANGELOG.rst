@@ -1,9 +1,13 @@
 Changelog
 ---------
 
+0.4.12 (2019-04-24)
+^^^^^^^^^^^^^^^^^^^
+- PySide2 5.12.2 has corrected the previously changed signature of QAbstractItemModel.createIndex(). The INSTALL documentation has been modified to no longer force the installation of PySide2 5.11.
+
 0.4.11 (2019-01-21)
 ^^^^^^^^^^^^^^^^^^^
-- PySide2 5.12 has changed the signature of QAbstractItemModel.createIndex(), as it seems that they are going to do a regression, the INSTALL documentation has been changed to force the installation of PySide2 5.11 instead.
+- PySide2 5.12 has changed the signature of QAbstractItemModel.createIndex(), as it seems that they are going to do a regression, the INSTALL documentation has been changed to force the installation of the previous 5.11.2 version of PySide2.
 
 0.4.10 (2018-11-20)
 ^^^^^^^^^^^^^^^^^^^

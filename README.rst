@@ -6,6 +6,6 @@ to use multiplatform ARM emulation environment that has been designed
 to be used on Computer Architecture introductory courses. It is a
 graphical interface to the ARMSim ARM simulator.
 
-The ARMSim ARM simulator, Copyright (c) 2014-18 by Germán Fabregat, is
+The ARMSim ARM simulator, Copyright (c) 2014-19 by Germán Fabregat, is
 bundled with QtARMSim. It can be found on the ``armsim/``
 subdirectory of the QtARMSim installation path.

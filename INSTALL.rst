@@ -35,26 +35,25 @@ dependencies using::
 
    $ sudo apt-get install python3-pip ruby
    $ # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
-   $ # for gosu dependencies
+   $ # for installing the gosu dependencies
    $ sudo gem install gosu
-   $ sudo pip3 install PySide2==5.11.2 QtARMSim
+   $ sudo pip3 install QtARMSim
 
 On a Gentoo distribution, you can install QtARMSim, ARMSim and their
 dependencies issuing (as root)::
 
    # emerge -av ruby
-   $ # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
-   $ # for gosu dependencies
+   # # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
+   # # for installing the gosu dependencies
    # gem install gosu
-   # pip3 install PySide2==5.11.2 QtARMSim
+   # pip3 install QtARMSim
 
-**Note about PySide2.** If the command '``pip3 install PySide2``' fails
-to install ``PySide2``, you can follow the instructions in
-`Qt for Python/GettingStarted <https://wiki.qt.io/Qt_for_Python/GettingStarted>`_
-to install the latest PySide2 snapshot wheel, which at the time this installation
-guide was written, consisted in executing the following command::
-
-  pip3 install --index-url=http://download.qt.io/snapshots/ci/pyside/5.11/latest/ PySide2 --trusted-host download.qt.io
+**Note about PySide2.**
+Versions 5.12.0 and 5.12.1 of PySide2 introduced some changes that prevented
+QtARMSim to work. Version 5.12.2 of PySide2 corrected these bugs.
+If QtARMSim does not start, check which version of PySide2 is installed,
+and if necessary, uninstall that version of PySide2 and install a valid version
+(e.g., ``pip3 install PySide2==5.12.2``).
 
 
 1.2 Installing QtARMSim on Windows
@@ -63,8 +62,8 @@ guide was written, consisted in executing the following command::
 To install QtARMSim, ARMSim, and their dependencies on Windows,
 please follow the next steps:
 
-1. Download and install a 64 bits Python version, either the 3.5 or the 3.6 version,
-   from the
+1. Download and install a 64 bits Python version, either the 3.5, 3.6 or the 3.7
+   version, from the
    `Python releases for Windows <https://www.python.org/downloads/windows/>`_ page.
    Please check the '``Add Python 3.X to PATH``' option when installing it.
 
@@ -81,18 +80,16 @@ please follow the next steps:
 
      PS C:\Users\Username> gem install gosu
 
-5. Install ``PySide2`` using the ``pip3`` command::
-
-     PS C:\Users\Username> pip3 install PySide2==5.11.2
-
-   If the latest version of ``PySide2`` is not automatically installed,
-   please follow the instructions in
-   `Qt for Python/GettingStarted <https://wiki.qt.io/Qt_for_Python/GettingStarted>`_
-   to install the latest ``PySide2 snapshot wheel`` for Windows.
-
-6. Install QtARMSim using the ``pip3`` command::
+5. Install QtARMSim using the ``pip3`` command::
 
      PS C:\Users\Username> pip3 install QtARMSim
+
+**Note about PySide2.**
+Versions 5.12.0 and 5.12.1 of PySide2 introduced some changes that prevented
+QtARMSim to work. Version 5.12.2 of PySide2 corrected these bugs.
+If QtARMSim does not start, check which version of PySide2 is installed,
+and if necessary, uninstall that version of PySide2 and install a valid version
+(e.g., ``pip3 install PySide2==5.12.2``).
 
 
 1.3 Installing QtARMSim on macOS
@@ -103,11 +100,11 @@ please follow the next steps:
 
 1. Install the `MacPorts package manager <https://www.macports.org/>`_.
    (If you use the `Homebrew package manager <http://brew.sh/>`_, please
-   adapt conveniently the next instructions.)
+   conveniently adapt the following instructions.)
 
 2. Open a ``Terminal`` and execute the commands indicated in the next steps.
 
-3. Install ``Python 3.6`` (or ``Python 3.5``) and ``pip``::
+3. Install ``Python 3.6`` (or ``Python 3.7``) and ``pip``::
 
      $ sudo port install python36 py36-pip
      $ sudo port select --set python3 python36
@@ -122,27 +119,28 @@ please follow the next steps:
 
      $ sudo port install libsdl2 gosu
 
-6. Install ``PySide2``::
-
-     $ sudo pip install PySide2==5.11.2
-
-   If the latest version of ``PySide2`` is not automatically installed,
-   please follow the instructions in
-   `Qt for Python/GettingStarted <https://wiki.qt.io/Qt_for_Python/GettingStarted>`_
-   to install the latest ``PySide2 snapshot wheel`` for macOS.
-
-7. Install ``QtARMSim``::
+6. Install ``QtARMSim``::
 
      $ sudo pip install QtARMSim
 
-After installing QtARMSim, its executable will be at:
-``/opt/local/Library/Frameworks/Python.framework/Versions/3.6/bin/qtarmsim``.
+**Note about PySide2.**
+Versions 5.12.0 and 5.12.1 of PySide2 introduced some changes that prevented
+QtARMSim to work. Version 5.12.2 of PySide2 corrected these bugs.
+If QtARMSim does not start, check which version of PySide2 is installed,
+and if necessary, uninstall that version of PySide2 and install a valid version
+(e.g., ``sudo pip install PySide2==5.12.2``).
 
-QtARMSim python source code will be at:
-``/opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/qtarmsim/``.
+After installing QtARMSim, its executable will be at::
 
-And the ARMSim ruby source code will be at:
-``/opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/qtarmsim/armsim``.
+    /opt/local/Library/Frameworks/Python.framework/Versions/3.6/bin/qtarmsim
+
+QtARMSim python source code will be at::
+
+    /opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/qtarmsim/
+
+And the ARMSim ruby source code will be at::
+
+    /opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/qtarmsim/armsim/
 
 
 1.4 Installing the ``GNU Gcc toolchain targeting the ARM EABI``
