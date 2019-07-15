@@ -1,7 +1,7 @@
 License
 -------
 
-Copyright 2014-18 Sergio Barrachina Mir <barrachi@uji.es>
+Copyright 2014-19 Sergio Barrachina Mir <barrachi@uji.es>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

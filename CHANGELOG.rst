@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.4.15 (2019-07-15)
+^^^^^^^^^^^^^^^^^^^
+-  Added the ``printf`` subroutine to the ARMSim firmware.
+
 0.4.12 (2019-04-24)
 ^^^^^^^^^^^^^^^^^^^
 - PySide2 5.12.2 has corrected the previously changed signature of QAbstractItemModel.createIndex(). The INSTALL documentation has been modified to no longer force the installation of PySide2 5.11.

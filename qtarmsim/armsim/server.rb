@@ -36,7 +36,7 @@ Errores = { orden: "Orden no reconocida\r\n",
             path: "El directorio no existe o no es correcto\r\n",
             exe: "El archivo no existe o no es ejecutable\r\n",
             file_s: "El archivo .s no existe\r\n",
-            errnoalign: "Acesso no alineado en dirección",
+            errnoalign: "Acceso no alineado a la dirección",
             errnoblock: "Memoria inexistente en dirección"
 }
 
@@ -80,7 +80,7 @@ end
 # @param [String] name
 # @return [Hash] (dir_rel => [source, number])
 def gen_source(name)
-  p name
+  p name if $dev_txt
   source = Hash.new
   intext = false
   fi = File.open(name)
@@ -119,7 +119,7 @@ def get_section(line)
   return 0 if line.nil?
   secs = %w(.text .data .bss .rodata)
   divide = line.split(' ')
-  p divide
+  p divide if $dev_txt
   return secs.find_index(divide[1]) + 1 if divide[0] == '.section'
   idx = secs.find_index(divide[0])
   return idx.nil? ? 0 : idx + 1
@@ -575,7 +575,7 @@ config_compiler = Proc.new { |entrada|
 
 config_args = Proc.new { |entrada|
   $args = entrada[0]
-  p $args
+  p $args if $dev_txt
   res = "OK\r\n"
 }
 
@@ -638,7 +638,7 @@ assemble = Proc.new { |entrada|
   #lline = '> ' + fline + '.lst'
   lline = fline + '.lst'
   #$warn = nil
-  puts cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline
+  puts cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline if $dev_txt
   #if system(cline + ' '  + fline + '.s ' +  ' ' + lline + ' ' + eline)
   if system(cline + ' '  + fline + '.s ', :out => lline, :err => eline)
     blocks = read_ELF(fline + '.o')
@@ -657,7 +657,7 @@ assemble = Proc.new { |entrada|
     procesador.update({usr_regs: [ThumbII_Defs::PC, dirPC, ThumbII_Defs::SP, END_DATA - 128]})
     $server.proc = procesador
     $source = gen_source(fline + '.lst')
-    p $source
+    p $source if $dev_txt
     if $warn.size == 0
       res = "SUCCESS\r\n"
     else
@@ -816,36 +816,36 @@ def read_ELF(name, firmware = FALSE)
     file.wks_orig['.text'] = ORIG_FIRMWARE if firmware
     e_ident = file.get_array(16)
     magic = e_ident[1].chr + e_ident[2].chr + e_ident[3].chr
-    puts("MAGIC: 0x%02X %s" % [e_ident[0], magic])
-    puts("CLASS: %s" % ELFCLASS[e_ident[4]])
-    puts("DATA:  %s" % ELFCLASS[e_ident[5]])
-    puts(ELFVERSION[e_ident[6]])
+    puts("MAGIC: 0x%02X %s" % [e_ident[0], magic]) if $dev_txt
+    puts("CLASS: %s" % ELFCLASS[e_ident[4]]) if $dev_txt
+    puts("DATA:  %s" % ELFCLASS[e_ident[5]]) if $dev_txt
+    puts(ELFVERSION[e_ident[6]]) if $dev_txt
     e_type = file.get_half
-    puts(ELFTYPE[e_type])
+    puts(ELFTYPE[e_type]) if $dev_txt
     e_machine = file.get_half
-    puts("MACHINE:%d (ARM)" % e_machine)
+    puts("MACHINE:%d (ARM)" % e_machine) if $dev_txt
     e_version = file.get_word
-    puts(ELFVERSION[e_version])
+    puts(ELFVERSION[e_version]) if $dev_txt
     e_entry = file.get_word
-    puts("Entry point address: %d" % e_entry)
+    puts("Entry point address: %d" % e_entry) if $dev_txt
     e_phoff = file.get_word
-    puts("Program header table offset: %d" % e_phoff)
+    puts("Program header table offset: %d" % e_phoff) if $dev_txt
     e_shoff = file.get_word
-    puts("Section header table offset: %d" % e_shoff)
+    puts("Section header table offset: %d" % e_shoff) if $dev_txt
     e_flags = file.get_word
-    p e_flags
+    p e_flags if $dev_txt
     e_ehsize = file.get_half
-    puts("ELF header size: %d" % e_ehsize)
+    puts("ELF header size: %d" % e_ehsize) if $dev_txt
     e_phentsize = file.get_half
-    puts("Program header table entry size: %d" % e_phentsize)
+    puts("Program header table entry size: %d" % e_phentsize) if $dev_txt
     e_phnum = file.get_half
-    puts("Program header table entries: %d" % e_phnum)
+    puts("Program header table entries: %d" % e_phnum) if $dev_txt
     e_shentsize = file.get_half
-    puts("Section header table entry size: %d" % e_shentsize)
+    puts("Section header table entry size: %d" % e_shentsize) if $dev_txt
     e_shnum = file.get_half
-    puts("Section header table entries: %d" % e_shnum)
+    puts("Section header table entries: %d" % e_shnum) if $dev_txt
     e_shstrndx = file.get_half
-    puts("Section name string table index: %d" % e_shstrndx)
+    puts("Section name string table index: %d" % e_shstrndx) if $dev_txt
 
     file.seek(e_shoff, IO::SEEK_SET)
     file.sections = Array.new
@@ -871,17 +871,17 @@ def read_ELF(name, firmware = FALSE)
     file.sections.each do |cursec|
       cursec.name = file.get_section_name_string(cursec.header[:name])
       file.wks[cursec.name] = cursec.idx unless file.wks[cursec.name].nil?
-      puts cursec
+      puts cursec if $dev_txt
     end
     file.wks_orig['.rodata'] = file.wks_orig['.text'] + file.sections[file.wks['.text']].header[:size]
     file.wks_orig['.rodata'] += 4 - (file.wks_orig['.rodata'] % 4) unless (file.wks_orig['.rodata'] % 4) == 0
     file.wks_orig['.bss'] = file.wks_orig['.data'] + file.sections[file.wks['.data']].header[:size]
-    p file.wks
-    p file.wks_orig
+    p file.wks if $dev_txt
+    p file.wks_orig if $dev_txt
     file.seek(file.sections[stable].header[:offset], IO::SEEK_SET)
     num = file.sections[stable].header[:size] / file.sections[stable].header[:entsize]
-    puts "Symbol table idx: %d, entries: %d, at file offset: %d" % [stable, num, file.sections[stable].header[:offset]]
-    puts "File size: %d, section end: %d\n" % [file.size, file.sections[stable].header[:offset] + file.sections[stable].header[:size] - 1 ]
+    puts "Symbol table idx: %d, entries: %d, at file offset: %d" % [stable, num, file.sections[stable].header[:offset]] if $dev_txt
+    puts "File size: %d, section end: %d\n" % [file.size, file.sections[stable].header[:offset] + file.sections[stable].header[:size] - 1 ] if $dev_txt
     file.symbols = Array.new
     0.upto(num - 1) do |idx|
       cursym = SymbolTableEntry.new
@@ -890,8 +890,10 @@ def read_ELF(name, firmware = FALSE)
       cursym.name = file.get_string_table_string(cursym.data[:name])
       file.symbols << cursym
     end
-    file.symbols.each do |cursec|
-      puts cursec
+    if $dev_txt
+      file.symbols.each do |cursec|
+        puts cursec
+      end
     end
     file.rel_idx.each do |rel|
       file.seek(file.sections[rel].header[:offset], IO::SEEK_SET)
@@ -902,23 +904,25 @@ def read_ELF(name, firmware = FALSE)
         cursym.idx = idx
         cursym.data = file.get_relocation_entry
         relocations << cursym
-        p cursym
+        p cursym if $dev_txt
       end
       file.relocations << relocations
     end
-    file.relocations.each do |cursec|
-      puts "Tabla"
-      cursec.each do |entry|
-        puts entry
+    if $dev_txt
+      file.relocations.each do |cursec|
+        puts "Tabla"
+        cursec.each do |entry|
+          puts entry
+       end
       end
     end
     # Nos preparamos. Lo primero es leer las secciones con datos
     file.fill_section(file.wks['.text']) unless file.sections[file.wks['.text']].header[:size] == 0;
-    p file.sections[file.wks['.text']].data
+    p file.sections[file.wks['.text']].data if $dev_txt
     file.fill_section(file.wks['.data']) unless file.sections[file.wks['.data']].header[:size] == 0;
-    p file.sections[file.wks['.data']].data
+    p file.sections[file.wks['.data']].data if $dev_txt
     file.fill_section(file.wks['.rodata']) unless file.sections[file.wks['.rodata']].header[:size] == 0;
-    p file.sections[file.wks['.rodata']].data
+    p file.sections[file.wks['.rodata']].data if $dev_txt
 
     return file.relocate
   end
@@ -934,10 +938,11 @@ class ServerApp
   #Aquí pondremos toda la inicialización y esas cosas
   #de momento una ROM random, la RAM de datos y la pila
   def main
+    $dev_txt = false
     host_os = RbConfig::CONFIG['host_os']
     $windows = host_os == "linux" ? false : true
-    p $windows
-    p host_os
+    p $windows if $dev_txt
+    p host_os if $dev_txt
     lpath = File.expand_path(File.dirname($0))
     Shell.cd(lpath)
     blocks = read_ELF('Firmware.o', TRUE)
@@ -947,6 +952,7 @@ class ServerApp
     @procesador.memory.symbolTable = blocks[2]
     $symbol_table = blocks[2]
     $use_symbols = false
+    $gen_trace = false
     @procesador.update({usr_regs: [ThumbII_Defs::PC, ORIG_CODE, ThumbII_Defs::SP, END_DATA - 128]})
     $firmware = blocks[0]
     $firmTable = blocks[2]
@@ -967,6 +973,7 @@ class ServerApp
         session = $server.accept
       else
         puts "Request: #{request}"
+        request.force_encoding("UTF-8") if $windows
         answer = $server.process(request)
         session.puts(answer)
       end

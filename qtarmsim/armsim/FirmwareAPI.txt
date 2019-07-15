@@ -1,0 +1,181 @@
+Firmware v1.2 for QtARMSim.
+API manual
+
+NOTES:
+
+All the functions of the API follow the ARM convention for parameter
+passing and return. 
+
+Passed values use the registers from r0 to r3, then the stack if required.
+Values are returned using r0 and r1 if required.
+
+All the functions modify only registers r0 to r3, all other are preserved.
+
+########################
+# ARITHMETIC FUNCTIONS #
+########################
+
+divide(unsigned int dividend, unsigned int divisor)
+===================================================
+
+Performs the 32 bits unsigned division dividend/divisor, where r0 holds the dividend
+and r1 the divisor. The quotient is returned in r0 and the remainder in r1.
+
+If r1 is 0 both quotient and remainder will be 0xFFFFFFFF which is an impossible result
+for a correct 32 bit division.
+
+
+sdivide(int dividend, int divisor)
+==================================
+
+Performs the 32 bits signed division dividend/divisor, where r0 holds the dividend
+and r1 the divisor. The quotient is returned in r0 and the remainder in r1. The remainder
+always has the sign of the dividend -unless the division is exact-.
+
+If r1 is 0 both quotient and remainder will be 0x7FFFFFFF which is an impossible result
+for a correct 32 bit division.
+
+If the dividend is 0x80000000 and the divisor is -1 the quotient returned is 0x80000000 as the
+positive range is exceeded. All the other combinations work as expected.
+
+
+sqrt(unsigned int val)
+======================
+
+Returns in r0 the positive, integer square root of the value passed in r0.
+
+
+#####################
+# DISPLAY FUNCTIONS #
+#####################
+
+cls()
+=====
+
+Clears the display by filling it with the space character. Does not require nor return any value.
+
+
+fill(char c)
+============
+
+Fills the display with the character passed in the LSB of r0. Does not return any value.
+
+cor2dir(int col, int row)
+=========================
+
+Returns in r0 the address in display memory corresponding to the given coordinates. It does not check if the coordinates are within the correct range.
+The column number is passed in r0 and the row in r1, both starting at 0.
+
+dir2cor(char *dir)
+==================
+
+Returns the coordinates corresponding tho the given display memory address, passed in r0. It does not check if the address is within the correct range. 
+Returns the column in r0 and the row in r1, both starting at 0.
+
+printString(int col, int row, char *str)
+========================================
+
+Shows the ASCIZ string whose address is passed in r2 starting at the display coordinates (col, row) where
+col is in r0 and row in r1.
+
+The number of characters printed, the length of the string, is returned in r0.
+
+Does not verify if the coordinates are inside or outside the display; does not also
+verify if the string is printed in two files or finishes out of the display area.
+
+
+printInt(int col, int row, int val)
+===================================
+
+Shows the signed decimal value passed in r2 starting at the display coordinates (col, row) where
+col is in r0 and row in r1.
+
+Only significant characters, plus a - sign if required, are printed. The number of characters printed is returned in r0.
+
+Does not verify if the coordinates are inside or outside the display; does not also
+verify if the number is printed in two files or finishes out of the display area.
+
+
+printUInt(int col, int row, unsigned int val)
+=============================================
+
+Shows the unsigned decimal value passed in r2 starting at the display coordinates (col, row) where
+col is in r0 and row in r1.
+
+Only significant characters are printed. The number of characters printed is returned in r0.
+
+Does not verify if the coordinates are inside or outside the display; does not also
+verify if the number is printed in two files or finishes out of the display area.
+
+
+printWord(int col, int row, unsigned int val)
+=============================================
+
+Shows the hexadecimal value of the word passed in r2 starting at the display coordinates (col, row) where
+col is in r0 and row in r1.
+
+All 8 characters are printed, no value is returned.
+
+Does not verify if the coordinates are inside or outside the display; does not also
+verify if the number is printed in two files or finishes out of the display area.
+
+
+printHalf(int col, int row, unsigned int val)
+=============================================
+
+Shows the hexadecimal value of the half word passed in r2 starting at the display coordinates (col, row) where
+col is in r0 and row in r1.
+
+All 4 characters are printed, no value is returned.
+
+Does not verify if the coordinates are inside or outside the display; does not also
+verify if the number is printed in two files or finishes out of the display area.
+
+
+printByte(int col, int row, unsigned int val)
+=============================================
+
+Shows the hexadecimal value of the byte passed in r2 starting at the display coordinates (col, row) where
+col is in r0 and row in r1.
+
+All 2 characters are printed, no value is returned.
+
+Does not verify if the coordinates are inside or outside the display; does not also
+verify if the number is printed in two files or finishes out of the display area.
+
+printFloat(int col, int row, float val, int format) 
+===================================================
+
+Shows the decimal representation of the 32 bits floating point value passed in r2 starting at the display coordinates (col, row) where
+col is in r0 and row in r1, with the format specified in r3.
+
+The formats adheres to that used in the qfp_float2str function (0 specifies a basic format). The number of characters printed is returned in r0.
+
+Does not verify if the coordinates are inside or outside the display; does not also
+verify if the number is printed in two files or finishes out of the display area.
+
+printf(int col, int fil, char *cad, ...)
+========================================
+
+
+Shows the ASCIZ formatted string whose address is passed in r2 starting at the display coordinates (col, row) where col is in r0 and row in r1. It is a simple
+version of the standard C printf function.
+
+The string includes a series of format specifiers preceded by the % character. Each specifier corresponds to one of the parameters passed after the string, in sequential order.
+The specifiers are:
+
+- %i o %d :a signed integer.
+- %u :an unsigned integer.
+- %x o %w :a 32 bits integer (word) in hexadecimal.
+- %h :a 16 bits integer (half) in hexadecimal.
+- %b :a byte in hexadecimal.
+- %c :a character.
+- %f :a 32 bits floating point value (basic format).
+- %s :an ASCIZ text string.
+
+All parameters are 32 bits values.
+
+In addition to the format specifiers, the function accepts the \n (CR) character to continue printing at the beginning of the next line, and \t (TAB) to force the next character to be placed at a column multiple of 5.
+The % character can be printed by writing %%. If an unknown specifier is found after %, the question mark ? is printed instead of %.
+
+The number of display positions used is returned in r0. That is the number of characters printed but adding the spaces generated by \t and those to the end of the current line after \n.
