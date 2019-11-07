@@ -27,6 +27,7 @@
 
 import sys
 
+import PySide2
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt
 
@@ -211,7 +212,6 @@ class LeftArea(QtWidgets.QWidget):
             if self.currentHighlightedLineNumber != lineNumber - 1:
                 # Change background color when a branch is executed
                 (h, s, v, a) = self.currentBgColor.getHsv()
-                print(h, s, v, a)
                 self.currentBgColor.setHsv((h - 50) % 360, s, v, a)
             self.linesWithBackground[self.currentHighlightedLineNumber] = QtGui.QColor(self.currentBgColor)
             self.currentHighlightedLineNumber = lineNumber
@@ -232,10 +232,10 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         # ------------------------------------------------------------
         self.currentHighlightedLineNumber = None
         # ------------------------------------------------------------
-        # Set the default font and tab width
+        # Set the default font and tab distance
         self.myFont = getMonoSpacedFont()
         self.setFont(self.myFont)
-        self.setTabStopWidth(8 * self.fontMetrics().width('9'))
+        self.setTabStopCharacters(8)
         # Disable wrap mode
         self.setLineWrapMode(self.NoWrap)
         # Add leftArea child
@@ -249,6 +249,8 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.updateHighlightSelections()
         # Set scrollLock to False
         self.scrollLock = False
+        # Set show tabs and spaces to False
+        self.showTabsAndSpaces = False
         # Connect signals
         self.connect(self, QtCore.SIGNAL('blockCountChanged(int)'), self.updateLeftAreaWidth)
         self.connect(self, QtCore.SIGNAL('updateRequest(QRect, int)'), self.updateLeftArea)
@@ -263,6 +265,30 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         if ro:
             self.updateLeftAreaWidth()
         return super(CodeEditor, self).setReadOnly(ro)
+
+    def setTabStopWidth(self, distance: float):
+        raise Exception("Use setTabStopCharacters instead")
+
+    def setTabStopDistance(self, distance: float):
+        raise Exception("Use setTabStopCharacters instead")
+
+    def setTabStopCharacters(self, characters):
+        length = characters * self.fontMetrics().horizontalAdvance(' '*10000) / 10000
+        super().setTabStopDistance(length)
+
+    @QtCore.Slot()
+    def toggleShowTabsAndSpaces(self):
+        """
+        Toggles ShowTabsAndSpaces option
+        """
+        self.showTabsAndSpaces = not self.showTabsAndSpaces
+        options = self.document().defaultTextOption()
+        if self.showTabsAndSpaces:
+            options.setFlags(QtGui.QTextOption.ShowTabsAndSpaces)
+        else:
+            flags = options.flags() & ~QtGui.QTextOption.ShowTabsAndSpaces
+            options.setFlags(flags)
+        self.document().setDefaultTextOption(options)
 
     def clearBreakpoints(self):
         """Calls leftArea clearBreakpoints method"""
@@ -312,6 +338,13 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
                                     self.currentHighlightedLineNumber - cursorBlockNumber)
             self.setTextCursor(cursor)
         return cursor
+
+    def contextMenuEvent(self, event: PySide2.QtGui.QContextMenuEvent):
+        menu = self.createStandardContextMenu()
+        menu.addSeparator()
+        txt = "Hide tabs and spaces" if self.showTabsAndSpaces else "Show tabs and spaces"
+        menu.addAction(txt, self, QtCore.SLOT("toggleShowTabsAndSpaces()"))
+        menu.exec_(event.globalPos())
 
     def resizeEvent(self, *args, **kwargs):
         """Resize the leftArea child widget when a resize event is triggered"""
@@ -373,18 +406,40 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         """Returns a list of keywords that should be highlighted when that keyword is under the cursor"""
         return []
 
-    def wheelEvent(self, event):
-        """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
+    def increaseFontSize(self, inc):
+        """
+        Increases (decreases) the font size
+        :param inc: number of points to increase the font
+        """
+        myFontPointSize = self.myFont.pointSize()
+        myFontPointSize += inc
+        if myFontPointSize < 10:
+            myFontPointSize = 10
+        self.myFont.setPointSize(myFontPointSize)
+        self.setFont(self.myFont)
+        self.setTabStopCharacters(8)
+
+    def keyPressEvent(self, event: PySide2.QtGui.QKeyEvent):
+        """
+        Processes the CTRL++ and CTRL+- events
+        """
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            myFontPointSize = self.myFont.pointSize()
-            myFontPointSize += event.delta() / 120
-            if myFontPointSize < 10:
-                myFontPointSize = 10
-            self.myFont.setPointSize(myFontPointSize)
-            self.setFont(self.myFont)
-            self.setTabStopWidth(8 * self.fontMetrics().width('9'))
+            if event.text() == '+':
+                self.increaseFontSize(1)
+                return
+            elif event.text() == '-':
+                self.increaseFontSize(-1)
+                return
+        super().keyPressEvent(event)
+
+    def wheelEvent(self, event):
+        """
+        Processes the wheel event: zooms in and out whenever a CTRL+wheel event is triggered
+        """
+        if event.modifiers() == QtCore.Qt.ControlModifier:
+            self.increaseFontSize(event.delta() / 120)
         else:
-            super(CodeEditor, self).wheelEvent(event)
+            super().wheelEvent(event)
 
     def scrollContentsBy(self, dx, dy):
         """Overrides scrollContentsBy to allow appending text without scrolling"""

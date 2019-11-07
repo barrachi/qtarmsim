@@ -50,11 +50,11 @@ class ARMCodeEditor(CodeEditor):
 
     def setARMMode(self):
         self.syntaxHighlighter = self.ARMSyntaxHighlighterClass(self.document())
-        self.setTabStopWidth(8 * self.fontMetrics().width('9'))
+        self.setTabStopCharacters(8)
 
     def setCMode(self):
         self.syntaxHighlighter = self.CSyntaxHighlighterClass(self.document())
-        self.setTabStopWidth(3 * self.fontMetrics().width('9'))
+        self.setTabStopCharacters(3)
 
 
 
