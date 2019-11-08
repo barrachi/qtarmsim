@@ -26,10 +26,19 @@ import signal
 import sys
 
 import PySide2
-from PySide2 import QtCore, QtSvg, QtXml, QtWidgets  # @warning: QtSvg and QtXml must be imported for SVG icons support
+from PySide2 import QtCore, QtSvg, QtXml, QtWidgets
 
 from .mainwindow import QtARMSimMainWindow
 from .modulepath import module_path
+
+
+def __stub():
+    """
+    This function does nothing. It exists only to avoid QtSvg and QtXml imports to be removed.
+    QtSvg and QtXml must be imported in order to use SVG icons.
+    """
+    return QtSvg.Object(), QtXml.Object()
+
 
 def _help():
     print("""Usage: qtarmsim.py [options] [asmfile.s]

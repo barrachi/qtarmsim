@@ -27,5 +27,3 @@ loop:	strb r1, [r0, r1]
 	add r2, #0x20
 	bl printString	@ printString(0, 1, ascii+0x20)
 end:	wfi
-
-	

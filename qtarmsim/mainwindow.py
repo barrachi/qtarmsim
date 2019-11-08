@@ -42,7 +42,14 @@ from .window.connectprogressbardialog import ConnectProgressBarDialog
 from .window.help import HelpWindow
 from .window.preferencesdialog import PreferencesDialog
 from .window.runprogressbardialog import RunProgressBarDialog
-from .res import main_rc, breeze_rc  # oxygen_rc  # @UnusedImport
+from .res import main_rc, breeze_rc
+
+
+def __stub():
+    """
+    This function does nothing. It exists only to avoid main_rc and breeze_rc imports to be removed.
+    """
+    return main_rc, breeze_rc
 
 
 def _fromUtf8(s):
@@ -290,6 +297,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 return res.groups()[0]
             else:
                 return basename
+
         files_or_dirs = glob(os.path.join(path, "*"))
         files_or_dirs.sort()
         for file_or_dir in files_or_dirs:
@@ -768,8 +776,11 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                                           .format(file_name, asm_file.errorString()))
             return False
         text = self.ui.sourceCodeEditor.document().toPlainText()
-        asm_file.write(
-            text.encode('utf-8'))  # @todo: let user decide which encoding (including sys.getdefaultencoding())
+        # Force a new line at the end of the file
+        text += '\n'
+        text = re.sub('\n+$', '\n', text)
+        # @todo: let user decide which encoding (including sys.getdefaultencoding())
+        asm_file.write(text.encode('utf-8'))
         asm_file.close()
         self.statusBar().showMessage(self.tr("File saved"), 2000)
         # Set file name
@@ -838,8 +849,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.registersModel.setRegister(reg_number, reg_value)
         for (hex_address, hex_byte) in response.memory:
             self.memoryModel.setByte(hex_address, hex_byte)
-            self.ui.treeViewMemory.expand(self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
-            self.ui.treeViewMemory.scrollTo(self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex(hex_address)))
+            self.ui.treeViewMemory.expand(
+                self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
+            self.ui.treeViewMemory.scrollTo(
+                self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex(hex_address)))
         if response.result == "ERROR":
             self.ui.textEditMessages.append("<b>An error has occurred.</b>")
         elif response.result == "BREAKPOINT REACHED":
@@ -1090,8 +1103,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             if mb['armsim_lines']:
                 self.ui.tabTabARMSim.addTab(self.ui.simCodeEditors[i], mb['hex_start'])
                 n_lines = len(mb['armsim_lines'])
-                for j in range(0, n_lines//30+1):
-                    self.ui.simCodeEditors[i].appendPlainText('\n'.join(mb['armsim_lines'][j*30: min((j+1)*30, n_lines)]))
+                for j in range(0, n_lines // 30 + 1):
+                    self.ui.simCodeEditors[i].appendPlainText(
+                        '\n'.join(mb['armsim_lines'][j * 30: min((j + 1) * 30, n_lines)]))
                     QtWidgets.QApplication.processEvents()
                 i += 1
         for simCodeEditor in self.ui.simCodeEditors:
@@ -1123,7 +1137,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 break
         # Modify the layout of treeViewMemory
         # @todo: expand automatically the first RAM module
-        self.ui.treeViewMemory.expand(self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
+        self.ui.treeViewMemory.expand(
+            self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
         QtWidgets.QApplication.processEvents()
         self.ui.treeViewMemory.updateGeometry()
 
