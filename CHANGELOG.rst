@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.4.16 (2019-11-19)
+^^^^^^^^^^^^^^^^^^^
+- Added the Show/Hide tabs and spaces functionality (on the editor contextual menu).
+- Saved files are forced to end with a new line (to avoid misleading the gcc compiler if the last line ended with a TAB).
+- Added zoom in and zoom out via CTRL++ and CTRL+- (CTRL+wheel already was there).
+- Tab width is now correctly computed.
+
 0.4.15 (2019-07-15)
 ^^^^^^^^^^^^^^^^^^^
 -  Added the ``printf`` subroutine to the ARMSim firmware.
