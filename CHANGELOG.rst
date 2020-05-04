@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.4.17 (2020-05-24)
+^^^^^^^^^^^^^^^^^^^
+- Updated installation instructions for Windows systems.
+
 0.4.16 (2019-11-19)
 ^^^^^^^^^^^^^^^^^^^
 - Added the Show/Hide tabs and spaces functionality (on the editor contextual menu).

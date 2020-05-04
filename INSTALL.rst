@@ -35,7 +35,7 @@ dependencies using::
 
    $ sudo apt-get install python3-pip ruby
    $ # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
-   $ # for installing the gosu dependencies
+   $ # for installing gosu dependencies
    $ sudo gem install gosu
    $ sudo pip3 install QtARMSim
 
@@ -44,7 +44,7 @@ dependencies issuing (as root)::
 
    # emerge -av ruby
    # # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
-   # # for installing the gosu dependencies
+   # # for installing gosu dependencies
    # gem install gosu
    # pip3 install QtARMSim
 
@@ -67,8 +67,8 @@ please follow the next steps:
    `Python releases for Windows <https://www.python.org/downloads/windows/>`_ page.
    Please check the '``Add Python 3.X to PATH``' option when installing it.
 
-2. Download and install a 64 bits Ruby version from the
-   `Ruby Installer for Windows <http://rubyinstaller.org/>`_ page.
+2. Download and install a 64 bits version of **Ruby with Devkit** from the
+   `Ruby Installer for Windows page <http://rubyinstaller.org/>`_.
    During the installation process, make sure that the
    '``Add Ruby executables to your PATH``' option is selected.
 
@@ -76,13 +76,23 @@ please follow the next steps:
    ``cmd``, depending on your Windows version), and execute the commands
    indicated in the next steps.
 
-4. Install the ``Gosu`` library using the ``gem`` command::
+4. Make sure that the ``shell``, ``e2mmap`` and ``sync`` Ruby modules are installed
+   using the next ``gem`` command::
+
+     PS C:\Users\Username> gem install shell e2mmap sync
+
+5. Install the ``Gosu`` Ruby module using the ``gem`` command::
 
      PS C:\Users\Username> gem install gosu
 
-5. Install QtARMSim using the ``pip3`` command::
+6. Install QtARMSim using the ``pip3`` command::
 
      PS C:\Users\Username> pip3 install QtARMSim
+
+**Note about Ruby.**
+Starting with the 2.5 version of the Ruby installer for Windows, the modules
+``shell``, ``e2mmap`` and ``sync`` are not bundled in. Therefore, they should be
+manually installed, as stated in the previous instructions.
 
 **Note about PySide2.**
 Versions 5.12.0 and 5.12.1 of PySide2 introduced some changes that prevented
@@ -129,18 +139,6 @@ QtARMSim to work. Version 5.12.2 of PySide2 corrected these bugs.
 If QtARMSim does not start, check which version of PySide2 is installed,
 and if necessary, uninstall that version of PySide2 and install a valid version
 (e.g., ``sudo pip install PySide2==5.12.2``).
-
-After installing QtARMSim, its executable will be at::
-
-    /opt/local/Library/Frameworks/Python.framework/Versions/3.6/bin/qtarmsim
-
-QtARMSim python source code will be at::
-
-    /opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/qtarmsim/
-
-And the ARMSim ruby source code will be at::
-
-    /opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/qtarmsim/armsim/
 
 
 1.4 Installing the ``GNU Gcc toolchain targeting the ARM EABI``
@@ -219,3 +217,4 @@ On Windows::
 On macOS::
 
   sudo pip uninstall QtARMSim
+
