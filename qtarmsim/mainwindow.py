@@ -987,13 +987,13 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def welcome_message(self):
         return "<b>QtARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
-               "(c) 2014-19 Sergio Barrachina Mir<br></br>\n" + \
+               "(c) 2014-20 Sergio Barrachina Mir<br></br>\n" + \
                self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
                "<p><b>" + self.tr("Version") + " " + __version__ + "</b></p>" + \
-               "<p>" + "(c) 2014-19 Sergio Barrachina Mir" + "</p>" + \
+               "<p>" + "(c) 2014-20 Sergio Barrachina Mir" + "</p>" + \
                "<p>" + \
                "<a href='http://lorca.act.uji.es/project/qtarmsim/'>http://lorca.act.uji.es/project/qtarmsim/</a>" + \
                "</p>" + \
@@ -1175,7 +1175,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             return False
         errmsg = connectProgressBarDialog.getMsg()
         if errmsg:
-            QtWidgets.QMessageBox.warning(self, self.tr("Connection to ARMSim failed\n\n"), "{}".format(errmsg))
+            QtWidgets.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "{}".format(errmsg))
             return False
         self.ui.textEditMessages.append(u"<b>Connected to ARMSim (ARMSim version info follows).</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
@@ -1190,7 +1190,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                         ("ARMGccOptions", self.settings.value("ARMGccOptions"))]:
             errmsg = self.simulator.setSettings(setting[0], setting[1])
             if errmsg:
-                QtWidgets.QMessageBox.warning(self, self.tr("ARMSim set setting failed"), "\n{}\n".format(errmsg))
+                QtWidgets.QMessageBox.warning(self, self.tr("ARMSim set settings failed"), "\n{}\n".format(errmsg))
                 return False
         return True
 

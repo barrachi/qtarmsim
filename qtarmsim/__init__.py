@@ -28,8 +28,8 @@ import sys
 import PySide2
 from PySide2 import QtCore, QtSvg, QtXml, QtWidgets
 
-from .mainwindow import QtARMSimMainWindow
-from .modulepath import module_path
+from qtarmsim.mainwindow import QtARMSimMainWindow
+from qtarmsim.modulepath import module_path
 
 
 def __stub():

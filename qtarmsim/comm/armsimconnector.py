@@ -107,19 +107,16 @@ class ARMSimConnector:
         cmd = shlex.split(command) + [str(current_port), ]
         self.messages.append("\nLaunching '{}'...".format(" ".join(cmd)))
         try:
-            if sys.platform == "win32":
-                self.armsim_process = subprocess.Popen(cmd,
-                                                       cwd=working_directory
-                                                       )
-            else:
-                self.armsim_process = subprocess.Popen(cmd,
-                                                       cwd=working_directory,
-                                                       stderr=subprocess.PIPE
-                                                       )
+            self.armsim_process = subprocess.Popen(cmd,
+                                                   cwd=working_directory,
+                                                   stdin=subprocess.DEVNULL,
+                                                   stdout=subprocess.PIPE,
+                                                   stderr=subprocess.PIPE
+                                                   )
         except OSError as e:
             return "Could not launch the next command:\n" \
                    "    '{}'\n\n" \
-                   "on the directory:\n" \
+                   "On the directory:\n" \
                    "    '{}'\n\n" \
                    "Error was:\n" \
                    "    [Errno {}] {}".format(" ".join(cmd), working_directory, e.errno, e.strerror)
@@ -136,22 +133,21 @@ class ARMSimConnector:
             return None
         # Get stderr
         stderr = ""
-        if sys.platform != "win32":
-            try:
-                (stdout, stderr) = self.armsim_process.communicate(timeout=1)  # @UnusedVariable stdout
-            except:
-                pass
+        try:
+            stdout, stderr = self.armsim_process.communicate(timeout=1)  # @UnusedVariable stdout
+        except subprocess.TimeoutExpired:
+            pass
         # Kill current ARMSim process (if it is still alive)
         if self.armsim_process.poll() is None:
             self.armsim_process.kill()
-        # Check previously got stderr, only return now if it is a ruby error
-        if stderr and stderr.decode(sys.stderr.encoding).count("ruby"):
+        # Check stderr and return if not empty
+        if stderr:
             return "Could not launch the next command:\n" \
                    "    '{}'\n\n" \
-                   "on the directory:\n" \
+                   "On the directory:\n" \
                    "    '{}'\n\n" \
                    "The error was:\n" \
-                   "    {}".format(" ".join(cmd), working_directory, stderr.decode(sys.stderr.encoding))
+                   "    {}".format(" ".join(cmd), working_directory, stderr.decode())
         return "Could not bind ARMSim to any port between {} and {}.\n" \
                "\n" \
                "The following messages were reported while trying to establish a connection.\n" \
