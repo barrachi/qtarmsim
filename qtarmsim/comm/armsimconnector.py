@@ -110,7 +110,7 @@ class ARMSimConnector:
             self.armsim_process = subprocess.Popen(cmd,
                                                    cwd=working_directory,
                                                    stdin=subprocess.DEVNULL,
-                                                   stdout=subprocess.PIPE,
+                                                   stdout=subprocess.DEVNULL,
                                                    stderr=subprocess.PIPE
                                                    )
         except OSError as e:

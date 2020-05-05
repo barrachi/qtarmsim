@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.4.18 (2020-05-25)
+^^^^^^^^^^^^^^^^^^^
+- Fixed bug: assigning a PIPE to armsim stdout prevented the Windows version to work properly.
+
 0.4.17 (2020-05-24)
 ^^^^^^^^^^^^^^^^^^^
 - Updated installation instructions for Windows systems.
