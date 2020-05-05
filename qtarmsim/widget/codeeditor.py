@@ -137,6 +137,8 @@ class LeftArea(QtWidgets.QWidget):
                 top = bottom
                 bottom = top + self.codeEditor.blockBoundingRect(block).height()
                 blockNumber += 1
+        # https://stackoverflow.com/questions/59605569/pyside2-raises-error-qpaintdevice-cannot-destroy-paint-device-that-is-being-p
+        del painter
 
     def width(self):
         """
