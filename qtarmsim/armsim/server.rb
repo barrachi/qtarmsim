@@ -161,7 +161,7 @@ end
 # @param [Array] entrada
 # @return [String]
 show_version = Proc.new { |entrada|
-  res = "V 1.4\r\n(c) 2014 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
+  res = "V 1.8\r\n(c) 2014-20 Germán Fabregat\r\nATC - UJI\r\nEOF\r\n"
 }
 
 #show_register
