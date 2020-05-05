@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.4.19 (2020-05-25)
+^^^^^^^^^^^^^^^^^^^
+- Fixed bug: 'QPaintDevice: Cannot destroy paint device that is being painted'.
+- Updated ARMSim version.
+
 0.4.18 (2020-05-25)
 ^^^^^^^^^^^^^^^^^^^
 - Fixed bug: assigning a PIPE to armsim stdout prevented the Windows version to work properly.
