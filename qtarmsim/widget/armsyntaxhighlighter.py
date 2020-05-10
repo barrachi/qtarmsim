@@ -491,10 +491,10 @@ def generateHighlightingRules():
     labelFormat.setFontWeight(QtGui.QFont.Bold)
     for pattern in ['^\\s*[^\\d\\s][\\w]*:', ]:
         highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), labelFormat))
-    # Add highlighting rules and format for ARM comments
+    # Add highlighting rules and format for ARM comments, tabs and spaces
     commentFormat = QtGui.QTextCharFormat()
     commentFormat.setForeground(QtGui.QColor('gray'))
-    pattern = '(@.*$|^\\s*#.*$)'
+    pattern = '(@.*$|^\\s*#.*$|[ \t]+)'
     highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), commentFormat))
     return highlightingRules
 
