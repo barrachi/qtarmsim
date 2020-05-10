@@ -36,7 +36,7 @@ class ARMCodeEditor(CodeEditor):
 
     def _getKeywordsToHighlight(self):
         """Returns which keywords should be highlighted on the text when the same keyword is under the cursor"""
-        registers = ['r{}'.format(n) for n in range(0, 16)] + ['sp', 'SP', 'lr', 'LR', 'pc', 'PC']
+        registers = ['r{}'.format(n) for n in range(0, 16)] + ['R{}'.format(n) for n in range(0, 16)] + ['sp', 'SP', 'lr', 'LR', 'pc', 'PC']
         # Labels
         labels = []
         labelQRegExp = QtCore.QRegExp('^\\s*[^\\d\\s][\\w]*:')
