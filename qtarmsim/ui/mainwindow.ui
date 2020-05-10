@@ -259,7 +259,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>Re&amp;gisters</string>
+    <string>Registers</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -311,7 +311,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>&amp;Memory</string>
+    <string>Memory</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -388,7 +388,7 @@
     <string>The Memory Dump dock shows the memory dump of the simulated system</string>
    </property>
    <property name="windowTitle">
-    <string>Memory &amp;Dump</string>
+    <string>Memory Dump</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -426,7 +426,7 @@
     <string>The LCD Display shows the output of a simulated LCD Display Device</string>
    </property>
    <property name="windowTitle">
-    <string>&amp;LCD Display</string>
+    <string>LCD Display</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -520,7 +520,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidgetTerminal">
    <property name="windowTitle">
-    <string>Termi&amp;nal</string>
+    <string>Terminal</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
