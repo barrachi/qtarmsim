@@ -339,12 +339,21 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # End migration of settings versions
         # -----------------------------------------------------------------------------
         self.settings.setValue("ConfVersion", 3)
+        # If some of the next settings is empty, populate it with its default value
         for setting in (
                 "ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMSimUseLabels",
                 "ARMGccCommand", "ARMGccOptions",
                 "LastUsedDirectory", "TerminalHistory"):
             if self.settings.value(setting) is None:
                 self.settings.setValue(setting, self.defaultSettings.value(setting))
+        # If server.rb is not in the ARMSimDirectory, change the ARMSimDirectory by the default one
+        setting = "ARMSimDirectory"
+        if not os.path.exists(os.path.join(self.settings.value(setting), "server.rb")):
+            self.settings.setValue(setting, self.defaultSettings.value(setting))
+        # If the gcc command is not a regular file, change the ARMGccCommand by the default one
+        setting = "ARMGccCommand"
+        if not os.path.isfile(self.settings.value(setting)):
+            self.settings.setValue(setting, self.defaultSettings.value(setting))
 
     def defaultGeometry(self):
         """Resizes main window to 800x600 and returns the geometry"""
