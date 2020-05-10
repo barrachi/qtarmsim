@@ -145,7 +145,7 @@
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
-     <string>R&amp;un</string>
+     <string>&amp;Run</string>
     </property>
     <addaction name="actionRun"/>
     <addaction name="separator"/>
@@ -156,7 +156,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionHelp"/>
     <addaction name="actionWhats_This"/>
