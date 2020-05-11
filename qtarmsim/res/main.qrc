@@ -1,11 +1,8 @@
-<!DOCTYPE RCC><RCC version="1.0">
-    <qresource prefix="" >
+<RCC version="1.0">
+    <qresource prefix="/" >
       <file>images/logo.svg</file>
       <file>images/lcd.png</file>
       <file>images/ajax-loader.gif</file>
-    </qresource>
-
-    <qresource prefix="" >
       <file>fonts/AlphaSmart3000.ttf</file>
     </qresource>
 </RCC>
