@@ -475,6 +475,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.sourceCodeEditor.selectionChanged.connect(self.sourceCodeSelectionChanged)
         self.ui.sourceCodeEditor.redoAvailable.connect(self.sourceCodeRedoAvailable)
         self.ui.sourceCodeEditor.undoAvailable.connect(self.sourceCodeUndoAvailable)
+        self.ui.sourceCodeEditor.highlightedWordSignal.connect(self.highlightedWord)
         # Install event filter for dock widgets
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
@@ -482,10 +483,11 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.dockWidgetLCDDisplay.installEventFilter(self)
         self.ui.dockWidgetTerminal.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
-        # Connect to self.uji.simCodeEditor set and clear breakpoint signals
+        # Connect to self.uji.simCodeEditor set and clear breakpoint signals and highlightedWord signal
         for simCodeEditor in self.ui.simCodeEditors:
             simCodeEditor.setBreakpointSignal.connect(self.setBreakpoint)
             simCodeEditor.clearBreakpointSignal.connect(self.clearBreakpoint)
+            simCodeEditor.highlightedWordSignal.connect(self.highlightedWord)
         # Connect register edited on registers model to self.registerEdited
         self.registersModel.register_edited.connect(self.registerEdited)
         # Connect memory edited on memory model to self.memoryEdited
@@ -619,6 +621,18 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, self.tr("Clear breakpoint error"), errmsg)
         else:
             self.breakpoints.remove(hex_address)
+
+    reg_text_to_number = dict([("r{}".format(n), n) for n in range(16)])
+    reg_text_to_number['sp'] = 13
+    reg_text_to_number['lr'] = 14
+    reg_text_to_number['pc'] = 15
+
+    def highlightedWord(self, text):
+        """Reacts upon a highlighted word in any code editor"""
+        if text.lower() in self.reg_text_to_number:
+            self.registersModel.highlightRegister(self.reg_text_to_number[text.lower()])
+        else:
+            self.registersModel.unHighlightRegister()
 
     def registerEdited(self, reg_name, hex_value):
         errmsg = self.simulator.setRegister(reg_name, hex_value)

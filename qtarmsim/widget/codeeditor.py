@@ -225,6 +225,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
 
     setBreakpointSignal = QtCore.Signal('int', 'QString')
     clearBreakpointSignal = QtCore.Signal('int', 'QString')
+    highlightedWordSignal = QtCore.Signal('QString')
 
     def __init__(self, parent=None, SyntaxHighlighterClass=None, *args, **kwargs):
         """CodeEditor initialization"""
@@ -402,6 +403,9 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
                     selection.format.setBackground(lineColor)
                     selection.cursor = cursor_
                     selections.append(selection)
+            self.highlightedWordSignal.emit(currentWord)
+        else:
+            self.highlightedWordSignal.emit('')
         return selections
 
     def _getKeywordsToHighlight(self):

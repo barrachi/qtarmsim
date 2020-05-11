@@ -36,6 +36,7 @@ class RegistersModel(TreeModel):
     modified_registers = []
     q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
     q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
+    q_brush_highlighted = QtGui.QBrush(QtGui.QColor(255, 255, 0, 100), Qt.SolidPattern)
 
     # register_edited, parameters are register name and hex value
     register_edited = QtCore.Signal('QString', 'QString')
@@ -63,6 +64,8 @@ class RegistersModel(TreeModel):
         self.q_font = getMonoSpacedFont()
         self.q_font_last = getMonoSpacedFont()
         self.q_font_last.setWeight(QtGui.QFont.Black)
+        # highlighted register
+        self.highlighted_register = None
 
     def data(self, index, role):
         if not index.isValid():
@@ -99,10 +102,15 @@ class RegistersModel(TreeModel):
                 dt.utf8,
                 dt.utf32
             )
-        elif role == Qt.BackgroundRole and self.modified_registers.count(index.row()):
-            return self.q_brush_last
-        elif role == Qt.BackgroundRole and self.previously_modified_registers.count(index.row()):
-            return self.q_brush_previous
+        elif role == Qt.BackgroundRole:
+            if self.highlighted_register == index.row():
+                return self.q_brush_highlighted
+            elif self.modified_registers.count(index.row()):
+                return self.q_brush_last
+            elif self.previously_modified_registers.count(index.row()):
+                return self.q_brush_previous
+            else:
+                return None
         elif role == Qt.FontRole:
             if self.modified_registers.count(index.row()):
                 return self.q_font_last
@@ -156,6 +164,17 @@ class RegistersModel(TreeModel):
         for reg in copy_of_previous + self.previously_modified_registers:
             self.dataChanged.emit(self.createIndex(reg, 0, self.rootItem.child(0)),
                                   self.createIndex(reg, 1, self.rootItem.child(0)))
+
+    def highlightRegister(self, reg):
+        self.highlighted_register = reg
+        self.dataChanged.emit(self.createIndex(reg, 0, self.rootItem.child(0)),
+                              self.createIndex(reg, 1, self.rootItem.child(0)))
+
+    def unHighlightRegister(self):
+        if self.highlighted_register is not None:
+            self.highlighted_register = None
+            self.dataChanged.emit(self.createIndex(0, 0, self.rootItem.child(0)),
+                                  self.createIndex(15, 1, self.rootItem.child(0)))
 
     def reset(self):
         self.beginResetModel()
