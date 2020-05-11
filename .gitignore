@@ -24,3 +24,4 @@ INSTALL.html
 qtarmsim/lang/qtarmsim_es.ts
 .idea
 QtARMSim.spec
+.eggs
