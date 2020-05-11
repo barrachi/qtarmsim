@@ -58,7 +58,7 @@ Please, report bugs to <barrachi@uji.es>.
 """)
 
 
-def _getopts():
+def _get_opts():
     """Processes the options passed to the executable"""
     debug = False
     verbose = False
@@ -92,7 +92,7 @@ def main():
     for plugins_dir in [os.path.join(p, "plugins") for p in PySide2.__path__]:
         qApp.addLibraryPath(plugins_dir)
     # Process the command line options
-    (file_name, debug, verbose) = _getopts()
+    (file_name, debug, verbose) = _get_opts()
     # Create the main window and show it
     main_window = QtARMSimMainWindow(debug=debug, verbose=verbose)
     main_window.show()
