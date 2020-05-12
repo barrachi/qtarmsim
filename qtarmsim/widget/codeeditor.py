@@ -56,6 +56,7 @@ class LeftArea(QtWidgets.QWidget):
         self.linesWithBackground = None
         self.currentHighlightedLineNumber = None
         self.currentBgColor = None
+        self.bgColors = []
         # ------------------------------------------------------------
         self.codeEditor = codeEditor
         self.clearBreakpoints()
@@ -102,14 +103,19 @@ class LeftArea(QtWidgets.QWidget):
             xOffset = (width - length) / 2
             yOffset = (height - length) / 2
             stopPoints = [(x + xOffset, y + yOffset) for (x, y) in stopPoints]
+            # Trace color
+            leftTrace = width / 8
+            widthTrace = 6 * width / 8 - 1
+            rightTrace = leftTrace + widthTrace - 1
             while block.isValid() and top <= event.rect().bottom():
                 if block.isVisible() and bottom >= event.rect().top():
                     if blockNumber in self.linesWithBackground:
-                        painter.fillRect(QtCore.QRectF(width / 4.0, top, width / 2.0, height), QtGui.QColor('white'))
-                        painter.fillRect(QtCore.QRectF(width / 4.0 + 1, top, width / 2.0 - 2, height),
-                                         self.linesWithBackground[blockNumber])
-                        # painter.fillRect(QtCore.QRectF(width/2.0-1, top, 2, height),
-                        #                  self.linesWithBackground[blockNumber].darker(110))
+                        for i, color in enumerate(self.linesWithBackground[blockNumber]):
+                            if color is None:
+                                continue
+                            leftLimited = min(leftTrace + i, rightTrace)
+                            widthLimited = max(widthTrace - i * 2, 1)
+                            painter.fillRect(QtCore.QRectF(leftLimited, top, widthLimited, height), color)
                     if blockNumber == self.codeEditor.getCurrentHighlightedLineNumber():
                         painter.setBrush(QtGui.QBrush(QtGui.QColor('blue').lighter(190)))
                         painter.setPen(QtGui.QColor('blue'))
@@ -201,6 +207,7 @@ class LeftArea(QtWidgets.QWidget):
             self.linesWithBackground = {}
         self.currentHighlightedLineNumber = -1
         self.currentBgColor = QtGui.QColor('blue').lighter(140)
+        self.bgColors = [QtGui.QColor(self.currentBgColor)]  # @warning: get a new color instance
 
     def setCurrentHighlightedLineNumber(self, lineNumber):
         """
@@ -209,13 +216,40 @@ class LeftArea(QtWidgets.QWidget):
         @param lineNumber: the line number of the current highlighted number.
         """
         if self.currentHighlightedLineNumber == -1:
+            # After a reset
             self.currentHighlightedLineNumber = lineNumber
         elif self.currentHighlightedLineNumber != lineNumber:
+            # Moved to an address different of the next one
             if self.currentHighlightedLineNumber != lineNumber - 1:
-                # Change background color when a branch is executed
+                # A branch has been done
+                # 1) Compute new background color
                 (h, s, v, a) = self.currentBgColor.getHsv()
                 self.currentBgColor.setHsv((h - 50) % 360, s, v, a)
-            self.linesWithBackground[self.currentHighlightedLineNumber] = QtGui.QColor(self.currentBgColor)
+                if self.currentHighlightedLineNumber in self.linesWithBackground:
+                    # If current line has already been traced, change the last background color
+                    self.bgColors[-1] = QtGui.QColor(self.currentBgColor)
+                else:
+                    # Else, append a new background color
+                    self.bgColors.append(QtGui.QColor(self.currentBgColor))
+                # Set this line background colors to the list of background colors
+                self.linesWithBackground[self.currentHighlightedLineNumber] = self.bgColors[:]
+            else:
+                # Next address is being executed
+                if self.currentHighlightedLineNumber in self.linesWithBackground:
+                    # If current line has already been traced, add new background color or change its last one
+                    if len(self.bgColors) > len(self.linesWithBackground[self.currentHighlightedLineNumber]):
+                        self.linesWithBackground[self.currentHighlightedLineNumber].append(
+                            QtGui.QColor(self.currentBgColor))
+                    else:
+                        self.linesWithBackground[self.currentHighlightedLineNumber][-1] = QtGui.QColor(
+                            self.currentBgColor)
+                else:
+                    # Else, set the background colors to the current list minus the first one not null
+                    try:
+                        self.bgColors[-2] = None
+                    except IndexError:
+                        pass
+                    self.linesWithBackground[self.currentHighlightedLineNumber] = self.bgColors[:]
             self.currentHighlightedLineNumber = lineNumber
 
 
@@ -276,7 +310,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         raise Exception("Use setTabStopCharacters instead")
 
     def setTabStopCharacters(self, characters):
-        length = characters * self.fontMetrics().horizontalAdvance(' '*10000) / 10000
+        length = characters * self.fontMetrics().horizontalAdvance(' ' * 10000) / 10000
         super().setTabStopDistance(length)
 
     @QtCore.Slot()
