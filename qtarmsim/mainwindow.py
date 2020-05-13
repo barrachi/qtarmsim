@@ -438,7 +438,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.spinnerLabel.setGeometry(spinnerLabelQRect)
         self.spinnerLabel.show()
         self.spinnerLabel.movie().start()
-        self.repaint()
+        self.update()
 
     def stopSpinner(self):
         """
