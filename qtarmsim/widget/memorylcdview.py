@@ -39,12 +39,11 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.setGridStyle(Qt.NoPen)
         self.horizontalHeader().hide()
         self.horizontalHeader().setMinimumSectionSize(1) # Minimum width
+        self.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.verticalHeader().hide()
         self.verticalHeader().setMinimumSectionSize(1) # Minimum height
+        self.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.setFocusPolicy(Qt.NoFocus)
-        # #78AE4D
-        #                 padding: 8 -8 -8 8;
-        #                 padding: 4 -3 -3 4;
         self.setStyleSheet("""
             QTableView { background: transparent;
                          border-width: 18 18 18 18;
@@ -68,8 +67,6 @@ class MemoryLCDView(QtWidgets.QTableView):
     def resize(self):
         """Resize the columns and rows of the LCD to its contents size, and then fixes the total width and height of
         the LCD."""
-        self.resizeColumnsToContents()
-        self.resizeRowsToContents()
         self.setFixedWidth(18 + 18 + 8 + sum([self.columnWidth(i) for i in range(self.LCDColumns)]))
         self.setFixedHeight(18 + 18 + 8 + sum([self.rowHeight(i) for i in range(self.LCDRows)]))
         self.update()
@@ -89,11 +86,11 @@ if __name__ == "__main__":
     #
     #    python3 -m qtarmsim.widget.memorylcdview
     #
-    app = QtWidgets.QApplication(sys.argv)
+    lcdApp = QtWidgets.QApplication(sys.argv)
     mainWindow = QtWidgets.QMainWindow()
     mainWindow.setGeometry(200, 200, 1000, 400)
     # Memory model
-    memoryModel = MemoryModel(app)
+    memoryModel = MemoryModel(lcdApp)
     memoryModel.appendMemoryBank('ROM', '0x10010000', ['0x{:02X}'.format(i) for i in range(24)])
     memoryModel.appendMemoryBank('RAM', '0x20070000', ['0x{:02X}'.format(i) for i in range(65, 256)])
     # Memory LCD View
@@ -102,4 +99,4 @@ if __name__ == "__main__":
     # Show main window and enter main loop
     mainWindow.setCentralWidget(memoryLCDView)
     mainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(lcdApp.exec_())
