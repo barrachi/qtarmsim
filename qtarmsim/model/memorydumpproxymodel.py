@@ -200,11 +200,11 @@ if __name__ == "__main__":
     #
     #    python3 -m qtarmsim.model.memorydumpproxymodel
     #
-    mdproxyApp = QtWidgets.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     mainWindow = QtWidgets.QMainWindow()
     mainWindow.setGeometry(200, 200, 1000, 400)
     # Memory model
-    memoryModel = MemoryModel(mdproxyApp)
+    memoryModel = MemoryModel(app)
     memoryModel.appendMemoryBank('ROM', '0x10010000', ['0x{:02X}'.format(i) for i in range(24)])
     memoryModel.appendMemoryBank('RAM', '0x20020000', ['0x{:02X}'.format(i) for i in range(256)])
     # Memory dump proxy model
@@ -213,10 +213,8 @@ if __name__ == "__main__":
     # Memory dump view
     memoryDumpView = QtWidgets.QTableView()
     memoryDumpView.setModel(memoryDumpProxyModel)
-    memoryDumpView.horizontalHeader().setMinimumSectionSize(1)
-    memoryDumpView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-    memoryDumpView.verticalHeader().setMinimumSectionSize(1)
-    memoryDumpView.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+    memoryDumpView.resizeColumnsToContents()
+    memoryDumpView.resizeRowsToContents()
     # Modify the memoryModel data after setting the proxy and the view
     memoryModel.appendMemoryBank('RAM', '0x40040000', ['0x{:02X}'.format(i) for i in range(256)])
     memoryModel.setByte('0x20020000', '0xCC')
@@ -225,4 +223,4 @@ if __name__ == "__main__":
     # Show main window and enter main loop
     mainWindow.setCentralWidget(memoryDumpView)
     mainWindow.show()
-    sys.exit(mdproxyApp.exec_())
+    sys.exit(app.exec_())

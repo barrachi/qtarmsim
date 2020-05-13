@@ -438,7 +438,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.spinnerLabel.setGeometry(spinnerLabelQRect)
         self.spinnerLabel.show()
         self.spinnerLabel.movie().start()
-        self.update()
+        self.repaint()
 
     def stopSpinner(self):
         """
@@ -1149,10 +1149,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             memoryBank += 1
             memoryDumpView = QtWidgets.QTableView()
             memoryDumpView.setModel(memoryDumpProxyModel)
-            memoryDumpView.horizontalHeader().setMinimumSectionSize(1)
-            memoryDumpView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-            memoryDumpView.verticalHeader().setMinimumSectionSize(1)
-            memoryDumpView.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+            memoryDumpView.resizeColumnsToContents()
+            memoryDumpView.resizeRowsToContents()
             self.ui.tabWidgetMemoryDump.addTab(memoryDumpView, "{}".format(mb['memtype']))
             QtWidgets.QApplication.processEvents()
         # Focus the first tab with RAM memory
