@@ -32,11 +32,14 @@ class ARMCodeEditor(CodeEditor):
         """ARMCodeEditor initialization"""
         self.ARMSyntaxHighlighterClass = ARMSyntaxHighlighter
         self.CSyntaxHighlighterClass = CSyntaxHighlighter
-        super(ARMCodeEditor, self).__init__(parent=parent, SyntaxHighlighterClass=self.ARMSyntaxHighlighterClass, *args, **kwargs)
+        super(ARMCodeEditor, self).__init__(parent=parent, SyntaxHighlighterClass=self.ARMSyntaxHighlighterClass, *args,
+                                            **kwargs)
 
     def _getKeywordsToHighlight(self):
         """Returns which keywords should be highlighted on the text when the same keyword is under the cursor"""
-        registers = ['r{}'.format(n) for n in range(0, 16)] + ['R{}'.format(n) for n in range(0, 16)] + ['sp', 'SP', 'lr', 'LR', 'pc', 'PC']
+        registers = ['r{}'.format(n) for n in range(0, 16)] + ['R{}'.format(n) for n in range(0, 16)] + ['sp', 'SP',
+                                                                                                         'lr', 'LR',
+                                                                                                         'pc', 'PC']
         # Labels
         labels = []
         labelQRegExp = QtCore.QRegExp('^\\s*[^\\d\\s][\\w]*:')
@@ -55,7 +58,6 @@ class ARMCodeEditor(CodeEditor):
     def setCMode(self):
         self.syntaxHighlighter = self.CSyntaxHighlighterClass(self.document())
         self.setTabStopCharacters(3)
-
 
 
 if __name__ == "__main__":
