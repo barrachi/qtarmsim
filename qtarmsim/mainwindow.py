@@ -1149,6 +1149,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             memoryBank += 1
             memoryDumpView = QtWidgets.QTableView()
             memoryDumpView.setModel(memoryDumpProxyModel)
+            memoryDumpView.horizontalHeader().setMinimumSectionSize(1)
+            memoryDumpView.verticalHeader().setMinimumSectionSize(1)
             memoryDumpView.resizeColumnsToContents()
             memoryDumpView.resizeRowsToContents()
             self.ui.tabWidgetMemoryDump.addTab(memoryDumpView, "{}".format(mb['memtype']))
