@@ -149,7 +149,7 @@ class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
 
     def flags(self, index):
         if not index.isValid():
-            return False
+            return Qt.NoItemFlags
         return Qt.ItemIsEnabled
 
     def changeFontSize(self, increment):
