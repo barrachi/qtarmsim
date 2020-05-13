@@ -38,7 +38,9 @@ class MemoryLCDView(QtWidgets.QTableView):
         # ------------------------------------------------------------
         self.setGridStyle(Qt.NoPen)
         self.horizontalHeader().hide()
+        self.horizontalHeader().setMinimumSectionSize(1) # Minimum width
         self.verticalHeader().hide()
+        self.verticalHeader().setMinimumSectionSize(1) # Minimum height
         self.setFocusPolicy(Qt.NoFocus)
         # #78AE4D
         #                 padding: 8 -8 -8 8;
@@ -70,7 +72,7 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.resizeRowsToContents()
         self.setFixedWidth(18 + 18 + 8 + sum([self.columnWidth(i) for i in range(self.LCDColumns)]))
         self.setFixedHeight(18 + 18 + 8 + sum([self.rowHeight(i) for i in range(self.LCDRows)]))
-        self.repaint()
+        self.update()
 
     def wheelEvent(self, event):
         """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
