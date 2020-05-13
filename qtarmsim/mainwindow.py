@@ -196,7 +196,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # updateFileActions updateShowActions and enableSimulatorActions have to be called after the window is shown
         self.updateFileActions()
         self.updateEditActions()
-        self.updateShowActions()
+        self.updateViewActions()
         self.enableSimulatorActions(False)
 
     def extendUi(self):
@@ -388,7 +388,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.actionPaste.setEnabled(not onSimulator and QtWidgets.QApplication.clipboard().text() != '')
         self.ui.actionSelect_All.setEnabled(not onSimulator)
 
-    def updateShowActions(self):
+    def updateViewActions(self):
         """Modifies the checked state of the show/hide actions depending on their widgets visibility"""
         self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
         self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
@@ -398,6 +398,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.actionShow_LCD_Display.setChecked(self.ui.dockWidgetLCDDisplay.isVisible())
         self.ui.actionShow_Terminal.setChecked(self.ui.dockWidgetTerminal.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
+        self.ui.actionFull_Screen_Mode.setChecked(self.isFullScreen())
 
     def enableSimulatorActions(self, onSimulator):
         """Enables/disables actions that depend on being on the simulator tab"""
@@ -520,6 +521,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         return super(QtARMSimMainWindow, self).eventFilter(source, event)
 
     def onTabChange(self, tabIndex):
+        """
+        Actions to be performed when the user changes from the edit tab to the simulator one
+        """
         if tabIndex == 1:
             # Check if source code has to be saved or not
             if self.checkCurrentFileState() == QtWidgets.QMessageBox.Cancel:
@@ -967,7 +971,18 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.restoreState(self.initialWindowState)
         # status bar is not automatically restored, restore it manually
         self.ui.statusBar.setVisible(True)
-        self.updateShowActions()
+        self.updateViewActions()
+
+    def doFull_Screen_Mode(self, wasMaximized=False):
+        """Toggles full screen mode"""
+        if self.isFullScreen():
+            if wasMaximized:
+                self.showMaximized()
+            else:
+                self.showNormal()
+        else:
+            wasMaximized = self.isMaximized()
+            self.showFullScreen()
 
     def doPreferences(self):
         preferences = PreferencesDialog(self)

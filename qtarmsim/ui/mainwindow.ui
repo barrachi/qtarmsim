@@ -179,6 +179,7 @@
     <addaction name="separator"/>
     <addaction name="actionRestore_Default_Layout"/>
     <addaction name="separator"/>
+    <addaction name="actionFull_Screen_Mode"/>
    </widget>
    <widget class="QMenu" name="menu_Edit">
     <property name="title">
@@ -934,6 +935,17 @@
   <action name="actionadd_2">
    <property name="text">
     <string>add</string>
+   </property>
+  </action>
+  <action name="actionFull_Screen_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Full Screen Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
  </widget>
