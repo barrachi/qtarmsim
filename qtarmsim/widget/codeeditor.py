@@ -40,7 +40,7 @@ class LeftArea(QtWidgets.QWidget):
 
     Its functionality depends on the read only property of the associated code editor. If it is read only,
     it will mark the current highlighted line number with a blue left arrow, and the lines where there are
-    breakpoints, with a stop sign. It will also accept left click mouse events to ser or unset breakpoints.
+    breakpoints, with a stop sign. It will also accept left click mouse events to set or unset breakpoints.
 
     On the other hand, if the associated editor is not read only, it will show the line number of each line of the
     code editor source.
@@ -54,9 +54,25 @@ class LeftArea(QtWidgets.QWidget):
         # ------------------------------------------------------------
         self.breakpoints = None
         self.linesWithBackground = None
+        self.previousHighlightedLineNumber = None
         self.currentHighlightedLineNumber = None
         self.currentBgColor = None
         self.bgColors = []
+        self.previousBlockHeight = None
+        self.previousSelfWidth = None
+        self.rightArrowPoints = None
+        self.stopPoints = None
+        self.middlePointerPoints = None
+        self.upPointerPoints = None
+        self.downPointerPoints = None
+        # ------------------------------------------------------------
+        # Colors
+        self.rightArrowColor = QtGui.QColor('blue')
+        self.stopPenColor = QtGui.QColor('black')
+        self.stopFillColor = QtGui.QColor('darkRed').lighter(170)
+        self.stopFillColor.setAlpha(100)
+        self.pointerColor = QtGui.QColor('red')
+        self.pointerColor.setAlpha(100)
         # ------------------------------------------------------------
         self.codeEditor = codeEditor
         self.clearBreakpoints()
@@ -66,6 +82,56 @@ class LeftArea(QtWidgets.QWidget):
         """Returns the size hint of this widget"""
         return QtCore.QSize(self.codeEditor.width(), 0)
 
+    def initializePolygons(self, blockHeight, selfWidth):
+        """Initializes different polygons based on block height and self width"""
+        self.previousBlockHeight = blockHeight
+        self.previousSelfWidth = selfWidth
+        # A right arrow
+        xa = 6
+        xb = 0.4 * selfWidth
+        xc = 0.9 * selfWidth
+        ya = 0.1 * blockHeight
+        yb = 0.25 * blockHeight
+        yc = 0.5 * blockHeight
+        yd = 0.75 * blockHeight
+        ye = 0.9 * blockHeight
+        self.rightArrowPoints = [(xa, yb), (xa, yd), (xb, yd), (xb, ye), (xc, yc), (xb, ya), (xb, yb)]
+        # A stop sign
+        length = min(selfWidth, blockHeight) - 0.2 * min(selfWidth, blockHeight)
+        xa = 0.0
+        xb = length / 4.0
+        xc = 3 * length / 4.0
+        xd = length
+        ya = 0.0
+        yb = length / 4.0
+        yc = 3 * length / 4.0
+        yd = length
+        stopPoints = [(xa, yb), (xa, yc), (xb, yd), (xc, yd), (xd, yc), (xd, yb), (xc, ya), (xb, ya)]
+        xOffset = (selfWidth - length) / 2
+        yOffset = (blockHeight - length) / 2
+        self.stopPoints = [(x + xOffset, y + yOffset) for (x, y) in stopPoints]
+        # From previous line to PC Arrow
+        xa = 3
+        ya = 0
+        offsets = [(-1, 0), (-1, blockHeight), (0, blockHeight), (0, 0)]
+        self.middlePointerPoints = [(xa + xo, ya + yo) for (xo, yo) in offsets]
+        xa = 3
+        ya = 0.5 * blockHeight
+        #
+        #     xxxx
+        #    xoxxx <- (0, 0)
+        #    xx
+        #    xx
+        offsets = [(-1, 0.5 * blockHeight), (-1, 0), (0, -1), (3, -1), (3, 0), (0, 0), (0, 0.5 * blockHeight)]
+        self.upPointerPoints = [(xa + xo, ya + yo) for (xo, yo) in offsets]
+        #    xx
+        #    xx
+        #    xxxxx
+        #     oxxx <- (0, 0)
+        #
+        offsets = [(-1, -0.5 * blockHeight), (-1, -1), (0, 0), (3, 0), (3, -1), (0, -1), (0, -0.5 * blockHeight)]
+        self.downPointerPoints = [(xa + xo, ya + yo) for (xo, yo) in offsets]
+
     def paintEvent(self, event):
         """Repaints (part of) the LeftArea Widget"""
         super(LeftArea, self).paintEvent(event)
@@ -74,65 +140,63 @@ class LeftArea(QtWidgets.QWidget):
         block = self.codeEditor.firstVisibleBlock()
         blockNumber = block.blockNumber()
         top = self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).top()
-        height = self.codeEditor.blockBoundingRect(block).height()
-        bottom = top + height
+        blockHeight = self.codeEditor.blockBoundingRect(block).height()
+        bottom = top + blockHeight
+        selfWidth = self.width()
         if self.codeEditor.isReadOnly():
-            width = self.width()
-            height = bottom - top
-            # A left arrow
-            xa = 0.1 * width
-            xb = 0.4 * width
-            xc = 0.9 * width
-            ya = 0.1 * height
-            yb = 0.25 * height
-            yc = 0.5 * height
-            yd = 0.75 * height
-            ye = 0.9 * height
-            leftArrowPoints = [(xa, yb), (xa, yd), (xb, yd), (xb, ye), (xc, yc), (xb, ya), (xb, yb)]
-            # A stop sign
-            length = min(width, height) - 0.2 * min(width, height)
-            xa = 0.0
-            xb = length / 4.0
-            xc = 3 * length / 4.0
-            xd = length
-            ya = 0.0
-            yb = length / 4.0
-            yc = 3 * length / 4.0
-            yd = length
-            stopPoints = [(xa, yb), (xa, yc), (xb, yd), (xc, yd), (xd, yc), (xd, yb), (xc, ya), (xb, ya)]
-            xOffset = (width - length) / 2
-            yOffset = (height - length) / 2
-            stopPoints = [(x + xOffset, y + yOffset) for (x, y) in stopPoints]
-            # Trace color
-            leftTrace = width / 8
-            widthTrace = 6 * width / 8 - 1
-            rightTrace = leftTrace + widthTrace - 1
-            while block.isValid() and top <= event.rect().bottom():
-                if block.isVisible() and bottom >= event.rect().top():
+            if self.previousBlockHeight != blockHeight or self.previousSelfWidth != selfWidth:
+                self.initializePolygons(blockHeight, selfWidth)
+            # Ribbon coordinates
+            ribbonX = selfWidth / 8
+            ribbonW = 6 * selfWidth / 8 - 1
+            ribbonX1 = ribbonX + ribbonW - 1
+            while block.isValid() and block.isVisible():
+                if top <= event.rect().bottom() and bottom >= event.rect().top():
+                    # The next actions will be done only on blocks affected by an event
                     if blockNumber in self.linesWithBackground:
                         for i, color in enumerate(self.linesWithBackground[blockNumber]):
                             if color is None:
                                 continue
-                            leftLimited = min(leftTrace + i, rightTrace)
-                            widthLimited = max(widthTrace - i * 2, 1)
-                            painter.fillRect(QtCore.QRectF(leftLimited, top, widthLimited, height), color)
+                            ribbonMinX = min(ribbonX + i, ribbonX1)
+                            ribbonMaxW = max(ribbonW - i * 2, 1)
+                            painter.fillRect(QtCore.QRectF(ribbonMinX, top, ribbonMaxW, blockHeight), color)
                     if blockNumber == self.codeEditor.getCurrentHighlightedLineNumber():
-                        painter.setBrush(QtGui.QBrush(QtGui.QColor('blue').lighter(190)))
-                        painter.setPen(QtGui.QColor('blue'))
-                        arrowQPointsWithOffset = [QtCore.QPointF(x, top + y) for (x, y) in leftArrowPoints]
-                        painter.drawPolygon(arrowQPointsWithOffset)
+                        painter.setPen(self.rightArrowColor)
+                        painter.setBrush(QtGui.QBrush(self.rightArrowColor.lighter(190)))
+                        painter.drawPolygon([QtCore.QPointF(x, y + top) for (x, y) in self.rightArrowPoints])
                     if blockNumber in self.breakpoints:
-                        stopColor = QtGui.QColor('darkRed').lighter(170)
-                        stopColor.setAlpha(100)
-                        painter.setBrush(QtGui.QBrush(stopColor))
-                        painter.setPen(QtGui.QColor('black'))
-                        stopQPointsWithOffset = [QtCore.QPointF(x, top + y) for (x, y) in stopPoints]
-                        painter.drawPolygon(stopQPointsWithOffset)
+                        painter.setPen(self.stopPenColor)
+                        painter.setBrush(QtGui.QBrush(self.stopFillColor))
+                        painter.drawPolygon([QtCore.QPointF(x, y + top) for (x, y) in self.stopPoints])
+                if self.previousHighlightedLineNumber != self.currentHighlightedLineNumber \
+                        and self.previousHighlightedLineNumber != -1 :
+                    # The next actions will be done on all visible blocks if the previous condition is met
+                    # @warning: a call to self.update() must be done in order to the next part to actual repaint
+                    #           all the parts of the trace arrow
+                    painter.setPen(self.pointerColor)
+                    painter.setBrush(QtGui.QBrush(self.pointerColor))
+                    points = None
+                    if self.previousHighlightedLineNumber < blockNumber < self.currentHighlightedLineNumber \
+                            or self.previousHighlightedLineNumber > blockNumber > self.currentHighlightedLineNumber:
+                        points = self.middlePointerPoints
+                    elif blockNumber == self.currentHighlightedLineNumber:
+                        if self.previousHighlightedLineNumber < self.currentHighlightedLineNumber:
+                            points = self.downPointerPoints
+                        else:
+                            points = self.upPointerPoints
+                    elif blockNumber == self.previousHighlightedLineNumber:
+                        if self.previousHighlightedLineNumber < self.currentHighlightedLineNumber:
+                            points = self.upPointerPoints
+                        else:
+                            points = self.downPointerPoints
+                    if points is not None:
+                        painter.drawPolygon([QtCore.QPointF(x, top + y) for (x, y) in points])
                 block = block.next()
                 top = bottom
                 bottom = top + self.codeEditor.blockBoundingRect(block).height()
                 blockNumber += 1
         else:
+            # Code editor is not read only
             while block.isValid() and top <= event.rect().bottom():
                 if block.isVisible() and bottom >= event.rect().top():
                     number = blockNumber + 1
@@ -141,15 +205,15 @@ class LeftArea(QtWidgets.QWidget):
                                      Qt.AlignRight, u"{}".format(number))
                 block = block.next()
                 top = bottom
-                bottom = top + self.codeEditor.blockBoundingRect(block).height()
+                bottom = top + blockHeight
                 blockNumber += 1
         # https://stackoverflow.com/questions/59605569/pyside2-raises-error-qpaintdevice-cannot-destroy-paint-device-that-is-being-p
         del painter
 
     def width(self):
         """
-        Returns the leftArea width, based on the number of blocks in the associated editor and the width of the used
-        font
+        Returns the leftArea width. If the code editor is read only, a fixed width is computed. Otherwise, the width is
+        based on how many blocks has the associated editor.
         """
         if self.codeEditor.isReadOnly():
             width = 8 + self.codeEditor.fontMetrics().width(u"9") * 2
@@ -176,13 +240,13 @@ class LeftArea(QtWidgets.QWidget):
             y = event.y()
             block = self.codeEditor.firstVisibleBlock()
             bottom = self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).bottom()
-            height = self.codeEditor.blockBoundingRect(block).height()
+            blockHeight = self.codeEditor.blockBoundingRect(block).height()
             while block.isValid() and bottom < y:
                 block = block.next()
-                bottom += height
+                bottom += blockHeight
             if block.isValid() and block.text().strip() != "":
                 self.setOrClearBreakpoint(block.blockNumber(), block.text())
-                self.repaint()
+                self.update()
         else:
             super(LeftArea, self).mousePressEvent(event)
 
@@ -205,9 +269,10 @@ class LeftArea(QtWidgets.QWidget):
             self.linesWithBackground.clear()
         except AttributeError:
             self.linesWithBackground = {}
+        self.previousHighlightedLineNumber = -1
         self.currentHighlightedLineNumber = -1
         self.currentBgColor = QtGui.QColor('blue').lighter(140)
-        self.bgColors = [QtGui.QColor(self.currentBgColor)]  # @warning: get a new color instance
+        self.bgColors = [QtGui.QColor(self.currentBgColor)]  # @warning: a new instance, no the color
 
     def setCurrentHighlightedLineNumber(self, lineNumber):
         """
@@ -217,6 +282,7 @@ class LeftArea(QtWidgets.QWidget):
         """
         if self.currentHighlightedLineNumber == -1:
             # After a reset
+            self.previousHighlightedLineNumber = lineNumber
             self.currentHighlightedLineNumber = lineNumber
         elif self.currentHighlightedLineNumber != lineNumber:
             # Moved to an address different of the next one
@@ -250,7 +316,12 @@ class LeftArea(QtWidgets.QWidget):
                     except IndexError:
                         pass
                     self.linesWithBackground[self.currentHighlightedLineNumber] = self.bgColors[:]
+            self.previousHighlightedLineNumber = self.currentHighlightedLineNumber
             self.currentHighlightedLineNumber = lineNumber
+        # Due to the need of repainting the trace arrow, which can involve more regions than the ones that
+        # should be marked to repaint, self.update() should be called in order to be able to repaint the whole
+        # visible part of the widget, not only those region marked as dirty.
+        self.update()
 
 
 class CodeEditor(QtWidgets.QPlainTextEdit):
