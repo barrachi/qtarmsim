@@ -966,12 +966,34 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         """Shows or hides the Messages dock widget"""
         self._doShow(self.ui.dockWidgetMessages, self.ui.actionShow_Messages)
 
-    def doRestore_Default_Layout(self):
-        """Restores the initial layout"""
+    def doDefault_Layout(self):
+        """Sets the default layout"""
         self.restoreState(self.initialWindowState)
         # status bar is not automatically restored, restore it manually
         self.ui.statusBar.setVisible(True)
         self.updateViewActions()
+
+    def doCompact_Layout(self):
+        """Sets the compact layout"""
+        # Hide the next elements
+        for widget, action in [
+            (self.ui.statusBar, self.ui.actionShow_Statusbar),
+            (self.ui.toolBar, self.ui.actionShow_Toolbar),
+            (self.ui.dockWidgetMemoryDump, self.ui.actionShow_Memory_Dump),
+            (self.ui.dockWidgetLCDDisplay, self.ui.actionShow_LCD_Display),
+            (self.ui.dockWidgetTerminal, self.ui.actionShow_Terminal),
+            (self.ui.dockWidgetMessages, self.ui.actionShow_Messages) ]:
+            widget.setHidden(True)
+            action.setChecked(False)
+        # Show the next elements
+        for widget, action in [
+            (self.ui.dockWidgetRegisters, self.ui.actionShow_Registers),
+            (self.ui.dockWidgetMemory, self.ui.actionShow_Memory) ]:
+            widget.setVisible(True)
+            action.setChecked(True)
+        # Tabify register and memory docks
+        self.tabifyDockWidget(self.ui.dockWidgetRegisters, self.ui.dockWidgetMemory)
+        self.ui.dockWidgetRegisters.raise_()
 
     def doFull_Screen_Mode(self, wasMaximized=False):
         """Toggles full screen mode"""

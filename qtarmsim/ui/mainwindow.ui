@@ -177,7 +177,8 @@
     <addaction name="actionShow_LCD_Display"/>
     <addaction name="actionShow_Terminal"/>
     <addaction name="separator"/>
-    <addaction name="actionRestore_Default_Layout"/>
+    <addaction name="actionDefault_Layout"/>
+    <addaction name="actionCompact_Layout"/>
     <addaction name="separator"/>
     <addaction name="actionFull_Screen_Mode"/>
    </widget>
@@ -757,9 +758,9 @@
     <string>Show &amp;Memory</string>
    </property>
   </action>
-  <action name="actionRestore_Default_Layout">
+  <action name="actionDefault_Layout">
    <property name="text">
-    <string>Rest&amp;ore Default Layout</string>
+    <string>De&amp;fault Layout</string>
    </property>
    <property name="shortcut">
     <string>F3</string>
@@ -946,6 +947,14 @@
    </property>
    <property name="shortcut">
     <string>F11</string>
+   </property>
+  </action>
+  <action name="actionCompact_Layout">
+   <property name="text">
+    <string>&amp;Compact Layout</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F3</string>
    </property>
   </action>
  </widget>
