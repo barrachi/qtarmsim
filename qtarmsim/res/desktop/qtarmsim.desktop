@@ -1,10 +1,11 @@
 [Desktop Entry]
-Name=QtARMSim
-Comment=An ARM simulator graphical interface
-Type=Application
 Version=1.0
+Type=Application
+Name=QtARMSim
+Comment=ARM graphical simulator
+Comment[es]=Simulador gráfico de ARM
 Exec=qtarmsim %u
+MimeType=text/assembler;text/x-asm;
 Icon=qtarmsim.png
 Terminal=false
-Categories=Education;ComputerScience
-MimeType=text/x-asm
+Categories=Education;ComputerScience;Science;

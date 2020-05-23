@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+ <id>qtarmsim@MARKER@.desktop</id>
+ <metadata_license>CC-BY-3.0</metadata_license>
+ <project_license>GPL-3.0+</project_license>
+ <name>QtARMSim@MARKER@</name>
+ <summary>Graphical ARM simulator</summary>
+ <description>
+  <p>
+      QtARMSim is an easy to use graphical ARM simulator. It provides an easy
+      to use multiplatform ARM emulation environment that has been designed
+      for Computer Architecture introductory courses.
+
+      The ARMSim ARM simulator, Copyright (c) 2014-20 by Germán Fabregat, is
+      bundled with QtARMSim. It can be found on the ``armsim/``
+      subdirectory of the QtARMSim installation path.
+  </p>
+ </description>
+ <screenshots>
+  <screenshot type="default" width="1247" height="862">https://lorca.act.uji.es/project/qtarmsim/qtarmsim_edit.png</screenshot>
+ </screenshots>
+ <url type="homepage">https://lorca.act.uji.es/project/qtarmsim/</url>
+ <url type="bugtracker">https://lorca.act.uji.es/project/qtarmsim/</url>
+ <url type="translate">https://lorca.act.uji.es/project/qtarmsim/</url>
+ <url type="donation">https://lorca.act.uji.es/project/qtarmsim/</url>
+ <update_contact>barrachi_AT_uji.es</update_contact>
+ <developer_name>Sergio Barrachina Mir</developer_name>
+ <translation type="qt">QtARMSim</translation>
+ <provides>
+   <binary>qtarmsim</binary>
+ </provides>
+ <releases>
+   <release version="@VERSION@" date="@DATE@" />
+ </releases>
+</component>

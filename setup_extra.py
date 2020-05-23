@@ -17,18 +17,61 @@
 ###########################################################################
 
 """
-Extra distutils command classes, QtClean and QtCompile, to clean and compile the qtarmsim project, respectivelly.
+Extra command classes:
+ + DevelopAndPostDevelop: develop command that can perform post development actions.
+ + InstallAndPostInstall: install command that can perform post installation actions.
+ + QtClean: command that cleans the QtARMSim project.
+ + QtCompile: command that compiles the QtARMSim project.
+
+References:
+ + /usr/lib64/python3.3/distutils/command/command_template
+ + https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
 """
 
-from distutils.core import Command
+import datetime
 import fnmatch
 import os
-from subprocess import call
 import sys
+from distutils.core import Command
+from subprocess import call
+
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+
+from qtarmsim.post_install import main as qtarmsim_post_install
+from settings import Settings
 
 
-# Find files and dirs from the given path
-def findFilesAndDirs(path, filePatterns=[], dirPatterns=[]):
+class DevelopAndPostDevelop(develop):
+    """Post-installation for development mode."""
+
+    def run(self):
+        develop.run(self)
+        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+
+
+class InstallAndPostInstall(install):
+    """Post-installation for installation mode."""
+
+    def run(self):
+        install.run(self)
+        # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
+        qtarmsim_post_install()
+
+
+def findFilesAndDirs(path, filePatterns=None, dirPatterns=None):
+    """
+    Returns the files and directories found on the given path by using the given file and dir patterns.
+
+    :param path: The path from where to search.
+    :param filePatterns: File patterns to be used.
+    :param dirPatterns: Directory patterns to be used.
+    :return: A 2-tuple with the list of directories found and the list of files found.
+    """
+    if dirPatterns is None:
+        dirPatterns = []
+    if filePatterns is None:
+        filePatterns = []
     files = []
     dirs = []
     for (dirpath, dirnames, filenames) in os.walk(path):
@@ -36,14 +79,24 @@ def findFilesAndDirs(path, filePatterns=[], dirPatterns=[]):
             files += [os.path.join(dirpath, fn) for fn in fnmatch.filter(filenames, filePattern)]
         for dirPattern in dirPatterns:
             dirs += [os.path.join(dirpath, dn) for dn in fnmatch.filter(dirnames, dirPattern)]
-    return (files, dirs)
+    return files, dirs
+
 
 def findFiles(path, filePatterns):
+    """
+    Returns the files found on the given path by using the given file and dir patterns.
+
+    :param path: The path from where to search.
+    :param filePatterns: File patterns to be used.
+    :return: A list with the found files.
+    """
     return findFilesAndDirs(path, filePatterns, [])[0]
 
-# Clean class (see /usr/lib64/python3.3/distutils/command/command_template)
-class QtClean(Command):
 
+class QtClean(Command):
+    """
+    QtClean class
+    """
     # Brief (40-50 characters) description of the command
     description = "Removes temporary files"
 
@@ -57,13 +110,8 @@ class QtClean(Command):
         pass
 
     def run(self):
-        files = []
-        dirs = []
-        (files, dirs) = findFilesAndDirs('.', ('*.pyc', ), ('__pycache__', ))
-        filesToBeRemoved = files
-        dirsToBeRemoved = dirs
-        files = findFiles('./examples', ('*.o', '*.err', '*.lst'))
-        filesToBeRemoved += files
+        filesToBeRemoved, dirsToBeRemoved = findFilesAndDirs('.', ('*.pyc',), ('__pycache__',))
+        filesToBeRemoved += findFiles('./examples', ('*.o', '*.err', '*.lst'))
         print("Removing temporary files...")
         for fileName in filesToBeRemoved:
             os.remove(fileName)
@@ -71,9 +119,11 @@ class QtClean(Command):
         for dirName in dirsToBeRemoved:
             os.rmdir(dirName)
 
-# Clean class (see /usr/lib64/python3.3/distutils/command/command_template)
-class QtCompile(Command):
 
+class QtCompile(Command):
+    """
+    QtCompile class
+    """
     # Brief (40-50 characters) description of the command
     description = "Runs the PySide development tools on the current project"
 
@@ -87,17 +137,17 @@ class QtCompile(Command):
         pass
 
     def run(self):
-        # Run pysyde2-uic
+        # 1) Run pyside2-uic
         CMD = 'pyside2-uic'
         inputFileNames = findFiles('.', ('*.ui',))
         for fileName in inputFileNames:
             outputFileName = os.path.splitext(fileName)[0] + '.py'
             cmdArray = [CMD, '-o', outputFileName, fileName]
             print("Executing {}...".format(' '.join(cmdArray)))
-            error = call(cmdArray) #, cwd = os.getcwd())
+            error = call(cmdArray)  # , cwd = os.getcwd())
             if error:
                 sys.exit(-1)
-        # Run pyside2-rcc
+        # 2) Run pyside2-rcc
         CMD = 'pyside2-rcc'
         inputFileNames = findFiles('.', ('*.qrc',))
         for fileName in inputFileNames:
@@ -108,19 +158,51 @@ class QtCompile(Command):
             error = call(cmdArray)
             if error:
                 sys.exit(-1)
-        # Run lrelease
+        # 3) Run lrelease
         CMD = 'lrelease'
         cmdArray = [CMD, './qtarmsim/qtarmsim.pro']
         print("Executing {}...".format(' '.join(cmdArray)))
         error = call(cmdArray)
         if error:
             sys.exit(-1)
-        # Run pyside2-lupdate
+        # 4) Run pyside2-lupdate
         CMD = 'pyside2-lupdate'
         cmdArray = [CMD, './qtarmsim/qtarmsim.pro']
         print("Executing {}...".format(' '.join(cmdArray)))
         error = call(cmdArray)
         if error:
             sys.exit(-1)
-        # Run linguist
+        # 5) Run linguist
         print("Now you can run 'linguist ./qtarmsim/lang/qtarmsim_es.ts'")
+
+
+class UpdateFiles(Command):
+    """
+    UpdateFiles class
+    """
+    # Brief (40-50 characters) description of the command
+    description = "Updates certain files with the current version info"
+
+    # List of option tuples
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        in_files = ["qtarmsim/res/desktop/qtarmsim.appdata.xml.in"]
+        for in_file in in_files:
+            in_file = os.path.join(os.path.dirname(__file__), in_file)
+            out_file = in_file[:-3]
+            print("Updating {}...".format(out_file))
+            with open(in_file, encoding="utf-8") as f:
+                text = f.read()
+            text = text \
+                .replace("@MARKER@", "") \
+                .replace("@VERSION@", Settings.get_version()) \
+                .replace("@DATE@", datetime.date.today().isoformat())
+            with open(out_file, 'w', encoding="utf-8") as f:
+                f.write(text)

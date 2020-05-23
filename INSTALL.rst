@@ -46,7 +46,13 @@ dependencies issuing (as root)::
    # # See https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
    # # for installing gosu dependencies
    # gem install gosu
-   # pip3 install QtARMSim
+   # pip3 install --user QtARMSim
+
+Please note that if you are installing QtARMSim on a system where PySide2
+is already packaged, you can install the packaged version of PySide2 and
+then install QtARMSim using the ``--no-deps`` option::
+
+    # sudo pip3 install --no-deps QtARMSim
 
 **Note about PySide2.**
 Versions 5.12.0 and 5.12.1 of PySide2 introduced some changes that prevented
@@ -110,15 +116,15 @@ please follow the next steps:
 
 1. Install the `MacPorts package manager <https://www.macports.org/>`_.
    (If you use the `Homebrew package manager <http://brew.sh/>`_, please
-   conveniently adapt the following instructions.)
+   adapt the following instructions conveniently.)
 
 2. Open a ``Terminal`` and execute the commands indicated in the next steps.
 
-3. Install ``Python 3.6`` (or ``Python 3.7``) and ``pip``::
+3. Install ``Python 3.7`` (or ``Python 3.8``) and ``pip``::
 
-     $ sudo port install python36 py36-pip
-     $ sudo port select --set python3 python36
-     $ sudo port select --set pip pip36
+     $ sudo port install python37 py37-pip py37wheel
+     $ sudo port select --set python3 python37
+     $ sudo port select --set pip pip37
 
 4. Install ``Ruby``::
 
@@ -127,11 +133,19 @@ please follow the next steps:
 
 5. Install ``libsdl2`` and ``Gosu``::
 
-     $ sudo port install libsdl2 gosu
+     $ sudo port install libsdl2
+     $ sudo gem install gosu
 
 6. Install ``QtARMSim``::
 
-     $ sudo pip install QtARMSim
+     $ sudo -H pip install QtARMSim
+
+   If there is no matching distribution of PySide2 for your version of macOS,
+   you can install the MacPorts version of PySide2 and, after that, QtARMSim
+   ignoring the PySide2 dependency::
+
+    $ sudo port install py37-pyside2
+    $ sudo -H pip install --no-deps QtARMSim
 
 **Note about PySide2.**
 Versions 5.12.0 and 5.12.1 of PySide2 introduced some changes that prevented
@@ -183,7 +197,7 @@ to the new '``arm-none-eabi-gcc``' command.
 
 To execute QtARMSim, run the ``qtarmsim`` command, or click on the
 corresponding entry on the applications menu (on GNU/Linux, under the
-``Education`` category).
+``Education:Science`` category).
 
 
 3. Upgrading QtARMSim

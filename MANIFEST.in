@@ -3,7 +3,6 @@
 include settings.py setup_extra.py
 include CHANGELOG.rst DEVELOPMENT.rst README.rst INSTALL.rst
 include GPL.txt LICENSE.txt
-include qtarmsim.ico
 
 prune docs
 prune examples

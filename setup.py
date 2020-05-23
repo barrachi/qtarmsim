@@ -1,40 +1,40 @@
 #
-# See DEVELOPMENT.rst for instructions
-#
-# Documentation for python packaging:
-# https://the-hitchhikers-guide-to-packaging.readthedocs.org/en/latest/
-#
-# Documentation for distutils
-# https://docs.python.org/3.3/distutils/
-#
-# Writing post-installation-script to create shortcut on Windows desktop
-# https://www.domenkozar.com/2009/09/27/writing-post-installation-script-to-create-shortcut-on-windows-desktop/
-#
-# Known limitations:
-#
-# * 'install_requires = s.requires,' could be used to automatically
-#    install PySide when installing qtarmsim. The problem is that this
-#    option will make the installation of PySide harder on binary
-#    based GNU/Linux distributions, because PySide will be downloaded
-#    as source code, and pip3 will try to compile it (which requires
-#    the correct compilers, etc.  being already installed on the
-#    system). This happens even if PySide has been previously
-#    installed by the own package manager of that distribution.
-#
-#    Some python packages appear as installed when you execute 'pip3
-#    list', even if they have been installed by the package manager
-#    and not by pip3 itself. So, it seems, IMHO, that the problem is
-#    due to PySide (or the PySide package) not saying that it is
-#    already installed.
+# See DEVELOPMENT.rst for instructions on how to use this module
 #
 
-# from distutils.core import setup
-import os
+###########################################################################
+#                                                                         #
+#  This file is part of QtARMSim.                                         #
+#                                                                         #
+#  QtARMSim is free software: you can redistribute it and/or modify       #
+#  it under the terms of the GNU General Public License as published by   #
+#  the Free Software Foundation; either version 3 of the License, or      #
+#  (at your option) any later version.                                    #
+#                                                                         #
+#  This program is distributed in the hope that it will be useful, but    #
+#  WITHOUT ANY WARRANTY; without even the implied warranty of             #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      #
+#  General Public License for more details.                               #
+#                                                                         #
+###########################################################################
+
+#
+# References:
+# + Setuptools' documentation
+#   https://setuptools.readthedocs.io/en/latest/
+# + Python packaging:
+#   https://the-hitchhikers-guide-to-packaging.readthedocs.org/en/latest/
+# + Post-install script with Python setuptools
+#   https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
+# + Post installation script to create shortcut on Windows desktop and entry on Programs Folder
+#   See qtarmsim/post_install.py
+#
+
 
 from setuptools import setup, find_packages
 
 from settings import Settings
-from setup_extra import QtClean, QtCompile
+from setup_extra import DevelopAndPostDevelop, InstallAndPostInstall, QtClean, QtCompile, UpdateFiles
 
 # Common settings used by distutils and cx_freeze
 s = Settings()
@@ -62,11 +62,19 @@ setup(
     packages=find_packages(exclude=['build', 'dist', 'distfiles', 'docs', 'examples', 'scripts', 'tmp']),
     package_data=s.package_data,
     data_files=s.data_files,
+    install_requires=s.install_requires,
     entry_points={
         'gui_scripts': [
             'qtarmsim=qtarmsim:main',
         ],
+        'console_scripts': [
+            'qtarmsim_post_install=qtarmsim.post_install:main'
+        ]
     },
-    cmdclass={'qtclean': QtClean, 'qtcompile': QtCompile},
-    install_requires=['PySide2']
+    cmdclass={'develop': DevelopAndPostDevelop,
+              'install': InstallAndPostInstall,
+              'qtclean': QtClean,
+              'qtcompile': QtCompile,
+              'update_files': UpdateFiles,
+              },
 )

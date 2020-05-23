@@ -16,61 +16,78 @@
 #                                                                         #
 ###########################################################################
 
-import codecs  # To use a consistent encoding when openning version.py
+import codecs  # To use a consistent encoding when opening version.py
 import os
+import sys
 
-# Read function
+
 def read(fname):
+    """Reads a file and returns its content"""
     fname = os.path.join(os.path.dirname(__file__), fname)
     with codecs.open(fname, encoding='utf8') as f:
         return f.read()
 
-# Settings class
-class Settings():
+
+class Settings:
+    """
+    QtARMSim package settings
+    """
 
     def __init__(self):
         self.name = 'qtarmsim'
-        self.version = self._get_version()
+        self.version = self.get_version()
         self.description = 'Easy to use graphical ARM simulator'
-        self.long_description = read('README.rst') + '\n\n' + read('INSTALL.rst') + '\n\n' + read('LICENSE.rst') + '\n\n' + read('CHANGELOG.rst')
+        self.long_description = read('README.rst') + '\n\n' + read('INSTALL.rst') + '\n\n' + read(
+            'LICENSE.rst') + '\n\n' + read('CHANGELOG.rst')
         self.url = 'http://lorca.act.uji.es/project/qtarmsim/'
         self.author = 'Sergio Barrachina Mir'
         self.email = 'barrachi@uji.es'
         self.license = 'GPLV3+'
-        self.scripts = ['qtarmsim_winpostinstall.py']
+        self.scripts = []  # ['qtarmsim_winpostinstall.py']  @todo: remove
         self.package_data = {
-                             'qtarmsim': ['armsim/*',
-                                          'gcc-arm/README.rst',
-                                          'gcc-arm/linux32/g++_arm_none_eabi/README',
-                                          'gcc-arm/linux32/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
-                                          'gcc-arm/linux32/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
-                                          'gcc-arm/linux32/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2',
-                                          'gcc-arm/linux32/g++_arm_none_eabi/arm-none-eabi/bin/as',
-                                          'gcc-arm/linux64/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
-                                          'gcc-arm/linux64/g++_arm_none_eabi/README',
-                                          'gcc-arm/linux64/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.9.3/collect2',
-                                          'gcc-arm/linux64/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.9.3/__empty_dir__',
-                                          'gcc-arm/linux64/g++_arm_none_eabi/arm-none-eabi/bin/as',
-                                          'gcc-arm/macos/g++_arm_none_eabi/README',
-                                          'gcc-arm/macos/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
-                                          'gcc-arm/macos/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
-                                          'gcc-arm/macos/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2',
-                                          'gcc-arm/macos/g++_arm_none_eabi/arm-none-eabi/bin/as',
-                                          'gcc-arm/win32/g++_arm_none_eabi/README',
-                                          'gcc-arm/win32/g++_arm_none_eabi/bin/arm-none-eabi-gcc.exe',
-                                          'gcc-arm/win32/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
-                                          'gcc-arm/win32/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2.exe',
-                                          'gcc-arm/win32/g++_arm_none_eabi/arm-none-eabi/bin/as.exe',
-                                          'html/*.html',
-                                          'html/img/*',
-                                          'stylesheets/*.css',
-                                          'examples/*/*',
-                                          'res/desktop/qtarmsim.desktop',
-                                          'res/images/qtarmsim.png',
-                                         ],
-                            }
-        self.data_files = [('share/applications', ['qtarmsim/res/desktop/qtarmsim.desktop']),
-                           ('share/pixmaps', ['qtarmsim/res/images/qtarmsim.png']),]
+            'qtarmsim': ['armsim/*',
+                         'gcc-arm/README.rst',
+                         'gcc-arm/linux32/g++_arm_none_eabi/README',
+                         'gcc-arm/linux32/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
+                         'gcc-arm/linux32/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
+                         'gcc-arm/linux32/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2',
+                         'gcc-arm/linux32/g++_arm_none_eabi/arm-none-eabi/bin/as',
+                         'gcc-arm/linux64/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
+                         'gcc-arm/linux64/g++_arm_none_eabi/README',
+                         'gcc-arm/linux64/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.9.3/collect2',
+                         'gcc-arm/linux64/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.9.3/__empty_dir__',
+                         'gcc-arm/linux64/g++_arm_none_eabi/arm-none-eabi/bin/as',
+                         'gcc-arm/macos/g++_arm_none_eabi/README',
+                         'gcc-arm/macos/g++_arm_none_eabi/bin/arm-none-eabi-gcc',
+                         'gcc-arm/macos/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
+                         'gcc-arm/macos/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2',
+                         'gcc-arm/macos/g++_arm_none_eabi/arm-none-eabi/bin/as',
+                         'gcc-arm/win32/g++_arm_none_eabi/README',
+                         'gcc-arm/win32/g++_arm_none_eabi/bin/arm-none-eabi-gcc.exe',
+                         'gcc-arm/win32/g++_arm_none_eabi/lib/gcc/arm-none-eabi/4.4.1/__empty_dir__',
+                         'gcc-arm/win32/g++_arm_none_eabi/libexec/gcc/arm-none-eabi/4.4.1/collect2.exe',
+                         'gcc-arm/win32/g++_arm_none_eabi/arm-none-eabi/bin/as.exe',
+                         'html/*.html',
+                         'html/img/*',
+                         'stylesheets/*.css',
+                         'examples/*/*',
+                         'res/desktop/qtarmsim.desktop',
+                         'res/images/qtarmsim.png',
+                         'res/images/qtarmsim.ico',
+                         ],
+        }
+        if sys.platform.startswith('linux'):
+            self.data_files = [
+                ('share/applications', ['qtarmsim/res/desktop/qtarmsim.desktop']),
+                ('share/pixmaps', ['qtarmsim/res/images/qtarmsim.png']),
+                ('share/appdata', ['qtarmsim/res/desktop/qtarmsim.appdata.xml']),
+                ('share/metainfo', ['qtarmsim/res/desktop/qtarmsim.appdata.xml']),
+            ]
+        elif sys.platform.startswith(("win", "cygwin")):
+            self.data_files = [('scripts', ['qtarmsim/res/images/qtarmsim.ico']), ]
+        else:
+            self.data_files = []
+
         # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
         self.classifiers = [
             # How mature is this project? Common values are
@@ -96,11 +113,13 @@ class Settings():
             'Programming Language :: Python :: 3.4',
             'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
-            ]
+        ]
         self.keywords = ['ARM', 'simulator', 'assembler', 'disassembler', 'debugger']
-        self.requires = ['PySide2 >= 5.11.0', ]
+        self.install_requires = ['PySide2>=5.12.2',
+                                 "pywin32>=1.0;platform_system=='Windows'", ]
 
-    def _get_version(self):
+    @staticmethod
+    def get_version():
         """Gets version from 'qtarmsim/version.py'."""
         version_dict = {}
         with codecs.open('qtarmsim/version.py') as fp:

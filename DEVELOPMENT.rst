@@ -5,12 +5,9 @@ How to distribute a new version
 -------------------------------
 
 To create a source distribution::
-  $ python3 ./setup.py qtclean qtcompile sdist
+  $ python3 ./setup.py checkdocs qtclean qtcompile update_files sdist
 
-To check that the RST documents are valid::
-  $ python3 ./setup.py checkdocs
-
-Where ``checkdocs`` can be installed using::
+The package ``checkdocs`` can be installed using::
   $ pip3 install --user collective.checkdocs
 
 To test the source distribution ``dist/qtarmsim-x.x.x.tar.gz``::
@@ -19,10 +16,10 @@ To test the source distribution ``dist/qtarmsim-x.x.x.tar.gz``::
   $ pip3 install dist/qtarmsim-x.y.z.tar.gz
   $ deactivate
 
-To upload it to the `testpypi repository <https://testpypi.python.org/>`_::
+To upload it to the `test pypi repository <https://testpypi.python.org/>`_::
    $ twine upload --repository-url https://test.pypi.org/legacy/ dist/qtarmsim-x.x.x.tar.gz
 
-To upload it to the `pypi repository <https://pypi.org/>`::
+To upload it to the `pypi repository <https://pypi.org/>`_::
   $ twine upload dist/qtarmsim-x.x.x.tar.gz
 
 
