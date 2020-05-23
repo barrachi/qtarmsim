@@ -203,11 +203,12 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         """Extends the Ui with new objects, links the views with their models,
            and puts in tabs the bottom dock widgets"""
 
-        # Mac OS X quirks
-        # @todo: check again the next on a MacOs (last time it didn't work)
-        # if sys.platform == 'darwin':
-        #     # Set unified title and toolbar on Mac
-        #     self.setUnifiedTitleAndToolBarOnMac(True)
+        # macOS X quirks
+        if sys.platform == 'darwin':
+            # Set unified title and toolbar on Mac
+            # @todo: check again the next on a macOS (last time it didn't work)
+            # self.setUnifiedTitleAndToolBarOnMac(True)
+            self.ui.menuView.removeAction(self.ui.actionFull_Screen_Mode)
 
         # Add an ARMCodeEditor to tabSource
         self.ui.sourceCodeEditor = ARMCodeEditor(self.ui.tabSource)
