@@ -1,11 +1,11 @@
 @
-@ This program shows in the LCD Display the strings stored in the variables 's1' and 's2'
+@ This program shows in the LCD the strings stored in the variables 's1' and 's2'
 @
 
 	.data
 @	        0123456789012345678901234567890123456789
 s1:	.asciz "HELLO WORLD!"
-s2:	.asciz "This is QtARMSim LCD Display!"
+s2:	.asciz "This is QtARMSim LCD!"
 
 	.text
 

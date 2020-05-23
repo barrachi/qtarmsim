@@ -265,7 +265,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
         # If not in debug mode, hide Terminal (action and dock)
         if not self.debug:
-            self.ui.menu_Window.removeAction(self.ui.actionShow_Terminal)
+            self.ui.menuView.removeAction(self.ui.actionShow_Terminal)
             self.ui.dockWidgetTerminal.hide()
 
         # Tabify bottom dock widgets
@@ -274,8 +274,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             bottomDocks.append(self.ui.dockWidgetMessages)
         if self.dockWidgetArea(self.ui.dockWidgetMemoryDump) == Qt.BottomDockWidgetArea:
             bottomDocks.append(self.ui.dockWidgetMemoryDump)
-        if self.dockWidgetArea(self.ui.dockWidgetLCDDisplay) == Qt.BottomDockWidgetArea:
-            bottomDocks.append(self.ui.dockWidgetLCDDisplay)
+        if self.dockWidgetArea(self.ui.dockWidgetLCD) == Qt.BottomDockWidgetArea:
+            bottomDocks.append(self.ui.dockWidgetLCD)
         if self.dockWidgetArea(self.ui.dockWidgetTerminal) == Qt.BottomDockWidgetArea:
             bottomDocks.insert(0, self.ui.dockWidgetTerminal)
         if len(bottomDocks) > 1:
@@ -395,7 +395,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
         self.ui.actionShow_Memory.setChecked(self.ui.dockWidgetMemory.isVisible())
         self.ui.actionShow_Memory_Dump.setChecked(self.ui.dockWidgetMemoryDump.isVisible())
-        self.ui.actionShow_LCD_Display.setChecked(self.ui.dockWidgetLCDDisplay.isVisible())
+        self.ui.actionShow_LCD.setChecked(self.ui.dockWidgetLCD.isVisible())
         self.ui.actionShow_Terminal.setChecked(self.ui.dockWidgetTerminal.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
         self.ui.actionFull_Screen_Mode.setChecked(self.isFullScreen())
@@ -481,7 +481,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.dockWidgetRegisters.installEventFilter(self)
         self.ui.dockWidgetMemory.installEventFilter(self)
         self.ui.dockWidgetMemoryDump.installEventFilter(self)
-        self.ui.dockWidgetLCDDisplay.installEventFilter(self)
+        self.ui.dockWidgetLCD.installEventFilter(self)
         self.ui.dockWidgetTerminal.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
         # Connect to self.uji.simCodeEditor set and clear breakpoint signals and highlightedWord signal
@@ -505,8 +505,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 self.ui.actionShow_Memory.setChecked(False)
             elif source is self.ui.dockWidgetMemoryDump:
                 self.ui.actionShow_Memory_Dump.setChecked(False)
-            elif source is self.ui.dockWidgetLCDDisplay:
-                self.ui.actionShow_LCD_Display.setChecked(False)
+            elif source is self.ui.dockWidgetLCD:
+                self.ui.actionShow_LCD.setChecked(False)
             elif source is self.ui.dockWidgetTerminal:
                 self.ui.actionShow_Terminal.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
@@ -954,9 +954,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         """Shows or hides the Memory Dump dock widget"""
         self._doShow(self.ui.dockWidgetMemoryDump, self.ui.actionShow_Memory_Dump)
 
-    def doShow_LCD_Display(self):
-        """Shows or hides the LCD Display dock widget"""
-        self._doShow(self.ui.dockWidgetLCDDisplay, self.ui.actionShow_LCD_Display)
+    def doShow_LCD(self):
+        """Shows or hides the LCD dock widget"""
+        self._doShow(self.ui.dockWidgetLCD, self.ui.actionShow_LCD)
 
     def doShow_Terminal(self):
         """Shows or hides the Terminal dock widget"""
@@ -980,7 +980,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             (self.ui.statusBar, self.ui.actionShow_Statusbar),
             (self.ui.toolBar, self.ui.actionShow_Toolbar),
             (self.ui.dockWidgetMemoryDump, self.ui.actionShow_Memory_Dump),
-            (self.ui.dockWidgetLCDDisplay, self.ui.actionShow_LCD_Display),
+            (self.ui.dockWidgetLCD, self.ui.actionShow_LCD),
             (self.ui.dockWidgetTerminal, self.ui.actionShow_Terminal),
             (self.ui.dockWidgetMessages, self.ui.actionShow_Messages) ]:
             widget.setHidden(True)
@@ -1071,7 +1071,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                self.tr(
                    "<p>Most of the ARM keywords and directives used on the assembler editor syntax highlighter are from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik.</p>") + \
                self.tr("<p>The GUI icons are from the KDE Breeze theme icons.</p>") + \
-               self.tr("<p>The LCD Display font is 'AlphaSmart 3000' by Colonel Sanders.</p>") + \
+               self.tr("<p>The LCD font is 'AlphaSmart 3000' by Colonel Sanders.</p>") + \
                self.tr(
                    "<p>Software floating point support thanks to <a href='https://www.quinapalus.com/qfplib.html'>Qfplib: an ARM Cortex-M0 floating-point library in 1 kbyte</a>, (c) Mark Owen.</p>") + \
                "</html>"

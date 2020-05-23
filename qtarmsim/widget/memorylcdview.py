@@ -57,7 +57,7 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.setFrameStyle(QtWidgets.QFrame.NoFrame)
 
     def setModel(self, memoryModel_, hexStartAddress, LCDColumns=32, LCDRows=6):
-        """Sets the memory model and the number of columns and rows of the LCD display"""
+        """Sets the memory model and the number of columns and rows of the LCD"""
         self.memoryLCDProxyModel = MemoryLCDProxyModel()
         self.memoryLCDProxyModel.setSourceModel(memoryModel_, hexStartAddress, LCDColumns, LCDRows)
         super(MemoryLCDView, self).setModel(self.memoryLCDProxyModel)

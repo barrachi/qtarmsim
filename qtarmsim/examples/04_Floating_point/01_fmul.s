@@ -4,7 +4,7 @@
 @     'strf1' and 'strf2' into the variables 'f1' and 'f2',
 @ + multiplies the floating point numbers in 'f1' and 'f2',
 @ + converts the result to a string,
-@ + and shows it on the LCD Display.
+@ + and shows it on the LCD.
 
 	.data
 f1:	.space	4

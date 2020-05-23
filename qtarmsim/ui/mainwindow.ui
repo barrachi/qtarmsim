@@ -164,7 +164,7 @@
     <addaction name="actionAbout_Qt_ARMSim"/>
     <addaction name="actionAbout_ARMSim"/>
    </widget>
-   <widget class="QMenu" name="menu_Window">
+   <widget class="QMenu" name="menuView">
     <property name="title">
      <string>&amp;View</string>
     </property>
@@ -174,7 +174,7 @@
     <addaction name="actionShow_Memory"/>
     <addaction name="actionShow_Messages"/>
     <addaction name="actionShow_Memory_Dump"/>
-    <addaction name="actionShow_LCD_Display"/>
+    <addaction name="actionShow_LCD"/>
     <addaction name="actionShow_Terminal"/>
     <addaction name="separator"/>
     <addaction name="actionDefault_Layout"/>
@@ -182,7 +182,7 @@
     <addaction name="separator"/>
     <addaction name="actionFull_Screen_Mode"/>
    </widget>
-   <widget class="QMenu" name="menu_Edit">
+   <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>&amp;Edit</string>
     </property>
@@ -198,8 +198,8 @@
     <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menu_Edit"/>
-   <addaction name="menu_Window"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
    <addaction name="menuRun"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -417,7 +417,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidgetLCDDisplay">
+  <widget class="QDockWidget" name="dockWidgetLCD">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
@@ -425,10 +425,10 @@
     </sizepolicy>
    </property>
    <property name="whatsThis">
-    <string>The LCD Display shows the output of a simulated LCD Display Device</string>
+    <string>The LCD shows the output of a simulated LCD Device</string>
    </property>
    <property name="windowTitle">
-    <string>LCD Display</string>
+    <string>LCD</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -906,7 +906,7 @@
     <string>Show Memory &amp;Dump</string>
    </property>
   </action>
-  <action name="actionShow_LCD_Display">
+  <action name="actionShow_LCD">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -914,7 +914,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show &amp;LCD Display</string>
+    <string>Show &amp;LCD</string>
+   </property>
+   <property name="toolTip">
+    <string>Show LCD</string>
    </property>
   </action>
   <action name="actionShow_Terminal">

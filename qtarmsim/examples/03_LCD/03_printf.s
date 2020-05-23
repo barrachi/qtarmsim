@@ -1,5 +1,5 @@
 @
-@ This program shows in the LCD Display the strings stored in the variables 's1' and 's2'
+@ This program shows in the LCD the strings stored in the variables 's1' and 's2'
 @
 
 	.data
