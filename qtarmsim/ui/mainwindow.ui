@@ -176,6 +176,7 @@
     <addaction name="actionShow_Memory_Dump"/>
     <addaction name="actionShow_LCD"/>
     <addaction name="actionShow_Terminal"/>
+    <addaction name="actionShow_Simulator_Output"/>
     <addaction name="separator"/>
     <addaction name="actionDefault_Layout"/>
     <addaction name="actionCompact_Layout"/>
@@ -521,6 +522,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidgetTerminal">
+   <property name="whatsThis">
+    <string>This terminal can be used to communicate directly with the simulator</string>
+   </property>
    <property name="windowTitle">
     <string>Terminal</string>
    </property>
@@ -545,6 +549,30 @@
         </widget>
        </item>
       </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidgetSimulatorOutput">
+   <property name="whatsThis">
+    <string>This console shows the standard output of the simulator</string>
+   </property>
+   <property name="windowTitle">
+    <string>Simulator output</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QTextBrowser" name="textBrowserSimulatorOutput"/>
      </item>
     </layout>
    </widget>
@@ -958,6 +986,17 @@
    </property>
    <property name="shortcut">
     <string>Shift+F3</string>
+   </property>
+  </action>
+  <action name="actionShow_Simulator_Output">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Simulator &amp;Output</string>
    </property>
   </action>
  </widget>

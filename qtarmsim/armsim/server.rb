@@ -967,6 +967,7 @@ class ServerApp
     $path = "C:\\Users\\German\\Desarrollos\\ArduinoDue\\"
     $exit = false
     session = $server.accept
+    $stdout.sync = true
     while !$exit
       request = session.gets
       if request.nil?

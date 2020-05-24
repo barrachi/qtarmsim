@@ -51,3 +51,9 @@ QTextBrowser#textBrowserTerminal
     background-color: #475058;
     color: greenyellow;
 }
+
+QTextBrowser#textBrowserSimulatorOutput
+{
+    background-color: #475058;
+    color: greenyellow;
+}

@@ -264,10 +264,12 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Remove default tabs of self.ui.tabWidgetMemoryDump
         self.ui.tabWidgetMemoryDump.clear()
 
-        # If not in debug mode, hide Terminal (action and dock)
+        # If not in debug mode, hide Terminal and Simulator Output (actions and docks)
         if not self.debug:
             self.ui.menuView.removeAction(self.ui.actionShow_Terminal)
             self.ui.dockWidgetTerminal.hide()
+            self.ui.menuView.removeAction(self.ui.actionShow_Simulator_Output)
+            self.ui.dockWidgetSimulatorOutput.hide()
 
         # Tabify bottom dock widgets
         bottomDocks = []
@@ -279,6 +281,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             bottomDocks.append(self.ui.dockWidgetLCD)
         if self.dockWidgetArea(self.ui.dockWidgetTerminal) == Qt.BottomDockWidgetArea:
             bottomDocks.insert(0, self.ui.dockWidgetTerminal)
+        if self.dockWidgetArea(self.ui.dockWidgetSimulatorOutput) == Qt.BottomDockWidgetArea:
+            bottomDocks.insert(1, self.ui.dockWidgetSimulatorOutput)
         if len(bottomDocks) > 1:
             self.tabifyDockWidget(bottomDocks[0], bottomDocks[1])
             if len(bottomDocks) > 2:
@@ -398,6 +402,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.actionShow_Memory_Dump.setChecked(self.ui.dockWidgetMemoryDump.isVisible())
         self.ui.actionShow_LCD.setChecked(self.ui.dockWidgetLCD.isVisible())
         self.ui.actionShow_Terminal.setChecked(self.ui.dockWidgetTerminal.isVisible())
+        self.ui.actionShow_Simulator_Output.setChecked(self.ui.dockWidgetSimulatorOutput.isVisible())
         self.ui.actionShow_Messages.setChecked(self.ui.dockWidgetMessages.isVisible())
         self.ui.actionFull_Screen_Mode.setChecked(self.isFullScreen())
 
@@ -484,6 +489,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.dockWidgetMemoryDump.installEventFilter(self)
         self.ui.dockWidgetLCD.installEventFilter(self)
         self.ui.dockWidgetTerminal.installEventFilter(self)
+        self.ui.dockWidgetSimulatorOutput.installEventFilter(self)
         self.ui.dockWidgetMessages.installEventFilter(self)
         # Connect to self.uji.simCodeEditor set and clear breakpoint signals and highlightedWord signal
         for simCodeEditor in self.ui.simCodeEditors:
@@ -510,6 +516,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 self.ui.actionShow_LCD.setChecked(False)
             elif source is self.ui.dockWidgetTerminal:
                 self.ui.actionShow_Terminal.setChecked(False)
+            elif source is self.ui.dockWidgetSimulatorOutput:
+                self.ui.actionShow_Simulator_Output.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
                 self.ui.actionShow_Messages.setChecked(False)
         if event.type() == QtCore.QEvent.KeyPress and source == self.ui.dockWidgetTerminal:
@@ -906,7 +914,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self._doStep(self.simulator.getExecuteStepOver)
 
     def doRestart(self):
-        self.simulator.disconnect()
+        self.simulator.disconnect_from()
         self.doAssemble()
         # Restore breakpoints
         for hex_address in self.breakpoints:
@@ -963,6 +971,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         """Shows or hides the Terminal dock widget"""
         self._doShow(self.ui.dockWidgetTerminal, self.ui.actionShow_Terminal)
 
+    def doShow_Simulator_Output(self):
+        """Shows or hides the Simulator Output dock widget"""
+        self._doShow(self.ui.dockWidgetSimulatorOutput, self.ui.actionShow_Simulator_Output)
+
     def doShow_Messages(self):
         """Shows or hides the Messages dock widget"""
         self._doShow(self.ui.dockWidgetMessages, self.ui.actionShow_Messages)
@@ -983,6 +995,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             (self.ui.dockWidgetMemoryDump, self.ui.actionShow_Memory_Dump),
             (self.ui.dockWidgetLCD, self.ui.actionShow_LCD),
             (self.ui.dockWidgetTerminal, self.ui.actionShow_Terminal),
+            (self.ui.dockWidgetSimulatorOutput, self.ui.actionShow_Simulator_Output),
             (self.ui.dockWidgetMessages, self.ui.actionShow_Messages) ]:
             widget.setHidden(True)
             action.setChecked(False)
@@ -1023,7 +1036,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.settings.setValue("windowState", self.saveState())
         # Disconnect the simulator
         if self.simulator and self.simulator.connected:
-            self.simulator.disconnect()
+            self.simulator.disconnect_from()
         # Close windows
         self.helpWindow.close()
         # Accept event
@@ -1224,8 +1237,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             return False
         self.simulator = ARMSimConnector(verbose=self.verbose)
         if self.debug:
-            self.simulator.mysocket.sentLine.connect(self.sentLineToSimulator)
-            self.simulator.mysocket.receivedLine.connect(self.receivedLineFromSimulator)
+            self.simulator.my_socket.sentLine.connect(self.sentLineToSimulator)
+            self.simulator.my_socket.receivedLine.connect(self.receivedLineFromSimulator)
+            self.simulator.stdoutLine.connect(self.stdoutLineFromSimulator)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         connectProgressBarDialog = ConnectProgressBarDialog(self.simulator,
                                                             self.settings.value("ARMSimCommand"),
@@ -1277,6 +1291,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.terminalHistoryPush(line)
             self.simulator.sendCommand(line)
 
+    def stdoutLineFromSimulator(self, line):
+        if self.ui.textBrowserSimulatorOutput.isEnabled():
+            self.ui.textBrowserSimulatorOutput.append('{}'.format(line))
+
     def terminalHistoryUp(self):
         self._terminal_history_cursor -= 1
         terminal_history = self.settings.value("TerminalHistory").split('::')
@@ -1300,3 +1318,4 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         if len(terminal_history) > 20:
             terminal_history = terminal_history[-20:]
         self.settings.setValue("TerminalHistory", '::'.join(terminal_history))
+

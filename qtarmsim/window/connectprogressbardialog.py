@@ -75,9 +75,9 @@ class ConnectThread(QtCore.QThread):
         self.ARMSimPort = ARMSimPort
 
     def run(self):
-        errmsg = self.simulator.connect(self.ARMSimCommand,
-                                        self.ARMSimDirectory,
-                                        self.ARMSimServer,
-                                        self.ARMSimPort
-                                        )
+        errmsg = self.simulator.connect_to(self.ARMSimCommand,
+                                           self.ARMSimDirectory,
+                                           self.ARMSimServer,
+                                           self.ARMSimPort
+                                           )
         self.taskFinished.emit(errmsg)
