@@ -30,7 +30,9 @@ class MySocket(QtCore.QObject):
     ORD_NL = 10
     ENCODING = 'utf8'
 
+    # noinspection PyUnresolvedReferences
     sentLine = QtCore.Signal('QString')
+    # noinspection PyUnresolvedReferences
     receivedLine = QtCore.Signal('QString')
 
     def __init__(self, verbose=False):
@@ -161,7 +163,7 @@ class MySocket(QtCore.QObject):
             msg = data.decode(self.ENCODING)
         except UnicodeDecodeError:
             msg = data.decode('latin1')
-        lines = [l.strip() for l in msg.strip().replace('\r\n', '\n').split('\n') if l.strip() != ""]
+        lines = [line.strip() for line in msg.strip().replace('\r\n', '\n').split('\n') if line.strip() != ""]
         if len(lines) > 1:
             self.pending_lines += lines[1:]
         if len(lines):
@@ -233,6 +235,7 @@ class MySocket(QtCore.QObject):
         if self.verbose:
             print('Socket closed')
 
+    # noinspection PyUnusedLocal
     def exit_signal_handler(self, received_signal, frame):
         """
         Handler used to close the socket when an exit signal is received. See __init__().
