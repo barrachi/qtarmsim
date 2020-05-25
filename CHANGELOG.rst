@@ -1,20 +1,31 @@
 Changelog
 ---------
 
-0.4.19 (2020-05-25)
+0.5.0 (2020-05-25)
+^^^^^^^^^^^^^^^^^^
+- Visualization improvements, specially on the trace ribbon (left area of the simulator).
+- The registers at the register dock are now highlighted when a register is highlighted in the editor or in the simulator.
+- Added Full Screen mode.
+- Added new Compact layout. Hides everything but the registers and memory docks (which are stacked at the left) and the Edit/Simulation widget (which takes the rest of the window).
+- The ARMSim path and GNU compiler path are tested on initialization. If they are no longer valid (usually due to a system python update), they are replaced by their default values.
+- Improved the QtARMSim installation and integration on GNU/Linux, Windows and macOS. On GNU/Linux, the KDE expected mime type for assembler editors has been added. On Windows, a menu entry and a desktop shortcut are now created. On macOS, the qtarmsim script is automatically copied on /opt/local/bin/.
+- Added a simulator output panel that displays the stdout of ARMSim (available only in debug mode).
+- Fixed a bug in ARMSim due to GCC trimming the lines of the LST file at a fixed number of bytes, which under certain circumstances could led to split a multi byte UTF-8 character and to provoke an exception.
+
+0.4.19 (2020-05-05)
 ^^^^^^^^^^^^^^^^^^^
 - Fixed bug: 'QPaintDevice: Cannot destroy paint device that is being painted'.
 - Updated ARMSim version.
 
-0.4.18 (2020-05-25)
+0.4.18 (2020-05-05)
 ^^^^^^^^^^^^^^^^^^^
 - Fixed bug: assigning a PIPE to armsim stdout prevented the Windows version to work properly.
 
-0.4.17 (2020-05-24)
+0.4.17 (2020-05-04)
 ^^^^^^^^^^^^^^^^^^^
 - Updated installation instructions for Windows systems.
 
-0.4.16 (2019-11-19)
+0.4.16 (2019-11-08)
 ^^^^^^^^^^^^^^^^^^^
 - Added the Show/Hide tabs and spaces functionality (on the editor contextual menu).
 - Saved files are forced to end with a new line (to avoid misleading the gcc compiler if the last line ended with a TAB).
