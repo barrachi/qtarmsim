@@ -595,7 +595,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             if response.errmsg:
                 self.ui.textEditMessages.append(response.errmsg)
             else:
-                self.ui.textEditMessages.append(self.tr("(Something bad has happened. That's all I know.)"))
+                self.ui.textEditMessages.append(self.tr("Something went wrong. Expected response not received."))
+                self.simulator.disconnect_from()
             self.ui.textEditMessages.append("")
             msg = self.tr("An error has occurred when assembling the source code.\n"
                           "Please, see the Messages panel for more details.")

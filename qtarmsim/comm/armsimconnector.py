@@ -61,11 +61,11 @@ def enqueue_file(file, queue):
     :param queue:  The queue where the lines are to be written to.
     """
     while True:
-        line = file.readline()
-        if not line:
+        line_bytes = file.readline()
+        if line_bytes == b'':
             time.sleep(0.5)
             continue
-        queue.put(line.rstrip())
+        queue.put(line_bytes)
 
 
 class ARMSimConnector(QtCore.QObject):
@@ -92,8 +92,8 @@ class ARMSimConnector(QtCore.QObject):
         # Create a temporary file where the armsim stdout is redirected to
         tmp_file, tmp_file_name = tempfile.mkstemp(".qtarmsim")
         os.close(tmp_file)
-        self.armsim_stdout_write = open(tmp_file_name, 'w')
-        self.armsim_stdout_read = open(tmp_file_name, 'r')
+        self.armsim_stdout_write = open(tmp_file_name, 'wb')
+        self.armsim_stdout_read = open(tmp_file_name, 'rb')
         # Start a thread that will copy the lines from armsim stdout file to a queue
         self.armsim_stdout_queue = Queue()
         queue_thread = Thread(target=enqueue_file,
@@ -279,15 +279,18 @@ class ARMSimConnector(QtCore.QObject):
         self.setConnected(False)
 
     def doUpdate(self):
-        if self.connected:
-            while True:
-                # read line without blocking
+        while True:
+            # read line without blocking
+            try:
+                line_bytes = self.armsim_stdout_queue.get_nowait()  # or .get(timeout=.1)
+            except Empty:
+                break
+            else:  # got line
                 try:
-                    line = self.armsim_stdout_queue.get_nowait()  # or .get(timeout=.1)
-                except Empty:
-                    break
-                else:  # got line
-                    self.stdoutLine.emit(line)
+                    line = line_bytes.decode("utf-8").rstrip()
+                except UnicodeDecodeError as err:
+                    line = "UnicodeDecodeError in '{}'".format(line_bytes.decode("utf8", "ignore").rstrip())
+                self.stdoutLine.emit(line)
         self._updateTimer.start(1000)
 
     def getVersion(self):

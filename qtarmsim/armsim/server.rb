@@ -85,7 +85,7 @@ def gen_source(name)
   intext = false
   fi = File.open(name)
   fi.each do |line|
-    line = line[0..-2]
+    line = line[0..-2].encode('UTF-8', invalid: :replace, undef: :replace)
     line_number = line[0, 4].to_i
     if line_number != 0
       dir_rel = line[5, 4].hex
@@ -94,7 +94,7 @@ def gen_source(name)
       if intext
         if data != 0
           if text != nil
-            text = text.encode('UTF-8') if $windows
+            # text = text.encode('UTF-8') if $windows
             source[dir_rel] = [text, line_number]
           end
         else
