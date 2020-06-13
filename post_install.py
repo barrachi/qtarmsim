@@ -36,7 +36,7 @@ import sysconfig
 # Post installation hooks for Windows
 # ------------------------------------------------------------------------
 
-def createWindowsLinks():
+def windowsCreateLinks():
     """
     Creates Desktop and Start Menu links.
     """
@@ -50,7 +50,7 @@ def createWindowsLinks():
     desktopFolder = os.path.normpath(os.path.expandvars(getWinregEntry(regName, regPath)))
     for linkName, targetPath, iconPath in windowsDesktopEntries():
         linkPath = os.path.join(desktopFolder, linkName)
-        createWindowsShortcut(linkPath, targetPath, iconPath)
+        windowsCreateShortcut(linkPath, targetPath, iconPath)
 
     # 2) Create start menu entry and shortcuts
     regName = "Programs"
@@ -70,7 +70,7 @@ def createWindowsLinks():
         # 8< - - - - - - - -
         for linkName, targetPath, iconPath in windowsDesktopEntries():
             linkPath = os.path.join(qtarmsimEntryPath, linkName)
-            createWindowsShortcut(linkPath, targetPath, iconPath)
+            windowsCreateShortcut(linkPath, targetPath, iconPath)
 
 
 def getWinregEntry(name, path):
@@ -110,7 +110,7 @@ def windowsDesktopEntries():
     ]
 
 
-def createWindowsShortcut(linkPath, targetPath, iconPath):
+def windowsCreateShortcut(linkPath, targetPath, iconPath):
     """
     Creates a Windows shortcut
 
@@ -138,7 +138,7 @@ def createWindowsShortcut(linkPath, targetPath, iconPath):
 # Post installation hooks for macOS
 # ------------------------------------------------------------------------
 
-def createMacOsSymLink():
+def macOsCreateSymLink():
     """
     Creates a symbolic link to qtarmsim in /opt/local/bin/.
     """
@@ -152,6 +152,23 @@ def createMacOsSymLink():
 
 
 # ------------------------------------------------------------------------
+# Post installation hooks for linux
+# ------------------------------------------------------------------------
+
+def linuxAppendPath():
+    """
+    If installed as a regular user, make sure that ~/.local/bin/ is in the path
+    """
+    if os.getlogin() != 'root':
+        if os.getenv("PATH").find("/.local/bin") == -1:
+            bashrc_path = os.path.join(os.getenv("HOME"), ".bashrc")
+            if os.path.exists(bashrc_path):
+                with open(bashrc_path, "a") as f:
+                    f.write('# QtARMSim post install\n')
+                    f.write('[ -e ~/.local/bin ] && PATH="$PATH:~/.local/bin"\n')
+
+
+# ------------------------------------------------------------------------
 # Main script
 # ------------------------------------------------------------------------
 
@@ -160,11 +177,13 @@ def main():
     Main script
     """
     if sys.platform.startswith(("win", "cygwin")):
-        createWindowsLinks()
+        windowsCreateLinks()
     elif sys.platform == "darwin":
         # This is no longer required, setuptools puts the qtarmsim executable on /opt/local/bin
         # createMacOsSymLink()
         pass
+    elif sys.platform == "linux":
+        linuxAppendPath()
 
 
 if __name__ == "__main__":
