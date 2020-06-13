@@ -67,9 +67,6 @@ setup(
         'gui_scripts': [
             'qtarmsim=qtarmsim:main',
         ],
-        'console_scripts': [
-            'qtarmsim_post_install=qtarmsim.post_install:main'
-        ]
     },
     cmdclass={'develop': DevelopAndPostDevelop,
               'install': InstallAndPostInstall,

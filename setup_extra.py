@@ -38,7 +38,7 @@ from subprocess import call
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-from qtarmsim.post_install import main as qtarmsim_post_install
+from post_install import main as qtarmsim_post_install
 from settings import Settings
 
 
