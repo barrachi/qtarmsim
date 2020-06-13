@@ -154,7 +154,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Set the file name to default untitled name
         self.setFileName("")
         # Set the application icon
-        self.setWindowIcon(QtGui.QIcon(":/images/logo.svg"))
+        self.setWindowIcon(QtGui.QIcon(":/images/qtarmsim.svg"))
         # Help windows initialization
         self.helpWindow = HelpWindow()
         # Connect actions

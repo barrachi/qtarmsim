@@ -79,7 +79,7 @@ class Settings:
         if sys.platform.startswith('linux'):
             self.data_files = [
                 ('share/applications', ['qtarmsim/res/desktop/qtarmsim.desktop']),
-                ('share/pixmaps', ['qtarmsim/res/images/qtarmsim.png']),
+                ('share/pixmaps', ['qtarmsim/res/images/qtarmsim_48x48.png', 'qtarmsim/res/images/qtarmsim.svg']),
                 ('share/appdata', ['qtarmsim/res/desktop/qtarmsim.appdata.xml']),
                 ('share/metainfo', ['qtarmsim/res/desktop/qtarmsim.appdata.xml']),
             ]

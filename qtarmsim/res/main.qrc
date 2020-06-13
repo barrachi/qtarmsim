@@ -1,6 +1,6 @@
 <RCC version="1.0">
     <qresource prefix="/" >
-      <file>images/logo.svg</file>
+      <file>images/qtarmsim.svg</file>
       <file>images/lcd.png</file>
       <file>images/ajax-loader.gif</file>
       <file>fonts/AlphaSmart3000.ttf</file>
