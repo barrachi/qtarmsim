@@ -2,7 +2,7 @@
 
 include settings.py setup_extra.py post_install.py
 include CHANGELOG.rst DEVELOPMENT.rst README.rst INSTALL.rst
-include GPL.txt LICENSE.txt
+include GPL.txt LICENSE.rst
 
 prune docs
 prune examples
