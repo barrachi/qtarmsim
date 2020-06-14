@@ -163,10 +163,13 @@ def linuxAppendPath():
         if os.getenv("PATH").find("/.local/bin") == -1:
             bashrc_path = os.path.join(os.getenv("HOME"), ".bashrc")
             if os.path.exists(bashrc_path):
-                with open(bashrc_path, "a") as f:
-                    f.write('# QtARMSim post install\n')
-                    f.write('[ -e ~/.local/bin ] && PATH="$PATH:~/.local/bin"\n')
-
+                try:
+                    with open(bashrc_path, "a") as f:
+                        f.write('# QtARMSim post install\n')
+                        f.write('[[ ":$PATH:" != *":~/.local/bin:"* ]] && PATH="$PATH:~/.local/bin"\n')
+                except OSError:
+                    # Apparently, some distributions use a sandbox to avoid writing on the user space
+                    pass
 
 # ------------------------------------------------------------------------
 # Main script
@@ -183,7 +186,8 @@ def main():
         # createMacOsSymLink()
         pass
     elif sys.platform == "linux":
-        linuxAppendPath()
+        # linuxAppendPath()
+        pass
 
 
 if __name__ == "__main__":
