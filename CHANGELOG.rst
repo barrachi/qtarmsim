@@ -1,16 +1,22 @@
 Changelog
 ---------
 
+0.5.1 (2020-06-13)
+^^^^^^^^^^^^^^^^^^
+- Reformatted post_install code and added a hook for linux.
+- Changed default QtARMSim icon by the SVG version.
+- Moved post_install.py script outside of qtarmsim module to avoid its dependency on PySide2 (under certain circumstances, post-install is called before the PySide2 dependency is installed).
+
 0.5.0 (2020-05-25)
 ^^^^^^^^^^^^^^^^^^
-- Visualization improvements, specially on the trace ribbon (left area of the simulator).
+- Visualization improvements, especially on the trace ribbon (left area of the simulator).
 - The registers at the register dock are now highlighted when a register is highlighted in the editor or in the simulator.
 - Added Full Screen mode.
 - Added new Compact layout. Hides everything but the registers and memory docks (which are stacked at the left) and the Edit/Simulation widget (which takes the rest of the window).
 - The ARMSim path and GNU compiler path are tested on initialization. If they are no longer valid (usually due to a system python update), they are replaced by their default values.
 - Improved the QtARMSim installation and integration on GNU/Linux, Windows and macOS. On GNU/Linux, the KDE expected mime type for assembler editors has been added. On Windows, a menu entry and a desktop shortcut are now created. On macOS, the qtarmsim script is automatically copied on /opt/local/bin/.
 - Added a simulator output panel that displays the stdout of ARMSim (available only in debug mode).
-- Fixed a bug in ARMSim due to GCC trimming the lines of the LST file at a fixed number of bytes, which under certain circumstances could led to split a multi byte UTF-8 character and to provoke an exception.
+- Fixed a bug in ARMSim due to GCC trimming the lines of the LST file at a fixed number of bytes, which under certain circumstances could lead to split a multi byte UTF-8 character and provoke an exception.
 
 0.4.19 (2020-05-05)
 ^^^^^^^^^^^^^^^^^^^
