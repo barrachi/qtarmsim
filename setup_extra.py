@@ -28,6 +28,7 @@ References:
  + https://stackoverflow.com/questions/20288711/post-install-script-with-python-setuptools
 """
 
+import atexit
 import datetime
 import fnmatch
 import os
@@ -38,7 +39,7 @@ from subprocess import call
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-from post_install import main as qtarmsim_post_install
+from qtarmsim.post_install import main as qtarmsim_post_install
 from settings import Settings
 
 
@@ -56,7 +57,7 @@ class InstallAndPostInstall(install):
     def run(self):
         install.run(self)
         # PUT YOUR POST-INSTALL SCRIPT HERE or CALL A FUNCTION
-        qtarmsim_post_install()
+        atexit.register(qtarmsim_post_install)
 
 
 def findFilesAndDirs(path, filePatterns=None, dirPatterns=None):

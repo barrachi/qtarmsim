@@ -65,7 +65,10 @@ setup(
     install_requires=s.install_requires,
     entry_points={
         'gui_scripts': [
-            'qtarmsim=qtarmsim:main',
+            'qtarmsim=qtarmsim.qtarmsim:main',
+        ],
+        'console_scripts': [
+            'post_install_qtarmsim=qtarmsim.post_install:main'
         ],
     },
     cmdclass={'develop': DevelopAndPostDevelop,

@@ -178,7 +178,7 @@ def linuxAppendPath():
                         appended = True
                 except OSError:
                     # If we cannot write on .bashrc
-                    log.warn("...could not write on {}!".format(bashrc_path))
+                    log.warn("...could not write on '{}'!".format(bashrc_path))
                     pass
             if appended:
                 log.warn("You should execute 'source {}' to update PATH on any currently open sessions."
