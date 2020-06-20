@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+0.5.2 (2020-06-20)
+^^^^^^^^^^^^^^^^^^
+- Updated installation instructions.
+- Updated post installation hook for linux.
+- Post installation code reorganized to allow post_install to be installed as a script.
+
 0.5.1 (2020-06-13)
 ^^^^^^^^^^^^^^^^^^
 - Reformatted post_install code and added a hook for linux.
