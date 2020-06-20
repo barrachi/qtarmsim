@@ -31,6 +31,8 @@ import os
 import sys
 import sysconfig
 
+from distutils import log
+
 
 # ------------------------------------------------------------------------
 # Post installation hooks for Windows
@@ -119,17 +121,17 @@ def windowsCreateShortcut(linkPath, targetPath, iconPath):
     :param iconPath: Path of the icon file
     """
 
-    from win32com.client import Dispatch
-    from pywintypes import com_error
+    import win32com.client
+    import pywintypes
 
     try:
-        shell = Dispatch('WScript.Shell')
+        shell = win32com.client.Dispatch('WScript.Shell')
         shortcut = shell.CreateShortCut(linkPath)
         shortcut.Targetpath = targetPath
         shortcut.WorkingDirectory = os.path.dirname(targetPath)
         shortcut.IconLocation = iconPath
         shortcut.save()
-    except com_error:
+    except pywintypes.com_error:
         # maybe restrictions prohibited link creation
         pass
 
@@ -159,22 +161,37 @@ def linuxAppendPath():
     """
     If installed as a regular user, make sure that ~/.local/bin/ is in the path
     """
-    if os.getlogin() != 'root':
+    if os.getenv("USER") != 'root':
         if os.getenv("PATH").find("/.local/bin") == -1:
+            appended = False
+            local_bin_path = os.path.join(os.getenv("HOME"), ".local/bin")
             bashrc_path = os.path.join(os.getenv("HOME"), ".bashrc")
+            log.warn("QtARMSim has been installed in '{0}' which is not on PATH.".format(local_bin_path))
             if os.path.exists(bashrc_path):
+                log.warn("Trying to prepend '{0}' to PATH...".format(local_bin_path))
                 try:
                     with open(bashrc_path, "a") as f:
+                        f.write('\n')
                         f.write('# QtARMSim post install\n')
-                        f.write('[[ ":$PATH:" != *":~/.local/bin:"* ]] && PATH="$PATH:~/.local/bin"\n')
+                        f.write('[[ ":$PATH:" != *":{0}:"* ]] && PATH="{0}":"$PATH"\n'.format(local_bin_path))
+                        log.warn("...succeeded!")
+                        appended = True
                 except OSError:
-                    # Apparently, some distributions use a sandbox to avoid writing on the user space
+                    # If we cannot write on .bashrc
+                    log.warn("...could not write on {}!".format(bashrc_path))
                     pass
+            if appended:
+                log.warn("You should execute 'source {}' to update PATH on any currently open sessions."
+                         "".format(bashrc_path))
+            else:
+                log.warn("Please, consider adding this directory to PATH.")
+                log.warn("""This can be accomplished by appending 'PATH="{0}":"$PATH"' """
+                         """to '{1}'""".format(local_bin_path, bashrc_path))
+
 
 # ------------------------------------------------------------------------
 # Main script
 # ------------------------------------------------------------------------
-
 def main():
     """
     Main script
@@ -186,8 +203,7 @@ def main():
         # createMacOsSymLink()
         pass
     elif sys.platform == "linux":
-        # linuxAppendPath()
-        pass
+        linuxAppendPath()
 
 
 if __name__ == "__main__":
