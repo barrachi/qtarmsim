@@ -1,9 +1,14 @@
 Changelog
 ---------
 
+0.5.3 (2020-11-06)
+^^^^^^^^^^^^^^^^^^
+- Updated the installation instructions.
+- A newer 64 bit GNU GCC Arm toolchain for macOS has been included.
+
 0.5.2 (2020-06-20)
 ^^^^^^^^^^^^^^^^^^
-- Updated installation instructions.
+- Updated the installation instructions.
 - Updated post installation hook for linux.
 - Post installation code reorganized to allow post_install to be installed as a script.
 
