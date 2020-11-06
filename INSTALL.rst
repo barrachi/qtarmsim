@@ -6,9 +6,9 @@ In order to install QtARMSim, its dependencies should be installed first.
 QtARMSim has the following dependencies: `Python3 <https://www.python.org/>`_,
 `Qt for Python (PySide2) <https://wiki.qt.io/Qt_for_Python>`_, and ARMSim.
 
-ARMSim, which is bundled with QtARMSim, has in turn the next dependencies: `Ruby
-<https://www.ruby-lang.org/en/>`_ and the `GNU Gcc toolchain for the ARM EABI
-platform <http://gcc.gnu.org/>`_.
+ARMSim, which is bundled with QtARMSim, has in turn the next dependencies:
+`Ruby <https://www.ruby-lang.org/en/>`_ and the
+`GNU GCC Arm toolchain <http://gcc.gnu.org/>`_.
 
 The next subsections describe how to install QtARMSim and its dependencies on
 GNU/Linux, Windows and macOS.
@@ -18,11 +18,10 @@ GNU/Linux, Windows and macOS.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The major GNU/Linux distributions already provide packages for ``Python3`` and
-``Ruby``. Therefore, the actual GNU/Linux distribution package manager can be
-used to install these. As for the GNU Gcc, the required part of the GNU Gcc
-toolchain for the ARM platform is bundled with QtARMSim. Finally, ``Qt for
-Python`` and ``QtARMSim`` can be installed using the ``pip3`` command provided
-by ``Python3``.
+``Ruby``. Therefore, the provided package manager can be used to install them.
+As for the GNU GCC, the required part of the GNU GCC Arm toolchain is bundled
+with QtARMSim. Finally, ``Qt for Python`` and ``QtARMSim`` can be installed
+using the ``pip3`` command provided by ``Python3``.
 
 For example, on Ubuntu you can install QtARMSim using:
 
@@ -43,7 +42,7 @@ If you are installing QtARMSim on a system where PySide2 is already provided as
 a package, you can install the packaged version of PySide2 and then install
 QtARMSim using the ``--no-deps`` option (be aware that the packaged version can
 be not so to up to date as the one obtained from pip). Once the PySide2
-package(s) are installed, QtARMSim can be installed as follows:
+package(s) are installed, QtARMSim should be installed as follows:
 
 .. code-block:: shell-session
 
@@ -57,13 +56,13 @@ To install QtARMSim on Windows please follow the next steps:
 
 1. Download a 64 bits **Python executable installer** from
    `Python releases for Windows <https://www.python.org/downloads/windows/>`_.
-   During the installation process, please check the '``Add Python 3.X to PATH``'
+   During the installation process, please select the ``Add Python 3.X to PATH``
    option.
 
 2. Download a 64 bits **Ruby with Devkit** installer from
    `Ruby Installer for Windows <http://rubyinstaller.org/>`_.
    During the installation process, make sure that the
-   '``Add Ruby executables to your PATH``' option is selected.
+   ``Add Ruby executables to your PATH`` option is selected.
 
 3. Open a Windows console (executing either ``Windows PowerShell`` or
    ``cmd``, depending on your Windows version), and execute the commands
@@ -88,66 +87,48 @@ To install QtARMSim on Windows please follow the next steps:
 
 To install QtARMSim on macOS, please follow the next steps:
 
-1. Install the `MacPorts package manager <https://www.macports.org/>`_.
-   (If you use the `Homebrew package manager <http://brew.sh/>`_, please
-   adapt the following instructions conveniently.)
+1. Download and install **Python 3** from the
+   `Python downloads page <https://www.python.org/downloads/>`_.
 
-2. Open a ``Terminal`` and execute the commands indicated in the next steps.
-
-   2.1. Install a ``Python`` version (for example, ``Python 3.8``) and ``pip``:
+2. Open a ``Terminal`` and execute the next command:
 
    .. code-block:: shell-session
 
-     $ sudo port install python38 py38-pip py38wheel
-     $ sudo port select --set python3 python38
-     $ sudo port select --set pip pip38
+     $ sudo -H pip3 install QtARMSim
 
-   2.2. Install a ``Ruby`` version:
+After doing the previous steps, you should be able to execute QtARMSim by
+typing ``qtarmsim`` on a **new** ``Terminal``.
 
-   .. code-block:: shell-session
+Note: If an error message appeared when executing the ``pip3`` command saying that
+there was no matching distribution of PySide2 for your macOS version, you can
+instead install PySide2 with
+`MacPorts <https://guide.macports.org/#installing.xcode>`_ and QtARMSim with no
+dependencies using the following commands (MacPorts should be installed
+previously):
 
-     $ sudo port install ruby25
-     $ sudo port select --set ruby ruby25
+.. code-block:: shell-session
 
-   2.3. Install ``libsdl2`` and ``Gosu``:
-
-   .. code-block:: shell-session
-
-     $ sudo port install libsdl2
-     $ sudo gem install gosu
-
-   2.4 Install ``QtARMSim``:
-
-   .. code-block:: shell-session
-
-     $ sudo -H pip install QtARMSim
-
-   If when executing the previous command it says that there is no matching
-   distribution of PySide2 for your macOS version, you can instead install the
-   MacPorts version of PySide2 and, after that, install QtARMSim without its
-   dependencies:
-
-   .. code-block:: shell-session
-
-    $ sudo port install py38-pyside2
-    $ sudo -H pip install --no-deps QtARMSim
+  $ sudo port install py39-pyside2   # same version as the installed Python
+  $ sudo -H pip3 install --no-deps QtARMSim
 
 
-1.4 Installing the ``GNU Gcc toolchain targeting the ARM EABI`` (optional)
+1.4 Installing the ``GNU GCC Arm toolchain`` (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Starting with version 0.3.1 of QtARMSim, the required part of the ``GNU Gcc
-toolchain targeting the ARM platform`` is already bundled with QtARMSim. So this
-step is no longer required, unless there is some problem with the bundled GNU
-Gcc toolchain (for example, if QtARMSim does not assemble a given source code).
-In this case, another instance of GNU Gcc can be installed and used.
+Starting with version 0.3.1 of QtARMSim, the required part of the ``GNU GCC Arm
+toolchain`` is already bundled with QtARMSim. So this step should only be done
+if there is a problem with the bundled GNU GCC Arm toolchain (i.e., QtARMSim
+is not able to assemble any source code).
 
-On GNU/Linux, this can be accomplished by installing a GNU Gcc for ARM package
+In this case, another instance of GNU GCC Arm toolchain can be installed and used.
+
+On GNU/Linux, this can be accomplished by installing a GNU GCC ARM package
 provided by the GNU/Linux distribution being used, by building a cross-compiling
-toolchain, or by extracting the ``gcc-arm-none-eabi`` ``tar.gz`` for linux32
-from the `Arduino download page
-<https://code.google.com/p/arduino/downloads/list>`_. For example, on Ubuntu,
-this optional step can be achieved with:
+toolchain, or by extracting the ``gcc-arm-none-eabi-????-linux.tar.bz2``
+file from the `GNU Arm Embedded Toolchain Downloads page
+<https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads>`_.
+
+For example, on Ubuntu, this optional step can be achieved with:
 
 .. code-block:: shell-session
 
@@ -161,15 +142,14 @@ And on Gentoo with:
   # echo "PORTDIR_OVERLAY=/usr/local/portage" >> /etc/portage/make.conf
   # crossdev --target arm --ov-output /usr/local/portage
 
-On Windows, to perform this optional step, download the GNU Gcc ARM cross
-compiler for Windows from the `Arduino download page
-<https://code.google.com/p/arduino/downloads/list>`_.  Open the
-``gcc-arm-none-eabi-x.y.y-win32.tar.gz`` file, and extract the
-``gcc-arm-none-eabi`` folder on any path you prefer.
+On Windows and macOS, to perform this optional step, download and execute the
+respective Windows or macOS GNU GCC Arm toolchain package from the
+`GNU Arm Embedded Toolchain Downloads page
+<https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads>`_.
 
-Once a new ``GNU Gcc toolchain targeting the ARM platform`` is installed, please
+Once a new ``GNU GCC Arm toolchain`` is installed, please
 configure the ``ARMSim Gcc Compiler`` QtARMSim option to point to the new
-'``arm-none-eabi-gcc``' command.
+``arm-none-eabi-gcc`` executable.
 
 
 2. Executing QtARMSim
@@ -200,7 +180,7 @@ On macOS:
 
 .. code-block:: shell-session
 
-    sudo -H pip install --upgrade QtARMSim
+    sudo -H pip3 install --upgrade QtARMSim
 
 
 4. Uninstalling QtARMSim
@@ -222,7 +202,7 @@ On macOS:
 
 .. code-block:: shell-session
 
-    sudo -H pip uninstall QtARMSim
+    sudo -H pip3 uninstall QtARMSim
 
 
 5. Installation related known issues
@@ -237,7 +217,7 @@ help when upgrading a previously installed version.
 
 + The 5.14 packaged version of PySide2 on Ubuntu 20.04 LTS does not properly
   display some icons and SVG images of QtARMSim. This can be solved by
-  installing a newer version PySide2 using ``pip``::
+  installing a newer version of PySide2 using ``pip``::
 
     $ sudo pip3 install PySide2
 
@@ -253,7 +233,8 @@ help when upgrading a previously installed version.
 
 + Starting with the 2.5 version of the Ruby installer, ``shell``, ``e2mmap``
   and ``sync`` ruby modules are no longer bundled in. Therefore, they must be
-  manually installed using the ``gem`` command.
+  manually installed using the ``gem`` command, as stated in the general
+  instructions.
 
 + Versions 5.12.0 and 5.12.1 of PySide2 introduced some changes that prevented
   QtARMSim to work. Version 5.12.2 of PySide2 corrected these regressions.
