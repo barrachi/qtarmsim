@@ -239,7 +239,7 @@ help when upgrading a previously installed version.
   display some icons and SVG images of QtARMSim. This can be solved by
   installing a newer version PySide2 using ``pip``::
 
-    $ sudo pip install PySide2
+    $ sudo pip3 install PySide2
 
 + On Ubuntu 20.04 LTS, if the next error is shown when executing QtARMSim from
   a terminal::
