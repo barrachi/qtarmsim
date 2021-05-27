@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.5.4 (2021-05-27)
+^^^^^^^^^^^^^^^^^^
+- Fixed incompatibility with Ruby 3.0.
+
 0.5.3 (2020-11-06)
 ^^^^^^^^^^^^^^^^^^
 - Updated the installation instructions.
