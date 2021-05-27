@@ -810,7 +810,7 @@ class MainServer < TCPServer
   end
 end
 
-def read_ELF(name, firmware = FALSE)
+def read_ELF(name, firmware = false)
   ELF_File.open(name, 'rb') do |file|
     file.externSymbols = $firmTable
     file.wks_orig['.text'] = ORIG_FIRMWARE if firmware
@@ -945,7 +945,7 @@ class ServerApp
     p host_os if $dev_txt
     lpath = File.expand_path(File.dirname($0))
     Shell.cd(lpath)
-    blocks = read_ELF('Firmware.o', TRUE)
+    blocks = read_ELF('Firmware.o', true)
     puerto = ARGV.length == 0 ? 8070 : ARGV[0].to_i
     @procesador = Core.new(ThumbII_Defs::ARCH, blocks[0])
     @procesador.memory.add_block(blocks[1])
