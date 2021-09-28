@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.5.5 (2021-10-28)
+^^^^^^^^^^^^^^^^^^
+- Fixed bug with macOS BigSur and PySide2.
+
 0.5.4 (2021-05-27)
 ^^^^^^^^^^^^^^^^^^
 - Fixed incompatibility with Ruby 3.0.

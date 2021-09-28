@@ -82,11 +82,17 @@ def _get_opts():
 def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    if sys.platform == 'darwin':
+        # Big Sur requires the next environment variable to be set
+        # (otherwise the PySide2 windows won't be shown)
+        # https://www.loekvandenouweland.com/content/pyside2-big-sur-does-not-show-window.html
+        os.environ['QT_MAC_WANTS_LAYER'] = '1'
     # Create the application
     qApp = QtWidgets.QApplication(sys.argv)
     # ------------------------------------------------------------
-    #  In order to use SVG images on @##!![] Windows, you need to import QtSvg and QtXml and also ensure that
-    #  the plugins directory are properly imported.
+    #  In order to use SVG images on @##!![] Windows, you need to import QtSvg
+    #  and QtXml and also ensure that the plugins directory is
+    #  properly imported.
     #  https://stackoverflow.com/questions/9933358/pyside-svg-image-formats-not-found
     # ------------------------------------------------------------
     for plugins_dir in [os.path.join(p, "plugins") for p in PySide2.__path__]:
