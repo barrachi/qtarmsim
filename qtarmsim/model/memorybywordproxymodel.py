@@ -44,10 +44,14 @@ class MemoryByWordProxyModel(QtCore.QSortFilterProxyModel):
         # Set brushes
         self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
         self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
+        # Initial rootItem
+        self.rootItem = None
 
     def setSourceModel(self, model):
         super(MemoryByWordProxyModel, self).setSourceModel(model)
         self.sourceModel().dataChanged.connect(self.sourceDataChanged)
+        # Set rootItem
+        self.rootItem = self.sourceModel().rootItem
 
     def filterAcceptsRow(self, sourceRow, sourceParent):
         try:

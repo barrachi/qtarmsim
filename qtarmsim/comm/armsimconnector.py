@@ -188,8 +188,7 @@ class ARMSimConnector(QtCore.QObject):
                                                    stdin=subprocess.DEVNULL,
                                                    stdout=self.armsim_stdout_write,
                                                    stderr=subprocess.PIPE,
-                                                   close_fds=ON_POSIX,
-                                                   bufsize=1,  # 1 means line buffered
+                                                   close_fds=ON_POSIX
                                                    )
         except OSError as e:
             return "Could not launch the next command:\n" \

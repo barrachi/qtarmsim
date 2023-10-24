@@ -61,9 +61,9 @@ class RegistersModel(TreeModel):
                 rti = TreeItem([register_data[0], register_data[1]], rbti)
                 rbti.appendChild(rti)
         # Set fonts
-        self.q_font = getMonoSpacedFont()
-        self.q_font_last = getMonoSpacedFont()
-        self.q_font_last.setWeight(QtGui.QFont.Black)
+        self.qFont = getMonoSpacedFont()
+        self.qFontLast = getMonoSpacedFont()
+        self.qFontLast.setWeight(QtGui.QFont.Black)
         # highlighted register
         self.highlighted_register = None
 
@@ -74,7 +74,7 @@ class RegistersModel(TreeModel):
         # Register bank
         if item.parent() == self.rootItem:
             if role == Qt.FontRole:
-                return self.q_font
+                return self.qFont
             elif role != QtCore.Qt.DisplayRole:
                 return None
             return item.data(index.column())
@@ -113,9 +113,9 @@ class RegistersModel(TreeModel):
                 return None
         elif role == Qt.FontRole:
             if self.modified_registers.count(index.row()):
-                return self.q_font_last
+                return self.qFontLast
             else:
-                return self.q_font
+                return self.qFont
         else:
             return None
 

@@ -41,7 +41,7 @@ class MemoryBank:
         self.end = self.start + self.length - 1
 
     def addressToRow(self, hexAddress):
-        """Given an hexadecimal hexAddress, returns the corresponding row"""
+        """Given a hexadecimal hexAddress, returns the corresponding row"""
         intAddress = int(hexAddress, 16)
         return intAddress - self.start
 
