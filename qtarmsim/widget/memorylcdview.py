@@ -18,8 +18,8 @@
 
 import sys
 
-from PySide2 import QtCore, QtWidgets
-from PySide2.QtCore import Qt
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import Qt
 
 from ..model.memorylcdproxymodel import MemoryLCDProxyModel
 from ..model.memorymodel import MemoryModel
@@ -72,12 +72,12 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.resizeRowsToContents()
         self.setFixedWidth(18 + 18 + 8 + sum([self.columnWidth(i) for i in range(self.LCDColumns)]))
         self.setFixedHeight(18 + 18 + 8 + sum([self.rowHeight(i) for i in range(self.LCDRows)]))
-        self.update()
+        # self.update()  # @todo: check that update is not required any more
 
     def wheelEvent(self, event):
         """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            self.memoryLCDProxyModel.changeFontSize(event.delta() / 120)
+            self.memoryLCDProxyModel.changeFontSize(event.angleDelta().y() / 120)
             self.resize()
         else:
             super(MemoryLCDView, self).wheelEvent(event)

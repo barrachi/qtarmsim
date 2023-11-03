@@ -19,7 +19,7 @@
 # Adapted from:
 # http://stackoverflow.com/questions/19442443/busy-indication-with-pyqt-progress-bar
 
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 
 class ConnectProgressBarDialog(QtWidgets.QDialog):

@@ -27,9 +27,9 @@
 
 import sys
 
-import PySide2
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import Qt
+import PySide6
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt
 
 from ..utils import getMonoSpacedFont
 
@@ -216,7 +216,7 @@ class LeftArea(QtWidgets.QWidget):
         based on how many blocks has the associated editor.
         """
         if self.codeEditor.isReadOnly():
-            width = 8 + self.codeEditor.fontMetrics().width(u"9") * 2
+            width = 8 + self.codeEditor.fontMetrics().horizontalAdvance(u"9") * 2
         else:
             digits = 1
             maxLines = max(1, self.codeEditor.blockCount())
@@ -224,7 +224,7 @@ class LeftArea(QtWidgets.QWidget):
                 maxLines /= 10
                 digits += 1
             digits = max(2, digits)
-            width = 8 + self.codeEditor.fontMetrics().width(u"9") * digits
+            width = 8 + self.codeEditor.fontMetrics().horizontalAdvance(u"9") * digits
         return width
 
     def wheelEvent(self, event):
@@ -345,7 +345,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.setFont(self.myFont)
         self.setTabStopCharacters(8)
         # Disable wrap mode
-        self.setLineWrapMode(self.NoWrap)
+        self.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         # Add leftArea child
         self.leftArea = LeftArea(self)
         self.updateLeftAreaWidth(0)
@@ -447,7 +447,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             self.setTextCursor(cursor)
         return cursor
 
-    def contextMenuEvent(self, event: PySide2.QtGui.QContextMenuEvent):
+    def contextMenuEvent(self, event: PySide6.QtGui.QContextMenuEvent):
         menu = self.createStandardContextMenu()
         menu.addSeparator()
         txt = "Hide tabs and spaces" if self.showTabsAndSpaces else "Show tabs and spaces"
@@ -530,7 +530,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.setFont(self.myFont)
         self.setTabStopCharacters(8)
 
-    def keyPressEvent(self, event: PySide2.QtGui.QKeyEvent):
+    def keyPressEvent(self, event: PySide6.QtGui.QKeyEvent):
         """
         Processes the CTRL++ and CTRL+- events
         """
@@ -548,7 +548,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         Processes the wheel event: zooms in and out whenever a CTRL+wheel event is triggered
         """
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            self.increaseFontSize(event.delta() / 120)
+            self.increaseFontSize(event.angleDelta().y() / 120)
         else:
             super().wheelEvent(event)
 

@@ -19,7 +19,7 @@
 import os
 import sys
 
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from ..modulepath import module_path
 from ..ui.help import Ui_Help

@@ -20,7 +20,7 @@ import signal
 import socket
 import sys
 import time
-from PySide2 import QtCore
+from PySide6 import QtCore
 
 
 class MySocket(QtCore.QObject):
@@ -142,7 +142,8 @@ class MySocket(QtCore.QObject):
         @return: a line.
         """
         if len(self.pending_lines):
-            line = self.pending_lines.pop(0)
+            line = self.pending_lines[0]
+            self.pending_lines = self.pending_lines[1:]  # will be [] if there are no more pending lines
             if self.verbose:
                 print("Received line: {}".format(line))
             self.receivedLine.emit(line)
@@ -164,10 +165,9 @@ class MySocket(QtCore.QObject):
         except UnicodeDecodeError:
             msg = data.decode('latin1')
         lines = [line.strip() for line in msg.strip().replace('\r\n', '\n').split('\n') if line.strip() != ""]
-        if len(lines) > 1:
-            self.pending_lines += lines[1:]
         if len(lines):
             line = lines[0]
+            self.pending_lines = lines[1:]  # will be [] if there are no more lines
             if self.verbose:
                 print("Received line: {}".format(line))
             self.receivedLine.emit(line)

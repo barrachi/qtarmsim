@@ -138,8 +138,8 @@ class QtCompile(Command):
         pass
 
     def run(self):
-        # 1) Run pyside2-uic
-        CMD = 'pyside2-uic'
+        # 1) Run pyside6-uic
+        CMD = 'pyside6-uic'
         inputFileNames = findFiles('.', ('*.ui',))
         for fileName in inputFileNames:
             outputFileName = os.path.splitext(fileName)[0] + '.py'
@@ -148,8 +148,8 @@ class QtCompile(Command):
             error = call(cmdArray)  # , cwd = os.getcwd())
             if error:
                 sys.exit(-1)
-        # 2) Run pyside2-rcc
-        CMD = 'pyside2-rcc'
+        # 2) Run pyside6-rcc
+        CMD = 'pyside6-rcc'
         inputFileNames = findFiles('.', ('*.qrc',))
         for fileName in inputFileNames:
             outputFileName = os.path.splitext(fileName)[0] + '_rc.py'
@@ -159,22 +159,22 @@ class QtCompile(Command):
             error = call(cmdArray)
             if error:
                 sys.exit(-1)
-        # 3) Run lrelease
-        CMD = 'lrelease'
-        cmdArray = [CMD, './qtarmsim/qtarmsim.pro']
-        print("Executing {}...".format(' '.join(cmdArray)))
-        error = call(cmdArray)
-        if error:
-            sys.exit(-1)
-        # 4) Run pyside2-lupdate
-        CMD = 'pyside2-lupdate'
-        cmdArray = [CMD, './qtarmsim/qtarmsim.pro']
-        print("Executing {}...".format(' '.join(cmdArray)))
-        error = call(cmdArray)
-        if error:
-            sys.exit(-1)
-        # 5) Run linguist
-        print("Now you can run 'linguist ./qtarmsim/lang/qtarmsim_es.ts'")
+        # # 3) Run pyside6-lrelease
+        # CMD = 'pyside6-lrelease'
+        # cmdArray = [CMD, './qtarmsim/qtarmsim.pro']
+        # print("Executing {}...".format(' '.join(cmdArray)))
+        # error = call(cmdArray)
+        # if error:
+        #     sys.exit(-1)
+        # # 4) Run pyside6-lupdate
+        # CMD = 'pyside6-lupdate'
+        # cmdArray = [CMD, './qtarmsim/qtarmsim.pro']
+        # print("Executing {}...".format(' '.join(cmdArray)))
+        # error = call(cmdArray)
+        # if error:
+        #     sys.exit(-1)
+        # # 5) Run linguist
+        # print("Now you can run 'linguist ./qtarmsim/lang/qtarmsim_es.ts'")
 
 
 class UpdateFiles(Command):

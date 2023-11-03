@@ -8,7 +8,7 @@ To create a source distribution::
   $ python3 ./setup.py checkdocs qtclean qtcompile update_files sdist
 
 The package ``checkdocs`` can be installed using::
-  $ pip3 install --user collective.checkdocs
+  $ pip3 install --user collective.checkdocs pygments
 
 To test the source distribution ``dist/qtarmsim-x.x.x.tar.gz``::
   $ virtualenv --python=python3 testqtarmsim

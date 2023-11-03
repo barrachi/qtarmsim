@@ -34,7 +34,7 @@ from glob import glob
 from queue import Queue, Empty
 from threading import Thread
 
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 from .exceptions import RunTimeOut
 from .mysocket import MySocket
@@ -104,6 +104,8 @@ class ARMSimConnector(QtCore.QObject):
         self._updateTimer = QtCore.QTimer()
         self._updateTimer.timeout.connect(self.doUpdate)
         self._updateTimer.start(1000)
+        # Settings for invoking gcc
+        self._settings = {}
 
     def __del__(self):
         """
@@ -325,6 +327,7 @@ class ARMSimConnector(QtCore.QObject):
         if line != 'OK':
             return "Error when trying to configure the '{}' setting on ARMSim.\n" \
                    "Error message was '{}'.".format(setting_name, line)
+        self._settings[setting_name] = setting_value
         return None
 
     def _parseRegister(self, line):
@@ -606,6 +609,23 @@ class ARMSimConnector(QtCore.QObject):
     def doAssemble(self, fname):
         response = AssembleResponse()
         tmp_fname = self._copyToTmpDir(fname)
+        # If the input is a c file, get its assembly version
+        if tmp_fname[-2:] == '.c':
+            gcc_command = shlex.split(self._settings['ARMGccCommand'] +
+                                      ' -S ' + self._settings['ARMGccOptions'] + ' ' + tmp_fname)
+            process = subprocess.run(gcc_command,
+                                     cwd=os.path.dirname(tmp_fname),
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     universal_newlines=True,
+                                     )
+            if process.returncode != 0:
+                response.result = "ERROR"
+                response.errmsg = process.stderr
+                self._disposeTmpDir(tmp_fname)
+                return response
+            tmp_fname = tmp_fname[:-2] + '.s'
+        # end of c file processing
         errmsg = self.setSettings("PATH", os.path.dirname(os.path.abspath(tmp_fname)) + '/')
         if errmsg:
             response.result = "ERROR"

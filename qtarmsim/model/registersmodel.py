@@ -17,8 +17,8 @@
 ###########################################################################
 
 
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import Qt
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt
 
 from .common import InputToHex, DataTypes
 from .simpletreemodel import TreeModel, TreeItem
@@ -145,10 +145,12 @@ class RegistersModel(TreeModel):
         # Ignore register numbers above 15 (16 is currently the Application Processor Status Register)
         if reg > 15:
             return
+        self.layoutAboutToBeChanged.emit()
         self.rootItem.child(0).child(reg).setData(1, value)
         self.modified_registers.append(reg)
         self.dataChanged.emit(self.createIndex(reg, 0, self.rootItem.child(0)),
                               self.createIndex(reg, 1, self.rootItem.child(0)))
+        self.layoutChanged.emit()
 
     def getRegister(self, i):
         return self.rootItem.child(0).child(i).data(1)

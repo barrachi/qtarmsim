@@ -16,11 +16,7 @@
 #                                                                         #
 ###########################################################################
 
-from PySide2 import QtCore, QtWidgets, QtGui
-from PySide2.QtCore import QAbstractItemModel
-from PySide2.QtWidgets import QHeaderView
-
-from qtarmsim.utils import getMonoSpacedFont
+from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class MyQTreeView(QtWidgets.QTreeView):
@@ -69,7 +65,8 @@ class MyQTreeView(QtWidgets.QTreeView):
             myFontPointSize = 10
         self.model().qFont.setPointSize(myFontPointSize)
         self.model().qFontLast.setPointSize(myFontPointSize)
-        expanded = [self.isExpanded(self.model().index(row, 0, QtCore.QModelIndex())) for row in range(self.model().rootItem.childCount())]
+        expanded = [self.isExpanded(self.model().index(row, 0, QtCore.QModelIndex())) for row in
+                    range(self.model().rootItem.childCount())]
         self.model().endResetModel()
         for row in range(self.model().rootItem.childCount()):
             self.setExpanded(self.model().index(row, 0, QtCore.QModelIndex()), expanded[row])
@@ -93,6 +90,6 @@ class MyQTreeView(QtWidgets.QTreeView):
         Processes the wheel event: zooms in and out whenever a CTRL+wheel event is triggered
         """
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            self.increaseFontSize(event.delta() / 120)
+            self.increaseFontSize(event.angleDelta().y() / 120)
         else:
             super().wheelEvent(event)

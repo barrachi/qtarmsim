@@ -3,7 +3,7 @@
 ###########################################################################
 #  QtARMSim -- A graphical ARM simulator                                  #
 #                                                                         #
-#  Copyright 2014-20 Sergio Barrachina Mir <barrachi@uji.es>              #
+#  Copyright 2014-23 Sergio Barrachina Mir <barrachi@uji.es>              #
 #                                                                         #
 #  This program is free software: you can redistribute it and/or modify   #
 #  it under the terms of the GNU General Public License as published by   #
@@ -22,11 +22,12 @@
 
 import getopt
 import os
+import platform
 import signal
 import sys
 
-import PySide2
-from PySide2 import QtCore, QtSvg, QtXml, QtWidgets
+import PySide6
+from PySide6 import QtCore, QtSvg, QtXml, QtWidgets
 
 from qtarmsim.mainwindow import QtARMSimMainWindow
 from qtarmsim.modulepath import module_path
@@ -82,9 +83,9 @@ def _get_opts():
 def main():
     # Make CTRL+C work
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    if sys.platform == 'darwin':
+    if platform.system() == 'Darwin':
         # Big Sur requires the next environment variable to be set
-        # (otherwise the PySide2 windows won't be shown)
+        # (otherwise the PySide6 windows won't be shown)
         # https://www.loekvandenouweland.com/content/pyside2-big-sur-does-not-show-window.html
         os.environ['QT_MAC_WANTS_LAYER'] = '1'
     # Create the application
@@ -95,7 +96,7 @@ def main():
     #  properly imported.
     #  https://stackoverflow.com/questions/9933358/pyside-svg-image-formats-not-found
     # ------------------------------------------------------------
-    for plugins_dir in [os.path.join(p, "plugins") for p in PySide2.__path__]:
+    for plugins_dir in [os.path.join(p, "plugins") for p in PySide6.__path__]:
         qApp.addLibraryPath(plugins_dir)
     # Process the command line options
     (file_name, debug, verbose) = _get_opts()

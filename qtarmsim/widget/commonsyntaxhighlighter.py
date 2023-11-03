@@ -18,40 +18,29 @@
 
 
 from PySide6 import QtCore, QtGui
-from abc import ABC, abstractmethod
+
 
 class HighlightingRule:
-    """A highlighting rule consists of a QRegularExpression pattern and its associated QTextCharFormat"""
+    """A highlighting rule consists of a QRegularExpression derived from pattern and its associated QTextCharFormat"""
+
     def __init__(self, patternTxt, hrFormat):
-        self.pattern = QtCore.QRegularExpression(patternTxt)
+        self.re = QtCore.QRegularExpression(patternTxt)
         self.format = hrFormat
 
-class PostInitCaller(type):
-    def __call__(cls, *args, **kwargs):
-        obj = type.__call__(cls, *args, **kwargs)
-        obj.__post_init__()
-        return obj
 
-
-class SyntaxHighlighter(ABC, QtGui.QSyntaxHighlighter, metaclass=PostInitCaller):
+class CommonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     """Class that can be used to parse and highlight a given code"""
 
     def __init__(self, parent):
         """Initializes the different patterns and their respective formats"""
         super().__init__(parent)
-        self.highlightingRules = None  # To be defined on __post_init__() method
-
-    @abstractmethod
-    def __post_init__(self):
-        # self.highlightingRules = generateHighlightingRules()
-        pass
+        self.highlightingRules = []  # To be defined on the derived classes
 
     def highlightBlock(self, text):
         """Parses a given block and applies the corresponding formats to the matched patterns"""
         # First, apply the patterns and formats from self.highlightingRules
         # ------------------------------------------------
         for rule in self.highlightingRules:
-            print(rule)
             i = rule.re.globalMatch(text)
             while i.hasNext():
                 match = i.next()

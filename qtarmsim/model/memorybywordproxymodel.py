@@ -18,8 +18,8 @@
 
 import sys
 
-from PySide2 import QtGui, QtCore, QtWidgets
-from PySide2.QtCore import Qt
+from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6.QtCore import Qt
 
 from .common import InputToHex, DataTypes
 from .memorymodel import MemoryModel

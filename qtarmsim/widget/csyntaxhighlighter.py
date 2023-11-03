@@ -21,10 +21,12 @@
 #   http://doc.qt.io/qt-5/qtwidgets-richtext-syntaxhighlighter-example.html
 # =========================================================================
 
-from PySide2 import QtCore, QtGui
+from PySide6 import QtGui
+
+from .commonsyntaxhighlighter import HighlightingRule, CommonSyntaxHighlighter
 
 
-def generateHighlightingRules():
+def generateCHighlightingRules():
     #
     # The following keywords have been obtained from the KDE syntax-highlight framework (c syntax):
     #   https://github.com/KDE/syntax-highlighting/blob/master/data/syntax/c.xml
@@ -127,78 +129,40 @@ def generateHighlightingRules():
     controlFlowFormat.setForeground(QtGui.QColor('black'))
     controlFlowFormat.setFontWeight(QtGui.QFont.Bold)
     pattern = '({})\\b'.format('|'.join(control_flow.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), controlFlowFormat))
+    highlightingRules.append(HighlightingRule(pattern, controlFlowFormat))
     # Add highlighting rules and format for C keywords
     keywordsFormat = QtGui.QTextCharFormat()
     keywordsFormat.setForeground(QtGui.QColor('darkBlue'))
     keywordsFormat.setFontWeight(QtGui.QFont.Bold)
     pattern = '({})\\b'.format('|'.join(keywords.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), keywordsFormat))
+    highlightingRules.append(HighlightingRule(pattern, keywordsFormat))
     # Add highlighting rules and format for C types
     typesFormat = QtGui.QTextCharFormat()
     typesFormat.setForeground(QtGui.QColor('darkBlue'))
     pattern = '({})\\b'.format('|'.join(types.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), typesFormat))
+    highlightingRules.append(HighlightingRule(pattern, typesFormat))
     # Add highlighting rules and format for numbers
     numbersFormat = QtGui.QTextCharFormat()
     numbersFormat.setForeground(QtGui.QColor('darkOrange'))
     pattern = '\\b[0-9]+\\b'
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), numbersFormat))
+    highlightingRules.append(HighlightingRule(pattern, numbersFormat))
     # Add highlighting rules and format for #define
     defineFormat = QtGui.QTextCharFormat()
     defineFormat.setForeground(QtGui.QColor('green'))
     pattern = '#define.*$'
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), defineFormat))
+    highlightingRules.append(HighlightingRule(pattern, defineFormat))
     # Add highlighting rules and format for C comments
     commentsFormat = QtGui.QTextCharFormat()
     commentsFormat.setForeground(QtGui.QColor('gray'))
     pattern = '//.*$'
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), commentsFormat))
+    highlightingRules.append(HighlightingRule(pattern, commentsFormat))
     return highlightingRules
 
 
-class HighlightingRule:
-    """A highlighting rule consists of a QRegExp pattern and its associated QTextCharFormat"""
-    def __init__(self, patternTxt, hrFormat):
-        self.pattern = QtCore.QRegExp(patternTxt)
-        self.format = hrFormat
-
-
-class CSyntaxHighlighter(QtGui.QSyntaxHighlighter):
-    """Class that can be used to parse and highlight ARM assembler code"""
-
-    highlightingRules = generateHighlightingRules()
+class CSyntaxHighlighter(CommonSyntaxHighlighter):
+    """Class that can be used to parse and highlight C assembler code"""
 
     def __init__(self, parent):
         """Initializes the different patterns and their respective formats"""
-        super(CSyntaxHighlighter, self).__init__(parent)
-
-    def highlightBlock(self, text):
-        """Parses a given block and applies the corresponding formats to the matched patterns"""
-        # First, apply the patterns and formats from self.highlightingRules
-        # ------------------------------------------------
-        for rule in self.highlightingRules:
-            index = rule.pattern.indexIn(text)
-            while index >= 0:
-                length = rule.pattern.matchedLength()
-                self.setFormat(index, length, rule.format)
-                index = rule.pattern.indexIn(text, index + length)
-        # Then, deal with multiline comments
-        # ------------------------------------------------
-        commentStartExpression = QtCore.QRegExp('/\\*')
-        commentEndExpression = QtCore.QRegExp('\\*/')
-        multilineCommentFormat = QtGui.QTextCharFormat()
-        multilineCommentFormat.setForeground(QtGui.QColor('gray'))
-        startIndex = 0
-        self.setCurrentBlockState(0)
-        if self.previousBlockState() != 1:
-            startIndex = commentStartExpression.indexIn(text, startIndex)
-        while startIndex >= 0:
-            endIndex = commentEndExpression.indexIn(text, startIndex)
-            if endIndex == -1:
-                self.setCurrentBlockState(1)
-                commentLength = len(text) - startIndex
-            else:
-                commentLength = endIndex - startIndex + commentEndExpression.matchedLength()
-            self.setFormat(startIndex, commentLength, multilineCommentFormat)
-            startIndex = commentStartExpression.indexIn(text, startIndex + commentLength)
+        super().__init__(parent)
+        self.highlightingRules = generateCHighlightingRules()

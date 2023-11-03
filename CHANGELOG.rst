@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+1.0.0 (2023-11-03)
+^^^^^^^^^^^^^^^^^^
+- Migrated from PySide2 to PySide6.
+- Updated the bundled GNU GCC (cross) compilers and added the win64 and ARM macOS versions.
+- Added the font increase and decrease functionality to the registers and memory panels.
+
 0.5.5 (2021-10-28)
 ^^^^^^^^^^^^^^^^^^
 - Fixed bug with macOS BigSur and PySide2.

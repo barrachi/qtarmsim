@@ -16,8 +16,8 @@
 #                                                                         #
 ###########################################################################
 
-from PySide2 import QtGui, QtCore
-from PySide2.QtCore import Qt
+from PySide6 import QtGui, QtCore
+from PySide6.QtCore import Qt
 
 from .simpletreemodel import TreeModel, TreeItem
 from ..utils import getMonoSpacedFont
@@ -77,7 +77,7 @@ class MemoryModel(TreeModel):
         """
         Adds a new memory bank to the memory model and populates it.
         """
-        self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
+        self.layoutAboutToBeChanged.emit()
         self.memoryBanks.append(MemoryBank(memType, hex_start, len(membytes)))
         memory_bank_item = TreeItem(("{} {}".format(memType, hex_start), ""), self.rootItem)
         self.rootItem.appendChild(memory_bank_item)
@@ -91,7 +91,7 @@ class MemoryModel(TreeModel):
             memory_item = TreeItem([hexAddress, hexByte], memory_bank_item)
             memory_bank_item.appendChild(memory_item)
             address += 1
-        self.emit(QtCore.SIGNAL("layoutChanged()"))
+        self.layoutChanged.emit()
 
     def getMemoryBank(self, hexAddress):
         """

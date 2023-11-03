@@ -25,8 +25,8 @@
 #    python3 -m qtarmsim.widget.memorylcdview
 #
 
-from PySide2 import QtCore, QtGui
-from PySide2.QtCore import Qt
+from PySide6 import QtCore, QtGui
+from PySide6.QtCore import Qt
 
 from .common import InputToHex
 

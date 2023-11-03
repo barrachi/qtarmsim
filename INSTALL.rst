@@ -4,7 +4,7 @@
 In order to install QtARMSim, its dependencies should be installed first.
 
 QtARMSim has the following dependencies: `Python3 <https://www.python.org/>`_,
-`Qt for Python (PySide2) <https://wiki.qt.io/Qt_for_Python>`_, and ARMSim.
+`Qt for Python (PySide6) <https://wiki.qt.io/Qt_for_Python>`_, and ARMSim.
 
 ARMSim, which is bundled with QtARMSim, has in turn the next dependencies:
 `Ruby <https://www.ruby-lang.org/en/>`_ and the
@@ -38,10 +38,10 @@ On a Gentoo distribution, you can install QtARMSim issuing (as root):
     # emerge -av pip ruby
     # pip3 install --user QtARMSim
 
-If you are installing QtARMSim on a system where PySide2 is already provided as
-a package, you can install the packaged version of PySide2 and then install
+If you are installing QtARMSim on a system where PySide6 is already provided as
+a package, you can install the packaged version of PySide6 and then install
 QtARMSim using the ``--no-deps`` option (be aware that the packaged version can
-be not so to up to date as the one obtained from pip). Once the PySide2
+be not so to up to date as the one obtained from pip). Once the PySide6
 package(s) are installed, QtARMSim should be installed as follows:
 
 .. code-block:: shell-session
@@ -100,15 +100,15 @@ After doing the previous steps, you should be able to execute QtARMSim by
 typing ``qtarmsim`` on a **new** ``Terminal``.
 
 Note: If an error message appeared when executing the ``pip3`` command saying that
-there was no matching distribution of PySide2 for your macOS version, you can
-instead install PySide2 with
+there was no matching distribution of PySide6 for your macOS version, you can
+instead install PySide6 with
 `MacPorts <https://guide.macports.org/#installing.xcode>`_ and QtARMSim with no
 dependencies using the following commands (MacPorts should be installed
 previously):
 
 .. code-block:: shell-session
 
-  $ sudo port install py39-pyside2   # same version as the installed Python
+  $ sudo port install py39-pyside6   # same version as the installed Python
   $ sudo -H pip3 install --no-deps QtARMSim
 
 
@@ -209,7 +209,7 @@ On macOS:
 ------------------------------------
 
 If something goes wrong after installing QtARMSim, executing the ``qtarmsim``
-command on a terminal could give some insight of what is the cause of the error.
+command on a terminal could give some insight of what is the error cause.
 
 The next known issues should not occur if the installation instructions are
 followed to the letter. They are listed here just in case they can be of some

@@ -20,14 +20,13 @@ import os
 import platform
 import re
 import shutil
-import sys
 import tempfile
 from functools import partial
 from glob import glob
 
-import PySide2
-from PySide2 import QtCore, QtGui, QtWidgets, QtPrintSupport
-from PySide2.QtCore import Qt
+import PySide6
+from PySide6 import QtCore, QtGui, QtWidgets, QtPrintSupport
+from PySide6.QtCore import Qt
 
 from .comm.armsimconnector import ARMSimConnector
 from .model.memorybywordproxymodel import MemoryByWordProxyModel
@@ -35,6 +34,7 @@ from .model.memorydumpproxymodel import MemoryDumpProxyModel
 from .model.memorymodel import MemoryModel
 from .model.registersmodel import RegistersModel
 from .modulepath import module_path
+from .res import main_rc, breeze_rc
 from .ui.mainwindow import Ui_MainWindow
 from .version import __version__
 from .widget.armcodeeditor import ARMCodeEditor
@@ -42,7 +42,6 @@ from .window.connectprogressbardialog import ConnectProgressBarDialog
 from .window.help import HelpWindow
 from .window.preferencesdialog import PreferencesDialog
 from .window.runprogressbardialog import RunProgressBarDialog
-from .res import main_rc, breeze_rc
 
 
 def __stub():
@@ -95,7 +94,7 @@ class DefaultSettings:
             # If not found, search its executable in the path
             fname = which("server.rb")
         if fname:
-            ruby_cmd = "ruby" if sys.platform != "win32" else "rubyw"
+            ruby_cmd = "ruby" if platform.system() != "Windows" else "rubyw"
             self._ARMSimCommand = "{} {}".format(ruby_cmd, os.path.basename(fname))
             self._ARMSimDirectory = os.path.dirname(fname)
         else:
@@ -105,26 +104,45 @@ class DefaultSettings:
         self._ARMSimPort = "8010"
         self._ARMSimUseLabels = "0"
         gcc_names = ["arm-none-eabi-gcc", "arm-unknown-linux-gnueabi-gcc", "arm-linux-gnueabi-gcc"]
-        if sys.platform == "win32":
+        if platform.system() == "Windows":
             gcc_names = ["{}.exe".format(name) for name in gcc_names]
         fname = ""
         for name in gcc_names:
             fname = which(name)
             if fname:
                 break
-        if not fname:  # Use bundled GNU Gcc if no native cross compiler is found
-            if sys.platform == "linux":
+        # See https://en.wikipedia.org/wiki/Uname for possible values of platform.machine() (i.e., uname -m)
+        if not fname:  # Use bundled GNU Gcc if no native (cross) compiler has been found
+            def get_fname(dir, executable="arm-none-eabi-gcc"):
+                return os.path.join(module_path, "gcc-arm", dir, "bin", executable)
+
+            if platform.system() == "Linux":
+                if platform.machine() == 'aarch64':
+                    fname = get_fname("linuxARM")
+                else:  # x86_{32,64}
+                    if platform.architecture()[0] == '64bit':
+                        fname = get_fname("linux64")
+                    elif platform.architecture()[0] == '32bit':
+                        fname = get_fname("linux32")
+                    else:
+                        fname = "Could not determine the correct compiler for this Linux system!"
+            elif platform.system() == "Windows":
+                executable = "arm-none-eabi-gcc.exe"
                 if platform.architecture()[0] == '64bit':
-                    fname = os.path.join(module_path, "gcc-arm", "linux64", "g++_arm_none_eabi", "bin",
-                                         "arm-none-eabi-gcc")
+                    fname = get_fname("win64", executable)
+                elif platform.architecture()[0] == '32bit':
+                    fname = get_fname("win32", executable)
                 else:
-                    fname = os.path.join(module_path, "gcc-arm", "linux32", "g++_arm_none_eabi", "bin",
-                                         "arm-none-eabi-gcc")
-            elif sys.platform == "win32":
-                fname = os.path.join(module_path, "gcc-arm", "win32", "g++_arm_none_eabi", "bin",
-                                     "arm-none-eabi-gcc.exe")
-            elif sys.platform == "darwin":
-                fname = os.path.join(module_path, "gcc-arm", "macos", "g++_arm_none_eabi", "bin", "arm-none-eabi-gcc")
+                    fname = "Could not determine the correct compiler for this Windows system!"
+            elif platform.system() == "Darwin":
+                if platform.machine() == 'aarch64':
+                    fname = get_fname("macosARM")
+                elif platform.machine() == 'x86_64':
+                    fname = get_fname("macos")
+                else:
+                    fname = "Could not determine the correct compiler for this macOS system!"
+            else:
+                fname = "Could not determine the correct compiler for this unknown system!"
         fname = fname if fname else ""
         self._ARMGccCommand = fname
         self._ARMGccOptions = "-mcpu=cortex-m1 -mthumb -c"
@@ -204,7 +222,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
            and puts in tabs the bottom dock widgets"""
 
         # macOS X quirks
-        if sys.platform == 'darwin':
+        if platform.system() == 'Darwin':
             # Set unified title and toolbar on Mac
             # @todo: check again the next on a macOS (last time it didn't work)
             # self.setUnifiedTitleAndToolBarOnMac(True)
@@ -312,7 +330,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 self.buildExamplesMenu(new_menu, file_or_dir)
                 menu.addAction(new_menu.menuAction())
             elif file_or_dir[-2:] in ('.s', '.c'):
-                action = QtWidgets.QAction(self)
+                action = QtGui.QAction(self)
                 action.setText(QtWidgets.QApplication.translate("Examples", _name_from_path(file_or_dir), None, -1))
                 action.setData(file_or_dir)
                 action.triggered.connect(partial(self.doOpenExample, action))
@@ -832,7 +850,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
         printDialog = QtPrintSupport.QPrintDialog(printer, self)
         printDialog.setOption(QtPrintSupport.QAbstractPrintDialog.PrintToFile, True)
-        if printDialog.exec_() == PySide2.QtWidgets.QDialog.Accepted:
+        if printDialog.exec_() == PySide6.QtWidgets.QDialog.Accepted:
             if self.ui.tabWidgetCode.currentIndex() == 0:
                 self.ui.sourceCodeEditor.print_(printer)
             else:
@@ -873,7 +891,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         for simCodeEditor in self.ui.simCodeEditors:
             document = simCodeEditor.document()
             cursor = QtGui.QTextCursor(document)
-            cursor = document.find(QtCore.QRegExp("^\\[{}\\]".format(PC)), cursor, QtGui.QTextDocument.FindWholeWords)
+            cursor = document.find(QtCore.QRegularExpression("^\\[{}\\]".format(PC)), cursor,
+                                   QtGui.QTextDocument.FindWholeWords)
             if cursor:
                 simCodeEditor.setCurrentHighlightedLineNumber(cursor.blockNumber())
                 self.ui.tabTabARMSim.setCurrentWidget(simCodeEditor)
@@ -997,13 +1016,13 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             (self.ui.dockWidgetLCD, self.ui.actionShow_LCD),
             (self.ui.dockWidgetTerminal, self.ui.actionShow_Terminal),
             (self.ui.dockWidgetSimulatorOutput, self.ui.actionShow_Simulator_Output),
-            (self.ui.dockWidgetMessages, self.ui.actionShow_Messages) ]:
+            (self.ui.dockWidgetMessages, self.ui.actionShow_Messages)]:
             widget.setHidden(True)
             action.setChecked(False)
         # Show the next elements
         for widget, action in [
             (self.ui.dockWidgetRegisters, self.ui.actionShow_Registers),
-            (self.ui.dockWidgetMemory, self.ui.actionShow_Memory) ]:
+            (self.ui.dockWidgetMemory, self.ui.actionShow_Memory)]:
             widget.setVisible(True)
             action.setChecked(True)
         # Tabify register and memory docks
@@ -1062,34 +1081,34 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def welcome_message(self):
         return "<b>QtARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
-               "(c) 2014-20 Sergio Barrachina Mir<br></br>\n" + \
-               self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
+            "(c) 2014-23 Sergio Barrachina Mir<br></br>\n" + \
+            self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
-               "<p><b>" + self.tr("Version") + " " + __version__ + "</b></p>" + \
-               "<p>" + "(c) 2014-20 Sergio Barrachina Mir" + "</p>" + \
-               "<p>" + \
-               "<a href='http://lorca.act.uji.es/project/qtarmsim/'>http://lorca.act.uji.es/project/qtarmsim/</a>" + \
-               "</p>" + \
-               "<p></p>" + \
-               "<p>" + self.tr("Running on ") + \
-               "Python " + sys.version.split(" ")[0] + ", " + \
-               "PySide2 " + PySide2.__version__ + ", and " + \
-               "Qt " + QtCore.__version__ + "." + \
-               "</p>" + \
-               "<hr/>" + \
-               self.tr("<p><b>Acknowledgments</b></p>") + \
-               "<p></p>" + \
-               self.tr(
-                   "<p>Initial development of QtARMSim was based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.</p>") + \
-               self.tr(
-                   "<p>Most of the ARM keywords and directives used on the assembler editor syntax highlighter are from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik.</p>") + \
-               self.tr("<p>The GUI icons are from the KDE Breeze theme icons.</p>") + \
-               self.tr("<p>The LCD font is 'AlphaSmart 3000' by Colonel Sanders.</p>") + \
-               self.tr(
-                   "<p>Software floating point support thanks to <a href='https://www.quinapalus.com/qfplib.html'>Qfplib: an ARM Cortex-M0 floating-point library in 1 kbyte</a>, (c) Mark Owen.</p>") + \
-               "</html>"
+            "<p><b>" + self.tr("Version") + " " + __version__ + "</b></p>" + \
+            "<p>" + "(c) 2014-23 Sergio Barrachina Mir" + "</p>" + \
+            "<p>" + \
+            "<a href='http://lorca.act.uji.es/project/qtarmsim/'>http://lorca.act.uji.es/project/qtarmsim/</a>" + \
+            "</p>" + \
+            "<p></p>" + \
+            "<p>" + self.tr("Running on ") + \
+            "Python " + platform.python_version() + ", " + \
+            "PySide6 " + PySide6.__version__ + ", and " + \
+            "Qt " + QtCore.__version__ + "." + \
+            "</p>" + \
+            "<hr/>" + \
+            self.tr("<p><b>Acknowledgments</b></p>") + \
+            "<p></p>" + \
+            self.tr(
+                "<p>Initial development of QtARMSim was based on the graphical frontend for Spim developed on 2008 by Gloria Edo Piñana.</p>") + \
+            self.tr(
+                "<p>Most of the ARM keywords and directives used on the assembler editor syntax highlighter are from the listings ARM definition for LaTeX (c) 2013 by Jacques Supcik.</p>") + \
+            self.tr("<p>The GUI icons are from the KDE Breeze theme icons.</p>") + \
+            self.tr("<p>The LCD font is 'AlphaSmart 3000' by Colonel Sanders.</p>") + \
+            self.tr(
+                "<p>Software floating point support thanks to <a href='https://www.quinapalus.com/qfplib.html'>Qfplib: an ARM Cortex-M0 floating-point library in 1 kbyte</a>, (c) Mark Owen.</p>") + \
+            "</html>"
 
     def doAbout_Qt_ARMSim(self):
         """Shows the About QtARMSim dialog"""
@@ -1319,4 +1338,3 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         if len(terminal_history) > 20:
             terminal_history = terminal_history[-20:]
         self.settings.setValue("TerminalHistory", '::'.join(terminal_history))
-

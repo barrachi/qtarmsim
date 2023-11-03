@@ -17,7 +17,7 @@
 ###########################################################################
 
 import math
-from PySide2 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 
 class InputToHex(QtCore.QObject):

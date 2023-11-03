@@ -21,10 +21,12 @@
 #   http://doc.qt.io/qt-5/qtwidgets-richtext-syntaxhighlighter-example.html
 # =========================================================================
 
-from PySide2 import QtCore, QtGui
+from PySide6 import QtGui
+
+from .commonsyntaxhighlighter import HighlightingRule, CommonSyntaxHighlighter
 
 
-def generateHighlightingRules():
+def generateARMHighlightingRules():
     #
     # Most of the following ARM keywords and directives were obtained from the listings ARM definition for LaTeX (c)
     # 2013 by Jacques Supcik
@@ -438,8 +440,8 @@ def generateHighlightingRules():
     directives = """
                 .2byte,.4byte,.8byte,.abort,.abort,.align,.altmacro,
                 .arch,.arch_extension,.arm,.ascii,.asciz,.balign,.bss,
-                .bundle_align_mode,.bundle_lock,,.bundle_unlock,.byte,.cantunwind,
-                .cfi_endproc,,.cfi_startproc,.code,.comm,.cpu,.data,.def,.desc,.dim,
+                .bundle_align_mode,.bundle_lock,.bundle_unlock,.byte,.cantunwind,
+                .cfi_endproc,.cfi_startproc,.code,.comm,.cpu,.data,.def,.desc,.dim,
                 .dn,.double,.eabi_attribute,.eject,.else,.elseif,.end,.endef,.endfunc,
                 .endif,.equ,.equiv,.eqv,.err,.error,.even,.exitm,.extend,.extend.,
                 .extern,.fail,.file,.fill,.float,.fnend,.fnstart,.force_thumb,.fpu,
@@ -451,7 +453,7 @@ def generateHighlightingRules():
                 .pad,.personality,.personalityindex,.pool,.popsection,.previous,
                 .print,.protected,.psize,.purgem,.pushsection,.qn,.quad,.reloc,.rept,
                 .req,.save,.sbttl,.scl,.secrel32,.section,.set,.setfp,.short,.single,
-                .size,.skip,.sleb128,.space,.stabd,,.stabn,,.stabs,.string,.string16,
+                .size,.skip,.sleb128,.space,.stabd,.stabn,.stabs,.string,.string16,
                 .string32,.string64,.string8,.struct,.subsection,.symver,.syntax,.tag,
                 .text,.thumb,.thumb_func,.thumb_set,.title,.tlsdescseq,.type,.uleb128,
                 .unreq,.unwind_raw,.val,.version,.vsave,.vtable_entry,.vtable_inherit,
@@ -471,76 +473,42 @@ def generateHighlightingRules():
             keywordsDict[kw[:3]] = [kw[3:], ]
     compactedKeywordsList = []
     for key, value in keywordsDict.items():
-        compactedKeywordsList.append('{}({})'.format(key, '|'.join(value)))
+        if len(value) == 1:
+            txt = "{}{}".format(key, value[0])
+        else:
+            txt = "{}(?:{})".format(key, '|'.join(value))
+        compactedKeywordsList.append(txt)
     pattern = '\\b({})\\b'.format('|'.join(compactedKeywordsList))
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), keywordFormat))
+    highlightingRules.append(HighlightingRule(pattern, keywordFormat))
     # Add highlighting rules and format for ARM assembler directives
     directiveFormat = QtGui.QTextCharFormat()
     directiveFormat.setForeground(QtGui.QColor('green'))
     directiveFormat.setFontWeight(QtGui.QFont.Bold)
-    pattern = '[.]({})\\b'.format('|'.join(directives.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), directiveFormat))
+    pattern = '[.](?:{})\\b'.format('|'.join(directives.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
+    highlightingRules.append(HighlightingRule(pattern, directiveFormat))
     # Add highlighting rules and format for ARM registers
     registerFormat = QtGui.QTextCharFormat()
     registerFormat.setForeground(QtGui.QColor('green'))
-    pattern = '\\b({})\\b'.format('|'.join(['r\\d', 'r1[0-5]{0,1}', '[sS][pP]', '[lL][rR]', '[pP][cC]']))
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), registerFormat))
+    pattern = '\\b(?:{})\\b'.format('|'.join(['r\\d', 'r1[0-5]{0,1}', '[sS][pP]', '[lL][rR]', '[pP][cC]']))
+    highlightingRules.append(HighlightingRule(pattern, registerFormat))
     # Add highlighting rules and format for ARM labels
     labelFormat = QtGui.QTextCharFormat()
     labelFormat.setForeground(QtGui.QColor('black'))
     labelFormat.setFontWeight(QtGui.QFont.Bold)
     for pattern in ['^\\s*[^\\d\\s][\\w]*:', ]:
-        highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), labelFormat))
-    # Add highlighting rules and format for ARM comments, tabs and spaces
+        highlightingRules.append(HighlightingRule(pattern, labelFormat))
+    # Add highlighting rules and format for ARM comments
     commentFormat = QtGui.QTextCharFormat()
     commentFormat.setForeground(QtGui.QColor('gray'))
-    pattern = '(@.*$|^\\s*#.*$|[ \t]+)'
-    highlightingRules.append(HighlightingRule(QtCore.QRegExp(pattern), commentFormat))
+    pattern = '(@.*$|^\\s*#.*$)'
+    highlightingRules.append(HighlightingRule(pattern, commentFormat))
     return highlightingRules
 
 
-class HighlightingRule:
-    """A highlighting rule consists of a QRegExp pattern and its associated QTextCharFormat"""
-    def __init__(self, patternTxt, hrFormat):
-        self.pattern = QtCore.QRegExp(patternTxt)
-        self.format = hrFormat
-
-
-class ARMSyntaxHighlighter(QtGui.QSyntaxHighlighter):
+class ARMSyntaxHighlighter(CommonSyntaxHighlighter):
     """Class that can be used to parse and highlight ARM assembler code"""
-
-    highlightingRules = generateHighlightingRules()
 
     def __init__(self, parent):
         """Initializes the different patterns and their respective formats"""
-        super(ARMSyntaxHighlighter, self).__init__(parent)
-
-    def highlightBlock(self, text):
-        """Parses a given block and applies the corresponding formats to the matched patterns"""
-        # First, apply the patterns and formats from self.highlightingRules
-        # ------------------------------------------------
-        for rule in self.highlightingRules:
-            index = rule.pattern.indexIn(text)
-            while index >= 0:
-                length = rule.pattern.matchedLength()
-                self.setFormat(index, length, rule.format)
-                index = rule.pattern.indexIn(text, index + length)
-        # Then, deal with multiline comments
-        # ------------------------------------------------
-        commentStartExpression = QtCore.QRegExp('/\\*')
-        commentEndExpression = QtCore.QRegExp('\\*/')
-        multilineCommentFormat = QtGui.QTextCharFormat()
-        multilineCommentFormat.setForeground(QtGui.QColor('gray'))
-        startIndex = 0
-        self.setCurrentBlockState(0)
-        if self.previousBlockState() != 1:
-            startIndex = commentStartExpression.indexIn(text, startIndex)
-        while startIndex >= 0:
-            endIndex = commentEndExpression.indexIn(text, startIndex)
-            if endIndex == -1:
-                self.setCurrentBlockState(1)
-                commentLength = len(text) - startIndex
-            else:
-                commentLength = endIndex - startIndex + commentEndExpression.matchedLength()
-            self.setFormat(startIndex, commentLength, multilineCommentFormat)
-            startIndex = commentStartExpression.indexIn(text, startIndex + commentLength)
+        super().__init__(parent)
+        self.highlightingRules = generateARMHighlightingRules()

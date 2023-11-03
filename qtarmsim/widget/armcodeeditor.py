@@ -19,7 +19,7 @@
 
 import sys
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from .codeeditor import CodeEditor
 from .armsyntaxhighlighter import ARMSyntaxHighlighter
 from .csyntaxhighlighter import CSyntaxHighlighter
@@ -42,7 +42,7 @@ class ARMCodeEditor(CodeEditor):
                                                                                                          'pc', 'PC']
         # Labels
         labels = []
-        labelQRegExp = QtCore.QRegExp('^\\s*[^\\d\\s][\\w]*:')
+        labelQRegExp = QtCore.QRegularExpression('^\\s*[^\\d\\s][\\w]*:')
         cursor = QtGui.QTextCursor(self.document())
         while not cursor.isNull() and not cursor.atEnd():
             cursor = self.document().find(labelQRegExp, cursor, QtGui.QTextDocument.FindWholeWords)
