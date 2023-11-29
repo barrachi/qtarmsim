@@ -135,7 +135,7 @@ class DefaultSettings:
                 else:
                     fname = "Could not determine the correct compiler for this Windows system!"
             elif platform.system() == "Darwin":
-                if platform.machine() == 'aarch64':
+                if platform.machine() == 'arm64':
                     fname = get_fname("macosARM")
                 elif platform.machine() == 'x86_64':
                     fname = get_fname("macos")

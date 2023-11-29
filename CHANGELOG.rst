@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+1.0.1 (2023-11-28)
+^^^^^^^^^^^^^^^^^^
+- Fixed the way an ARM macOS is detected.
+
 1.0.0 (2023-11-03)
 ^^^^^^^^^^^^^^^^^^
 - Migrated from PySide2 to PySide6.
