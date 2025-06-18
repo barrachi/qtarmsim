@@ -10,11 +10,22 @@ To create a source distribution::
 The package ``checkdocs`` can be installed using::
   $ pip3 install --user collective.checkdocs pygments
 
-To test the source distribution ``dist/qtarmsim-x.x.x.tar.gz``::
+To create the source and the wheel distribution::
+  $ uv build
+
+To test the source or wheel distribution ``dist/qtarmsim-x.x.x.tar.gz``::
+  $ uv venv /tmp/venv
+  $ source /tmp/venv/bin/activate
+  $ uv pip install dist/qtarmim.
   $ virtualenv --python=python3 testqtarmsim
   $ . testqtarmsim/bin/activate
   $ pip3 install dist/qtarmsim-x.y.z.tar.gz
   $ deactivate
+
+To set a new version::
+  $ git tag x.y.z
+  $ git commit
+  $ git push
 
 To upload it to the `test pypi repository <https://testpypi.python.org/>`_::
    $ twine upload --repository-url https://test.pypi.org/legacy/ dist/qtarmsim-x.x.x.tar.gz
