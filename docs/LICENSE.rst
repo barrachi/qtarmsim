@@ -1,7 +1,7 @@
 License
 -------
 
-Copyright 2014-20 Sergio Barrachina Mir <barrachi@uji.es>
+Copyright 2014-25 Sergio Barrachina Mir <barrachi@uji.es>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 3rd party software acknowledgments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,4 +40,4 @@ included under the ``3rdparty/`` directory. This part of the code
 is only available under the GPLv2 license.
 
 `AlphaSmart 3000 <https://www.urbanfonts.com/fonts/AlphaSmart_3000.font>`_ font,
-designed by Colonel Sanders. Included under the ``3rdparty/`` directory.
+designed by Colonel Sanders. Included under the ``src/3rdparty/`` directory.
