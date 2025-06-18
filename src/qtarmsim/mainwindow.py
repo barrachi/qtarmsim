@@ -34,21 +34,25 @@ from .model.memorydumpproxymodel import MemoryDumpProxyModel
 from .model.memorymodel import MemoryModel
 from .model.registersmodel import RegistersModel
 from .modulepath import module_path
-from .res import main_rc, breeze_rc
-from .ui.mainwindow import Ui_MainWindow
-from .version import __version__
+from .res import main_rc, breeze_icons_rc
+from .ui.ui_mainwindow import Ui_MainWindow
 from .widget.armcodeeditor import ARMCodeEditor
 from .window.connectprogressbardialog import ConnectProgressBarDialog
 from .window.help import HelpWindow
 from .window.preferencesdialog import PreferencesDialog
 from .window.runprogressbardialog import RunProgressBarDialog
 
+try:
+    from ._version import __version__
+except ImportError:
+    # Fallback for when the package is not installed (e.g., during development without a build)
+    __version__ = "0.0.0+unknown"
 
 def __stub():
     """
-    This function does nothing. It exists only to avoid main_rc and breeze_rc imports to be removed.
+    This function does nothing. It exists only to avoid main_rc and breeze_icons_rc imports from being removed.
     """
-    return main_rc, breeze_rc
+    return main_rc, breeze_icons_rc
 
 
 def _fromUtf8(s):
@@ -113,8 +117,8 @@ class DefaultSettings:
                 break
         # See https://en.wikipedia.org/wiki/Uname for possible values of platform.machine() (i.e., uname -m)
         if not fname:  # Use bundled GNU Gcc if no native (cross) compiler has been found
-            def get_fname(dir, executable="arm-none-eabi-gcc"):
-                return os.path.join(module_path, "gcc-arm", dir, "bin", executable)
+            def get_fname(arch_dir, gcc="arm-none-eabi-gcc"):
+                return os.path.join(module_path, "gcc-arm", arch_dir, "bin", gcc)
 
             if platform.system() == "Linux":
                 if platform.machine() == 'aarch64':
@@ -1081,13 +1085,13 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def welcome_message(self):
         return "<b>QtARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
-            "(c) 2014-23 Sergio Barrachina Mir<br></br>\n" + \
+            "(c) 2014-25 Sergio Barrachina Mir<br></br>\n" + \
             self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self):
         return "<html>" + \
             "<p><b>" + self.tr("Version") + " " + __version__ + "</b></p>" + \
-            "<p>" + "(c) 2014-23 Sergio Barrachina Mir" + "</p>" + \
+            "<p>" + "(c) 2014-25 Sergio Barrachina Mir" + "</p>" + \
             "<p>" + \
             "<a href='http://lorca.act.uji.es/project/qtarmsim/'>http://lorca.act.uji.es/project/qtarmsim/</a>" + \
             "</p>" + \

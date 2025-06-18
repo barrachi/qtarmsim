@@ -22,7 +22,7 @@ import sys
 from PySide6 import QtCore, QtWidgets
 
 from ..modulepath import module_path
-from ..ui.help import Ui_Help
+from ..ui.ui_help import Ui_Help
 
 
 class HelpWindow(QtWidgets.QWidget):
@@ -34,10 +34,10 @@ class HelpWindow(QtWidgets.QWidget):
         self.ui.setupUi(self)
         rect = self.contentsRect()
         self.editor = QtWidgets.QTextBrowser(self)
-        self.editor.setReadOnly(1)
-        self.editor.setAcceptRichText(1)
+        self.editor.setReadOnly(True)
+        self.editor.setAcceptRichText(True)
         self.editor.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
-        self.editor.setOpenLinks(1)
+        self.editor.setOpenLinks(True)
         self.editor.setGeometry(rect)
         # @todo: check the following sentence
         policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored,

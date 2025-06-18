@@ -580,8 +580,8 @@
   <action name="actionWhats_This">
    <property name="icon">
     <iconset theme="help-whatsthis">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/help-whatsthis.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/help-whatsthis.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>What's &amp;This?</string>
@@ -599,8 +599,8 @@
   <action name="actionAbout_Qt_ARMSim">
    <property name="icon">
     <iconset theme="help-about">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/help-about.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/help-about.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;About QtARMSim</string>
@@ -615,8 +615,8 @@
   <action name="actionHelp">
    <property name="icon">
     <iconset theme="help-contents">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/22/help-contents.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/help-contents.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>QtARMSim &amp;Help</string>
@@ -628,8 +628,8 @@
   <action name="actionAbout_ARMSim">
    <property name="icon">
     <iconset theme="help-about">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/help-about.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/help-about.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>A&amp;bout ARMSim</string>
@@ -638,8 +638,8 @@
   <action name="actionNew">
    <property name="icon">
     <iconset theme="document-new">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/document-new.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/document-new.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;New...</string>
@@ -651,8 +651,8 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset theme="document-open">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/document-open.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/document-open.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Open...</string>
@@ -667,8 +667,8 @@
   <action name="actionSave">
    <property name="icon">
     <iconset theme="document-save">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/document-save.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/document-save.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -680,8 +680,8 @@
   <action name="actionSave_As">
    <property name="icon">
     <iconset theme="document-save-as">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/document-save-as.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/document-save-as.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>Save &amp;As...</string>
@@ -690,8 +690,8 @@
   <action name="actionPrint">
    <property name="icon">
     <iconset theme="document-print">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/document-print.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/document-print.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Print...</string>
@@ -703,8 +703,8 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset theme="application-exit">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/application-exit.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/application-exit.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -716,8 +716,8 @@
   <action name="actionRun">
    <property name="icon">
     <iconset theme="system-run">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/system-run.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/system-run.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Run</string>
@@ -729,8 +729,8 @@
   <action name="actionStepInto">
    <property name="icon">
     <iconset theme="debug-step-into">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/debug-step-into.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/debug-step-into.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>Step &amp;Into</string>
@@ -805,8 +805,8 @@
   <action name="action_Undo">
    <property name="icon">
     <iconset theme="edit-undo">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/edit-undo.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/edit-undo.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Undo</string>
@@ -818,8 +818,8 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset theme="edit-redo">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/edit-redo.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/edit-redo.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>Re&amp;do</string>
@@ -831,8 +831,8 @@
   <action name="actionCut">
    <property name="icon">
     <iconset theme="edit-cut">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/edit-cut.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/edit-cut.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>Cu&amp;t</string>
@@ -844,8 +844,8 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset theme="edit-copy">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/edit-copy.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/edit-copy.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Copy</string>
@@ -857,8 +857,8 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset theme="edit-paste">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/edit-paste.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/edit-paste.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>&amp;Paste</string>
@@ -870,8 +870,8 @@
   <action name="actionSelect_All">
    <property name="icon">
     <iconset theme="edit-select-all">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/edit-select-all.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/edit-select-all.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>Select &amp;All</string>
@@ -894,8 +894,8 @@
   <action name="actionStepOver">
    <property name="icon">
     <iconset theme="debug-step-over">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/24/debug-step-over.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/debug-step-over.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>Step &amp;Over</string>
@@ -910,8 +910,8 @@
   <action name="actionRestart">
    <property name="icon">
     <iconset theme="view-refresh">
-     <normaloff>../../../../../../.designer/backup</normaloff>
-     <normalon>:themes/breeze/32/view-refresh.svg</normalon>../../../../../../.designer/backup</iconset>
+     <normaloff></normaloff>
+     <normalon>:themes/breeze_icons/22/view-refresh.svg</normalon></iconset>
    </property>
    <property name="text">
     <string>Re&amp;start</string>

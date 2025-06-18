@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """
-Autogenerating a qrc file from the full contents
+Auto generating a qrc file from the full contents
 of a directory tree
 copyright 2011 by Flavio Codeco Coelho
 licese: GPL v3
 """
+
 import os
 import argparse
 import sys

@@ -1,0 +1,23 @@
+<RCC>
+  <qresource prefix="themes">
+    <file>breeze_icons/22/help-whatsthis.svg</file>
+    <file>breeze_icons/22/debug-step-into.svg</file>
+    <file>breeze_icons/22/view-refresh.svg</file>
+    <file>breeze_icons/22/edit-select-all.svg</file>
+    <file>breeze_icons/22/document-new.svg</file>
+    <file>breeze_icons/22/help-about.svg</file>
+    <file>breeze_icons/22/edit-cut.svg</file>
+    <file>breeze_icons/22/document-save-as.svg</file>
+    <file>breeze_icons/22/edit-redo.svg</file>
+    <file>breeze_icons/22/edit-copy.svg</file>
+    <file>breeze_icons/22/help-contents.svg</file>
+    <file>breeze_icons/22/edit-paste.svg</file>
+    <file>breeze_icons/22/document-open.svg</file>
+    <file>breeze_icons/22/document-print.svg</file>
+    <file>breeze_icons/22/document-save.svg</file>
+    <file>breeze_icons/22/system-run.svg</file>
+    <file>breeze_icons/22/application-exit.svg</file>
+    <file>breeze_icons/22/debug-step-over.svg</file>
+    <file>breeze_icons/22/edit-undo.svg</file>
+  </qresource>
+</RCC>

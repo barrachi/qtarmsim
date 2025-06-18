@@ -19,7 +19,7 @@
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
-from ..ui.preferences import Ui_PreferencesDialog
+from ..ui.ui_preferences import Ui_PreferencesDialog
 
 
 class PreferencesDialog(QtWidgets.QDialog):

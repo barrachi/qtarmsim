@@ -27,7 +27,8 @@ import signal
 import sys
 
 import PySide6
-from PySide6 import QtCore, QtSvg, QtXml, QtWidgets
+import qdarktheme
+from PySide6 import QtSvg, QtXml, QtWidgets
 
 from qtarmsim.mainwindow import QtARMSimMainWindow
 from qtarmsim.modulepath import module_path
@@ -36,9 +37,9 @@ from qtarmsim.modulepath import module_path
 def __stub():
     """
     This function does nothing. It exists only to avoid QtSvg and QtXml imports to be removed.
-    QtSvg and QtXml must be imported in order to use SVG icons.
+    QtSvg and QtXml must be imported to use the SVG icons.
     """
-    return QtSvg.Object(), QtXml.Object()
+    return QtSvg, QtXml
 
 
 def _help():
@@ -100,21 +101,16 @@ def main():
         qApp.addLibraryPath(plugins_dir)
     # Process the command line options
     (file_name, debug, verbose) = _get_opts()
+    # Set the application style
+    qdarktheme.setup_theme("light")
     # Create the main window and show it
     main_window = QtARMSimMainWindow(debug=debug, verbose=verbose)
     main_window.show()
     # If there is a file_name on the command line, open it
     if file_name:
         main_window.readFile(file_name)
-    # Set style
-    # print(QtWidgets.QStyleFactory.keys())
-    # qApp.setStyle("Fusion")
-    url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "stylesheets", "lightblue.css"))
-    f = open(url.toLocalFile())
-    qApp.setStyleSheet("".join(f.readlines()))
-    f.close()
     # Enter the main loop of the application
-    sys.exit(qApp.exec_())
+    sys.exit(qApp.exec())
 
 
 if __name__ == "__main__":
