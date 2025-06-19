@@ -1,0 +1,106 @@
+[project]
+name = "qtarmsim"
+description = "Easy to use graphical ARM simulator"
+dynamic = ["readme", "version"]
+authors = [
+    {name = "Sergio Barrachina Mir", email = "barrachi@uji.es"},
+]
+dependencies = [
+    "pyqtdarktheme>=2.1.0",
+    # "setuptools>=75.3.2",
+    "PySide6~=6.6.0",
+    "pywin32>=1.0;platform_system=='Windows'",
+]
+requires-python = ">=3.10"
+license = {text = "GPLV3+"}
+keywords = ["ARM", "simulator", "assembler", "disassembler", "debugger"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Assemblers",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Disassemblers",
+    "Topic :: System :: Emulators",
+]
+
+[project.urls]
+Homepage = "http://lorca.act.uji.es/project/qtarmsim/"
+
+[project.scripts]
+post_install_qtarmsim = "qtarmsim.post_install:main"
+
+[project.gui-scripts]
+qtarmsim = "qtarmsim:main"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/qtarmsim/_version.py"
+
+[tool.hatch.build]
+artifacts = [
+    # Generated files that must be included bypassing exclude rules (.gitignore)
+    'src/qtarmsim/ui/ui_*.py',
+    'src/qtarmsim/res/*_rc.py',
+    'src/qtarmsim/res/desktop/qtarmsim.appdata.xml',
+]
+exclude = [
+    'src/**/*.ui',
+    'src/**/*.qrc',
+    'src/**/*.in',
+]
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "docs/CHANGELOG.rst",
+    "docs/INSTALL.rst",
+    "docs/LICENSE.rst",
+    "src/qtarmsim",
+    "README.rst",
+    "GPL.txt"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qtarmsim"]
+
+
+# ----------------------------------------------------------------
+# Documentation
+# ----------------------------------------------------------------
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/x-rst"
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.rst"
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "\n\n"
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "docs/INSTALL.rst"
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "\n\n"
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "docs/LICENSE.rst"
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "\n\n"
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "docs/CHANGELOG.rst"
+
+
+# ----------------------------------------------------------------
+# Build hooks (they should be included in the sdist)
+# ----------------------------------------------------------------
+[tool.hatch.build.hooks.custom]
+path = "build_scripts/generate_assets.py"
+[tool.hatch.build.targets.sdist.force-include]
+"build_scripts/generate_assets.py" = "/build_scripts/generate_assets.py"
