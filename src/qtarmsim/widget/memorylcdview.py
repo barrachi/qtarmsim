@@ -47,9 +47,9 @@ class MemoryLCDView(QtWidgets.QTableView):
         #                 padding: 4 -3 -3 4;
         self.setStyleSheet("""
             QTableView { background: transparent;
-                         border-width: 18 18 18 18;
-                         padding: 4 -4 -4 4;
-                         border-image: url(:/images/lcd.png) 18 18 18 18;}
+                         border-width: 8 8 8 8;
+                         padding: 16 -6 -6 16;
+                         border-image: url(:/images/lcd.png) 8 8 8 8;}
             QTableView::item:hover {background: none;}
         """)
         self.verticalScrollBar().setDisabled(True)
