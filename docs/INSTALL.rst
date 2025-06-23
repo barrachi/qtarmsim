@@ -100,7 +100,7 @@ Follow these steps to install QtARMSim on Windows:
 
        gem install shell e2mmap sync   # to install the required Ruby modules
        pip3 install qtarmsim           # to install qtarmsim
-       post_install_qtarmsim           # to create
+       post_install_qtarmsim           # to create start menu entry and shortcuts
 
 1.3 Installing QtARMSim on macOS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

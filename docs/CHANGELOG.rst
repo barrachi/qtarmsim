@@ -1,9 +1,10 @@
 Changelog
 ---------
 
-1.0.5 (2025-06-23)
+1.0.6 (2025-06-23)
 ^^^^^^^^^^^^^^^^^^
-- Removed pyqtdarktheme dependency as it only supports until Python 3.11.
+- Removed pyqtdarktheme dependency (it only supports python versions lower than 3.12).
+- Edited the package documentation.
 
 1.0.4 (2025-06-20)
 ^^^^^^^^^^^^^^^^^^
