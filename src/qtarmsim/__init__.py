@@ -27,7 +27,6 @@ import signal
 import sys
 
 import PySide6
-import qdarktheme
 from PySide6 import QtSvg, QtXml, QtWidgets
 
 from qtarmsim.mainwindow import QtARMSimMainWindow
@@ -102,7 +101,7 @@ def main():
     # Process the command line options
     (file_name, debug, verbose) = _get_opts()
     # Set the application style
-    qdarktheme.setup_theme("light")
+    qApp.setStyle('Fusion')
     # Create the main window and show it
     main_window = QtARMSimMainWindow(debug=debug, verbose=verbose)
     main_window.show()

@@ -6,12 +6,11 @@ authors = [
     {name = "Sergio Barrachina Mir", email = "barrachi@uji.es"},
 ]
 dependencies = [
-    "pyqtdarktheme>=2.1.0",
     # "setuptools>=75.3.2",
     "PySide6~=6.6.0",
     "pywin32>=1.0;platform_system=='Windows'",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = {text = "GPLV3+"}
 keywords = ["ARM", "simulator", "assembler", "disassembler", "debugger"]
 classifiers = [
@@ -20,7 +19,6 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -31,7 +29,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "http://lorca.act.uji.es/project/qtarmsim/"
+Homepage = "https://lorca.act.uji.es/project/qtarmsim/"
 
 [project.scripts]
 post_install_qtarmsim = "qtarmsim.post_install:main"
