@@ -2,8 +2,12 @@ with import <nixpkgs> {};
 
 mkShell {
   buildInputs = [
-    python310
-    uv
+    python311
+    python311Packages.sphinx
+    python311Packages.doc8   # linter
+    rstfmt
+    jetbrains.pycharm-professional
     boxes
+    uv
   ];
 }
