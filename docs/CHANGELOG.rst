@@ -1,6 +1,16 @@
 Changelog
 ---------
 
+1.0.5 (2025-06-23)
+^^^^^^^^^^^^^^^^^^
+- Removed pyqtdarktheme dependency as it only supports until Python 3.11.
+
+1.0.4 (2025-06-20)
+^^^^^^^^^^^^^^^^^^
+- Reorganized the project to use pyproject.toml and the hatchling builder.
+- Updated the KDE breeze icons.
+- Using pyqtdarktheme to improve the QtARMSim aesthetics.
+
 1.0.1 (2023-11-28)
 ^^^^^^^^^^^^^^^^^^
 - Fixed the way an ARM macOS is detected.
