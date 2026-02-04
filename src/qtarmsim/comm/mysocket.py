@@ -31,9 +31,9 @@ class MySocket(QtCore.QObject):
     ENCODING = 'utf8'
 
     # noinspection PyUnresolvedReferences
-    sentLine = QtCore.Signal('QString')
+    sentLine = QtCore.Signal(str)
     # noinspection PyUnresolvedReferences
-    receivedLine = QtCore.Signal('QString')
+    receivedLine = QtCore.Signal(str)
 
     def __init__(self, verbose=False):
         """
@@ -91,8 +91,8 @@ class MySocket(QtCore.QObject):
     def test_port_is_free(self, port):
         """
         Tests if a port is free by binding a new socket to the given port and closing it afterwards.
-        This method should only be used if a free port number has to passed to a third application, and be aware that
-        there is a chance that another application grabs the port in the meantime.
+        This method should only be used if a free port number has to be passed to a third application, and be aware
+        that there is a chance that another application grabs the port in the meantime.
 
         The correct way of getting a port for ourselves is using self.server_bind().
 
@@ -130,10 +130,11 @@ class MySocket(QtCore.QObject):
                 line = self.receive_line()
             except ConnectionResetError:
                 break
-            if line != '':
-                yield line
             else:
-                break
+                if line != '':
+                    yield line
+                else:
+                    break
 
     def _receive_line(self):
         """

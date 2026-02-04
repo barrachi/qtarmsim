@@ -75,8 +75,7 @@ class ARMSimConnector(QtCore.QObject):
     re_memexpr = re.compile("(0[xX][0-9a-fA-F]+): (0[xX][0-9a-fA-F]+)")
 
     # Signals
-    # noinspection PyUnresolvedReferences
-    stdoutLine = QtCore.Signal('QString')
+    stdoutLine = QtCore.Signal(str)
 
     def __init__(self, verbose=False):
         super().__init__()
@@ -206,7 +205,7 @@ class ARMSimConnector(QtCore.QObject):
         while self.armsim_process.poll() is None and not self.doConnect(server, free_port) and chances < 30:
             time.sleep(.1)
             chances += 1
-        # Check if self.armsim_process is still alive and we have not consumed all the chances
+        # Check if self.armsim_process is still alive, and we have not consumed all the chances
         if self.armsim_process.poll() is None and chances < 30:
             # Return no error message
             return None
@@ -289,7 +288,7 @@ class ARMSimConnector(QtCore.QObject):
             else:  # got line
                 try:
                     line = line_bytes.decode("utf-8").rstrip()
-                except UnicodeDecodeError as err:
+                except UnicodeDecodeError as _err:
                     line = "UnicodeDecodeError in '{}'".format(line_bytes.decode("utf8", "ignore").rstrip())
                 self.stdoutLine.emit(line)
         self._updateTimer.start(1000)
@@ -413,7 +412,7 @@ class ARMSimConnector(QtCore.QObject):
         """
         Gets nbytes at most from memory starting at hex_start.
 
-        @return: An array of pairs of the form (hexadecimal memory address, hexadecimal byte).
+        @return: An array of (hexadecimal memory address, hexadecimal byte) pairs.
         """
         self.my_socket.send_line("DUMP MEMORY {} {}".format(hex_start, nbytes))
         for line in self.my_socket.receive_lines_till_eof():
@@ -462,7 +461,7 @@ class ARMSimConnector(QtCore.QObject):
 
     def getDisassemble(self, hex_start, ninsts):
         """
-        Gets the disassemble of ninsts instructions at most starting at hex_start memory address.
+        Gets the disassembly of ninsts instructions at most starting at hex_start memory address.
 
         @return: An array of lines with a disassembled instruction in each.
         """
@@ -602,7 +601,7 @@ class ARMSimConnector(QtCore.QObject):
         try:
             os.rmdir(tmp_dir)
         except OSError:
-            # Directory was not empty (don't raise an exception just for that ;-) )
+            # The directory was not empty (don't raise an exception just for that ;-))
             pass
 
     # @todo: add this to the grammar document
