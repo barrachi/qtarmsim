@@ -20,8 +20,9 @@
 import sys
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from .codeeditor import CodeEditor
+
 from .armsyntaxhighlighter import ARMSyntaxHighlighter
+from .codeeditor import CodeEditor
 from .csyntaxhighlighter import CSyntaxHighlighter
 
 
@@ -45,7 +46,7 @@ class ARMCodeEditor(CodeEditor):
         labelQRegExp = QtCore.QRegularExpression('^\\s*[^\\d\\s][\\w]*:')
         cursor = QtGui.QTextCursor(self.document())
         while not cursor.isNull() and not cursor.atEnd():
-            cursor = self.document().find(labelQRegExp, cursor, QtGui.QTextDocument.FindWholeWords)
+            cursor = self.document().find(labelQRegExp, cursor, QtGui.QTextDocument.FindFlag.FindWholeWords)
             if cursor.selectedText():
                 labels.append(cursor.selectedText()[:-1].strip())
         # Return special keywords

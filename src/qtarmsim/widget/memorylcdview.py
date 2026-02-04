@@ -16,6 +16,11 @@
 #                                                                         #
 ###########################################################################
 
+# -----------------------------------oOOo----------------------------------
+# To test this module, execute from the qtarmsim upper directory:
+#    python3 -m qtarmsim.widget.memorylcdview
+# -------------------------------------------------------------------------
+
 import sys
 
 from PySide6 import QtCore, QtWidgets
@@ -29,19 +34,12 @@ class MemoryLCDView(QtWidgets.QTableView):
 
     def __init__(self, parent=None):
         super(MemoryLCDView, self).__init__(parent)
-        # ------------------------------------------------------------
-        #  Instance attributes that will be properly initialized later
-        # ------------------------------------------------------------
-        self.memoryLCDProxyModel = None
-        self.LCDColumns = None
-        self.LCDRows = None
-        # ------------------------------------------------------------
-        self.setGridStyle(Qt.NoPen)
+        self.setGridStyle(Qt.PenStyle.NoPen)
         self.horizontalHeader().hide()
-        self.horizontalHeader().setMinimumSectionSize(1) # Minimum width
+        self.horizontalHeader().setMinimumSectionSize(1)  # Minimum width
         self.verticalHeader().hide()
-        self.verticalHeader().setMinimumSectionSize(1) # Minimum height
-        self.setFocusPolicy(Qt.NoFocus)
+        self.verticalHeader().setMinimumSectionSize(1)  # Minimum height
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         # #78AE4D
         #                 padding: 8 -8 -8 8;
         #                 padding: 4 -3 -3 4;
@@ -54,19 +52,23 @@ class MemoryLCDView(QtWidgets.QTableView):
         """)
         self.verticalScrollBar().setDisabled(True)
         self.horizontalScrollBar().setDisabled(True)
-        self.setFrameStyle(QtWidgets.QFrame.NoFrame)
+        self.setFrameStyle(QtWidgets.QFrame.Shape.NoFrame)
+        #  Instance attributes that will be populated later
+        self.memoryLCDProxyModel = None
+        self.LCDColumns = None
+        self.LCDRows = None
 
-    def setModel(self, memoryModel_, hexStartAddress, LCDColumns=32, LCDRows=6):
+    def setModel(self, memoryModel_, hexStartAddress='0x20080000', LCDColumns=32, LCDRows=6):
         """Sets the memory model and the number of columns and rows of the LCD"""
         self.memoryLCDProxyModel = MemoryLCDProxyModel()
         self.memoryLCDProxyModel.setSourceModel(memoryModel_, hexStartAddress, LCDColumns, LCDRows)
-        super(MemoryLCDView, self).setModel(self.memoryLCDProxyModel)
+        super().setModel(self.memoryLCDProxyModel)
         self.LCDColumns = LCDColumns
         self.LCDRows = LCDRows
         self.resize()
 
-    def resize(self):
-        """Resize the columns and rows of the LCD to its contents size, and then fixes the total width and height of
+    def resize(self, size=QtCore.QSize(0, 0)):
+        """Resize the columns and rows of the LCD to the size of its content, and then fixes the total width and height of
         the LCD."""
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
@@ -76,7 +78,7 @@ class MemoryLCDView(QtWidgets.QTableView):
 
     def wheelEvent(self, event):
         """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
-        if event.modifiers() == QtCore.Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
             self.memoryLCDProxyModel.changeFontSize(event.angleDelta().y() / 120)
             self.resize()
         else:
@@ -84,22 +86,18 @@ class MemoryLCDView(QtWidgets.QTableView):
 
 
 if __name__ == "__main__":
-    #
-    # To test this module, execute the following command from qtarmsim upper directory:
-    #
-    #    python3 -m qtarmsim.widget.memorylcdview
-    #
+    # To test this model, see the note in the header of this file
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = QtWidgets.QMainWindow()
     mainWindow.setGeometry(200, 200, 1000, 400)
     # Memory model
     memoryModel = MemoryModel(app)
     memoryModel.appendMemoryBank('ROM', '0x10010000', ['0x{:02X}'.format(i) for i in range(24)])
-    memoryModel.appendMemoryBank('RAM', '0x20070000', ['0x{:02X}'.format(i) for i in range(65, 256)])
+    memoryModel.appendMemoryBank('RAM', '0x20080000', ['0x{:02X}'.format(i) for i in range(65, 256)])
     # Memory LCD View
     memoryLCDView = MemoryLCDView(mainWindow)
-    memoryLCDView.setModel(memoryModel, '0x20070000', 32, 6)
-    # Show main window and enter main loop
+    memoryLCDView.setModel(memoryModel, '0x20080000', 32, 6)
+    # Show main window and enter the main loop
     mainWindow.setCentralWidget(memoryLCDView)
     mainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

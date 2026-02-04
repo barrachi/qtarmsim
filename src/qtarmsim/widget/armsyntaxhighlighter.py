@@ -27,10 +27,10 @@ from .commonsyntaxhighlighter import HighlightingRule, CommonSyntaxHighlighter
 
 
 def generateARMHighlightingRules():
-    #
-    # Most of the following ARM keywords and directives were obtained from the listings ARM definition for LaTeX (c)
-    # 2013 by Jacques Supcik
-    #
+    """
+    Most of the ARM keywords and directives were obtained from the listings ARM definition for LaTeX
+    (c) 2013 by Jacques Supcik
+    """
     keywords = """
                 adc,adcal,adcals,adccc,adcccs,adccs,adccss,adceq,adceqs,
                 adcge,adcges,adcgt,adcgts,adchi,adchis,adchs,adchss,adcle,adcles,
@@ -463,7 +463,7 @@ def generateARMHighlightingRules():
     # Add highlighting rules and format for ARM assembler keywords
     keywordFormat = QtGui.QTextCharFormat()
     keywordFormat.setForeground(QtGui.QColor('darkBlue'))
-    keywordFormat.setFontWeight(QtGui.QFont.Bold)
+    keywordFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     keywordsList = keywords.replace('\n', '').replace(' ', '').split(',')
     keywordsDict = {}
     for kw in keywordsList:
@@ -483,7 +483,7 @@ def generateARMHighlightingRules():
     # Add highlighting rules and format for ARM assembler directives
     directiveFormat = QtGui.QTextCharFormat()
     directiveFormat.setForeground(QtGui.QColor('green'))
-    directiveFormat.setFontWeight(QtGui.QFont.Bold)
+    directiveFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     pattern = '[.](?:{})\\b'.format('|'.join(directives.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(pattern, directiveFormat))
     # Add highlighting rules and format for ARM registers
@@ -494,7 +494,7 @@ def generateARMHighlightingRules():
     # Add highlighting rules and format for ARM labels
     labelFormat = QtGui.QTextCharFormat()
     labelFormat.setForeground(QtGui.QColor('black'))
-    labelFormat.setFontWeight(QtGui.QFont.Bold)
+    labelFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     for pattern in ['^\\s*[^\\d\\s][\\w]*:', ]:
         highlightingRules.append(HighlightingRule(pattern, labelFormat))
     # Add highlighting rules and format for ARM comments

@@ -76,7 +76,7 @@ class MyQTreeView(QtWidgets.QTreeView):
         """
         Processes the CTRL++ and CTRL+- events
         """
-        if event.modifiers() == QtCore.Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
             if event.text() == '+':
                 self.increaseFontSize(1)
                 return
@@ -89,7 +89,7 @@ class MyQTreeView(QtWidgets.QTreeView):
         """
         Processes the wheel event: zooms in and out whenever a CTRL+wheel event is triggered
         """
-        if event.modifiers() == QtCore.Qt.ControlModifier:
+        if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
             self.increaseFontSize(event.angleDelta().y() / 120)
         else:
             super().wheelEvent(event)

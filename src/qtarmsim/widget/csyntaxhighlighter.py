@@ -127,13 +127,13 @@ def generateCHighlightingRules():
     # Add highlighting rules and format for C control flow directives
     controlFlowFormat = QtGui.QTextCharFormat()
     controlFlowFormat.setForeground(QtGui.QColor('black'))
-    controlFlowFormat.setFontWeight(QtGui.QFont.Bold)
+    controlFlowFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     pattern = '({})\\b'.format('|'.join(control_flow.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(pattern, controlFlowFormat))
     # Add highlighting rules and format for C keywords
     keywordsFormat = QtGui.QTextCharFormat()
     keywordsFormat.setForeground(QtGui.QColor('darkBlue'))
-    keywordsFormat.setFontWeight(QtGui.QFont.Bold)
+    keywordsFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     pattern = '({})\\b'.format('|'.join(keywords.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(pattern, keywordsFormat))
     # Add highlighting rules and format for C types
