@@ -22,13 +22,5 @@
 """
 
 import os
-import sys
-
 
 module_path = os.path.dirname(__file__)
-
-# if getattr(sys, 'frozen', False):
-#     my_path = os.path.dirname(__file__)
-#     module_path = os.path.realpath(my_path[:my_path.index("library.zip")])
-# else:
-#     module_path = os.path.dirname(__file__)
