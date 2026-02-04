@@ -6,7 +6,7 @@ mkShell {
     python311Packages.sphinx
     python311Packages.doc8   # linter
     rstfmt
-    jetbrains.pycharm-professional
+    jetbrains.pycharm
     boxes
     uv
   ];
