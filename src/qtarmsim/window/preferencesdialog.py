@@ -17,18 +17,20 @@
 ###########################################################################
 
 
-from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from ..ui.ui_preferences import Ui_PreferencesDialog
 
 
 class PreferencesDialog(QtWidgets.QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent, settings=None, defaultSettings=None):
         QtWidgets.QDialog.__init__(self, parent)
+        self.settings = settings
+        self.defaultSettings = defaultSettings
         self.ui = Ui_PreferencesDialog()
         self.ui.setupUi(self)
-        self.setFromSettings(self.parent().settings)
+        self.setFromSettings(self.settings)
         self.connect(self.ui.pushButtonARMSimRestoreDefaults, QtCore.SIGNAL('clicked()'), self.restoreARMSimDefaults)
         self.connect(self.ui.toolButtonARMSimDirectory, QtCore.SIGNAL('clicked()'), self.ARMSimDirectoryClicked)
         self.connect(self.ui.toolButtonARMGccCommand, QtCore.SIGNAL('clicked()'), self.ARMGccCommandClicked)
@@ -44,7 +46,7 @@ class PreferencesDialog(QtWidgets.QDialog):
         self.ui.lineEditARMGccOptions.setText(settings.value("ARMGccOptions"))
 
     def restoreARMSimDefaults(self):
-        self.setFromSettings(self.parent().defaultSettings)
+        self.setFromSettings(self.defaultSettings)
 
     def ARMSimDirectoryClicked(self):
         dirname = self.ui.lineEditARMSimDirectory.text()
@@ -59,7 +61,7 @@ class PreferencesDialog(QtWidgets.QDialog):
             self.ui.lineEditARMGccCommand.setText(fname)
 
     def accept(self):
-        s = self.parent().settings
+        s = self.settings
         # ARMSim tab
         s.setValue("ARMSimServer", self.ui.lineEditARMSimServer.text().strip())
         s.setValue("ARMSimPort", self.ui.spinBoxARMSimPort.text().strip())

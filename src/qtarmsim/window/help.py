@@ -36,12 +36,12 @@ class HelpWindow(QtWidgets.QWidget):
         self.editor = QtWidgets.QTextBrowser(self)
         self.editor.setReadOnly(True)
         self.editor.setAcceptRichText(True)
-        self.editor.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
+        self.editor.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.TextBrowserInteraction)
         self.editor.setOpenLinks(True)
         self.editor.setGeometry(rect)
         # @todo: check the following sentence
-        policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored,
-                                       QtWidgets.QSizePolicy.Ignored)
+        policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Ignored,
+                                       QtWidgets.QSizePolicy.Policy.Ignored)
         self.editor.setSizePolicy(policy)
         # noinspection PyTypeChecker
         url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "html", self.tr("Help.html")))
