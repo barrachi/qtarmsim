@@ -24,14 +24,16 @@
 ###########################################################################
 
 """
-Module implementing the post install logic for 'pip install'.
+Module implementing the post-installation logic for 'pip install'.
 """
 
+import logging
 import os
 import sys
 import sysconfig
 
-from distutils import log
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 # ------------------------------------------------------------------------
@@ -80,7 +82,7 @@ def getWinregEntry(name, path):
     Gets an entry from the Windows Registry.
 
     :param name: Variable name
-    :param path: Registry path of the variable
+    :param path: Registry variable path
     :return: Value of the requested registry variable
     """
     try:
@@ -166,27 +168,27 @@ def linuxAppendPath():
             appended = False
             local_bin_path = os.path.join(os.getenv("HOME"), ".local/bin")
             bashrc_path = os.path.join(os.getenv("HOME"), ".bashrc")
-            log.warn("QtARMSim has been installed in '{0}' which is not on PATH.".format(local_bin_path))
+            logger.warning("QtARMSim has been installed in '{0}' which is not on PATH.".format(local_bin_path))
             if os.path.exists(bashrc_path):
-                log.warn("Trying to prepend '{0}' to PATH...".format(local_bin_path))
+                logger.warning("Trying to prepend '{0}' to PATH...".format(local_bin_path))
                 try:
                     with open(bashrc_path, "a") as f:
                         f.write('\n')
                         f.write('# QtARMSim post install\n')
                         f.write('[[ ":$PATH:" != *":{0}:"* ]] && PATH="{0}":"$PATH"\n'.format(local_bin_path))
-                        log.warn("...succeeded!")
+                        logger.warning("...succeeded!")
                         appended = True
                 except OSError:
                     # If we cannot write on .bashrc
-                    log.warn("...could not write on '{}'!".format(bashrc_path))
+                    logger.warning("...could not write on '{}'!".format(bashrc_path))
                     pass
             if appended:
-                log.warn("You should execute 'source {}' to update PATH on any currently open sessions."
-                         "".format(bashrc_path))
+                logger.warning("You should execute 'source {}' to update PATH on any currently open sessions."
+                               "".format(bashrc_path))
             else:
-                log.warn("Please, consider adding this directory to PATH.")
-                log.warn("""This can be accomplished by appending 'PATH="{0}":"$PATH"' """
-                         """to '{1}'""".format(local_bin_path, bashrc_path))
+                logger.warning("Please, consider adding this directory to PATH.")
+                logger.warning("""This can be accomplished by appending 'PATH="{0}":"$PATH"' """
+                               """to '{1}'""".format(local_bin_path, bashrc_path))
 
 
 # ------------------------------------------------------------------------
