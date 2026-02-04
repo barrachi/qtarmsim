@@ -17,12 +17,12 @@
 ###########################################################################
 
 import math
-from PySide6 import QtCore, QtGui
+from PySide6 import QtCore
 
 
 class InputToHex(QtCore.QObject):
     """
-    Class that handles the conversion between a user input value and an
+    Class that handles the conversion between a user input value and a
     hexadecimal representation of that input.
     """
 
@@ -42,19 +42,19 @@ class InputToHex(QtCore.QObject):
 
     def convert(self, text, bits=32):
         """
-        Converts the given text to an hexadecimal value with 8 digits.
+        Converts the given text to a hexadecimal value with 8 digits.
 
         The following kinds of conversion are supported:
 
-         - from a number in base 10, 16, 2, or 8. The number must be between
+         - From a number in base 10, 16, 2, or 8. The number must be between
             [-MAX_NEG, +MAX_POS].
 
-         - from an UTF8 string using the format '[:alnum:]*' or "[:alnum:]*".
+         - From an UTF8 string using the format '[:alnum:]*' or "[:alnum:]*".
 
         @param text: a string representing the chars or the number to be represented
         @param bits: number of bits allowed
 
-        @return: a pair (hex_value, err_msg) hex_value is an string with the
+        @return: a pair (hex_value, err_msg) hex_value is a string with the
                                              hexadecimal value if everything went
                                              OK, or None otherwise, err_msg provides
                                              an error message in case something went
@@ -70,12 +70,12 @@ class InputToHex(QtCore.QObject):
         if len(text) == 0:
             return None, ''
         if len(text) >= 2:
-            # If starts and ends with ' or ", try to decode it as an string
+            # If starts and ends with ' or ", try to decode it as a string
             if (text[0] == "'" and text[-1] == "'") or (text[0] == '"' and text[-1] == '"'):
                 if len(text) == 2:
                     # Empty string, return 0
                     return '0x' + '0' * HEX_DIGITS, ''
-                # Non empty string, convert to bytes, left padding with 0s
+                # Non-empty string, convert to bytes, left padding with zeros
                 bytes_list = ["{:02X}".format(b) for b in bytes(text[1:-1], 'utf-8')]
                 if len(bytes_list) > bits / 8:
                     err_msg = self.tr("The UTF-8 string '{}' can not been represented with {} bits.").format(text, bits)
