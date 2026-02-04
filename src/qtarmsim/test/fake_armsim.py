@@ -27,11 +27,11 @@ from ..comm.mysocket import MySocket
 
 # Globals
 PORT = 0
-mysocket = None
+mySocket = None
 
 
 def myhelp():
-    print("""Usage: fake_armsim.py -p PORTNUMBER
+    print("""Usage: fake_armsim.py -p PORT_NUMBER
 
 This is a fake ARMSim with socket server capabilities. Please, use the -p option
 to indicate which port number should be used.
@@ -102,7 +102,7 @@ EOF = 'EOF'
 # SHOW commands
 # ===============================================================================
 
-def do_SHOW_VERSION(args, socket):
+def do_SHOW_VERSION(_args, socket):
     print("Showing version information")
     socket.send_line("Fake ARMSim version 0.1")
     socket.send_line("(c) 2014 Sergio Barrachina Mir")
@@ -133,7 +133,7 @@ def do_SHOW_MEMORY(args, socket):
         socket.send_line("{}: {}".format(hex_address, value))
 
 
-def do_DUMP_REGISTERS(args, socket):
+def do_DUMP_REGISTERS(_args, socket):
     print("Dumping all the registers")
     for reg_name in reg_names:
         socket.send_line("{}: {}".format(reg_name, REGISTERS[reg_name]))
@@ -148,7 +148,7 @@ def do_DUMP_MEMORY(args, socket):
         socket.send_line("{}: {}".format("0x{0:0{1}X}".format(pos, 8), MEMORY[pos]))
 
 
-def do_SHOW_BREAKPOINTS(args, socket):
+def do_SHOW_BREAKPOINTS(_args, socket):
     """SHOW BREAKPOINTS"""
     print("Showing breakpoints")
     for breakpoint_ in BREAKPOINTS:
@@ -201,14 +201,14 @@ def do_SET_BREAKPOINT_AT(args, socket):
 # RESET commands
 # ===============================================================================
 
-def do_RESET_REGISTERS(args, socket):
+def do_RESET_REGISTERS(_args, socket):
     global REGISTERS
     print("Resetting registers")
     REGISTERS = _REGISTERS.copy()
     socket.send_line(OK)
 
 
-def do_RESET_MEMORY(args, socket):
+def do_RESET_MEMORY(_args, socket):
     global MEMORY
     print("Resetting memory")
     MEMORY = _MEMORY[:]
@@ -219,7 +219,7 @@ def do_RESET_MEMORY(args, socket):
 # CLEAR commands
 # ===============================================================================
 
-def do_CLEAR_BREAKPOINTS(args, socket):
+def do_CLEAR_BREAKPOINTS(_args, socket):
     """CLEAR BREAKPOINTS"""
     global BREAKPOINTS
     print("Clearing breakpoints")
@@ -237,8 +237,8 @@ def do_CLEAR_BREAKPOINT_AT(args, socket):
 
 # ===============================================================================
 # def signal_handler(signal, frame):
-#     if mysocket != None:
-#         mysocket.close_socket()
+#     if mySocket != None:
+#         mySocket.close_socket()
 #     sys.exit(0)
 # ===============================================================================
 
@@ -246,24 +246,24 @@ def main():
     """Main part of the application"""
     getopts()
     # signal.signal(signal.SIGINT, signal_handler)
-    mysocket_ = MySocket(verbose=True)
-    mysocket_.server_bind(PORT)
-    while True:
-        print("")
-        mysocket_.server_accept_connection()
-        lines_generator = mysocket_.get_lines()
-        for line in lines_generator:
-            args = line.split(' ')
-            for n in range(len(args), 0, -1):
-                do_method_name = 'do_{}'.format('_'.join(args[0:n]))
-                do_method = globals().get(do_method_name)
-                if do_method:
-                    do_method(args, mysocket_)
-                    break
-            else:
-                print(">>> Unsupported command: {}".format(line))
-    mysocket_.close_connection()
-    mysocket_.close_socket()
+    mySocket_ = MySocket(verbose=True)
+    mySocket_.server_bind(PORT)
+    # while True:
+    print("")
+    mySocket_.server_accept_connection()
+    lines_generator = mySocket_.get_lines()
+    for line in lines_generator:
+        args = line.split(' ')
+        for n in range(len(args), 0, -1):
+            do_method_name = 'do_{}'.format('_'.join(args[0:n]))
+            do_method = globals().get(do_method_name)
+            if do_method:
+                do_method(args, mySocket_)
+                break
+        else:
+            print(">>> Unsupported command: {}".format(line))
+    mySocket_.close_connection()
+    mySocket_.close_socket()
 
 
 if __name__ == "__main__":
