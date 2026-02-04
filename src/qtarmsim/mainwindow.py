@@ -23,10 +23,12 @@ import shutil
 import tempfile
 from functools import partial
 from glob import glob
+from typing import Union
 
 import PySide6
 from PySide6 import QtCore, QtGui, QtWidgets, QtPrintSupport
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeyEvent
 
 from .comm.armsimconnector import ARMSimConnector
 from .model.memorybywordproxymodel import MemoryByWordProxyModel
@@ -204,7 +206,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Worker threads
         self.getMemoryThread = self.GetMemoryThread(self)
         self.getMemoryThread.finished.connect(self.onGetMemoryThreadFinished)
-        # Print welcome message on the Messages Window and show Ready on the status bar
+        # Print welcome message on the Messages' Window and show Ready on the status bar
         self.ui.textEditMessages.append(self.welcome_message())
         self.statusBar().showMessage(self.tr("Ready"))
         # Initialize number of received lines from simulator
@@ -262,16 +264,16 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.treeViewMemory.setModel(memoryByWordProxyModel)
         self.ui.memoryLCDView.setModel(self.memoryModel, '0x20080000', 40, 6)
 
-        # Status bar with flags indicator
+        # Status bar with flags
         self.statusBar().addWidget(QtWidgets.QLabel(""), 10)  # No permanent
         self.flagsLabel = QtWidgets.QLabel("Flags:")
         self.statusBar().addPermanentWidget(self.flagsLabel, 0)
         self.flagsText = QtWidgets.QLabel("- - - -")
-        self.flagsText.setFrameStyle(QtWidgets.QFrame.Sunken | QtWidgets.QFrame.StyledPanel)
+        self.flagsText.setFrameStyle(QtWidgets.QFrame.Shadow.Sunken | QtWidgets.QFrame.Shape.StyledPanel)
         font = QtGui.QFont("fake font name")  # @warning: fake name needed to setStyleHint work
-        font.setStyleHint(QtGui.QFont.TypeWriter)
+        font.setStyleHint(QtGui.QFont.StyleHint.TypeWriter)
         if not QtGui.QFontInfo(font).fixedPitch():
-            font.setStyleHint(QtGui.QFont.Monospace)
+            font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
         font.setPointSize(QtGui.QFont().pointSize())  # Using the system default font point size
         self.flagsText.setFont(font)
         self.flagsText.setToolTip("""
@@ -295,21 +297,21 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
         # Tabify bottom dock widgets
         bottomDocks = []
-        if self.dockWidgetArea(self.ui.dockWidgetMessages) == Qt.BottomDockWidgetArea:
+        if self.dockWidgetArea(self.ui.dockWidgetMessages) == Qt.DockWidgetArea.BottomDockWidgetArea:
             bottomDocks.append(self.ui.dockWidgetMessages)
-        if self.dockWidgetArea(self.ui.dockWidgetMemoryDump) == Qt.BottomDockWidgetArea:
+        if self.dockWidgetArea(self.ui.dockWidgetMemoryDump) == Qt.DockWidgetArea.BottomDockWidgetArea:
             bottomDocks.append(self.ui.dockWidgetMemoryDump)
-        if self.dockWidgetArea(self.ui.dockWidgetLCD) == Qt.BottomDockWidgetArea:
+        if self.dockWidgetArea(self.ui.dockWidgetLCD) == Qt.DockWidgetArea.BottomDockWidgetArea:
             bottomDocks.append(self.ui.dockWidgetLCD)
-        if self.dockWidgetArea(self.ui.dockWidgetTerminal) == Qt.BottomDockWidgetArea:
+        if self.dockWidgetArea(self.ui.dockWidgetTerminal) == Qt.DockWidgetArea.BottomDockWidgetArea:
             bottomDocks.insert(0, self.ui.dockWidgetTerminal)
-        if self.dockWidgetArea(self.ui.dockWidgetSimulatorOutput) == Qt.BottomDockWidgetArea:
+        if self.dockWidgetArea(self.ui.dockWidgetSimulatorOutput) == Qt.DockWidgetArea.BottomDockWidgetArea:
             bottomDocks.insert(1, self.ui.dockWidgetSimulatorOutput)
         if len(bottomDocks) > 1:
             self.tabifyDockWidget(bottomDocks[0], bottomDocks[1])
             if len(bottomDocks) > 2:
                 for i in range(1, len(bottomDocks) - 1):
-                    self.splitDockWidget(bottomDocks[i], bottomDocks[i + 1], Qt.Horizontal)
+                    self.splitDockWidget(bottomDocks[i], bottomDocks[i + 1], Qt.Orientation.Horizontal)
             bottomDocks[0].raise_()
 
         # Examples menu
@@ -317,7 +319,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def buildExamplesMenu(self, menu, path):
         def _name_from_path(path_):
-            basename = os.path.basename(path_)
+            basename:str = os.path.basename(path_)
             basename = basename.replace('_', ' ')
             res = re.search('[0-9]+ (.*)', basename)
             if res:
@@ -344,7 +346,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         """Reads the settings from the settings file or initializes them from defaultSettings"""
         self.defaultSettings = DefaultSettings()
         self.settings = QtCore.QSettings("UJI", "QtARMSim")
-        self.restoreGeometry(self.settings.value("geometry", self.defaultGeometry()))
+        geometry: Union[QtCore.QByteArray, object] = self.settings.value("geometry", self.defaultGeometry())
+        self.restoreGeometry(QtCore.QByteArray(geometry))
         # @TODO: The next line does not work as expected, the central widget does not claims all the space
         # self.restoreState(self.settings.value("windowState", self.initialWindowState))
         # -----------------------------------------------------------------------------
@@ -383,7 +386,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.settings.setValue(setting, self.defaultSettings.value(setting))
 
     def defaultGeometry(self):
-        """Resizes main window to 800x600 and returns the geometry"""
+        """Resizes the main window to 800x600 and returns the geometry"""
         self.resize(800, 600)
         return self.saveGeometry()
 
@@ -416,7 +419,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.actionSelect_All.setEnabled(not onSimulator)
 
     def updateViewActions(self):
-        """Modifies the checked state of the show/hide actions depending on their widgets visibility"""
+        """Modifies the checked state of the show/hide actions depending on their widget visibility"""
         self.ui.actionShow_Statusbar.setChecked(self.ui.statusBar.isVisible())
         self.ui.actionShow_Toolbar.setChecked(self.ui.toolBar.isVisible())
         self.ui.actionShow_Registers.setChecked(self.ui.dockWidgetRegisters.isVisible())
@@ -482,7 +485,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def connectActions(self):
         """Connects the actions with their correspondent methods"""
-        # Automatically assign actions to methods using the actions names
+        # Automatically assign actions to methods using their names
         signalTriggered = QtCore.SIGNAL("triggered()")
         for actionName in dir(self.ui):
             if actionName.startswith('action'):
@@ -518,16 +521,16 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             simCodeEditor.setBreakpointSignal.connect(self.setBreakpoint)
             simCodeEditor.clearBreakpointSignal.connect(self.clearBreakpoint)
             simCodeEditor.highlightedWordSignal.connect(self.highlightedWord)
-        # Connect register edited on registers model to self.registerEdited
+        # Connect register edited on registers' model to self.registerEdited
         self.registersModel.register_edited.connect(self.registerEdited)
-        # Connect memory edited on memory model to self.memoryEdited
+        # Connect memory edited on the memory model to self.memoryEdited
         self.memoryModel.memoryEdited.connect(self.memoryEdited)
         # Connect Terminal push button and Terminal line edit return to send line to simulator
         self.ui.pushButtonTerminal.pressed.connect(self.sendLineToSimulator)
         self.ui.lineEditTerminal.returnPressed.connect(self.sendLineToSimulator)
 
     def eventFilter(self, source, event):
-        if event.type() == QtCore.QEvent.Close and isinstance(source, QtWidgets.QDockWidget):
+        if event.type() == QtCore.QEvent.Type.Close and isinstance(source, QtWidgets.QDockWidget):
             if source is self.ui.dockWidgetRegisters:
                 self.ui.actionShow_Registers.setChecked(False)
             elif source is self.ui.dockWidgetMemory:
@@ -542,13 +545,14 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 self.ui.actionShow_Simulator_Output.setChecked(False)
             elif source is self.ui.dockWidgetMessages:
                 self.ui.actionShow_Messages.setChecked(False)
-        if event.type() == QtCore.QEvent.KeyPress and source == self.ui.dockWidgetTerminal:
-            if event.key() == Qt.Key_Up:
-                self.ui.lineEditTerminal.setText(self.terminalHistoryUp())
-                return True
-            elif event.key() == Qt.Key_Down:
-                self.ui.lineEditTerminal.setText(self.terminalHistoryDown())
-                return True
+        if event.type() == QtCore.QEvent.Type.KeyPress and source == self.ui.dockWidgetTerminal:
+            if isinstance(event, QKeyEvent):
+                if event.key() == Qt.Key.Key_Up:
+                    self.ui.lineEditTerminal.setText(self.terminalHistoryUp())
+                    return True
+                elif event.key() == Qt.Key.Key_Down:
+                    self.ui.lineEditTerminal.setText(self.terminalHistoryDown())
+                    return True
         return super(QtARMSimMainWindow, self).eventFilter(source, event)
 
     def onTabChange(self, tabIndex):
@@ -557,7 +561,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         """
         if tabIndex == 1:
             # Check if source code has to be saved or not
-            if self.checkCurrentFileState() == QtWidgets.QMessageBox.Cancel:
+            if self.checkCurrentFileState() == QtWidgets.QMessageBox.StandardButton.Cancel:
                 self.ui.tabWidgetCode.setCurrentIndex(0)
                 return
             # If we have already assembled the current source code, enable the simulator actions and return
@@ -571,8 +575,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 msg = "It seems that there is no source code to assemble.\n" \
                       "Do you really want to proceed?"
                 reply = QtWidgets.QMessageBox.question(self, 'Empty source code?',
-                                                       msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
-                if reply == QtWidgets.QMessageBox.No:
+                                                       msg,
+                                                       QtWidgets.QMessageBox.StandardButton.Yes,
+                                                       QtWidgets.QMessageBox.StandardButton.No)
+                if reply == QtWidgets.QMessageBox.StandardButton.No:
                     self.ui.tabWidgetCode.setCurrentIndex(0)
                     return
             #   2) Assembly self.file_name
@@ -640,8 +646,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.editorFlags['undoAvailable'] = undoAvailable
         self.updateEditActions()
 
-    def setBreakpoint(self, lineNumber, text):
-        """Sets a breakpoint on the memory address obtained from text"""
+    def setBreakpoint(self, _lineNumber, text):
+        """Sets a breakpoint on the memory address obtained from the variable text"""
         hex_address = text.split(" ")[0][1:-1]
         errmsg = self.simulator.setBreakpoint(hex_address)
         if errmsg:
@@ -649,8 +655,8 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         else:
             self.breakpoints.append(hex_address)
 
-    def clearBreakpoint(self, lineNumber, text):
-        """Clears a breakpoint from the memory address obtained from text"""
+    def clearBreakpoint(self, _lineNumber, text):
+        """Clears a breakpoint from the memory address obtained from the variable text"""
         hex_address = text.split(" ")[0][1:-1]
         errmsg = self.simulator.clearBreakpoint(hex_address)
         if errmsg:
@@ -683,16 +689,16 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def checkCurrentFileState(self):
         if not self.isSourceCodeModified():
-            return QtWidgets.QMessageBox.Discard
+            return QtWidgets.QMessageBox.StandardButton.Discard
         msg = "The document '{}' has been modified.\n" \
               "Do you want to save the changes?".format(os.path.basename(self.file_name))
         reply = QtWidgets.QMessageBox.question(self, 'Close Document',
                                                msg,
-                                               QtWidgets.QMessageBox.Save
-                                               | QtWidgets.QMessageBox.Discard
-                                               | QtWidgets.QMessageBox.Cancel,
-                                               QtWidgets.QMessageBox.Save)
-        if reply == QtWidgets.QMessageBox.Save:
+                                               QtWidgets.QMessageBox.StandardButton.Save
+                                               | QtWidgets.QMessageBox.StandardButton.Discard
+                                               | QtWidgets.QMessageBox.StandardButton.Cancel,
+                                               QtWidgets.QMessageBox.StandardButton.Save)
+        if reply == QtWidgets.QMessageBox.StandardButton.Save:
             self.doSave()
         return reply
 
@@ -708,7 +714,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def doNew(self):
         """Creates a new file"""
-        if self.checkCurrentFileState() == QtWidgets.QMessageBox.Cancel:
+        if self.checkCurrentFileState() == QtWidgets.QMessageBox.StandardButton.Cancel:
             return
         # 1) Change to tab 0
         self.ui.tabWidgetCode.setCurrentIndex(0)
@@ -727,7 +733,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def doOpen(self):
         """Opens an ARM assembler file"""
-        if self.checkCurrentFileState() == QtWidgets.QMessageBox.Cancel:
+        if self.checkCurrentFileState() == QtWidgets.QMessageBox.StandardButton.Cancel:
             return
         file_name = QtWidgets.QFileDialog.getOpenFileName(self, self.tr("Open File"),
                                                           self._getDirectory(),
@@ -748,7 +754,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def doOpenExample(self, action):
         """Opens an example file"""
-        if self.checkCurrentFileState() == QtWidgets.QMessageBox.Cancel:
+        if self.checkCurrentFileState() == QtWidgets.QMessageBox.StandardButton.Cancel:
             return
         file_name = action.data()
         if file_name:
@@ -828,7 +834,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
     def saveFile(self, file_name):
         """Saves the contents of the source editor on the given file name"""
         asm_file = QtCore.QFile(file_name)
-        if not asm_file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Text):
+        if not asm_file.open(QtCore.QFile.OpenModeFlag.WriteOnly | QtCore.QFile.OpenModeFlag.Text):
             QtWidgets.QMessageBox.warning(self,
                                           self.tr("Error"),
                                           self.tr("Could not write to file '{0}':\n{1}.")
@@ -851,10 +857,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def doPrint(self):
         """Prints the current ARM assembler source file or the disassembled code"""
-        printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
+        printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.PrinterMode.HighResolution)
         printDialog = QtPrintSupport.QPrintDialog(printer, self)
-        printDialog.setOption(QtPrintSupport.QAbstractPrintDialog.PrintToFile, True)
-        if printDialog.exec_() == PySide6.QtWidgets.QDialog.Accepted:
+        printDialog.setOption(QtPrintSupport.QAbstractPrintDialog.PrintDialogOption.PrintToFile, True)
+        if printDialog.exec_() == PySide6.QtWidgets.QDialog.DialogCode.Accepted:
             if self.ui.tabWidgetCode.currentIndex() == 0:
                 self.ui.sourceCodeEditor.print_(printer)
             else:
@@ -896,7 +902,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             document = simCodeEditor.document()
             cursor = QtGui.QTextCursor(document)
             cursor = document.find(QtCore.QRegularExpression("^\\[{}\\]".format(PC)), cursor,
-                                   QtGui.QTextDocument.FindWholeWords)
+                                   QtGui.QTextDocument.FindFlag.FindWholeWords)
             if cursor:
                 simCodeEditor.setCurrentHighlightedLineNumber(cursor.blockNumber())
                 self.ui.tabTabARMSim.setCurrentWidget(simCodeEditor)
@@ -910,7 +916,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         for (hex_address, hex_byte) in response.memory:
             self.memoryModel.setByte(hex_address, hex_byte)
             self.ui.treeViewMemory.expand(
-                self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
+                self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.parent))
             self.ui.treeViewMemory.scrollTo(
                 self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex(hex_address)))
         if response.result == "ERROR":
@@ -972,7 +978,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self._doShow(self.ui.statusBar, self.ui.actionShow_Statusbar)
 
     def doShow_Toolbar(self):
-        """Shows or hides the tool bar"""
+        """Shows or hides the toolbar"""
         self._doShow(self.ui.toolBar, self.ui.actionShow_Toolbar)
 
     def doShow_Registers(self):
@@ -1041,18 +1047,17 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             else:
                 self.showNormal()
         else:
-            wasMaximized = self.isMaximized()
             self.showFullScreen()
 
     def doPreferences(self):
-        preferences = PreferencesDialog(self)
+        preferences = PreferencesDialog(self, self.settings, self.defaultSettings)
         if preferences.exec_():
             if self.simulator and self.simulator.connected:
                 self.sendSettingsToARMSim()
 
     def closeEvent(self, event):
-        """Called when the main window is closed. Saves state and performs clean up actions."""
-        if self.checkCurrentFileState() == QtWidgets.QMessageBox.Cancel:
+        """Called when the main window is closed. Saves state and performs cleanup actions."""
+        if self.checkCurrentFileState() == QtWidgets.QMessageBox.StandardButton.Cancel:
             event.ignore()
             return
         # Save current geometry and window state
@@ -1099,7 +1104,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             "<p>" + self.tr("Running on ") + \
             "Python " + platform.python_version() + ", " + \
             "PySide6 " + PySide6.__version__ + ", and " + \
-            "Qt " + QtCore.__version__ + "." + \
+            "Qt " + QtCore.qVersion() + "." + \
             "</p>" + \
             "<hr/>" + \
             self.tr("<p><b>Acknowledgments</b></p>") + \
@@ -1230,7 +1235,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             memoryDumpView.resizeRowsToContents()
             self.ui.tabWidgetMemoryDump.addTab(memoryDumpView, "{}".format(mb['memtype']))
             QtWidgets.QApplication.processEvents()
-        # Focus the first tab with RAM memory
+        # Focus the first tab on to the RAM
         for i in range(self.ui.tabWidgetMemoryDump.count()):
             if self.ui.tabWidgetMemoryDump.tabText(i) == "RAM":
                 self.ui.tabWidgetMemoryDump.setCurrentIndex(i)
@@ -1238,7 +1243,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Modify the layout of treeViewMemory
         # @todo: expand automatically the first RAM module
         self.ui.treeViewMemory.expand(
-            self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000').parent()))
+            self.ui.treeViewMemory.model().mapFromSource(self.memoryModel.getIndex('0x20070000')))
         QtWidgets.QApplication.processEvents()
         self.ui.treeViewMemory.updateGeometry()
 
