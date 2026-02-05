@@ -2,9 +2,10 @@
 
 ###########################################################################
 #                                                                         #
-#  This file is part of QtARMSim.  It is a derivative work from original  #
-#  simpletreemodel.py which was part of the example classes of the        #
-#  Qt Toolkit Copyright (C) 2005-2005 Trolltech AS.                       #
+#  This file is part of QtARMSim.                                         #
+#                                                                         #
+#  It is a derivation of simpletreemodel.py, which was part of the        #
+#  example classes of the Qt Toolkit Copyright (C) 2005-2005 Trolltech AS.#
 #                                                                         #
 #  QtARMSim is free software: you can redistribute it and/or modify       #
 #  it under the terms of the GNU General Public License as published by   #
@@ -20,6 +21,7 @@
 
 
 from PySide6 import QtCore
+from PySide6.QtCore import Qt, QModelIndex
 
 
 class TreeItem(object):
@@ -52,7 +54,7 @@ class TreeItem(object):
             self.itemData[column] = data
         except IndexError:
             pass
-        
+
     def parent(self):
         return self.parentItem
 
@@ -68,29 +70,26 @@ class TreeModel(QtCore.QAbstractItemModel):
         super(TreeModel, self).__init__(parent)
         self.rootItem = TreeItem(("Column1", "Column2"))
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
-
-        if role != QtCore.Qt.DisplayRole:
+        if role != Qt.ItemDataRole.DisplayRole:
             return None
-
         item = index.internalPointer()
-
-        return item.data(index.column())
+        return item.bytes(index.column())
 
     def flags(self, index):
         if not index.isValid():
-            return QtCore.Qt.NoItemFlags
+            return Qt.ItemFlag.NoItemFlags
 
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
 
-    def headerData(self, section, orientation, role):
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return self.rootItem.data(section)
         return None
 
-    def index(self, row, column, parent):
+    def index(self, row, column, parent=QtCore.QModelIndex()):
         if not self.hasIndex(row, column, parent):
             return QtCore.QModelIndex()
 
@@ -105,7 +104,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         else:
             return QtCore.QModelIndex()
 
-    def parent(self, index):
+    def parent(self, index=QtCore.QModelIndex()):
         if not index.isValid():
             return QtCore.QModelIndex()
 
@@ -117,8 +116,8 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return self.createIndex(parentItem.row(), 0, parentItem)
 
-    def rowCount(self, index):
-        """Returns the number of childs of item pointed by index"""
+    def rowCount(self, index=QtCore.QModelIndex()):
+        """Returns the number of children in the item pointed by index"""
         if index.column() > 0:
             return 0
         if not index.isValid():
@@ -127,10 +126,9 @@ class TreeModel(QtCore.QAbstractItemModel):
             item = index.internalPointer()
         return item.childCount()
 
-    def columnCount(self, index):
-        """Returns the number of data elements of item pointed by index"""
+    def columnCount(self, index=QtCore.QModelIndex()):
+        """Returns the number of data elements in the item pointed by index"""
         if index.isValid():
             return index.internalPointer().columnCount()
         else:
             return self.rootItem.columnCount()
-
