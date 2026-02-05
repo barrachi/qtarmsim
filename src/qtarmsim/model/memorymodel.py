@@ -16,8 +16,8 @@
 #                                                                         #
 ###########################################################################
 
-from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Qt
+from PySide6 import QtGui
+from PySide6.QtCore import Qt, QAbstractItemModel, Signal, QModelIndex
 
 from .simpletreemodel import TreeModel, TreeItem
 from ..utils import getMonoSpacedFont
@@ -57,21 +57,20 @@ class MemoryModel(TreeModel):
     previouslyModifiedBytes = []
 
     # memoryEdited signal, parameters are hex address and hex value
-    memoryEdited = QtCore.Signal('QString', 'QString')
+    memoryEdited = Signal(str, str)
 
     def __init__(self, parent=None):
         """
         Initializes the memory model.
         """
-        super(MemoryModel, self).__init__(parent)
-        self.rootItem = TreeItem(("Address", "Value"))
+        super().__init__(parent)
         # Set fonts
         self.qFont = getMonoSpacedFont()
         self.qFontLast = getMonoSpacedFont()
-        self.qFontLast.setWeight(QtGui.QFont.Black)
+        self.qFontLast.setWeight(QtGui.QFont.Weight.Black)
         # Set brushes
-        self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
-        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
+        self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.BrushStyle.SolidPattern)
+        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.BrushStyle.SolidPattern)
 
     def appendMemoryBank(self, memType, hex_start, membytes):
         """

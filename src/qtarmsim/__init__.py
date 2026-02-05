@@ -64,9 +64,9 @@ def _get_opts():
     debug = False
     verbose = False
     file_name = ""
-    optlist, args = getopt.getopt(sys.argv[1:],  # @UnusedVariable
-                                  'dvh',
-                                  ['debug', 'verbose', 'help', ])
+    optlist, _args = getopt.gnu_getopt(sys.argv[1:],
+                                       'dvh',
+                                       ['debug', 'verbose', 'help', ])
     for opt, arg in optlist:  # @UnusedVariable arg
         if opt in ('-h', '--help'):
             _help()
