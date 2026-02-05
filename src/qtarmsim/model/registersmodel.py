@@ -18,7 +18,7 @@
 
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QModelIndex
 
 from .common import InputToHex, DataTypes
 from .simpletreemodel import TreeModel, TreeItem
@@ -34,12 +34,12 @@ class RegisterBank:
 class RegistersModel(TreeModel):
     previously_modified_registers = []
     modified_registers = []
-    q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
-    q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
-    q_brush_highlighted = QtGui.QBrush(QtGui.QColor(255, 255, 0, 100), Qt.SolidPattern)
+    q_brush_previous = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.BrushStyle.SolidPattern)
+    q_brush_last = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.BrushStyle.SolidPattern)
+    q_brush_highlighted = QtGui.QBrush(QtGui.QColor(255, 255, 0, 100), Qt.BrushStyle.SolidPattern)
 
     # register_edited, parameters are register name and hex value
-    register_edited = QtCore.Signal('QString', 'QString')
+    register_edited = QtCore.Signal(str, str)
 
     # InputToHex object
     input2hex = InputToHex()
@@ -63,25 +63,25 @@ class RegistersModel(TreeModel):
         # Set fonts
         self.qFont = getMonoSpacedFont()
         self.qFontLast = getMonoSpacedFont()
-        self.qFontLast.setWeight(QtGui.QFont.Black)
+        self.qFontLast.setWeight(QtGui.QFont.Weight.Black)
         # highlighted register
         self.highlighted_register = None
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
         item = index.internalPointer()
         # Register bank
         if item.parent() == self.rootItem:
-            if role == Qt.FontRole:
+            if role == Qt.ItemDataRole.FontRole:
                 return self.qFont
-            elif role != QtCore.Qt.DisplayRole:
+            elif role != QtCore.Qt.ItemDataRole.DisplayRole:
                 return None
             return item.data(index.column())
         # Register
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return item.data(index.column())
-        elif role == Qt.ToolTipRole:
+        elif role == Qt.ItemDataRole.ToolTipRole:
             if index.column() == 0:
                 return None
             dt = DataTypes(item.data(index.column()))
@@ -102,7 +102,7 @@ class RegistersModel(TreeModel):
                 dt.utf8,
                 dt.utf32
             )
-        elif role == Qt.BackgroundRole:
+        elif role == Qt.ItemDataRole.BackgroundRole:
             if self.highlighted_register == index.row():
                 return self.q_brush_highlighted
             elif self.modified_registers.count(index.row()):
@@ -111,7 +111,7 @@ class RegistersModel(TreeModel):
                 return self.q_brush_previous
             else:
                 return None
-        elif role == Qt.FontRole:
+        elif role == Qt.ItemDataRole.FontRole:
             if self.modified_registers.count(index.row()):
                 return self.qFontLast
             else:
@@ -124,12 +124,12 @@ class RegistersModel(TreeModel):
             return False
         item = index.internalPointer()
         if item.parent() == self.rootItem:
-            return Qt.ItemIsEnabled
+            return Qt.ItemFlag.ItemIsEnabled
         if index.column() == 0:
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable
-        return Qt.ItemIsEditable | Qt.ItemIsEnabled | Qt.ItemIsSelectable
+            return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
+        return Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
 
-    def setData(self, index, value, role=Qt.EditRole):
+    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
         (hex_value, err_msg) = self.input2hex.convert(value)
         if not hex_value:
             if err_msg:
