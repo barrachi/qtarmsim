@@ -244,7 +244,7 @@ class LeftArea(QtWidgets.QWidget):
         find which line in the source code has been clicked on.
         """
         if self.codeEditor.isReadOnly() and event.button() == Qt.MouseButton.LeftButton:
-            y = event.y()
+            y = int(event.position().y())
             block = self.codeEditor.firstVisibleBlock()
             bottom = self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).bottom()
             blockHeight = self.codeEditor.blockBoundingRect(block).height()
@@ -269,10 +269,7 @@ class LeftArea(QtWidgets.QWidget):
             self.codeEditor.setBreakpointSignal.emit(lineNumber, text)
 
     def clearLinesWithBackground(self) -> None:
-        try:
-            self.linesWithBackground.clear()
-        except AttributeError:
-            self.linesWithBackground = {}
+        self.linesWithBackground.clear()
         self.previousHighlightedLineNumber = -1
         self.currentHighlightedLineNumber = -1
         self.currentBgColor = QtGui.QColor('blue').lighter(140)
@@ -364,9 +361,9 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         # Set show tabs and spaces to False
         self.showTabsAndSpaces = False
         # Connect signals
-        self.connect(self, QtCore.SIGNAL('blockCountChanged(int)'), self.updateLeftAreaWidth)
-        self.connect(self, QtCore.SIGNAL('updateRequest(QRect, int)'), self.updateLeftArea)
-        self.connect(self, QtCore.SIGNAL('cursorPositionChanged()'), self.updateHighlightSelections)
+        _ = self.blockCountChanged.connect(self.updateLeftAreaWidth)
+        _ = self.updateRequest.connect(self.updateLeftArea)
+        _ = self.cursorPositionChanged.connect(self.updateHighlightSelections)
 
     def setReadOnly(self, ro: bool):
         """
@@ -378,10 +375,10 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             self.updateLeftAreaWidth()
         return super().setReadOnly(ro)
 
-    def setTabStopWidth(self, distance: float):
+    def setTabStopWidth(self, _distance: float):  # pyright: ignore[reportUnusedParameter]
         raise Exception("Use setTabStopCharacters instead")
 
-    def setTabStopDistance(self, distance: float):
+    def setTabStopDistance(self, _distance: float):  # pyright: ignore[reportUnusedParameter]
         raise Exception("Use setTabStopCharacters instead")
 
     def setTabStopCharacters(self, characters: int) -> None:
@@ -455,8 +452,8 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         menu = self.createStandardContextMenu()
         menu.addSeparator()
         txt = "Hide tabs and spaces" if self.showTabsAndSpaces else "Show tabs and spaces"
-        menu.addAction(txt, self, QtCore.SLOT("toggleShowTabsAndSpaces()"))
-        menu.exec_(event.globalPos())
+        menu.addAction(txt, self.toggleShowTabsAndSpaces)
+        menu.exec(event.globalPos())
 
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         """Resize the leftArea child widget when a resize event is triggered"""
@@ -465,7 +462,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.leftArea.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftArea.width(), cr.height()))
 
     # noinspection PyUnusedLocal
-    def updateLeftAreaWidth(self, newBlockCount: int | None = None) -> None:
+    def updateLeftAreaWidth(self, _newBlockCount: int | None = None) -> None:  # pyright: ignore[reportUnusedParameter]
         """Changes the code editor left margin based on the width of the leftArea child widget"""
         self.setViewportMargins(self.leftArea.width(), 0, 0, 0)
 
@@ -552,7 +549,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         Processes the wheel event: zooms in and out whenever a CTRL+wheel event is triggered
         """
         if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
-            self.increaseFontSize(event.angleDelta().y() / 120)
+            self.increaseFontSize(event.angleDelta().y() // 120)
         else:
             super().wheelEvent(event)
 
@@ -569,4 +566,4 @@ if __name__ == "__main__":
     editor.setWindowTitle("Code Editor Example")
     editor.setGeometry(QtCore.QRect(200, 200, 600, 400))
     editor.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

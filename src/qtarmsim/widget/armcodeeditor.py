@@ -71,4 +71,4 @@ if __name__ == "__main__":
     armEditor.setGeometry(QtCore.QRect(200, 200, 600, 400))
     # armEditor.setReadOnly(True)
     armEditor.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
