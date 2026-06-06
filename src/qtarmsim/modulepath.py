@@ -17,10 +17,9 @@
 ###########################################################################
 
 """
- module_path has the correct module path depending on whether the application is
- frozen (by cx_freeze) or not.
+module_path holds the absolute path to the directory containing this module.
 """
 
 import os
 
-module_path: str = os.path.dirname(__file__)
+module_path: str = os.path.dirname(os.path.abspath(__file__))
