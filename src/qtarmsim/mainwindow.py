@@ -259,7 +259,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         memoryByWordProxyModel: MemoryByWordProxyModel = MemoryByWordProxyModel(self)
         memoryByWordProxyModel.setSourceModel(self.memoryModel)
         self.ui.treeViewMemory.setModel(memoryByWordProxyModel)
-        # self.ui.memoryLCDView.setModel(self.memoryModel, '0x20080000', 40, 6)
+        # self.ui.memoryLCDView.setMemoryModel(self.memoryModel, '0x20080000', 40, 6)
 
         # Status bar with flags
         self.statusBar().addWidget(QtWidgets.QLabel(""), 10)  # No permanent
@@ -1300,7 +1300,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 break
         # Set the LCD model now that memory banks are populated
         try:
-            self.ui.memoryLCDView.setModel(memoryModel, '0x20080000', 40, 6)
+            self.ui.memoryLCDView.setMemoryModel(memoryModel, '0x20080000', 40, 6)
         except IndexError:
             pass  # LCD bank is not present in this program
         # Synchronously rebuild the view from the fully populated model

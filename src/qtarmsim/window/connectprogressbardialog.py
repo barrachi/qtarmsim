@@ -31,24 +31,24 @@ class ConnectProgressBarDialog(QtWidgets.QDialog):
 
         super(ConnectProgressBarDialog, self).__init__(parent)
         self.setWindowTitle("Connecting...")
-        self.layout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
 
         # Create a label and a progress bar and add them to the main layout
         self.label = QtWidgets.QLabel(self.tr("Connecting to ARMSim..."), self)
-        self.layout.addWidget(self.label)
+        self.mainLayout.addWidget(self.label)
         self.progressBar = QtWidgets.QProgressBar(self)
         self.progressBar.setRange(0, 1)
-        self.layout.addWidget(self.progressBar)
+        self.mainLayout.addWidget(self.progressBar)
 
         # Cancel button        
         self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Cancel)
-        self.layout.addWidget(self.buttonBox)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), self.reject)
+        self.mainLayout.addWidget(self.buttonBox)
+        _ = self.buttonBox.rejected.connect(self.reject)
 
         # button = QtWidgets.QPushButton("Start", self)
-        # self.layout.addWidget(button)
+        # self.mainLayout.addWidget(button)
         # button.clicked.connect(self.a)
 
         self.myLongTask = ConnectThread(simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort)

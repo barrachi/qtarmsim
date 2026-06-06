@@ -60,4 +60,4 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     helpWindow = HelpWindow()
     helpWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
