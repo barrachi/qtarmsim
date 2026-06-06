@@ -61,6 +61,9 @@ class MySocket(QtCore.QObject):
         This method should be used by a server application. Returns -1 if
         something goes wrong.
         """
+        if self.socket:
+            self.socket.close()
+            self.socket = None
         if self.verbose:
             print("Creating the socket")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -72,6 +75,8 @@ class MySocket(QtCore.QObject):
             _ = sys.stderr.write(
                 "Bind failed. [errno {}] {}\n".format(str(error.errno), error.strerror)
             )
+            self.socket.close()
+            self.socket = None
             return -1
         if self.verbose:
             print("Socket bind complete")
@@ -205,7 +210,7 @@ class MySocket(QtCore.QObject):
 
         @return: An array with the received lines or an empty array if a timeout occurs.
         """
-        lines: list[str] = []
+        lines: list[str] = []  # For giving some information if a timeout occurs
         line = ""
         while line != "EOF":
             try:
@@ -214,7 +219,7 @@ class MySocket(QtCore.QObject):
                 print("A time out error has occurred")
                 print("\n".join(lines))
                 raise
-            lines.append(line)  # For debugging purposes only
+            lines.append(line)
             if line != "EOF":
                 yield line
         self.block_until_response = False
@@ -224,7 +229,11 @@ class MySocket(QtCore.QObject):
         Sends a line through the open connection.
         """
         # Avoid sending new commands to ARMSim until the block_until_response flag is cleared
+        deadline = time.monotonic() + 10.0
         while self.block_until_response:
+            if time.monotonic() > deadline:
+                self.block_until_response = False
+                break
             time.sleep(0.1)
         if self.verbose:
             print("Sending line: {}".format(msg))
@@ -235,15 +244,18 @@ class MySocket(QtCore.QObject):
 
     def closeConnection(self) -> None:
         """
-        Closes the current connection.
+        Closes the current connection and the listening socket if open.
         """
         if self.conn:
             self.conn.close()
+            self.conn = None
             if self.verbose:
                 print("Connection closed")
+        if self.socket:
+            self.socket.close()
+            self.socket = None
 
-    # noinspection PyUnusedLocal
-    def exitSignalHandler(self, _received_signal: int, _frame: object) -> None:
+    def exitSignalHandler(self, _sig: int, _frame: object) -> None:
         """
         Handler used to close the socket when an exit signal is received. See __init__().
         """
