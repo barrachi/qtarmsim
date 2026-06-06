@@ -55,7 +55,7 @@ class MemoryBank:
         """
         self.slot: int = slot
         self.memType: str = memType
-        self.hexStartAddress:str = hexStartAddress
+        self.hexStartAddress: str = hexStartAddress
         self.bytes: list[str] = memBytes
         self.bytes += ['0x00'] * ((4 - len(self.bytes) % 4) % 4)  # Round data to the next word boundary
         self.startAddress: int = int(hexStartAddress, 16)
