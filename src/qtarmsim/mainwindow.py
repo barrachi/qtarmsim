@@ -30,7 +30,7 @@ from typing import Callable, TypedDict, cast
 
 import PySide6
 from PySide6 import QtCore, QtGui, QtPrintSupport, QtWidgets
-from PySide6.QtCore import QByteArray, QObject, Qt, QSettings
+from PySide6.QtCore import QByteArray, QObject, Qt
 from PySide6.QtGui import QAction, QKeyEvent
 from PySide6.QtWidgets import QDialog, QLabel, QWidget
 from typing_extensions import override
@@ -104,6 +104,7 @@ class DefaultSettings:
         for name in gcc_names:
             fname = which(name)
             if fname:
+                fname = os.path.abspath(fname)
                 break
         # See https://en.wikipedia.org/wiki/Uname for possible values of platform.machine() (i.e., uname -m)
         if not fname:  # Use bundled GNU Gcc if no native (cross) compiler has been found
@@ -113,21 +114,16 @@ class DefaultSettings:
             if platform.system() == "Linux":
                 if platform.machine() == 'aarch64':
                     fname = get_fname("linuxARM")
-                else:  # x86_{32,64}
-                    if platform.architecture()[0] == '64bit':
-                        fname = get_fname("linux64")
-                    elif platform.architecture()[0] == '32bit':
-                        fname = get_fname("linux32")
-                    else:
-                        fname = "Could not determine the correct compiler for this Linux system!"
+                elif platform.machine() == 'x86_64':
+                    fname = get_fname("linux64")
+                else:
+                    fname = get_fname("linux32")
             elif platform.system() == "Windows":
                 executable = "arm-none-eabi-gcc.exe"
-                if platform.architecture()[0] == '64bit':
+                if platform.machine() in ('AMD64', 'x86_64'):
                     fname = get_fname("win64", executable)
-                elif platform.architecture()[0] == '32bit':
-                    fname = get_fname("win32", executable)
                 else:
-                    fname = "Could not determine the correct compiler for this Windows system!"
+                    fname = get_fname("win32", executable)
             elif platform.system() == "Darwin":
                 if platform.machine() == 'arm64':
                     fname = get_fname("macosARM")
@@ -661,7 +657,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.editorFlags['undoAvailable'] = undoAvailable
         self.updateEditActions()
 
-    def setBreakpoint(self, _lineNumber: int, text: str) -> None:
+    def setBreakpoint(self, _: int, text: str) -> None:
         """Sets a breakpoint on the memory address obtained from the variable text"""
         assert self.simulator is not None
         hex_address = text.split(" ")[0][1:-1]
@@ -671,7 +667,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         else:
             self.breakpoints.append(hex_address)
 
-    def clearBreakpoint(self, _lineNumber: int, text: str) -> None:
+    def clearBreakpoint(self, _: int, text: str) -> None:
         """Clears a breakpoint from the memory address obtained from the variable text"""
         assert self.simulator is not None
         hex_address = text.split(" ")[0][1:-1]
