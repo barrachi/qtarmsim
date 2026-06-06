@@ -25,15 +25,15 @@ import os
 import platform
 import signal
 import sys
+from types import ModuleType
 
 import PySide6
-from PySide6 import QtSvg, QtXml, QtWidgets
+from PySide6 import QtSvg, QtWidgets, QtXml
 
 from qtarmsim.mainwindow import QtARMSimMainWindow
-from qtarmsim.modulepath import module_path
 
 
-def __stub():
+def __stub() -> tuple[ModuleType, ModuleType]:  # pyright: ignore[reportUnusedFunction]
     """
     This function does nothing. It exists only to avoid QtSvg and QtXml imports to be removed.
     QtSvg and QtXml must be imported to use the SVG icons.
@@ -41,7 +41,7 @@ def __stub():
     return QtSvg, QtXml
 
 
-def _help():
+def _help() -> None:
     print("""Usage: qtarmsim.py [options] [file.s]
 
 QtARMSim is a graphical ARM simulator. It provides an easy to use
@@ -59,35 +59,41 @@ Please, report bugs to <barrachi@uji.es>.
 """)
 
 
-def _get_opts():
+def _get_opts() -> tuple[str, bool, bool]:
     """Processes the options passed to the executable"""
     debug = False
     verbose = False
-    file_name = ""
-    optlist, _args = getopt.gnu_getopt(sys.argv[1:],
-                                       'dvh',
-                                       ['debug', 'verbose', 'help', ])
-    for opt, arg in optlist:  # @UnusedVariable arg
-        if opt in ('-h', '--help'):
+    fileName = ""
+    optlist, args = getopt.gnu_getopt(
+        sys.argv[1:],
+        "dvh",
+        [
+            "debug",
+            "verbose",
+            "help",
+        ],
+    )
+    for opt, _arg in optlist:
+        if opt in ("-h", "--help"):
             _help()
             sys.exit()
-        elif opt in ('-d', '--debug'):
+        elif opt in ("-d", "--debug"):
             debug = True
-        elif opt in ('-v', '--verbose'):
+        elif opt in ("-v", "--verbose"):
             verbose = True
-    if len(args) and args[0][-2:] in ('.s', '.c'):
-        file_name = args[0]
-    return file_name, debug, verbose
+    if len(args) and args[0][-2:] in (".s", ".c"):
+        fileName = args[0]
+    return fileName, debug, verbose
 
 
-def main():
+def main() -> None:
     # Make CTRL+C work
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    if platform.system() == 'Darwin':
+    _ = signal.signal(signal.SIGINT, signal.SIG_DFL)
+    if platform.system() == "Darwin":
         # Big Sur requires the next environment variable to be set
         # (otherwise the PySide6 windows won't be shown)
         # https://www.loekvandenouweland.com/content/pyside2-big-sur-does-not-show-window.html
-        os.environ['QT_MAC_WANTS_LAYER'] = '1'
+        os.environ["QT_MAC_WANTS_LAYER"] = "1"
     # Create the application
     qApp = QtWidgets.QApplication(sys.argv)
     # ------------------------------------------------------------
@@ -101,7 +107,7 @@ def main():
     # Process the command line options
     (file_name, debug, verbose) = _get_opts()
     # Set the application style
-    qApp.setStyle('Fusion')
+    _ = qApp.setStyle("Fusion")
     # Create the main window and show it
     main_window = QtARMSimMainWindow(debug=debug, verbose=verbose)
     main_window.show()

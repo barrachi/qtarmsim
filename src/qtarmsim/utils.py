@@ -19,7 +19,7 @@
 from PySide6 import QtGui
 
 
-def getMonoSpacedFont():
+def getMonoSpacedFont() -> QtGui.QFont:
     """Tries to get a monospaced font in Linux, Windows and macOS"""
     font = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.SystemFont.FixedFont)
     # If the previous line does not work...

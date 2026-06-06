@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+1.0.7 (2025-10-12)
+^^^^^^^^^^^^^^^^^^
+- Updated PySide6 dependencies and python requirements.
+- Created __main__.py so qtarmsim can be launched with python -m qtarmsim.
+
 1.0.6 (2025-06-23)
 ^^^^^^^^^^^^^^^^^^
 - Removed pyqtdarktheme dependency (it only supports python versions lower than 3.12).

@@ -27,6 +27,8 @@
 Module implementing the post-installation logic for 'pip install'.
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import sys
@@ -40,7 +42,7 @@ logger = logging.getLogger(__name__)
 # Post installation hooks for Windows
 # ------------------------------------------------------------------------
 
-def windowsCreateLinks():
+def windowsCreateLinks() -> None:
     """
     Creates Desktop and Start Menu links.
     """
@@ -77,7 +79,7 @@ def windowsCreateLinks():
             windowsCreateShortcut(linkPath, targetPath, iconPath)
 
 
-def getWinregEntry(name, path):
+def getWinregEntry(name: str, path: str) -> str | None:
     """
     Gets an entry from the Windows Registry.
 
@@ -99,7 +101,7 @@ def getWinregEntry(name, path):
         return None
 
 
-def windowsDesktopEntries():
+def windowsDesktopEntries() -> list[tuple[str, str, str]]:
     """
     Generates the data for the Windows Desktop links.
 
@@ -114,7 +116,7 @@ def windowsDesktopEntries():
     ]
 
 
-def windowsCreateShortcut(linkPath, targetPath, iconPath):
+def windowsCreateShortcut(linkPath: str, targetPath: str, iconPath: str) -> None:
     """
     Creates a Windows shortcut
 
@@ -142,7 +144,7 @@ def windowsCreateShortcut(linkPath, targetPath, iconPath):
 # Post installation hooks for macOS
 # ------------------------------------------------------------------------
 
-def macOsCreateSymLink():
+def macOsCreateSymLink() -> None:
     """
     Creates a symbolic link to qtarmsim in /opt/local/bin/.
     """
@@ -159,7 +161,7 @@ def macOsCreateSymLink():
 # Post installation hooks for linux
 # ------------------------------------------------------------------------
 
-def linuxAppendPath():
+def linuxAppendPath() -> None:
     """
     If installed as a regular user, make sure that ~/.local/bin/ is in the path
     """
@@ -194,7 +196,7 @@ def linuxAppendPath():
 # ------------------------------------------------------------------------
 # Main script
 # ------------------------------------------------------------------------
-def main():
+def main() -> None:
     """
     Main script
     """

@@ -23,4 +23,4 @@
 
 import os
 
-module_path = os.path.dirname(__file__)
+module_path: str = os.path.dirname(__file__)
