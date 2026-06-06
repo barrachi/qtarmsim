@@ -27,13 +27,16 @@
 
 import sys
 
-import PySide6
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QContextMenuEvent, QKeyEvent, QWheelEvent
+from typing import final, cast
+from typing_extensions import override
+
 
 from ..utils import getMonoSpacedFont
 
-
+@final
 class LeftArea(QtWidgets.QWidget):
     """
     LeftArea widget.
@@ -46,25 +49,25 @@ class LeftArea(QtWidgets.QWidget):
     in the code editor source.
     """
 
-    def __init__(self, codeEditor):
+    def __init__(self, codeEditor: 'CodeEditor') -> None:
         """Associates this LeftArea instance with its CodeEditor parent"""
         super(LeftArea, self).__init__(codeEditor)
         # ------------------------------------------------------------
         #  Instance attributes that will be properly initialized later
         # ------------------------------------------------------------
-        self.breakpoints = None
-        self.linesWithBackground = None
-        self.previousHighlightedLineNumber = None
-        self.currentHighlightedLineNumber = None
-        self.currentBgColor = None
-        self.bgColors = []
-        self.previousBlockHeight = None
-        self.previousSelfWidth = None
-        self.rightArrowPoints = None
-        self.stopPoints = None
-        self.middlePointerPoints = None
-        self.upPointerPoints = None
-        self.downPointerPoints = None
+        self.breakpoints: dict[int, str] = {}
+        self.linesWithBackground: dict[int, list[QtGui.QColor]] = {}
+        self.previousHighlightedLineNumber: int = -1
+        self.currentHighlightedLineNumber: int = -1
+        self.currentBgColor:QtGui.QColor = QtGui.QColor('blue')
+        self.bgColors: list[QtGui.QColor]
+        self.previousBlockHeight: float = -1.0
+        self.previousSelfWidth: float = -1.0
+        self.rightArrowPoints: list[tuple[float,float]] = []
+        self.stopPoints: list[tuple[float,float]] = []
+        self.middlePointerPoints: list[tuple[float,float]] = []
+        self.upPointerPoints: list[tuple[float,float]] = []
+        self.downPointerPoints: list[tuple[float,float]] = []
         # ------------------------------------------------------------
         # Colors
         self.rightArrowColor = QtGui.QColor('blue')
@@ -74,15 +77,16 @@ class LeftArea(QtWidgets.QWidget):
         self.pointerColor = QtGui.QColor('red')
         self.pointerColor.setAlpha(100)
         # ------------------------------------------------------------
-        self.codeEditor = codeEditor
+        self.codeEditor: CodeEditor = codeEditor
         self.clearBreakpoints()
         self.clearLinesWithBackground()
 
-    def sizeHint(self):
+    @override
+    def sizeHint(self) -> QtCore.QSize:
         """Returns the size hint of this widget"""
         return QtCore.QSize(self.codeEditor.width(), 0)
 
-    def initializePolygons(self, blockHeight, selfWidth):
+    def initializePolygons(self, blockHeight: float, selfWidth: float) -> None:
         """Initializes different polygons based on block height and self-width"""
         self.previousBlockHeight = blockHeight
         self.previousSelfWidth = selfWidth
@@ -110,7 +114,7 @@ class LeftArea(QtWidgets.QWidget):
         xOffset = (selfWidth - length) / 2
         yOffset = (blockHeight - length) / 2
         self.stopPoints = [(x + xOffset, y + yOffset) for (x, y) in stopPoints]
-        # From previous line to PC Arrow
+        # From the previous line to PC Arrow
         xa = 3
         ya = 0
         offsets = [(-1, 0), (-1, blockHeight), (0, blockHeight), (0, 0)]
@@ -132,14 +136,16 @@ class LeftArea(QtWidgets.QWidget):
         offsets = [(-1, -0.5 * blockHeight), (-1, -1), (0, 0), (3, 0), (3, -1), (0, -1), (0, -0.5 * blockHeight)]
         self.downPointerPoints = [(xa + xo, ya + yo) for (xo, yo) in offsets]
 
-    def paintEvent(self, event):
+    @override
+    def paintEvent(self, event: QtGui.QPaintEvent):
         """Repaints (part of) the LeftArea Widget"""
         super(LeftArea, self).paintEvent(event)
         painter = QtGui.QPainter(self)
         painter.fillRect(event.rect(), QtGui.QColor('lightGray'))
         block = self.codeEditor.firstVisibleBlock()
         blockNumber = block.blockNumber()
-        top = self.codeEditor.blockBoundingGeometry(block).translated(self.codeEditor.contentOffset()).top()
+        contentOffset = self.codeEditor.contentOffset()
+        top = self.codeEditor.blockBoundingGeometry(block).translated(contentOffset).top()
         blockHeight = self.codeEditor.blockBoundingRect(block).height()
         bottom = top + blockHeight
         selfWidth = self.width()
@@ -155,8 +161,6 @@ class LeftArea(QtWidgets.QWidget):
                     # The next actions will be done only on blocks affected by an event
                     if blockNumber in self.linesWithBackground:
                         for i, color in enumerate(self.linesWithBackground[blockNumber]):
-                            if color is None:
-                                continue
                             ribbonMinX = min(ribbonX + i, ribbonX1)
                             ribbonMaxW = max(ribbonW - i * 2, 1)
                             painter.fillRect(QtCore.QRectF(ribbonMinX, top, ribbonMaxW, blockHeight), color)
@@ -201,7 +205,7 @@ class LeftArea(QtWidgets.QWidget):
                 if block.isVisible() and bottom >= event.rect().top():
                     number = blockNumber + 1
                     painter.setPen(QtGui.QColor('black'))
-                    painter.drawText(-4, top, self.width(), self.codeEditor.fontMetrics().height(),
+                    painter.drawText(-4, int(top), self.width(), self.codeEditor.fontMetrics().height(),
                                      Qt.AlignmentFlag.AlignRight, u"{}".format(number))
                 block = block.next()
                 top = bottom
@@ -210,7 +214,8 @@ class LeftArea(QtWidgets.QWidget):
         # https://stackoverflow.com/questions/59605569/pyside2-raises-error-qpaintdevice-cannot-destroy-paint-device-that-is-being-p
         del painter
 
-    def width(self):
+    @override
+    def width(self) -> int:
         """
         Returns the leftArea width. If the code editor is read-only, a fixed width is computed. Otherwise, the width is
         based on how many blocks has the associated editor.
@@ -227,11 +232,13 @@ class LeftArea(QtWidgets.QWidget):
             width = 8 + self.codeEditor.fontMetrics().horizontalAdvance(u"9") * digits
         return width
 
-    def wheelEvent(self, event):
+    @override
+    def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         """Process the wheel event calling the wheel event on the parent"""
         self.codeEditor.wheelEvent(event)
 
-    def mousePressEvent(self, event):
+    @override
+    def mousePressEvent(self, event: QtGui.QMouseEvent):
         """
         Process the mouse press events: if the associated code editor is read-only and the left button is clicked,
         find which line in the source code has been clicked on.
@@ -250,13 +257,10 @@ class LeftArea(QtWidgets.QWidget):
         else:
             super(LeftArea, self).mousePressEvent(event)
 
-    def clearBreakpoints(self):
-        try:
-            self.breakpoints.clear()
-        except AttributeError:
-            self.breakpoints = {}
+    def clearBreakpoints(self) -> None:
+        self.breakpoints.clear()
 
-    def setOrClearBreakpoint(self, lineNumber, text):
+    def setOrClearBreakpoint(self, lineNumber: int, text: str) -> None:
         if lineNumber in self.breakpoints:
             self.breakpoints.pop(lineNumber)
             self.codeEditor.clearBreakpointSignal.emit(lineNumber, text)
@@ -264,7 +268,7 @@ class LeftArea(QtWidgets.QWidget):
             self.breakpoints[lineNumber] = text
             self.codeEditor.setBreakpointSignal.emit(lineNumber, text)
 
-    def clearLinesWithBackground(self):
+    def clearLinesWithBackground(self) -> None:
         try:
             self.linesWithBackground.clear()
         except AttributeError:
@@ -274,9 +278,9 @@ class LeftArea(QtWidgets.QWidget):
         self.currentBgColor = QtGui.QColor('blue').lighter(140)
         self.bgColors = [QtGui.QColor(self.currentBgColor)]  # @warning: a new instance, no the color
 
-    def setCurrentHighlightedLineNumber(self, lineNumber):
+    def setCurrentHighlightedLineNumber(self, lineNumber: int):
         """
-        Sets the previous highlighted line background properties.
+        Sets the previously highlighted line background properties.
 
         @param lineNumber: the line number of the current highlighted number.
         """
@@ -288,8 +292,8 @@ class LeftArea(QtWidgets.QWidget):
             # Moved to an address different of the next one
             if self.currentHighlightedLineNumber != lineNumber - 1:
                 # A branch has been done
-                # 1) Compute new background color
-                (h, s, v, a) = self.currentBgColor.getHsv()
+                # 1) Compute a new background color
+                (h, s, v, a) = cast(tuple[int, int, int, int], self.currentBgColor.getHsv())
                 self.currentBgColor.setHsv((h - 50) % 360, s, v, a)
                 if self.currentHighlightedLineNumber in self.linesWithBackground:
                     # If the current line has already been traced, change the last background color
@@ -312,7 +316,7 @@ class LeftArea(QtWidgets.QWidget):
                 else:
                     # Else, set the background colors to the current list minus the first one not null
                     try:
-                        self.bgColors[-2] = None
+                        self.bgColors[-2] = QtGui.QColor(self.currentBgColor)
                     except IndexError:
                         pass
                     self.linesWithBackground[self.currentHighlightedLineNumber] = self.bgColors[:]
@@ -332,13 +336,13 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
     clearBreakpointSignal = QtCore.Signal(int, str)
     highlightedWordSignal = QtCore.Signal(str)
 
-    def __init__(self, parent=None, SyntaxHighlighterClass=None, *args, **kwargs):
+    def __init__(self, parent: QtWidgets.QWidget | None = None, SyntaxHighlighterClass=None, *args, **kwargs) -> None:
         """CodeEditor initialization"""
         super().__init__(parent, *args, **kwargs)
         # ------------------------------------------------------------
         #  Instance attributes that will be properly initialized later
         # ------------------------------------------------------------
-        self.currentHighlightedLineNumber = None
+        self.currentHighlightedLineNumber: int = 0
         # ------------------------------------------------------------
         # Set the default font and tab distance
         self.myFont = getMonoSpacedFont()
@@ -364,7 +368,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.connect(self, QtCore.SIGNAL('updateRequest(QRect, int)'), self.updateLeftArea)
         self.connect(self, QtCore.SIGNAL('cursorPositionChanged()'), self.updateHighlightSelections)
 
-    def setReadOnly(self, ro):
+    def setReadOnly(self, ro: bool):
         """
         Sets the read-only property to True or False.
 
@@ -380,11 +384,11 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
     def setTabStopDistance(self, distance: float):
         raise Exception("Use setTabStopCharacters instead")
 
-    def setTabStopCharacters(self, characters):
+    def setTabStopCharacters(self, characters: int) -> None:
         length = characters * self.fontMetrics().horizontalAdvance(' ' * 10000) / 10000
         super().setTabStopDistance(length)
 
-    @QtCore.Slot()
+    @QtCore.Slot()  # pyright: ignore[reportAny]
     def toggleShowTabsAndSpaces(self):
         """
         Toggles ShowTabsAndSpaces option
@@ -398,15 +402,15 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             options.setFlags(flags)
         self.document().setDefaultTextOption(options)
 
-    def clearBreakpoints(self):
+    def clearBreakpoints(self) -> None:
         """Calls leftArea clearBreakpoints method"""
         self.leftArea.clearBreakpoints()
 
-    def clearDecorations(self):
+    def clearDecorations(self) -> None:
         """Calls leftArea clearLinesWithBackground method"""
         self.leftArea.clearLinesWithBackground()
 
-    def setCurrentHighlightedLineNumber(self, lineNumber):
+    def setCurrentHighlightedLineNumber(self, lineNumber: int) -> None:
         """
         Sets the stored currentHighlightedLineNumber variable.
 
@@ -416,7 +420,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.leftArea.setCurrentHighlightedLineNumber(lineNumber)
         self.updateHighlightSelections()
 
-    def getCurrentHighlightedLineNumber(self):
+    def getCurrentHighlightedLineNumber(self) -> int:
         """
         Returns the current highlighted line number.
 
@@ -428,7 +432,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         else:
             return self.textCursor().blockNumber()
 
-    def _getCurrentHighlightedLineCursor(self):
+    def _getCurrentHighlightedLineCursor(self) -> QtGui.QTextCursor:
         """
         Returns a cursor to the current highlighted line.
 
@@ -447,25 +451,25 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             self.setTextCursor(cursor)
         return cursor
 
-    def contextMenuEvent(self, event: PySide6.QtGui.QContextMenuEvent):
+    def contextMenuEvent(self, event: QContextMenuEvent):
         menu = self.createStandardContextMenu()
         menu.addSeparator()
         txt = "Hide tabs and spaces" if self.showTabsAndSpaces else "Show tabs and spaces"
         menu.addAction(txt, self, QtCore.SLOT("toggleShowTabsAndSpaces()"))
         menu.exec_(event.globalPos())
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         """Resize the leftArea child widget when a resize event is triggered"""
         super().resizeEvent(event)
         cr = self.contentsRect()
         self.leftArea.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.leftArea.width(), cr.height()))
 
     # noinspection PyUnusedLocal
-    def updateLeftAreaWidth(self, newBlockCount=None):
+    def updateLeftAreaWidth(self, newBlockCount: int | None = None) -> None:
         """Changes the code editor left margin based on the width of the leftArea child widget"""
         self.setViewportMargins(self.leftArea.width(), 0, 0, 0)
 
-    def updateLeftArea(self, rect, dy):
+    def updateLeftArea(self, rect: QtCore.QRect, dy: int) -> None:
         """Updates the leftArea child widgets when an updateRequest event is triggered"""
         if dy:
             self.leftArea.scroll(0, dy)
@@ -474,13 +478,13 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self.updateLeftAreaWidth()
 
-    def updateHighlightSelections(self):
+    def updateHighlightSelections(self) -> None:
         """Sets the selections to be highlighted"""
         extraSelections = [self._getCurrentLineHighlightSelection()]
         extraSelections += self._getCurrentWordHighlightSelections()
         self.setExtraSelections(extraSelections)
 
-    def _getCurrentLineHighlightSelection(self):
+    def _getCurrentLineHighlightSelection(self) -> QtWidgets.QTextEdit.ExtraSelection:
         """Returns the current line highlight selection"""
         lineColor = QtGui.QColor('blue').lighter(190)
         selection = QtWidgets.QTextEdit.ExtraSelection()
@@ -490,7 +494,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         selection.cursor.clearSelection()
         return selection
 
-    def _getCurrentWordHighlightSelections(self):
+    def _getCurrentWordHighlightSelections(self) -> list[QtWidgets.QTextEdit.ExtraSelection]:
         """Returns highlight selections for those words in the document that match the current word under the cursor
         (only if the current word is a special keyword) """
         words = self._getKeywordsToHighlight()
@@ -513,11 +517,11 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             self.highlightedWordSignal.emit('')
         return selections
 
-    def _getKeywordsToHighlight(self):
+    def _getKeywordsToHighlight(self) -> list[str]:
         """Returns a list of keywords that should be highlighted when that keyword is under the cursor"""
         return []
 
-    def increaseFontSize(self, inc):
+    def increaseFontSize(self, inc: int):
         """
         Increases (decreases) the font size
         :param inc: number of points to increase the font
@@ -530,7 +534,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.setFont(self.myFont)
         self.setTabStopCharacters(8)
 
-    def keyPressEvent(self, event: PySide6.QtGui.QKeyEvent):
+    def keyPressEvent(self, event: QKeyEvent):
         """
         Processes the CTRL++ and CTRL+- events
         """
@@ -543,7 +547,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
                 return
         super().keyPressEvent(event)
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event: QWheelEvent) -> None:
         """
         Processes the wheel event: zooms in and out whenever a CTRL+wheel event is triggered
         """
@@ -552,7 +556,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         else:
             super().wheelEvent(event)
 
-    def scrollContentsBy(self, dx, dy):
+    def scrollContentsBy(self, dx: int, dy: int) -> None:
         """Overrides scrollContentsBy to allow appending text without scrolling"""
         if not self.scrollLock:
             super().scrollContentsBy(dx, dy)

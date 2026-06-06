@@ -23,7 +23,7 @@ from PySide6 import QtCore, QtGui
 class HighlightingRule:
     """A highlighting rule consists of a QRegularExpression derived from pattern and its associated QTextCharFormat"""
 
-    def __init__(self, patternTxt, hrFormat):
+    def __init__(self, patternTxt: str, hrFormat: QtGui.QTextCharFormat) -> None:
         self.re = QtCore.QRegularExpression(patternTxt)
         self.format = hrFormat
 
@@ -31,12 +31,12 @@ class HighlightingRule:
 class CommonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     """Class that can be used to parse and highlight a given code"""
 
-    def __init__(self, parent):
+    def __init__(self, parent: QtGui.QTextDocument) -> None:
         """Initializes the different patterns and their respective formats"""
         super().__init__(parent)
-        self.highlightingRules = []  # To be defined on the derived classes
+        self.highlightingRules: list[HighlightingRule] = []  # To be defined on the derived classes
 
-    def highlightBlock(self, text):
+    def highlightBlock(self, text: str) -> None:
         """Parses a given block and applies the corresponding formats to the matched patterns"""
         # First, apply the patterns and formats from self.highlightingRules
         # ------------------------------------------------

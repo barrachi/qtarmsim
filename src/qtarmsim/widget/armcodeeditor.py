@@ -17,6 +17,8 @@
 ###########################################################################
 
 
+from __future__ import annotations
+
 import sys
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -29,14 +31,14 @@ from .csyntaxhighlighter import CSyntaxHighlighter
 class ARMCodeEditor(CodeEditor):
     """CodeEditor with ARMSyntaxHighlighter"""
 
-    def __init__(self, parent=None, *args, **kwargs):
+    def __init__(self, parent: QtWidgets.QWidget | None = None, *args, **kwargs) -> None:
         """ARMCodeEditor initialization"""
         self.ARMSyntaxHighlighterClass = ARMSyntaxHighlighter
         self.CSyntaxHighlighterClass = CSyntaxHighlighter
         super(ARMCodeEditor, self).__init__(parent=parent, SyntaxHighlighterClass=self.ARMSyntaxHighlighterClass, *args,
                                             **kwargs)
 
-    def _getKeywordsToHighlight(self):
+    def _getKeywordsToHighlight(self) -> list[str]:
         """Returns which keywords should be highlighted on the text when the same keyword is under the cursor"""
         registers = ['r{}'.format(n) for n in range(0, 16)] + ['R{}'.format(n) for n in range(0, 16)] + ['sp', 'SP',
                                                                                                          'lr', 'LR',
@@ -52,11 +54,11 @@ class ARMCodeEditor(CodeEditor):
         # Return special keywords
         return registers + labels
 
-    def setARMMode(self):
+    def setARMMode(self) -> None:
         self.syntaxHighlighter = self.ARMSyntaxHighlighterClass(self.document())
         self.setTabStopCharacters(8)
 
-    def setCMode(self):
+    def setCMode(self) -> None:
         self.syntaxHighlighter = self.CSyntaxHighlighterClass(self.document())
         self.setTabStopCharacters(3)
 

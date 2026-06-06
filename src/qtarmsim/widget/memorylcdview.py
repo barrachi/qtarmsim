@@ -21,9 +21,11 @@
 #    python3 -m qtarmsim.widget.memorylcdview
 # -------------------------------------------------------------------------
 
+from __future__ import annotations
+
 import sys
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt
 
 from ..model.memorylcdproxymodel import MemoryLCDProxyModel
@@ -32,7 +34,7 @@ from ..model.memorymodel import MemoryModel
 
 class MemoryLCDView(QtWidgets.QTableView):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(MemoryLCDView, self).__init__(parent)
         self.setGridStyle(Qt.PenStyle.NoPen)
         self.horizontalHeader().hide()
@@ -58,7 +60,7 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.LCDColumns = None
         self.LCDRows = None
 
-    def setModel(self, memoryModel_, hexStartAddress='0x20080000', LCDColumns=32, LCDRows=6):
+    def setModel(self, memoryModel_: MemoryModel, hexStartAddress: str = '0x20080000', LCDColumns: int = 32, LCDRows: int = 6) -> None:
         """Sets the memory model and the number of columns and rows of the LCD"""
         self.memoryLCDProxyModel = MemoryLCDProxyModel()
         self.memoryLCDProxyModel.setSourceModel(memoryModel_, hexStartAddress, LCDColumns, LCDRows)
@@ -67,7 +69,7 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.LCDRows = LCDRows
         self.resize()
 
-    def resize(self, size=QtCore.QSize(0, 0)):
+    def resize(self, size: QtCore.QSize = QtCore.QSize(0, 0)) -> None:
         """Resize the columns and rows of the LCD to the size of its content, and then fixes the total width and height of
         the LCD."""
         self.resizeColumnsToContents()
@@ -76,7 +78,7 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.setFixedHeight(18 + 18 + 8 + sum([self.rowHeight(i) for i in range(self.LCDRows)]))
         # self.update()  # @todo: check that update is not required any more
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         """Process the wheel event: zooms in and out whenever a CTRL+wheel event is triggered"""
         if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
             self.memoryLCDProxyModel.changeFontSize(event.angleDelta().y() / 120)

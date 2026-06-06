@@ -26,7 +26,7 @@ from PySide6 import QtGui
 from .commonsyntaxhighlighter import HighlightingRule, CommonSyntaxHighlighter
 
 
-def generateCHighlightingRules():
+def generateCHighlightingRules() -> list[HighlightingRule]:
     #
     # The following keywords have been obtained from the KDE syntax-highlight framework (c syntax):
     #   https://github.com/KDE/syntax-highlighting/blob/master/data/syntax/c.xml
@@ -162,7 +162,7 @@ def generateCHighlightingRules():
 class CSyntaxHighlighter(CommonSyntaxHighlighter):
     """Class that can be used to parse and highlight C assembler code"""
 
-    def __init__(self, parent):
+    def __init__(self, parent: QtGui.QTextDocument) -> None:
         """Initializes the different patterns and their respective formats"""
         super().__init__(parent)
         self.highlightingRules = generateCHighlightingRules()

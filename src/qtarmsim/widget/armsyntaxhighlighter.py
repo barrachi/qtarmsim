@@ -26,7 +26,7 @@ from PySide6 import QtGui
 from .commonsyntaxhighlighter import HighlightingRule, CommonSyntaxHighlighter
 
 
-def generateARMHighlightingRules():
+def generateARMHighlightingRules() -> list[HighlightingRule]:
     """
     Most of the ARM keywords and directives were obtained from the listings ARM definition for LaTeX
     (c) 2013 by Jacques Supcik
@@ -508,7 +508,7 @@ def generateARMHighlightingRules():
 class ARMSyntaxHighlighter(CommonSyntaxHighlighter):
     """Class that can be used to parse and highlight ARM assembler code"""
 
-    def __init__(self, parent):
+    def __init__(self, parent: QtGui.QTextDocument) -> None:
         """Initializes the different patterns and their respective formats"""
         super().__init__(parent)
         self.highlightingRules = generateARMHighlightingRules()

@@ -21,13 +21,17 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 class MyQTreeView(QtWidgets.QTreeView):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.geometry_updated = False
         self.header().setStretchLastSection(False)
-        # self.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.setUniformRowHeights(True)
+        # Per-column width hints: maps column -> (sample_text, fixed_overhead_px)
+        # When set, increaseFontSize computes widths from font metrics (O(1)).
+        # When absent, it falls back to resizeColumnToContents.
+        self._column_width_hints: dict[int, tuple[str, int]] = {}
 
-    def updateGeometrySizes(self):
+    def updateGeometrySizes(self) -> None:
         self.geometry_updated = True
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
@@ -37,10 +41,10 @@ class MyQTreeView(QtWidgets.QTreeView):
         if my_vertical_scrollbar.isVisible():
             width += my_vertical_scrollbar.width()
         self.setMinimumWidth(width)
-        self.parent().setMinimumWidth(0)
-        self.parent().parent().setMinimumWidth(0)
+        self.parent().setMinimumWidth(0)  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
+        self.parent().parent().setMinimumWidth(0)  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
 
-    def sizeHint(self):
+    def sizeHint(self) -> QtCore.QSize:
         """
         If there is no model yet, just return a 0x0 size.
         Else, compute the total width and height and set the minimum and maximum sizes of the parent dock widget
@@ -53,24 +57,49 @@ class MyQTreeView(QtWidgets.QTreeView):
         hint.setWidth(self.minimumWidth())
         return hint
 
-    def increaseFontSize(self, inc):
+    def setColumnWidthHint(self, col: int, sample_text: str, fixed_overhead: int) -> None:
+        """
+        Register a width hint for a column so that increaseFontSize can recompute
+        its width in O(1) from font metrics instead of re-measuring all rows.
+
+        :param col: column index
+        :param sample_text: the widest string that can appear in this column
+        :param fixed_overhead: fixed extra pixels (indentation, padding) that do not scale with font
+        """
+        self._column_width_hints[col] = (sample_text, fixed_overhead)
+
+    def increaseFontSize(self, inc: int) -> None:
         """
         Increases (decreases) the font size
         :param inc: number of points to increase the font
         """
-        self.model().beginResetModel()
-        myFontPointSize = self.model().qFont.pointSize()
-        myFontPointSize += inc
-        if myFontPointSize < 10:
-            myFontPointSize = 10
-        self.model().qFont.setPointSize(myFontPointSize)
-        self.model().qFontLast.setPointSize(myFontPointSize)
-        expanded = [self.isExpanded(self.model().index(row, 0, QtCore.QModelIndex())) for row in
-                    range(self.model().rootItem.childCount())]
-        self.model().endResetModel()
-        for row in range(self.model().rootItem.childCount()):
-            self.setExpanded(self.model().index(row, 0, QtCore.QModelIndex()), expanded[row])
-        self.updateGeometrySizes()
+        model = self.model()
+        if model is None:
+            return
+        old_size = model.qFont.pointSize()  # pyright: ignore[reportAttributeAccessIssue]
+        new_size = max(10, old_size + inc)
+        if new_size == old_size:
+            return
+        # Wrap font change in layout signals so the view updates synchronously.
+        # uniformRowHeights=True makes layoutChanged O(1) (only one row measured).
+        model.layoutAboutToBeChanged.emit()  # pyright: ignore[reportAttributeAccessIssue]
+        model.qFont.setPointSize(new_size)  # pyright: ignore[reportAttributeAccessIssue]
+        model.qFontLast.setPointSize(new_size)  # pyright: ignore[reportAttributeAccessIssue]
+        model.layoutChanged.emit()  # pyright: ignore[reportAttributeAccessIssue]
+        # Column widths: O(1) from font metrics if hints set, else resizeColumnToContents
+        if self._column_width_hints:
+            fm = QtGui.QFontMetrics(model.qFont)  # pyright: ignore[reportAttributeAccessIssue]
+            for col, (sample, overhead) in self._column_width_hints.items():
+                self.setColumnWidth(col, fm.horizontalAdvance(sample) + overhead)
+        else:
+            for col in range(self.header().count()):
+                self.resizeColumnToContents(col)
+        width = sum(self.columnWidth(col) for col in range(self.header().count()))
+        if self.verticalScrollBar().isVisible():
+            width += self.verticalScrollBar().width()
+        self.setMinimumWidth(width)
+        self.parent().setMinimumWidth(0)  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
+        self.parent().parent().setMinimumWidth(0)  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         """
@@ -85,11 +114,11 @@ class MyQTreeView(QtWidgets.QTreeView):
                 return
         super().keyPressEvent(event)
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         """
         Processes the wheel event: zooms in and out whenever a CTRL+wheel event is triggered
         """
         if event.modifiers() == QtCore.Qt.KeyboardModifier.ControlModifier:
-            self.increaseFontSize(event.angleDelta().y() / 120)
+            self.increaseFontSize(int(event.angleDelta().y()) // 120)
         else:
             super().wheelEvent(event)
