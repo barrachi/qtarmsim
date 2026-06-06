@@ -25,7 +25,7 @@ from PySide6.QtWidgets import QApplication
 
 from ..model.memorybank import MemoryBank
 from ..model.memorybankitem import MemoryBankItem
-from ..model.memoryitem import MemoryItem
+from ..model.memorybank import MemoryItem
 from ..model.memorymodel import MemoryModel
 from ..model.memorybywordproxymodel import MemoryByWordProxyModel
 

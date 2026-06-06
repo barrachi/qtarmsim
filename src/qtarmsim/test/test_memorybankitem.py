@@ -21,7 +21,7 @@ import unittest
 
 from ..model.memorybank import MemoryBank
 from ..model.memorybankitem import MemoryBankItem
-from ..model.memoryitem import MemoryItem
+from ..model.memorybank import MemoryItem
 
 
 class TestMemoryBankItemAttributes(unittest.TestCase):

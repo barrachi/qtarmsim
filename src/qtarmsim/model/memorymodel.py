@@ -25,7 +25,7 @@ from typing_extensions import override
 
 from .memorybank import MemoryBank
 from .memorybankitem import MemoryBankItem
-from .memoryitem import MemoryItem
+from .memorybank import MemoryItem
 from ..utils import getMonoSpacedFont
 
 

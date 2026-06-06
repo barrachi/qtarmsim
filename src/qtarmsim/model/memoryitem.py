@@ -15,31 +15,9 @@
 #                                                                         #
 ###########################################################################
 
-from __future__ import annotations
+# MemoryItem is defined in memorybank to avoid a circular import
+# (MemoryItem references MemoryBank as its parent type).
+# This module re-exports it for backward compatibility.
+from .memorybank import MemoryItem
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .memorybank import MemoryBank
-
-
-class MemoryItem:
-    """Stores the information of a memory item."""
-
-    _instance_cache: dict[str, MemoryItem] = {}
-
-    def __new__(cls, parent: MemoryBank, hexAddress: str, hexValue: str) -> MemoryItem:
-        _ = parent, hexValue  # not used in __new__; handled by __init__
-        if hexAddress not in cls._instance_cache:
-            instance = super().__new__(cls)
-            cls._instance_cache[hexAddress] = instance
-        return cls._instance_cache[hexAddress]
-
-    def __init__(self, parent: MemoryBank, hexAddress: str, hexValue: str) -> None:
-        self.parent: MemoryBank = parent
-        self.hexAddress: str = hexAddress
-        self.hexValue: str = hexValue
-
-    @property
-    def memoryBank(self) -> MemoryBank:
-        return self.parent
+__all__ = ["MemoryItem"]

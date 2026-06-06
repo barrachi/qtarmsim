@@ -32,7 +32,7 @@ from typing_extensions import override
 
 from .common import InputToHex, DataTypes
 from .memorybank import MemoryBank
-from .memoryitem import MemoryItem
+from .memorybank import MemoryItem
 from .memorymodel import MemoryModel
 from .memorybankitem import MemoryBankItem
 from ..utils import getMonoSpacedFont

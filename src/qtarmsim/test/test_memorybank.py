@@ -20,7 +20,7 @@
 import unittest
 
 from ..model.memorybank import MemoryBank
-from ..model.memoryitem import MemoryItem
+from ..model.memorybank import MemoryItem
 
 
 class TestMemoryBankInit(unittest.TestCase):
