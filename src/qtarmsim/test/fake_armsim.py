@@ -104,15 +104,15 @@ EOF = 'EOF'
 
 def do_SHOW_VERSION(_args, socket):
     print("Showing version information")
-    socket.send_line("Fake ARMSim version 0.1")
-    socket.send_line("(c) 2014 Sergio Barrachina Mir")
-    socket.send_line(EOF)
+    socket.sendLine("Fake ARMSim version 0.1")
+    socket.sendLine("(c) 2014 Sergio Barrachina Mir")
+    socket.sendLine(EOF)
 
 
 def do_SHOW_REGISTER(args, socket):
     reg_name = args[2]
     print("Showing contents of register {} ({})".format(reg_name, REGISTERS[reg_name]))
-    socket.send_line("{}: {}".format(reg_name, REGISTERS[reg_name]))
+    socket.sendLine("{}: {}".format(reg_name, REGISTERS[reg_name]))
 
 
 def do_SHOW_MEMORY(args, socket):
@@ -122,21 +122,21 @@ def do_SHOW_MEMORY(args, socket):
     print("Showing {} at Memory[{}]".format(size.lower(), hex_address))
     address = int(hex_address, 16)
     if size == 'BYTE':
-        socket.send_line("{}: {}".format(hex_address, MEMORY[address]))
+        socket.sendLine("{}: {}".format(hex_address, MEMORY[address]))
     elif size == 'HALF':
         # Little-endian version
         value = MEMORY[address] + MEMORY[address + 1][2:]
-        socket.send_line("{}: {}".format(hex_address, value))
+        socket.sendLine("{}: {}".format(hex_address, value))
     elif size == 'WORD':
         # Little-endian version
         value = MEMORY[address] + MEMORY[address + 1][2:] + MEMORY[address + 2][2:] + MEMORY[address + 3][2:]
-        socket.send_line("{}: {}".format(hex_address, value))
+        socket.sendLine("{}: {}".format(hex_address, value))
 
 
 def do_DUMP_REGISTERS(_args, socket):
     print("Dumping all the registers")
     for reg_name in reg_names:
-        socket.send_line("{}: {}".format(reg_name, REGISTERS[reg_name]))
+        socket.sendLine("{}: {}".format(reg_name, REGISTERS[reg_name]))
 
 
 def do_DUMP_MEMORY(args, socket):
@@ -145,15 +145,15 @@ def do_DUMP_MEMORY(args, socket):
     nbytes = int(args[3])
     print("Dumping memory starting at address {} ({} bytes)".format(start, nbytes))
     for pos in range(start, start + nbytes):
-        socket.send_line("{}: {}".format("0x{0:0{1}X}".format(pos, 8), MEMORY[pos]))
+        socket.sendLine("{}: {}".format("0x{0:0{1}X}".format(pos, 8), MEMORY[pos]))
 
 
 def do_SHOW_BREAKPOINTS(_args, socket):
     """SHOW BREAKPOINTS"""
     print("Showing breakpoints")
     for breakpoint_ in BREAKPOINTS:
-        socket.send_line(breakpoint_)
-    socket.send_line(EOF)
+        socket.sendLine(breakpoint_)
+    socket.sendLine(EOF)
 
 
 # ===============================================================================
@@ -166,7 +166,7 @@ def do_SET_REGISTER(args, socket):
     value = args[4]
     print("Setting register {} to {}".format(reg_name, value))
     REGISTERS[reg_name] = value
-    socket.send_line(OK)
+    socket.sendLine(OK)
 
 
 def do_SET_MEMORY(args, socket):
@@ -186,7 +186,7 @@ def do_SET_MEMORY(args, socket):
         MEMORY[pos + 1] = "0x{}".format(value[4:6])
         MEMORY[pos + 2] = "0x{}".format(value[6:8])
         MEMORY[pos + 3] = "0x{}".format(value[8:])
-    socket.send_line(OK)
+    socket.sendLine(OK)
 
 
 def do_SET_BREAKPOINT_AT(args, socket):
@@ -194,7 +194,7 @@ def do_SET_BREAKPOINT_AT(args, socket):
     breakpoint_ = args[3]
     print("Setting breakpoint at {}".format(breakpoint_))
     BREAKPOINTS.append(breakpoint_)
-    socket.send_line(OK)
+    socket.sendLine(OK)
 
 
 # ===============================================================================
@@ -205,14 +205,14 @@ def do_RESET_REGISTERS(_args, socket):
     global REGISTERS
     print("Resetting registers")
     REGISTERS = _REGISTERS.copy()
-    socket.send_line(OK)
+    socket.sendLine(OK)
 
 
 def do_RESET_MEMORY(_args, socket):
     global MEMORY
     print("Resetting memory")
     MEMORY = _MEMORY[:]
-    socket.send_line(OK)
+    socket.sendLine(OK)
 
 
 # ===============================================================================
@@ -224,7 +224,7 @@ def do_CLEAR_BREAKPOINTS(_args, socket):
     global BREAKPOINTS
     print("Clearing breakpoints")
     BREAKPOINTS = []
-    socket.send_line(OK)
+    socket.sendLine(OK)
 
 
 def do_CLEAR_BREAKPOINT_AT(args, socket):
@@ -232,7 +232,7 @@ def do_CLEAR_BREAKPOINT_AT(args, socket):
     breakpoint_ = args[3]
     print("Clearing breakpoint at {}".format(breakpoint_))
     BREAKPOINTS.remove(breakpoint_)
-    socket.send_line(OK)
+    socket.sendLine(OK)
 
 
 # ===============================================================================
@@ -247,11 +247,11 @@ def main():
     getopts()
     # signal.signal(signal.SIGINT, signal_handler)
     mySocket_ = MySocket(verbose=True)
-    mySocket_.server_bind(PORT)
+    mySocket_.serverBind(PORT)
     # while True:
     print("")
-    mySocket_.server_accept_connection()
-    lines_generator = mySocket_.get_lines()
+    mySocket_.serverAcceptConnection()
+    lines_generator = mySocket_.getLines()
     for line in lines_generator:
         args = line.split(' ')
         for n in range(len(args), 0, -1):
@@ -262,7 +262,7 @@ def main():
                 break
         else:
             print(">>> Unsupported command: {}".format(line))
-    mySocket_.close_connection()
+    mySocket_.closeConnection()
     mySocket_.close_socket()
 
 
