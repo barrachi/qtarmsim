@@ -75,6 +75,7 @@ in
         xz
         zlib
         zstd
+        inetutils # telnet
       ]) ++ (with pkgs.xorg;
         [
           libX11
