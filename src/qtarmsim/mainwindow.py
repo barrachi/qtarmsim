@@ -78,7 +78,7 @@ class DefaultSettings:
         self._setARMSimDefaults()
         self._setDirectoryDefaults()
 
-    def value(self, name: str)-> str:
+    def value(self, name: str) -> str:
         return cast(str, getattr(self, "_" + name))
 
     def _setARMSimDefaults(self) -> None:
@@ -151,7 +151,7 @@ class UiMainWindowExtended(Ui_MainWindow):
 class QtARMSimMainWindow(QtWidgets.QMainWindow):
     """Main window of the QtARMSim application."""
 
-    def __init__(self, parent: QWidget|None=None, debug: bool=False, verbose: bool=False) -> None:
+    def __init__(self, parent: QWidget | None = None, debug: bool = False, verbose: bool = False) -> None:
         # Call super.__init__()
         super(QtARMSimMainWindow, self).__init__(parent)
         # Set debug and verbosity flags
@@ -539,7 +539,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         _ = self.ui.lineEditTerminal.returnPressed.connect(self.sendLineToSimulator)
 
     @override
-    def eventFilter(self, source:QObject, event: QtCore.QEvent) -> bool:
+    def eventFilter(self, source: QObject, event: QtCore.QEvent) -> bool:
         if event.type() == QtCore.QEvent.Type.Close and isinstance(source, QtWidgets.QDockWidget):
             if source is self.ui.dockWidgetRegisters:
                 self.ui.actionShow_Registers.setChecked(False)
@@ -868,7 +868,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.PrinterMode.HighResolution)
         printDialog = QtPrintSupport.QPrintDialog(printer, self)
         printDialog.setOption(QtPrintSupport.QAbstractPrintDialog.PrintDialogOption.PrintToFile, True)
-        if printDialog.exec_() == QDialog.DialogCode.Accepted:
+        if printDialog.exec() == QDialog.DialogCode.Accepted:
             if self.ui.tabWidgetCode.currentIndex() == 0:
                 self.ui.sourceCodeEditor.print_(printer)
             else:
@@ -978,7 +978,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         #           After executing Examples > Registers > add.s the cursor on the editor is lost
         assert self.simulator is not None
         runProgressBarDialog = RunProgressBarDialog(self.simulator)
-        if not runProgressBarDialog.exec_():
+        if not runProgressBarDialog.exec():
             self.doRestart()
             return
         response = runProgressBarDialog.getResponse()
@@ -1075,7 +1075,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def doPreferences(self) -> None:
         preferences = PreferencesDialog(self, self.settings, self.defaultSettings)
-        if preferences.exec_():
+        if preferences.exec():
             if self.simulator and self.simulator.connected:
                 _ = self.sendSettingsToARMSim()
 
@@ -1364,7 +1364,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                                                             int(cast(str, self.settings.value("ARMSimPort"))),
                                                             self
                                                             )
-        if not connectProgressBarDialog.exec_():
+        if not connectProgressBarDialog.exec():
             return False
         errmsg = connectProgressBarDialog.getMsg()
         if errmsg:
