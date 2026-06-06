@@ -19,17 +19,17 @@
 ## Execute response container
 class ExecuteResponse:
 
-    def __init__(self):
-        self.result = ""
-        self.assembly_line = ""
-        self.registers = []
-        self.memory = []
-        self.errmsg = ""
+    def __init__(self) -> None:
+        self.result: str = ""
+        self.assembly_line: str = ""
+        self.registers: list[tuple[int, str]] = []
+        self.memory: list[tuple[str, str]] = []
+        self.errmsg: str = ""
 
 
 ## Assemble response container
 class AssembleResponse:
 
-    def __init__(self):
-        self.result = ""
-        self.errmsg = ""
+    def __init__(self) -> None:
+        self.result: str = ""
+        self.errmsg: str = ""
