@@ -1246,11 +1246,11 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                 armsimLines: list[str] = []
                 # if memType == ROM then load the program into the ARMSim tab
                 if memType == 'ROM':
-                    nInsturctions = int(nBytes / 2)  # Maximum number of instructions in the given ROM
+                    nInstructions = int(nBytes / 2)  # Maximum number of instructions in the given ROM
                     armsimLines += ['@@ ----------------------------------------',
                                      '@@ DISASSEMBLED CODE STARTING AT {}'.format(hexStart),
                                      '@@ ----------------------------------------']
-                    armsimLines += simulator.getDisassemble(hexStart, nInsturctions)
+                    armsimLines += simulator.getDisassemble(hexStart, nInstructions)
                 memory_banks.append({
                     'memType': memType,
                     'hexStart': hexStart,
@@ -1332,7 +1332,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Synchronously rebuild the view from the fully populated model
         self.ui.treeViewMemory.reset()
         self.ui.treeViewMemory.geometry_updated = False
-        # Restore expansion state: auto-expand first RAM on first load, otherwise restore previous state
+        # Restore expansion state: auto-expand the first RAM on the first load, otherwise restore previous state
         if first_population:
             for slot in range(memoryModel.getNumberOfMemoryBanks()):
                 if memoryModel.getMemoryBankInSlot(slot).memType == 'RAM':
@@ -1379,9 +1379,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.simulator = ARMSimConnector(verbose=self.verbose)
         simulator = self.simulator
         if self.debug:
-            _ = simulator.mySocket.sentLine.connect(self.sentLineToSimulator)  # pyright: ignore[reportAttributeAccessIssue]
-            _ = simulator.mySocket.receivedLine.connect(self.receivedLineFromSimulator)  # pyright: ignore[reportAttributeAccessIssue]
-            _ = simulator.stdoutLine.connect(self.stdoutLineFromSimulator)  # pyright: ignore[reportAny]
+            _ = simulator.mySocket.sentLine.connect(self.sentLineToSimulator)
+            _ = simulator.mySocket.receivedLine.connect(self.receivedLineFromSimulator)
+            _ = simulator.stdoutLine.connect(self.stdoutLineFromSimulator)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         connectProgressBarDialog = ConnectProgressBarDialog(simulator,
                                                             cast(str, self.settings.value("ARMSimCommand")),
@@ -1399,7 +1399,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.ui.textEditMessages.append(u"<b>Connected to ARMSim (ARMSim version info follows).</b><br/>")
         self.ui.textEditMessages.append(self.simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
-        self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(simulator.currentPort),  # pyright: ignore[reportAttributeAccessIssue]
+        self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(simulator.currentPort),
                                      2000)
         return self.sendSettingsToARMSim()
 
