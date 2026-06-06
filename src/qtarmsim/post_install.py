@@ -33,6 +33,7 @@ import logging
 import os
 import sys
 import sysconfig
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -53,10 +54,12 @@ def windowsCreateLinks() -> None:
 
     # 1) Create desktop shortcuts
     regName = "Desktop"
-    desktopFolder = os.path.normpath(os.path.expandvars(getWinregEntry(regName, regPath)))
-    for linkName, targetPath, iconPath in windowsDesktopEntries():
-        linkPath = os.path.join(desktopFolder, linkName)
-        windowsCreateShortcut(linkPath, targetPath, iconPath)
+    desktopEntry = getWinregEntry(regName, regPath)
+    if desktopEntry:
+        desktopFolder = os.path.normpath(os.path.expandvars(desktopEntry))
+        for linkName, targetPath, iconPath in windowsDesktopEntries():
+            linkPath = os.path.join(desktopFolder, linkName)
+            windowsCreateShortcut(linkPath, targetPath, iconPath)
 
     # 2) Create start menu entry and shortcuts
     regName = "Programs"
@@ -94,10 +97,10 @@ def getWinregEntry(name: str, path: str) -> str | None:
 
     try:
         registryKey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_READ)
-        value, _ = winreg.QueryValueEx(registryKey, name)
+        value, _ = winreg.QueryValueEx(registryKey, name)  # pyright: ignore[reportAny]
         winreg.CloseKey(registryKey)
-        return value
-    except WindowsError:
+        return value  # pyright: ignore[reportAny]
+    except OSError:
         return None
 
 
@@ -105,9 +108,11 @@ def windowsDesktopEntries() -> list[tuple[str, str, str]]:
     """
     Generates the data for the Windows Desktop links.
 
-    :return: List of tuples containing the desktop link name, the link target and the icon target.
+    :return: List of tuples containing the desktop link name, the link target, and the icon target.
     """
     scriptsDir = sysconfig.get_path("scripts")
+    if not scriptsDir:
+        return []
     return [
         ("QtARMSim.lnk",
          os.path.join(scriptsDir, "qtarmsim.exe"),
@@ -125,16 +130,19 @@ def windowsCreateShortcut(linkPath: str, targetPath: str, iconPath: str) -> None
     :param iconPath: Path of the icon file
     """
 
-    import win32com.client
-    import pywintypes
+    try:
+        import win32com.client  # pyright: ignore[reportMissingModuleSource]
+        import pywintypes  # pyright: ignore[reportMissingModuleSource]
+    except ImportError:
+        return
 
     try:
         shell = win32com.client.Dispatch('WScript.Shell')
-        shortcut = shell.CreateShortCut(linkPath)
+        shortcut = shell.CreateShortCut(linkPath)  # pyright: ignore[reportAny]
         shortcut.Targetpath = targetPath
         shortcut.WorkingDirectory = os.path.dirname(targetPath)
         shortcut.IconLocation = iconPath
-        shortcut.save()
+        shortcut.save()  # pyright: ignore[reportAny]
     except pywintypes.com_error:
         # maybe restrictions prohibited link creation
         pass
@@ -165,19 +173,20 @@ def linuxAppendPath() -> None:
     """
     If installed as a regular user, make sure that ~/.local/bin/ is in the path
     """
-    if os.getenv("USER") != 'root':
-        if os.getenv("PATH").find("/.local/bin") == -1:
+    if os.geteuid() != 0:
+        if "/.local/bin" not in os.getenv("PATH", ""):
             appended = False
-            local_bin_path = os.path.join(os.getenv("HOME"), ".local/bin")
-            bashrc_path = os.path.join(os.getenv("HOME"), ".bashrc")
+            home = Path.home()
+            local_bin_path = str(home / ".local/bin")
+            bashrc_path = str(home / ".bashrc")
             logger.warning("QtARMSim has been installed in '{0}' which is not on PATH.".format(local_bin_path))
             if os.path.exists(bashrc_path):
                 logger.warning("Trying to prepend '{0}' to PATH...".format(local_bin_path))
                 try:
                     with open(bashrc_path, "a") as f:
-                        f.write('\n')
-                        f.write('# QtARMSim post install\n')
-                        f.write('[[ ":$PATH:" != *":{0}:"* ]] && PATH="{0}":"$PATH"\n'.format(local_bin_path))
+                        _ = f.write('\n')
+                        _ = f.write('# QtARMSim post install\n')
+                        _ = f.write('[[ ":$PATH:" != *":{0}:"* ]] && PATH="{0}":"$PATH"\n'.format(local_bin_path))
                         logger.warning("...succeeded!")
                         appended = True
                 except OSError:
@@ -185,12 +194,10 @@ def linuxAppendPath() -> None:
                     logger.warning("...could not write on '{}'!".format(bashrc_path))
                     pass
             if appended:
-                logger.warning("You should execute 'source {}' to update PATH on any currently open sessions."
-                               "".format(bashrc_path))
+                logger.warning("You should execute 'source {}' to update PATH on any currently open sessions.".format(bashrc_path))
             else:
                 logger.warning("Please, consider adding this directory to PATH.")
-                logger.warning("""This can be accomplished by appending 'PATH="{0}":"$PATH"' """
-                               """to '{1}'""".format(local_bin_path, bashrc_path))
+                logger.warning("""This can be accomplished by appending 'PATH="{0}":"$PATH"' to '{1}'""".format(local_bin_path, bashrc_path))
 
 
 # ------------------------------------------------------------------------
