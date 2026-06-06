@@ -16,6 +16,8 @@
 #                                                                         #
 ###########################################################################
 
+from __future__ import annotations
+
 import math
 from PySide6 import QtCore
 
@@ -26,7 +28,7 @@ class InputToHex(QtCore.QObject):
     hexadecimal representation of that input.
     """
 
-    def html_error(self, err_msg):
+    def html_error(self, err_msg: str) -> str:
         return self.tr("""
         <p>{0}</p>
         <p>Allowed inputs are:</p>
@@ -40,7 +42,7 @@ class InputToHex(QtCore.QObject):
         </ul>
         """).format(err_msg)
 
-    def convert(self, text, bits=32):
+    def convert(self, text: str | object, bits: int = 32) -> tuple[str | None, str]:
         """
         Converts the given text to a hexadecimal value with 8 digits.
 
@@ -64,13 +66,13 @@ class InputToHex(QtCore.QObject):
         MAX_POS = (1 << bits) - 1
         HEX_DIGITS = int(math.ceil(bits / 4))
         BYTES = int(HEX_DIGITS / 2)
-        if type(text) != str:
+        if type(text) is not str:
             err_msg = self.tr("Input value '{}' was not an string").format(text)
             return None, self.html_error(err_msg)
         if len(text) == 0:
             return None, ''
         if len(text) >= 2:
-            # If starts and ends with ' or ", try to decode it as a string
+            # If starts and ends with quote or double quote, try to decode it as a string
             if (text[0] == "'" and text[-1] == "'") or (text[0] == '"' and text[-1] == '"'):
                 if len(text) == 2:
                     # Empty string, return 0
@@ -105,21 +107,21 @@ class InputToHex(QtCore.QObject):
 
 class DataTypes:
 
-    MAX_POSITIVE = (0, 0, 127, 0, 32767, 0, 0, 0, 2147483647)
-    CA2_VALUE= (0, 0, 256, 0, 65536, 0, 0, 0, 4294967296)
+    MAX_POSITIVE: tuple[int, int, int, int, int, int, int, int, int] = (0, 0, 127, 0, 32767, 0, 0, 0, 2147483647)
+    CA2_VALUE: tuple[int, int, int, int, int, int, int, int, int] = (0, 0, 256, 0, 65536, 0, 0, 0, 4294967296)
 
-    def __init__(self, hex_value):
-        self.hexadecimal = hex_value
-        hex_digits = len(self.hexadecimal) - 2 # - "0x"
+    def __init__(self, hex_value: str) -> None:
+        self.hexadecimal: str = hex_value
+        hex_digits: int = len(self.hexadecimal) - 2 # - "0x"
         if hex_digits not in (2, 4, 8):
             raise RuntimeError("DataTypes class received an hexadecimal value of a length not supported")
         # Unsigned integer
-        self.uint = int(self.hexadecimal, 16)
+        self.uint: int = int(self.hexadecimal, 16)
         # Integer
-        self.int = self.uint if self.uint <= self.MAX_POSITIVE[hex_digits] else self.uint - self.CA2_VALUE[hex_digits]
+        self.int: int = self.uint if self.uint <= self.MAX_POSITIVE[hex_digits] else self.uint - self.CA2_VALUE[hex_digits]
         # binary
         if hex_digits == 2:
-            self.binary = "{:08b}".format(self.uint)
+            self.binary: str = "{:08b}".format(self.uint)
         elif hex_digits == 4:
             self.binary = "{:016b}".format(self.uint)
         else:
@@ -127,7 +129,7 @@ class DataTypes:
         self.binary = '0b' + self.binary
         # ASCII
         try:
-            self.ascii = self.uint.to_bytes(1, "big").decode("ascii", "replace")
+            self.ascii: str = self.uint.to_bytes(1, "big").decode("ascii", "replace")
         except OverflowError:
             self.ascii = "<small>Out of range</small>"
         if not self.ascii.isprintable():
@@ -142,14 +144,14 @@ class DataTypes:
         else:
             if len(utf8_bytes) == 0:
                 utf8_bytes = b'\x00'
-            self.utf8 = utf8_bytes.decode("utf-8", "replace")
+            self.utf8: str = utf8_bytes.decode("utf-8", "replace")
             if len(self.utf8) != 1:
                 self.utf8 = "<small>Not a UTF-8 char</small>"
         if not self.utf8.isprintable():
             self.utf8 = '·'
         # UTF-32
         try:
-            self.utf32 = chr(self.uint)
+            self.utf32: str = chr(self.uint)
         except ValueError:
             self.utf32 = "<small>Not a UTF-32 char</small>"
         except OverflowError:

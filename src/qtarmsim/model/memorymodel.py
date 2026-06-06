@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 ###########################################################################
 #                                                                         #
 #  This file is part of QtARMSim.                                         #
@@ -16,170 +15,235 @@
 #                                                                         #
 ###########################################################################
 
+from __future__ import annotations
+
+from typing import cast
+
 from PySide6 import QtGui
 from PySide6.QtCore import Qt, QAbstractItemModel, Signal, QModelIndex
+from typing_extensions import override
 
-from .simpletreemodel import TreeModel, TreeItem
+from .memorybank import MemoryBank
+from .memorybankitem import MemoryBankItem
+from .memoryitem import MemoryItem
 from ..utils import getMonoSpacedFont
 
 
-class MemoryBank:
-
-    def __init__(self, memType, start, nBytes):
-        """Initializes a memory bank instance.
-        
-        @param memType: The memory type, one of RAM or ROM.
-        @param start: The starting address in hexadecimal.
-        @param nBytes: The number of bytes.
-        """
-        self.memType = memType
-        self.start = int(start, 16)
-        self.length = nBytes
-        # Round memory size to a word boundary
-        if nBytes % 4:
-            self.length += (4 - nBytes % 4)
-        self.end = self.start + self.length - 1
-
-    def addressToRow(self, hexAddress):
-        """Given a hexadecimal hexAddress, returns the corresponding row"""
-        intAddress = int(hexAddress, 16)
-        return intAddress - self.start
-
-
-class MemoryModel(TreeModel):
+class MemoryModel(QAbstractItemModel):
     """
-    Tree model that manages the memory banks of a given simulation and their contents.
+    Memory model that manages the memory banks of a given simulation and their contents.
     """
-
-    memoryBanks = []
-
-    modifiedBytes = []
-    previouslyModifiedBytes = []
 
     # memoryEdited signal, parameters are hex address and hex value
-    memoryEdited = Signal(str, str)
+    memoryEdited: Signal = Signal(str, str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QAbstractItemModel | None = None) -> None:
         """
         Initializes the memory model.
         """
         super().__init__(parent)
+        self.nextSlot: int = 0
+        self._memoryBanks: list[MemoryBank] = [MemoryBank(i, 'ROM', '0x10000000', ['0x00']) for i in range(5)]
+        self.modifiedBytes: list[tuple[int, int]] = []
+        self.previouslyModifiedBytes: list[tuple[int, int]] = []
         # Set fonts
-        self.qFont = getMonoSpacedFont()
-        self.qFontLast = getMonoSpacedFont()
+        self.qFont: QtGui.QFont = getMonoSpacedFont()
+        self.qFontLast: QtGui.QFont = getMonoSpacedFont()
         self.qFontLast.setWeight(QtGui.QFont.Weight.Black)
         # Set brushes
-        self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.BrushStyle.SolidPattern)
-        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.BrushStyle.SolidPattern)
+        self.qBrushPrevious: QtGui.QBrush = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.BrushStyle.SolidPattern)
+        self.qBrushLast: QtGui.QBrush = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.BrushStyle.SolidPattern)
 
-    def appendMemoryBank(self, memType, hex_start, membytes):
+    def appendMemoryBank(self, memType: str, hexStart: str, memBytes: list[str]) -> None:
         """
-        Adds a new memory bank to the memory model and populates it.
+        Adds a new memory bank to the memory model
         """
         self.layoutAboutToBeChanged.emit()
-        self.memoryBanks.append(MemoryBank(memType, hex_start, len(membytes)))
-        memory_bank_item = TreeItem(("{} {}".format(memType, hex_start), ""), self.rootItem)
-        self.rootItem.appendChild(memory_bank_item)
-        address = self.memoryBanks[-1].start
-        # Round memory bytes to a word boundary
-        if len(membytes) % 4 != 0:
-            membytes += ['0x00'] * (4 - len(membytes) % 4)
-        # Add the bytes to the model
-        for hexByte in membytes:
-            hexAddress = "0x{0:0{1}X}".format(address, 8)
-            memory_item = TreeItem([hexAddress, hexByte], memory_bank_item)
-            memory_bank_item.appendChild(memory_item)
-            address += 1
+        self._memoryBanks[self.nextSlot].__init__(self.nextSlot, memType, hexStart, memBytes)
+        self.nextSlot += 1
         self.layoutChanged.emit()
 
-    def getMemoryBank(self, hexAddress):
+    def getMemoryBankWithHexAddress(self, hexAddress: str) -> MemoryBank:
         """
         Returns the memory bank that holds the given memory address.
         """
-        intAddress = int(hexAddress, 16)
-        mbRow = 0
-        for memoryBank in self.memoryBanks:
-            if memoryBank.start <= intAddress <= memoryBank.end:
-                return mbRow, memoryBank
-            mbRow += 1
-        return -1, None
+        for memoryBank in self._memoryBanks:
+            if memoryBank.contains(hexAddress):
+                return memoryBank
+        raise IndexError(f"memory bank for address {hexAddress} not found")
 
-    def getIndex(self, hexAddress):
+    def getMemoryBankInSlot(self, slot: int) -> MemoryBank:
+        """
+        Returns the memory bank in the given slot.
+        """
+        if slot < 0 or slot >= self.nextSlot:
+            raise IndexError(f"memory bank in slot {slot} not found")
+        return self._memoryBanks[slot]
+
+    def getNumberOfMemoryBanks(self) -> int:
+        return self.nextSlot
+
+    def getIndex(self, hexAddress: str) -> QModelIndex:
         """
         Returns the model index that references the given memory address.
         """
-        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
-        memoryRow = memoryBank.addressToRow(hexAddress)
-        return self.createIndex(memoryRow, 0, self.rootItem.child(mbRow).child(memoryRow))
+        memoryBank = self.getMemoryBankWithHexAddress(hexAddress)
+        memoryRow = memoryBank.index(hexAddress)
+        return self.createIndex(memoryRow, 0, memoryBank.getMemoryItem(memoryRow))
 
-    def setByte(self, hexAddress, hexByte, emitMemoryEdited=False):
+    def setByte(self, hexAddress: str, hexByte: str, emitMemoryEdited: bool = False) -> None:
         """
         Stores the given byte at the given address.
+
+        :param hexAddress: The hexadecimal address
+        :param hexByte: The byte to be stored in hexadecimal
+        :param emitMemoryEdited: Whether to emit the memory edited signal or not
         """
-        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
-        memoryRow = memoryBank.addressToRow(hexAddress)
-        memoryItem = self.rootItem.child(mbRow).child(memoryRow)
-        memoryItem.setData(1, hexByte)
-        self.modifiedBytes.append((mbRow, memoryRow))
-        self.dataChanged.emit(self.createIndex(memoryRow, 0, self.rootItem.child(mbRow)),
-                              self.createIndex(memoryRow, 1, self.rootItem.child(mbRow)))
+        memoryBank = self.getMemoryBankWithHexAddress(hexAddress)
+        memoryRow = memoryBank.setByte(hexAddress, hexByte)
+        self.modifiedBytes.append((memoryBank.slot, memoryRow))
+        topLeft = self.createIndex(memoryRow, 0, memoryBank.getMemoryItem(memoryRow))
+        bottomRight = self.createIndex(memoryRow, 0, memoryBank.getMemoryItem(memoryRow))
+        if topLeft.isValid() and bottomRight.isValid():
+            self.dataChanged.emit(topLeft, bottomRight)
         if emitMemoryEdited:
             self.memoryEdited.emit(hexAddress, hexByte)
 
-    def setWord(self, hexAddress, hexWord, emitMemoryEdited=False):
+    def getByte(self, hexAddress: str) -> str:
+        """
+        Returns the byte at the given address in hexadecimal format.
+
+        :param hexAddress: The hexadecimal address.
+        :return: The byte in hexadecimal format.
+        """
+        return self.getMemoryBankWithHexAddress(hexAddress).getByte(hexAddress)
+
+    def setWord(self, hexAddress: str, hexWord: str, emitMemoryEdited: bool = False) -> None:
         """
         Stores the given word (4 bytes) at the given address (following Little Endian memory organization).
         """
-        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
-        memoryRowStart = memoryBank.addressToRow(hexAddress)
-        for i in range(4):
-            hexByte = "0x{}".format(hexWord[2 + i * 2:4 + i * 2])
-            memoryRow = memoryRowStart + 3 - i  # 3-i due to Little Endian
-            memoryItem = self.rootItem.child(mbRow).child(memoryRow)
-            memoryItem.setData(1, hexByte)
-            self.modifiedBytes.append((mbRow, memoryRow))
-        # noinspection PyUnboundLocalVariable
-        self.dataChanged.emit(self.createIndex(memoryRow, 0, self.rootItem.child(mbRow)),
-                              self.createIndex(memoryRow + 3, 1, self.rootItem.child(mbRow)))
+        memoryBank = self.getMemoryBankWithHexAddress(hexAddress)
+        memoryRow = memoryBank.setWord(hexAddress, hexWord)
+        self.modifiedBytes.append((memoryBank.slot, memoryRow))
+        topLeft = self.createIndex(memoryRow, 0, memoryBank.getMemoryItem(memoryRow))
+        bottomRight = self.createIndex(memoryRow + 3, 0, memoryBank.getMemoryItem(memoryRow + 3))
+        if topLeft.isValid() and bottomRight.isValid():
+            self.dataChanged.emit(topLeft, bottomRight)
         if emitMemoryEdited:
             self.memoryEdited.emit(hexAddress, hexWord)
 
-    def getWord(self, hexAddress):
+    def getWord(self, hexAddress: str) -> str:
         """
-        Returns the word (4 bytes) at the given address (following Little Endian memory organization).
-        """
-        (mbRow, memoryBank) = self.getMemoryBank(hexAddress)
-        memoryRowStart = memoryBank.addressToRow(hexAddress)
-        hexWord = "0x"
-        for i in range(4):
-            memoryRow = memoryRowStart + 3 - i  # 3-i due to Little Endian
-            memoryItem = self.rootItem.child(mbRow).child(memoryRow)
-            hexWord += memoryItem.data(1)[2:]
+        Returns the word (4 bytes) at the given address (following the Little Endian memory organization).
 
-    def reset(self):
+        :param hexAddress: The hexadecimal address of the word.
+        :return: The word in hexadecimal format.
+        """
+        return self.getMemoryBankWithHexAddress(hexAddress).getWord(hexAddress)
+
+    def reset(self) -> None:
         """
         Resets the model to its original state in any attached views.
         """
         self.beginResetModel()
-        self.memoryBanks.clear()
-        self.rootItem.childItems.clear()
+        self.nextSlot = 0
         self.clearHistory()
         self.endResetModel()
 
-    def clearHistory(self):
+    def clearHistory(self) -> None:
         """
         Clears the history of previously modified bytes.
         """
         self.previouslyModifiedBytes.clear()
         self.modifiedBytes.clear()
 
-    def stepHistory(self):
+    def stepHistory(self) -> None:
         """
-        Steps one the history of previously modified bytes.
+        Advances one step in the history of previously modified bytes.
         """
-        copyOfPrevious = self.previouslyModifiedBytes[:]
-        self.previouslyModifiedBytes = self.modifiedBytes[:]
+        copyOfPrevious = self.previouslyModifiedBytes.copy()
+        self.previouslyModifiedBytes = self.modifiedBytes.copy()
         self.modifiedBytes.clear()
-        for (mbRow, memoryRow) in copyOfPrevious + self.previouslyModifiedBytes:
-            self.dataChanged.emit(self.createIndex(memoryRow, 0, self.rootItem.child(mbRow)),
-                                  self.createIndex(memoryRow, 1, self.rootItem.child(mbRow)))
+        for (slot, memoryRow) in copyOfPrevious + self.previouslyModifiedBytes:
+            memoryBank = self.getMemoryBankInSlot(slot)
+            topLeft = self.createIndex(memoryRow, 0, memoryBank.getMemoryItem(memoryRow))
+            bottomRight = self.createIndex(memoryRow, 0, memoryBank.getMemoryItem(memoryRow))
+            if topLeft.isValid() and bottomRight.isValid():
+                self.dataChanged.emit(topLeft, bottomRight)
+
+    # ======================================================================
+    # QAbstractItemModel abstract methods implementations
+    # ======================================================================
+
+    # REQUIRED: Return the number of rows
+    @override
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not parent.isValid():  # Level 0 (Memory)
+            return self.nextSlot
+        if not parent.parent().isValid():  # Level 1 (Memory Bank)
+            return cast(MemoryBank, cast(object, parent.internalPointer())).length
+        # Level 2 Memory Bank contents
+        return 0  # no children
+
+    # REQUIRED: Return the number of columns
+    @override
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not parent.isValid():  # Level 0 (Memory)
+            return 1
+        if not parent.parent().isValid():  # Level 1 (Memory Bank)
+            return 1
+        # Level 2 Memory Bank contents
+        return 2
+
+    # REQUIRED: The core method to retrieve data for the view
+    @override
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> str | None:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not index.isValid():
+            return None  # Invalid index
+        if role != Qt.ItemDataRole.DisplayRole:
+            return None
+        item: object = cast(object, index.internalPointer())
+        if isinstance(item, MemoryBank):
+            return str(item)
+        return None
+
+    # OPTIONAL: index
+    @override
+    def index(self, row: int, column: int, parent: QModelIndex = QModelIndex()) -> QModelIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not self.hasIndex(row, column, parent):
+            return QModelIndex()  # invalid index -> return empty QModelIndex()
+        if not parent.isValid():  # Level 0: memory
+            return self.createIndex(row, 0, MemoryBankItem(self._memoryBanks[row]))
+        if not parent.parent().isValid():  # Level 1: memory bank
+            memoryBank = cast(MemoryBank, cast(object, parent.internalPointer()))
+            return self.createIndex(row, 0, memoryBank.getMemoryItem(row))
+        return QModelIndex()
+
+    # OPTIONAL: parent
+    @override
+    def parent(self, child: QModelIndex = QModelIndex()) -> QModelIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not child.isValid():
+            return QModelIndex()
+        childItem: object = cast(object, child.internalPointer())
+        if childItem is None:
+            return QModelIndex()
+        if isinstance(childItem, MemoryBank) or isinstance(childItem, MemoryBankItem):
+            return QModelIndex()
+        if isinstance(childItem, MemoryItem):
+            memoryBank = cast(MemoryBank, childItem.parent)
+            return self.createIndex(memoryBank.slot, 0, MemoryBankItem(memoryBank))
+        return QModelIndex()  # Something went wrong
+
+    # OPTIONAL: flags
+    @override
+    def flags(self, index: QModelIndex) -> Qt.ItemFlag:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not index.isValid():
+            return Qt.ItemFlag.NoItemFlags
+        return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
+
+    # OPTIONAL: headerData
+    @override
+    def headerData(self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> str | None:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+            return ('Address', 'Content ')[section]
+        return None

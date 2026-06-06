@@ -16,111 +16,145 @@
 #                                                                         #
 ###########################################################################
 
+# -----------------------------------oOOo----------------------------------
+# To test this module, execute from the qtarmsim upper directory:
+#    python3 -m qtarmsim.model.memorydumpproxymodel
+# -------------------------------------------------------------------------
+
 # References
 # http://stackoverflow.com/questions/21564976/how-to-create-a-proxy-model-that-would-flatten-nodes-of-a-qabstractitemmodel-int
 
+from __future__ import annotations
+
 import sys
+from typing import Any
+
+from typing_extensions import override
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QModelIndex
 
 from .common import InputToHex, DataTypes
-from .memorymodel import MemoryModel
+from .memorybank import MemoryBank
+from .memorymodel import MemoryModel, MemoryItem
 from ..utils import getMonoSpacedFont
 
 
 class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
 
-    @QtCore.Slot(QtCore.QModelIndex, QtCore.QModelIndex)
-    def sourceDataChanged(self, topLeft, bottomRight):
-        self.dataChanged.emit(self.mapFromSource(topLeft),
-                              self.mapFromSource(bottomRight))
+    @QtCore.Slot(QModelIndex, QModelIndex)  # pyright: ignore[reportAny]
+    def sourceDataChanged(self, topLeft: QModelIndex, bottomRight: QModelIndex) -> None:
+        if not topLeft.isValid() or not bottomRight.isValid():
+            return
+        mdTopLeft = self.mapFromSource(topLeft)
+        mdBottomRight = self.mapFromSource(bottomRight)
+        if mdTopLeft.isValid() and mdBottomRight.isValid():
+            self.dataChanged.emit(mdTopLeft, mdBottomRight)
 
     # InputToHex helper object
     input2hex = InputToHex()
 
-    def __init__(self, parent=None):
-        super(MemoryDumpProxyModel, self).__init__(parent)
+    def __init__(self, parent: QtCore.QObject | None = None) -> None:
+        super().__init__(parent)
         # Set fonts
         self.qFont = getMonoSpacedFont()
         self.qFontLast = getMonoSpacedFont()
-        self.qFontLast.setWeight(QtGui.QFont.Black)
+        self.qFontLast.setWeight(QtGui.QFont.Weight.Black)
         # Set brushes
-        self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.SolidPattern)
-        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.SolidPattern)
+        self.qBrushPrevious = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.BrushStyle.SolidPattern)
+        self.qBrushLast = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.BrushStyle.SolidPattern)
+        # Instance attributes that will be populated later
+        self.memoryBank: MemoryBank | None = None
+        self.memoryBankIndex: QModelIndex | None = None
 
-    def setSourceModel(self, model, memoryBankRow=0):
-        super(MemoryDumpProxyModel, self).setSourceModel(model)
-        self.memoryBankRow = memoryBankRow
-        self.memoryBankItem = self.sourceModel().rootItem.child(memoryBankRow)
-        self.memoryBankIndex = self.sourceModel().createIndex(memoryBankRow, 0, self.memoryBankItem)
-        self.memoryBankStartAddress = int(self.memoryBankItem.data(0).split(" ")[1], 16)
+    @override
+    def sourceModel(self) -> MemoryModel:
+        model = super().sourceModel()
+        return model if isinstance(model, MemoryModel) else MemoryModel(self)
+
+    @override
+    def setSourceModel(self, model: MemoryModel, memoryBankRow: int = 0) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
+        super().setSourceModel(model)
         self.sourceModel().dataChanged.connect(self.sourceDataChanged)
+        self.memoryBank = self.sourceModel().getMemoryBankInSlot(memoryBankRow)
+        self.memoryBankIndex = self.sourceModel().createIndex(self.memoryBank.slot, 0, self.memoryBank)
 
-    def mapFromSource(self, index):
-        # If index is root or a memory bank item, return QModelIndex() 
-        if index == QtCore.QModelIndex() or index.parent() == QtCore.QModelIndex:
-            return QtCore.QModelIndex()
-        # At this point, index should point to a memory address
-        memoryBankRow = index.parent().row()
-        if memoryBankRow != self.memoryBankRow:
-            return QtCore.QModelIndex()
-        # At this point, index should point to a memory address of the memory bank specified at setSourceModel()
-        memoryAddress = int(index.internalPointer().data(0), 16)
-        row = int((memoryAddress - self.memoryBankStartAddress) / 16)
-        column = (memoryAddress - self.memoryBankStartAddress) % 16
-        return self.createIndex(row, column)
+    @override
+    def mapFromSource(self, sourceIndex: QModelIndex) -> QModelIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
+        # If the index is root or a memory bank item, return QModelIndex()
+        if sourceIndex == QModelIndex() or sourceIndex.parent() == QModelIndex():
+            return QModelIndex()
+        # At this point, the index should point to a memory item
+        item : MemoryItem = sourceIndex.internalPointer()
+        if item.memoryBank.slot != self.memoryBank.slot:
+            return QModelIndex()
+        # index should point to a memory item of our memory bank, specified at setSourceModel()
+        row = sourceIndex.row()
+        newRow = row // 16
+        newColumn = row % 16
+        return self.index(newRow, newColumn, self.mapFromSource(sourceIndex.parent()))
 
-    def mapToSource(self, index):
+    @override
+    def mapToSource(self, index: QModelIndex) -> QModelIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
         if not index.isValid() or index.column() == 16:
-            return QtCore.QModelIndex()
+            return QModelIndex()
         memoryRow = index.row() * 16 + index.column()
         return self.sourceModel().index(memoryRow, 0, self.memoryBankIndex)
 
-    def rowCount(self, parent):
-        if not parent.isValid():
-            return int(self.memoryBankItem.childCount() / 16)
+    @override
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if parent == QModelIndex():
+            return int(self.memoryBank.length / 16)
         else:
             return 0
 
-    def columnCount(self, parent):
-        # bytes*16 | ASCII 
+    @override
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:  # pyright: ignore[reportIncompatibleMethodOverride]
+        _ = parent
+        # bytes*16 | ASCII
         return 17
 
-    def index(self, row, column, parent):
-        if parent.isValid():
-            return QtCore.QModelIndex()
-        return self.createIndex(row, column)
+    @override
+    def index(self, row: int, column: int, parent: QModelIndex = QModelIndex()) -> QModelIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not self.hasIndex(row, column, parent):
+            return QModelIndex()  # invalid index -> return empty QModelIndex()
+        if not parent.isValid():
+            return self.createIndex(row, column, self.memoryBank.getMemoryItem(row*16))
+        return QModelIndex()
 
-    def parent(self, index):
-        return QtCore.QModelIndex()
+    @override
+    def parent(self, child: QModelIndex = QModelIndex()) -> QModelIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
+        _ = child
+        return QModelIndex()
 
     @staticmethod
-    def _chr(hexByte):
+    def _chr(hexByte: str) -> str:
         n = int(hexByte, 16)
         if 32 <= n <= 126:
             return chr(n)
         else:
             return '·'
 
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    @override
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if role == Qt.ItemDataRole.DisplayRole:
             if index.column() < 16:
-                return self.mapToSource(index).internalPointer().data(1)[2:]
+                return self.mapToSource(index).internalPointer().hexValue[2:]
             else:
                 chars = []
                 byteRow = index.row() * 16
                 for i in range(16):
                     try:
-                        item = self.memoryBankItem.child(byteRow + i)
+                        item : MemoryItem = self.memoryBank.getMemoryItem(byteRow + i)
                     except KeyError:
                         break
-                    chars.append(self._chr(item.data(1)[2:]))
+                    else:
+                        chars.append(self._chr(item.hexValue))
                 return ''.join(chars)
-        elif role == Qt.ToolTipRole:
+        elif role == Qt.ItemDataRole.ToolTipRole:
             if index.column() >= 16:
                 return None
-            dt = DataTypes("0x{}".format(self.mapToSource(index).internalPointer().data(1)[2:]))
+            dt = DataTypes(self.mapToSource(index).internalPointer().hexValue)
             return """
                 <table>
                 <tr><td align="right"> Hexadecimal:</td><td><b>{0}</b></td></tr>
@@ -138,20 +172,20 @@ class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
                 dt.ascii,
                 dt.utf8,
             )
-        elif role == Qt.BackgroundRole:
+        elif role == Qt.ItemDataRole.BackgroundRole:
             byteRow = index.row() * 16 + index.column()
-            byteMemoryBankRow = self.memoryBankRow
+            byteMemoryBankRow = self.memoryBank.slot
             # If the current byte is in modifiedBytes, return qBrushLast
             if (byteMemoryBankRow, byteRow) in self.sourceModel().modifiedBytes:
                 return self.qBrushLast
-            # If not, if the bytes is in previouslyModifiedBytes, return qBrushPrevious
+            # If not, if the bytes are in previouslyModifiedBytes, return qBrushPrevious
             if (byteMemoryBankRow, byteRow) in self.sourceModel().previouslyModifiedBytes:
                 return self.qBrushPrevious
             # If not, return None
             return None
-        elif role == Qt.FontRole:
+        elif role == Qt.ItemDataRole.FontRole:
             byteRow = index.row() * 16 + index.column()
-            byteMemoryBankRow = self.memoryBankRow
+            byteMemoryBankRow = self.memoryBank.slot
             if (byteMemoryBankRow, byteRow) in self.sourceModel().modifiedBytes:
                 return self.qFontLast
             else:
@@ -159,47 +193,45 @@ class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
         else:
             return None
 
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+    @override
+    def headerData(self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
                 if section < 16:
                     return "{:X}".format(section)
                 else:
                     return "ASCII"
-            elif orientation == Qt.Vertical:
+            elif orientation == Qt.Orientation.Vertical:
                 byteRow = section * 16
-                return self.memoryBankItem.child(byteRow).data(0)
+                return self.memoryBank.getMemoryItem(byteRow).hexAddress
+        return None
 
-    def flags(self, index):
-        if not index.isValid():
-            return False
-        # Column 16 can not be changed
+    @override
+    def flags(self, index: QModelIndex) -> Qt.ItemFlag:  # pyright: ignore[reportIncompatibleMethodOverride]
+        # Column 16 cannot be changed
         if index.column() == 16:
-            return Qt.ItemIsEnabled
+            return Qt.ItemFlag.ItemIsEnabled
         # If we are in columns 1 to 16, check if the bank memory is ROM or RAM
-        if self.memoryBankItem.data(0)[:3] == 'ROM':
-            return Qt.ItemIsEnabled
+        if self.memoryBank.memType == 'ROM':
+            return Qt.ItemFlag.ItemIsEnabled
         else:
-            return Qt.ItemIsEditable | Qt.ItemIsEnabled
+            return Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsEnabled
 
-    def setData(self, index, value, role=Qt.EditRole):
+    @override
+    def setData(self, index: QModelIndex, value: Any, role: Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
+        _ = role
         (hexValue, errMsg) = self.input2hex.convert(value, 8)
         if not hexValue:
             if errMsg:
                 QtWidgets.QMessageBox.warning(None, self.tr("Input error"), errMsg)
             return False
         item = self.mapToSource(index).internalPointer()
-        hexAddress = item.data(0)
-        self.sourceModel().setByte(hexAddress, hexValue, True)
+        self.sourceModel().setByte(item.hexAddress, hexValue, True)
         return True
 
 
 if __name__ == "__main__":
-    #
-    # To test this module, execute from qtarmsim upper directory the following command:
-    #
-    #    python3 -m qtarmsim.model.memorydumpproxymodel
-    #
+    # To test this model, see the note in the header of this file
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = QtWidgets.QMainWindow()
     mainWindow.setGeometry(200, 200, 1000, 400)
@@ -220,7 +252,7 @@ if __name__ == "__main__":
     memoryModel.setByte('0x20020000', '0xCC')
     memoryModel.stepHistory()
     memoryModel.setByte('0x20020002', '0xDD')
-    # Show main window and enter main loop
+    # Show the main window and enter the main loop
     mainWindow.setCentralWidget(memoryDumpView)
     mainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

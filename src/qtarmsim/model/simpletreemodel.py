@@ -20,45 +20,49 @@
 ###########################################################################
 
 
+from __future__ import annotations
+
+from typing import Any
+
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QModelIndex
 
 
 class TreeItem(object):
-    def __init__(self, data, parent=None):
+    def __init__(self, data: tuple | list, parent: TreeItem | None = None) -> None:
         self.parentItem = parent
         self.itemData = data
         self.childItems = []
 
-    def appendChild(self, item):
+    def appendChild(self, item: TreeItem) -> None:
         item.parentItem = self
         self.childItems.append(item)
 
-    def child(self, row):
+    def child(self, row: int) -> TreeItem:
         return self.childItems[row]
 
-    def childCount(self):
+    def childCount(self) -> int:
         return len(self.childItems)
 
-    def columnCount(self):
+    def columnCount(self) -> int:
         return len(self.itemData)
 
-    def data(self, column):
+    def data(self, column: int) -> Any:
         try:
             return self.itemData[column]
         except IndexError:
             return None
 
-    def setData(self, column, data):
+    def setData(self, column: int, data: Any) -> None:
         try:
             self.itemData[column] = data
         except IndexError:
             pass
 
-    def parent(self):
+    def parent(self) -> TreeItem | None:
         return self.parentItem
 
-    def row(self):
+    def row(self) -> int:
         if self.parentItem:
             return self.parentItem.childItems.index(self)
         else:
@@ -66,11 +70,11 @@ class TreeItem(object):
 
 
 class TreeModel(QtCore.QAbstractItemModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QtCore.QObject | None = None) -> None:
         super(TreeModel, self).__init__(parent)
         self.rootItem = TreeItem(("Column1", "Column2"))
 
-    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
         if not index.isValid():
             return None
         if role != Qt.ItemDataRole.DisplayRole:
@@ -78,18 +82,18 @@ class TreeModel(QtCore.QAbstractItemModel):
         item = index.internalPointer()
         return item.bytes(index.column())
 
-    def flags(self, index):
+    def flags(self, index: QModelIndex) -> Qt.ItemFlag:
         if not index.isValid():
             return Qt.ItemFlag.NoItemFlags
 
         return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
 
-    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+    def headerData(self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> Any:
         if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return self.rootItem.data(section)
         return None
 
-    def index(self, row, column, parent=QtCore.QModelIndex()):
+    def index(self, row: int, column: int, parent: QModelIndex = QtCore.QModelIndex()) -> QModelIndex:
         if not self.hasIndex(row, column, parent):
             return QtCore.QModelIndex()
 
@@ -104,7 +108,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         else:
             return QtCore.QModelIndex()
 
-    def parent(self, index=QtCore.QModelIndex()):
+    def parent(self, index: QModelIndex = QtCore.QModelIndex()) -> QModelIndex:
         if not index.isValid():
             return QtCore.QModelIndex()
 
@@ -116,7 +120,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         return self.createIndex(parentItem.row(), 0, parentItem)
 
-    def rowCount(self, index=QtCore.QModelIndex()):
+    def rowCount(self, index: QModelIndex = QtCore.QModelIndex()) -> int:
         """Returns the number of children in the item pointed by index"""
         if index.column() > 0:
             return 0
@@ -126,7 +130,7 @@ class TreeModel(QtCore.QAbstractItemModel):
             item = index.internalPointer()
         return item.childCount()
 
-    def columnCount(self, index=QtCore.QModelIndex()):
+    def columnCount(self, index: QModelIndex = QtCore.QModelIndex()) -> int:
         """Returns the number of data elements in the item pointed by index"""
         if index.isValid():
             return index.internalPointer().columnCount()
