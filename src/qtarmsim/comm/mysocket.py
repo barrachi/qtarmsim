@@ -38,7 +38,7 @@ class MySocket(QtCore.QObject):
     sentLine = QtCore.Signal(str)
     receivedLine = QtCore.Signal(str)
 
-    def __init__(self, verbose: bool = False) -> None:
+    def __init__(self, verbose: bool = False, register_sigint: bool = True) -> None:
         """
         Initializes the socket
         """
@@ -48,11 +48,12 @@ class MySocket(QtCore.QObject):
         self.socket: socket.socket | None = None
         self.pending_lines: list[str] = []
         self.block_until_response: bool = False
-        try:
-            _ = signal.signal(signal.SIGINT, self.exitSignalHandler)
-        except ValueError:
-            # If not in the main thread, the signal will raise a ValueError
-            pass
+        if register_sigint:
+            try:
+                _ = signal.signal(signal.SIGINT, self.exitSignalHandler)
+            except ValueError:
+                # If not in the main thread, the signal will raise a ValueError
+                pass
 
     def serverBind(self, port: int) -> int:
         """

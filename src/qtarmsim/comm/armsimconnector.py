@@ -45,18 +45,6 @@ from .mysocket import MySocket
 from .responses import ExecuteResponse, AssembleResponse
 
 
-def enqueue_pipe(pipe: BufferedReader, queue: Queue[bytes]) -> None:
-    """
-    Reads lines from a pipe and puts them in a queue.
-
-    :param pipe: The pipe from which the lines are to be read.
-    :param queue:  The queue where the lines are to be written to.
-    """
-    for line_bytes in iter(pipe.readline, b""):
-        queue.put(line_bytes)
-    pipe.close()
-
-
 def enqueue_file(file: FileIO, queue: Queue[bytes]) -> None:
     """
     Reads lines from a file and puts them in a queue.
@@ -184,7 +172,7 @@ class ARMSimConnector(QtCore.QObject):
         # Search for a free port
         free_port = 0
         rest_of_ports: list[int] = list(range(port + 1, port + 20))
-        tmp_socket = MySocket()
+        tmp_socket = MySocket(register_sigint=False)
         for current_port in [
             port,
         ] + rest_of_ports:
@@ -335,8 +323,7 @@ class ARMSimConnector(QtCore.QObject):
         self._sendExit()
         time.sleep(0.5)
         self.mySocket.closeConnection()
-        self.mySocket.closeConnection()
-        # Kill current ARMSim process (if it is still alive)
+        # Kill the current ARMSim process (if it is still alive)
         if self.armsimProcess and self.armsimProcess.poll() is None:
             self.armsimProcess.kill()
         self.setConnected(False)
@@ -569,8 +556,12 @@ class ARMSimConnector(QtCore.QObject):
         @return: An ExecuteResponse object.
         """
         self.mySocket.sendLine("EXECUTE {}".format(ARMSimCommand))
-        lines = [line for line in self.mySocket.receiveLinesTillEof()]
+        lines = list(self.mySocket.receiveLinesTillEof())
         response = ExecuteResponse()
+        if len(lines) < 2:
+            response.result = "ERROR"
+            response.errmsg = "Unexpected response from server: {}".format(lines)
+            return response
         response.result = lines[0]
         response.assembly_line = lines[1].split(";")[0]  # get rid of the source code part
         mode = ""
@@ -661,23 +652,18 @@ class ARMSimConnector(QtCore.QObject):
         # Find the coding of the original file
         encoding = "utf-8"
         for enc in ["utf-8", "latin1", "ascii"]:
-            f = open(src_fname, encoding=enc)
             try:
-                _ = f.read()
-                f.close()
+                with open(src_fname, encoding=enc) as f:
+                    _ = f.read()
                 encoding = enc
                 break
             except UnicodeDecodeError as e:
-                f.close()
                 if enc == "ascii":
                     raise e
-        # Open the file with the correct encoding
-        f = open(src_fname, encoding=encoding)
-        dest = open(dst_fname, "w")
-        for line in f:
-            _ = dest.write(line)
-        f.close()
-        dest.close()
+        # Copy the file with the detected encoding
+        with open(src_fname, encoding=encoding) as f, open(dst_fname, "w") as dest:
+            for line in f:
+                _ = dest.write(line)
         return dst_fname
 
     def _disposeTmpDir(self, fname: str) -> None:
