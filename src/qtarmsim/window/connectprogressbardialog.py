@@ -19,12 +19,14 @@
 # Adapted from:
 # http://stackoverflow.com/questions/19442443/busy-indication-with-pyqt-progress-bar
 
+from __future__ import annotations
+
 from PySide6 import QtCore, QtWidgets
 
 
 class ConnectProgressBarDialog(QtWidgets.QDialog):
 
-    def __init__(self, simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort, parent=None):
+    def __init__(self, simulator, ARMSimCommand: str, ARMSimDirectory: str, ARMSimServer: str, ARMSimPort: int, parent: QtWidgets.QWidget | None = None) -> None:
         self.errmsg = ""
 
         super(ConnectProgressBarDialog, self).__init__(parent)
@@ -54,19 +56,19 @@ class ConnectProgressBarDialog(QtWidgets.QDialog):
         self.progressBar.setRange(0, 0)
         self.myLongTask.start()
 
-    def onFinished(self, errmsg):
+    def onFinished(self, errmsg: str) -> None:
         self.progressBar.setRange(0, 1)  # Stop the pulsation
         self.errmsg = errmsg
         self.accept()
 
-    def getMsg(self):
+    def getMsg(self) -> str:
         return self.errmsg
 
 
 class ConnectThread(QtCore.QThread):
     taskFinished = QtCore.Signal(str)
 
-    def __init__(self, simulator, ARMSimCommand, ARMSimDirectory, ARMSimServer, ARMSimPort):
+    def __init__(self, simulator, ARMSimCommand: str, ARMSimDirectory: str, ARMSimServer: str, ARMSimPort: int) -> None:
         super(ConnectThread, self).__init__()
         self.simulator = simulator
         self.ARMSimCommand = ARMSimCommand
@@ -74,10 +76,10 @@ class ConnectThread(QtCore.QThread):
         self.ARMSimServer = ARMSimServer
         self.ARMSimPort = ARMSimPort
 
-    def run(self):
-        errmsg = self.simulator.connect_to(self.ARMSimCommand,
-                                           self.ARMSimDirectory,
-                                           self.ARMSimServer,
-                                           self.ARMSimPort
-                                           )
+    def run(self) -> None:
+        errmsg = self.simulator.connectTo(self.ARMSimCommand,
+                                          self.ARMSimDirectory,
+                                          self.ARMSimServer,
+                                          self.ARMSimPort
+                                          )
         self.taskFinished.emit(errmsg)

@@ -16,10 +16,12 @@
 #                                                                         #
 ###########################################################################
 
+from __future__ import annotations
+
 import os
 import sys
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from ..modulepath import module_path
 from ..ui.ui_help import Ui_Help
@@ -28,7 +30,7 @@ from ..ui.ui_help import Ui_Help
 class HelpWindow(QtWidgets.QWidget):
     """Help window"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super(HelpWindow, self).__init__(parent)
         self.ui = Ui_Help()
         self.ui.setupUi(self)
@@ -47,7 +49,7 @@ class HelpWindow(QtWidgets.QWidget):
         url = QtCore.QUrl.fromLocalFile(os.path.join(module_path, "html", self.tr("Help.html")))
         self.editor.setSource(url)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         """Method called when the help window is resized."""
         rect = self.contentsRect()
         self.editor.setGeometry(rect)

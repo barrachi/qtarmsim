@@ -19,6 +19,8 @@
 # Adapted from:
 # http://stackoverflow.com/questions/19442443/busy-indication-with-pyqt-progress-bar
 
+from __future__ import annotations
+
 from PySide6 import QtCore, QtWidgets
 
 from ..comm.exceptions import RunTimeOut
@@ -27,7 +29,7 @@ from ..comm.responses import ExecuteResponse
 
 class RunProgressBarDialog(QtWidgets.QDialog):
 
-    def __init__(self, simulator, parent=None):
+    def __init__(self, simulator, parent: QtWidgets.QWidget | None = None) -> None:
         self.response = ExecuteResponse()
         super(RunProgressBarDialog, self).__init__(parent)
 
@@ -57,7 +59,7 @@ class RunProgressBarDialog(QtWidgets.QDialog):
         self.progressBar.setRange(0, 0)
         self.myLongTask.start()
 
-    def onFinished(self, result, assembly_line, registers, memory, errmsg):
+    def onFinished(self, result: str, assembly_line: str, registers: list[tuple[int, str]], memory: list[tuple[str, str]], errmsg: str) -> None:
         self.progressBar.setRange(0, 1)  # Stop the pulsation
         self.response.result = result
         self.response.assembly_line = assembly_line
@@ -66,18 +68,18 @@ class RunProgressBarDialog(QtWidgets.QDialog):
         self.response.errmsg = errmsg
         self.accept()
 
-    def getResponse(self):
+    def getResponse(self) -> ExecuteResponse:
         return self.response
 
 
 class RunThread(QtCore.QThread):
     taskFinished = QtCore.Signal(str, str, list, list, str)
 
-    def __init__(self, simulator):
+    def __init__(self, simulator) -> None:
         super(RunThread, self).__init__()
         self.simulator = simulator
 
-    def run(self):
+    def run(self) -> None:
         try:
             response = self.simulator.getExecuteAll()
         except RunTimeOut:

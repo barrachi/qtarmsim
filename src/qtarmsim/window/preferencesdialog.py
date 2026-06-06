@@ -17,6 +17,8 @@
 ###########################################################################
 
 
+from __future__ import annotations
+
 from PySide6 import QtCore, QtWidgets
 
 from ..ui.ui_preferences import Ui_PreferencesDialog
@@ -24,7 +26,7 @@ from ..ui.ui_preferences import Ui_PreferencesDialog
 
 class PreferencesDialog(QtWidgets.QDialog):
 
-    def __init__(self, parent, settings=None, defaultSettings=None):
+    def __init__(self, parent: QtWidgets.QWidget, settings: QtCore.QSettings | None = None, defaultSettings: QtCore.QSettings | None = None) -> None:
         QtWidgets.QDialog.__init__(self, parent)
         self.settings = settings
         self.defaultSettings = defaultSettings
@@ -35,7 +37,7 @@ class PreferencesDialog(QtWidgets.QDialog):
         self.connect(self.ui.toolButtonARMSimDirectory, QtCore.SIGNAL('clicked()'), self.ARMSimDirectoryClicked)
         self.connect(self.ui.toolButtonARMGccCommand, QtCore.SIGNAL('clicked()'), self.ARMGccCommandClicked)
 
-    def setFromSettings(self, settings):
+    def setFromSettings(self, settings: QtCore.QSettings) -> None:
         # ARMSim tab
         self.ui.lineEditARMSimServer.setText(settings.value("ARMSimServer"))
         self.ui.spinBoxARMSimPort.setValue(int(settings.value("ARMSimPort")))
@@ -45,22 +47,22 @@ class PreferencesDialog(QtWidgets.QDialog):
         self.ui.lineEditARMGccCommand.setText(settings.value("ARMGccCommand"))
         self.ui.lineEditARMGccOptions.setText(settings.value("ARMGccOptions"))
 
-    def restoreARMSimDefaults(self):
+    def restoreARMSimDefaults(self) -> None:
         self.setFromSettings(self.defaultSettings)
 
-    def ARMSimDirectoryClicked(self):
+    def ARMSimDirectoryClicked(self) -> None:
         dirname = self.ui.lineEditARMSimDirectory.text()
         dirname = QtWidgets.QFileDialog.getExistingDirectory(self, self.tr('Select ARMSim working directory'), dirname)
         if dirname != '':
             self.ui.lineEditARMSimDirectory.setText(dirname)
 
-    def ARMGccCommandClicked(self):
+    def ARMGccCommandClicked(self) -> None:
         fname = self.ui.lineEditARMGccCommand.text()
         (fname, selectedFilter) = QtWidgets.QFileDialog.getOpenFileName(self, self.tr('Select file'), fname)
         if fname != '':
             self.ui.lineEditARMGccCommand.setText(fname)
 
-    def accept(self):
+    def accept(self) -> None:
         s = self.settings
         # ARMSim tab
         s.setValue("ARMSimServer", self.ui.lineEditARMSimServer.text().strip())
