@@ -19,36 +19,44 @@
 
 from __future__ import annotations
 
+from typing import Any, Protocol
+
 from PySide6 import QtCore, QtWidgets
 
 from ..ui.ui_preferences import Ui_PreferencesDialog
 
 
+class _SettingsReader(Protocol):
+    """Minimal interface shared by QSettings and DefaultSettings."""
+    def value(self, name: str, *args: Any, **kwargs: Any) -> Any: ...
+
+
 class PreferencesDialog(QtWidgets.QDialog):
 
-    def __init__(self, parent: QtWidgets.QWidget, settings: QtCore.QSettings | None = None, defaultSettings: QtCore.QSettings | None = None) -> None:
+    def __init__(self, parent: QtWidgets.QWidget, settings: QtCore.QSettings, defaultSettings: _SettingsReader | None = None) -> None:
         QtWidgets.QDialog.__init__(self, parent)
         self.settings = settings
         self.defaultSettings = defaultSettings
         self.ui = Ui_PreferencesDialog()
         self.ui.setupUi(self)
-        self.setFromSettings(self.settings)
-        self.connect(self.ui.pushButtonARMSimRestoreDefaults, QtCore.SIGNAL('clicked()'), self.restoreARMSimDefaults)
-        self.connect(self.ui.toolButtonARMSimDirectory, QtCore.SIGNAL('clicked()'), self.ARMSimDirectoryClicked)
-        self.connect(self.ui.toolButtonARMGccCommand, QtCore.SIGNAL('clicked()'), self.ARMGccCommandClicked)
+        self.setFromSettings(self.settings)  # pyright: ignore[reportArgumentType]
+        _ = self.ui.pushButtonARMSimRestoreDefaults.clicked.connect(self.restoreARMSimDefaults)
+        _ = self.ui.toolButtonARMSimDirectory.clicked.connect(self.ARMSimDirectoryClicked)
+        _ = self.ui.toolButtonARMGccCommand.clicked.connect(self.ARMGccCommandClicked)
 
-    def setFromSettings(self, settings: QtCore.QSettings) -> None:
+    def setFromSettings(self, settings: _SettingsReader) -> None:
         # ARMSim tab
-        self.ui.lineEditARMSimServer.setText(settings.value("ARMSimServer"))
-        self.ui.spinBoxARMSimPort.setValue(int(settings.value("ARMSimPort")))
-        self.ui.lineEditARMSimCommand.setText(settings.value("ARMSimCommand"))
-        self.ui.lineEditARMSimDirectory.setText(settings.value("ARMSimDirectory"))
+        self.ui.lineEditARMSimServer.setText(str(settings.value("ARMSimServer") or ""))
+        self.ui.spinBoxARMSimPort.setValue(int(settings.value("ARMSimPort") or 0))
+        self.ui.lineEditARMSimCommand.setText(str(settings.value("ARMSimCommand") or ""))
+        self.ui.lineEditARMSimDirectory.setText(str(settings.value("ARMSimDirectory") or ""))
         self.ui.useLabelsCheckBox.setChecked(settings.value("ARMSimUseLabels") != "0")
-        self.ui.lineEditARMGccCommand.setText(settings.value("ARMGccCommand"))
-        self.ui.lineEditARMGccOptions.setText(settings.value("ARMGccOptions"))
+        self.ui.lineEditARMGccCommand.setText(str(settings.value("ARMGccCommand") or ""))
+        self.ui.lineEditARMGccOptions.setText(str(settings.value("ARMGccOptions") or ""))
 
     def restoreARMSimDefaults(self) -> None:
-        self.setFromSettings(self.defaultSettings)
+        if self.defaultSettings is not None:
+            self.setFromSettings(self.defaultSettings)
 
     def ARMSimDirectoryClicked(self) -> None:
         dirname = self.ui.lineEditARMSimDirectory.text()
@@ -58,7 +66,7 @@ class PreferencesDialog(QtWidgets.QDialog):
 
     def ARMGccCommandClicked(self) -> None:
         fname = self.ui.lineEditARMGccCommand.text()
-        (fname, selectedFilter) = QtWidgets.QFileDialog.getOpenFileName(self, self.tr('Select file'), fname)
+        (fname, _) = QtWidgets.QFileDialog.getOpenFileName(self, self.tr('Select file'), fname)
         if fname != '':
             self.ui.lineEditARMGccCommand.setText(fname)
 

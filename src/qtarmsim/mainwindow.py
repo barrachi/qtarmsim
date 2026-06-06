@@ -68,25 +68,8 @@ def _fromUtf8(s: str) -> str:
 
 
 def which(cmd: str) -> str | None:
-    """
-    Searches cmd in the system PATH.
-
-    If shutil.which is available (>= Python3.3), it calls it, otherwise it does a naive search for the given command on the
-    system PATH.
-
-    @return: the full path to the given command.
-    """
-    # Try with shutil.which
-    try:
-        return shutil.which(cmd)
-    except AttributeError:
-        pass
-    # Do a naive search if not
-    for dirname in os.get_exec_path():
-        path = os.path.join(dirname, cmd)
-        if os.path.exists(path):
-            return os.path.realpath(path)
-    return None
+    """Searches cmd in the system PATH. Returns the full path or None."""
+    return shutil.which(cmd)
 
 
 class DefaultSettings:
@@ -389,7 +372,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             # Version <4 -> ARMSim ruby implementation
             # Version 4 -> ARMSim reimplemented in python
             # @warning: Reread setting as it could have been changed
-            ARMSimCommand= cast(str, self.settings.value("ARMSimCommand"))
+            ARMSimCommand = cast(str, self.settings.value("ARMSimCommand") or "")
             if ARMSimCommand.count("ruby") != 0:
                 self.settings.setValue("ARMSimCommand", self.defaultSettings.value("ARMSimCommand"))
                 self.settings.setValue("ARMSimDirectory", self.defaultSettings.value("ARMSimDirectory"))
@@ -515,18 +498,17 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
     def connectActions(self) -> None:
         """Connects the actions with their correspondent methods"""
         # Automatically assign actions to methods using their names
-        signalTriggered = QtCore.SIGNAL("triggered()")
         for actionName in dir(self.ui):
             if actionName.startswith('action'):
                 methodName = 'do{}'.format(actionName[6:])
                 try:
-                    method = cast(Callable[..., QAction], getattr(self, methodName))
+                    method = cast(Callable[..., None], getattr(self, methodName))
                 except AttributeError:
                     if self.verbose:
                         print("Method: {} not implemented yet!".format(methodName))
                     continue
                 action = cast(QAction, getattr(self.ui, actionName))
-                _ = self.connect(action, signalTriggered, method)
+                _ = action.triggered.connect(method)
         # Tab changes
         _ = self.ui.tabWidgetCode.currentChanged.connect(self.onTabChange)
         # Clipboard changes
@@ -776,7 +758,9 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             return
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, self.tr("Open File"),
                                                             self._getDirectory(),
-                                                          self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
+                                                            self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
+        if not fileName:
+            return
         self.readFile(fileName)
         # Change to tab 0
         self.ui.tabWidgetCode.setCurrentIndex(0)
@@ -850,15 +834,10 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         newFileName = self.fileName
         if os.path.dirname(newFileName) == '':
             newFileName = os.path.join(self._getDirectory(), newFileName)
-        newFileName = QtWidgets.QFileDialog.getSaveFileName(self, self.tr("Save File"),
-                                                              newFileName,
-                                                              self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
-        # @warning: fileName should return a string, but on Python 3.3.5, PySide2 1.2.2, and Qt 4.8.5, it returns a
-        # tuple (fileName, 'ARM assembler files (*.s)')
-        # @todo: check why this is happening and remove the following hack and this comment
-        if type(newFileName) is tuple:
-            newFileName = newFileName[0]
-        assert(isinstance(newFileName, str))
+        newFileName, _ = QtWidgets.QFileDialog.getSaveFileName(self, self.tr("Save File"),
+                                                               newFileName,
+                                                               self.tr("ARM assembler files (*.s);;ARM C files (*.c)"))
+        assert isinstance(newFileName, str)
         if newFileName != '':
             return self.saveFile(newFileName)
         else:
@@ -1099,7 +1078,6 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             self.showFullScreen()
 
     def doPreferences(self) -> None:
-        assert(isinstance(self.defaultSettings, QSettings))
         preferences = PreferencesDialog(self, self.settings, self.defaultSettings)
         if preferences.exec_():
             if self.simulator and self.simulator.connected:
@@ -1196,7 +1174,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def updateFlags(self) -> None:
         assert self.simulator is not None
-        (_reg, hex_value) = self.simulator.getRegister('r16')  # @UnusedVariable reg
+        (_, hex_value) = self.simulator.getRegister('r16')
         value = int(hex_value, 16)
         N = '<b>N</b>' if value & 2 ** 31 else 'n'
         Z = '<b>Z</b>' if value & 2 ** 30 else 'z'
