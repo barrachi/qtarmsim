@@ -261,6 +261,7 @@ class MySocket(QtCore.QObject):
         Handler used to close the socket when an exit signal is received. See __init__().
         """
         self.closeConnection()
+        sys.exit(0)
 
     def setConnTimeout(self, value: float) -> None:
         """
