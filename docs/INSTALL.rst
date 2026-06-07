@@ -11,7 +11,6 @@ QtARMSim depends on:
 
 ARMSim, which is bundled with QtARMSim, requires:
 
-- `Ruby <https://www.ruby-lang.org/en/>`_
 - `GNU GCC Arm toolchain <http://gcc.gnu.org/>`_
 
 The following sections explain how to install QtARMSim and its
@@ -60,8 +59,8 @@ with something similar to:
     $ sudo pipx install pipx  # Installs a newer version of pipx on the root home
     $ sudo apt remove pipx    # Removes the older system pipx
     $ sudo bash
-    # ~/.local/share/pipx/venvs/pipx/bn/pipx install pipx --global
-    # ~/.local/share/pipx/venvs/pipx/bn/pipx ensurepath --global
+    # ~/.local/share/pipx/venvs/pipx/bin/pipx install pipx --global
+    # ~/.local/share/pipx/venvs/pipx/bin/pipx ensurepath --global
     # exit
     $ sudo pipx install --global qtarmsim  # The newer version should support --global
 
@@ -188,13 +187,13 @@ To upgrade QtARMSim to its latest version, use the following commands:
 
 - **On GNU/Linux:**
 
-  Depending or your method of installation (``pix``):
+  Depending on your method of installation (``pix``):
 
   .. code-block:: shell-session
 
       $ sudo pipx upgrade qtarmsim
 
-  or (``pip``)::
+  or (``pip``):
 
   .. code-block:: shell-session
 
@@ -225,11 +224,11 @@ To uninstall QtARMSim, run:
 
       $ sudo pipx uninstall qtarmsim
 
-  or
+  or (``pip``):
 
   .. code-block:: shell-session
 
-      $ sudo pipx uninstall qtarmsim
+      $ sudo pip3 uninstall qtarmsim
 
 
 - **On Windows:**
@@ -271,15 +270,6 @@ terminal to inspect any error messages.
 
       # sudo pip3 install --no-deps qtarmsim
 
-- **Issue:** On Ubuntu 20.04 LTS, the PySide2 5.14 package does not
-  display some icons or SVGs properly.
-
-  **Solution:**
-
-  .. code-block:: shell-session
-
-      $ sudo pip3 install pyside2
-
 - **Issue:** The following error appears when launching QtARMSim::
 
       qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in ""
@@ -290,15 +280,4 @@ terminal to inspect any error messages.
   .. code-block:: shell-session
 
       $ sudo apt install libxcb-xinerama0
-
-- **Issue:** Since Ruby installer version 2.5, the ``shell``,
-  ``e2mmap``, and ``sync`` modules are no longer bundled.
-
-  **Solution:** Manually install these modules using the ``gem``
-  command as shown in the Windows installation instructions.
-
-- **Issue:** PySide2 versions 5.12.0 and 5.12.1 introduced regressions
-  that prevent QtARMSim from working properly.
-
-  **Solution:** Upgrade to PySide2 version 5.12.2 or later.
 

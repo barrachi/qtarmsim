@@ -16,7 +16,7 @@ To create the source and the wheel distribution::
 To test the source or wheel distribution ``dist/qtarmsim-x.x.x.tar.gz``::
   $ uv venv /tmp/venv
   $ source /tmp/venv/bin/activate
-  $ uv pip install dist/qtarmim.
+  $ uv pip install dist/qtarmsim-x.x.x.tar.gz
   $ virtualenv --python=python3 testqtarmsim
   $ . testqtarmsim/bin/activate
   $ pip3 install dist/qtarmsim-x.y.z.tar.gz
@@ -24,8 +24,7 @@ To test the source or wheel distribution ``dist/qtarmsim-x.x.x.tar.gz``::
 
 To set a new version::
   $ git tag x.y.z
-  $ git commit
-  $ git push
+  $ git push --tags
 
 To upload it to the `test pypi repository <https://testpypi.python.org/>`_::
    $ twine upload --repository-url https://test.pypi.org/legacy/ dist/qtarmsim-x.x.x.tar.gz
@@ -36,6 +35,12 @@ To upload it to the `pypi repository <https://pypi.org/>`_::
 
 How to build a binary installer for Windows
 -------------------------------------------
+
+.. note::
+
+   This section is obsolete. The ``bdist_wininst`` command and the
+   ``distutils`` module it relied on were removed in Python 3.12. The
+   instructions below are kept for historical reference only.
 
 To create a binary installer for Windows from GNU/Linux with wine, the
 next command can be executed::
@@ -51,6 +56,12 @@ with the appropriate QtARMSim icon.
 
 Install python on Wine
 ----------------------
+
+.. note::
+
+   This section is outdated. Python 3.4.3 is no longer supported.
+   Refer to `<https://www.python.org/downloads/windows/>`_ for a
+   current installer.
 
 To install python on Wine:
 
