@@ -69,7 +69,10 @@ class LeftArea(QtWidgets.QWidget):
         self.upPointerPoints: list[tuple[float,float]] = []
         self.downPointerPoints: list[tuple[float,float]] = []
         # ------------------------------------------------------------
-        # Colors
+        # Colors (light theme defaults; updated via setDarkMode)
+        self._dark_mode: bool = False
+        self._bg_color = QtGui.QColor('lightGray')
+        self._text_color = QtGui.QColor('black')
         self.rightArrowColor = QtGui.QColor('blue')
         self.stopPenColor = QtGui.QColor('black')
         self.stopFillColor = QtGui.QColor('darkRed').lighter(170)
@@ -141,7 +144,7 @@ class LeftArea(QtWidgets.QWidget):
         """Repaints (part of) the LeftArea Widget"""
         super(LeftArea, self).paintEvent(event)
         painter = QtGui.QPainter(self)
-        painter.fillRect(event.rect(), QtGui.QColor('lightGray'))
+        painter.fillRect(event.rect(), self._bg_color)
         block = self.codeEditor.firstVisibleBlock()
         blockNumber = block.blockNumber()
         contentOffset = self.codeEditor.contentOffset()
@@ -204,7 +207,7 @@ class LeftArea(QtWidgets.QWidget):
             while block.isValid() and top <= event.rect().bottom():
                 if block.isVisible() and bottom >= event.rect().top():
                     number = blockNumber + 1
-                    painter.setPen(QtGui.QColor('black'))
+                    painter.setPen(self._text_color)
                     painter.drawText(-4, int(top), self.width(), self.codeEditor.fontMetrics().height(),
                                      Qt.AlignmentFlag.AlignRight, u"{}".format(number))
                 block = block.next()
@@ -256,6 +259,16 @@ class LeftArea(QtWidgets.QWidget):
                 self.update()
         else:
             super(LeftArea, self).mousePressEvent(event)
+
+    def setDarkMode(self, dark: bool) -> None:
+        self._dark_mode = dark
+        if dark:
+            self._bg_color = QtGui.QColor('#3c3f41')
+            self._text_color = QtGui.QColor('#A0A0A0')
+        else:
+            self._bg_color = QtGui.QColor('lightGray')
+            self._text_color = QtGui.QColor('black')
+        self.update()
 
     def clearBreakpoints(self) -> None:
         self.breakpoints.clear()
@@ -340,6 +353,8 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         #  Instance attributes that will be properly initialized later
         # ------------------------------------------------------------
         self.currentHighlightedLineNumber: int = 0
+        self._dark_mode: bool = False
+        self._tab_chars: int = 8
         # ------------------------------------------------------------
         # Set the default font and tab distance
         self.myFont = getMonoSpacedFont()
@@ -382,8 +397,15 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         raise Exception("Use setTabStopCharacters instead")
 
     def setTabStopCharacters(self, characters: int) -> None:
+        self._tab_chars = characters
         length = characters * self.fontMetrics().horizontalAdvance(' ' * 10000) / 10000
         super().setTabStopDistance(length)
+
+    def applyFont(self, font: QtGui.QFont) -> None:
+        """Apply a new font to the editor, preserving the current tab width."""
+        self.myFont = font
+        self.setFont(self.myFont)
+        self.setTabStopCharacters(self._tab_chars)
 
     @QtCore.Slot()  # pyright: ignore[reportAny]
     def toggleShowTabsAndSpaces(self):
@@ -475,6 +497,14 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         if rect.contains(self.viewport().rect()):
             self.updateLeftAreaWidth()
 
+    def setDarkMode(self, dark: bool) -> None:
+        """Propagate dark/light mode to the left area and syntax highlighter."""
+        self._dark_mode = dark
+        self.leftArea.setDarkMode(dark)
+        if hasattr(self, 'syntaxHighlighter'):
+            self.syntaxHighlighter.setDarkMode(dark)
+        self.updateHighlightSelections()
+
     def updateHighlightSelections(self) -> None:
         """Sets the selections to be highlighted"""
         extraSelections = [self._getCurrentLineHighlightSelection()]
@@ -483,7 +513,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
 
     def _getCurrentLineHighlightSelection(self) -> QtWidgets.QTextEdit.ExtraSelection:
         """Returns the current line highlight selection"""
-        lineColor = QtGui.QColor('blue').lighter(190)
+        lineColor = QtGui.QColor('#2d4a6b') if self._dark_mode else QtGui.QColor('blue').lighter(190)
         selection = QtWidgets.QTextEdit.ExtraSelection()
         selection.format.setBackground(lineColor)
         selection.format.setProperty(QtGui.QTextFormat.Property.FullWidthSelection, True)
@@ -498,7 +528,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         cursor = self.textCursor()
         cursor.select(QtGui.QTextCursor.SelectionType.WordUnderCursor)
         currentWord = cursor.selectedText()
-        lineColor = QtGui.QColor('yellow')
+        lineColor = QtGui.QColor('#4a4a1a') if self._dark_mode else QtGui.QColor('yellow')
         selections = []
         if currentWord in words:
             cursor_ = QtGui.QTextCursor(self.document())

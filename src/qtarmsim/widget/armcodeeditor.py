@@ -57,10 +57,14 @@ class ARMCodeEditor(CodeEditor):
     def setARMMode(self) -> None:
         self.syntaxHighlighter = self.ARMSyntaxHighlighterClass(self.document())
         self.setTabStopCharacters(8)
+        if self.leftArea._dark_mode:
+            self.syntaxHighlighter.setDarkMode(True)
 
     def setCMode(self) -> None:
         self.syntaxHighlighter = self.CSyntaxHighlighterClass(self.document())
         self.setTabStopCharacters(3)
+        if self.leftArea._dark_mode:
+            self.syntaxHighlighter.setDarkMode(True)
 
 
 if __name__ == "__main__":

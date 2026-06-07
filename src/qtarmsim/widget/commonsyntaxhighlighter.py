@@ -35,6 +35,12 @@ class CommonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         """Initializes the different patterns and their respective formats"""
         super().__init__(parent)
         self.highlightingRules: list[HighlightingRule] = []  # To be defined on the derived classes
+        self._dark_mode: bool = False
+
+    def setDarkMode(self, dark: bool) -> None:
+        """Switch between light and dark highlighting colors and rehighlight."""
+        self._dark_mode = dark
+        self.rehighlight()
 
     def highlightBlock(self, text: str) -> None:
         """Parses a given block and applies the corresponding formats to the matched patterns"""
@@ -52,7 +58,9 @@ class CommonSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         commentStartExpression = QtCore.QRegularExpression('/\\*')
         commentEndExpression = QtCore.QRegularExpression('\\*/')
         multilineCommentFormat = QtGui.QTextCharFormat()
-        multilineCommentFormat.setForeground(QtGui.QColor('gray'))
+        multilineCommentFormat.setForeground(
+            QtGui.QColor('#6A9955') if self._dark_mode else QtGui.QColor('gray')
+        )
         startIndex = 0
         self.setCurrentBlockState(0)
         if self.previousBlockState() != 1:

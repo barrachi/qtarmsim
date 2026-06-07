@@ -26,7 +26,7 @@ from PySide6 import QtGui
 from .commonsyntaxhighlighter import HighlightingRule, CommonSyntaxHighlighter
 
 
-def generateCHighlightingRules() -> list[HighlightingRule]:
+def generateCHighlightingRules(dark_mode: bool = False) -> list[HighlightingRule]:
     #
     # The following keywords have been obtained from the KDE syntax-highlight framework (c syntax):
     #   https://github.com/KDE/syntax-highlighting/blob/master/data/syntax/c.xml
@@ -126,34 +126,34 @@ def generateCHighlightingRules() -> list[HighlightingRule]:
     highlightingRules = []
     # Add highlighting rules and format for C control flow directives
     controlFlowFormat = QtGui.QTextCharFormat()
-    controlFlowFormat.setForeground(QtGui.QColor('black'))
+    controlFlowFormat.setForeground(QtGui.QColor('#C586C0') if dark_mode else QtGui.QColor('black'))
     controlFlowFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     pattern = '({})\\b'.format('|'.join(control_flow.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(pattern, controlFlowFormat))
     # Add highlighting rules and format for C keywords
     keywordsFormat = QtGui.QTextCharFormat()
-    keywordsFormat.setForeground(QtGui.QColor('darkBlue'))
+    keywordsFormat.setForeground(QtGui.QColor('#569CD6') if dark_mode else QtGui.QColor('darkBlue'))
     keywordsFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     pattern = '({})\\b'.format('|'.join(keywords.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(pattern, keywordsFormat))
     # Add highlighting rules and format for C types
     typesFormat = QtGui.QTextCharFormat()
-    typesFormat.setForeground(QtGui.QColor('darkBlue'))
+    typesFormat.setForeground(QtGui.QColor('#4EC9B0') if dark_mode else QtGui.QColor('darkBlue'))
     pattern = '({})\\b'.format('|'.join(types.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(pattern, typesFormat))
     # Add highlighting rules and format for numbers
     numbersFormat = QtGui.QTextCharFormat()
-    numbersFormat.setForeground(QtGui.QColor('darkOrange'))
+    numbersFormat.setForeground(QtGui.QColor('#B5CEA8') if dark_mode else QtGui.QColor('darkOrange'))
     pattern = '\\b[0-9]+\\b'
     highlightingRules.append(HighlightingRule(pattern, numbersFormat))
     # Add highlighting rules and format for #define
     defineFormat = QtGui.QTextCharFormat()
-    defineFormat.setForeground(QtGui.QColor('green'))
+    defineFormat.setForeground(QtGui.QColor('#9CDCFE') if dark_mode else QtGui.QColor('green'))
     pattern = '#define.*$'
     highlightingRules.append(HighlightingRule(pattern, defineFormat))
     # Add highlighting rules and format for C comments
     commentsFormat = QtGui.QTextCharFormat()
-    commentsFormat.setForeground(QtGui.QColor('gray'))
+    commentsFormat.setForeground(QtGui.QColor('#6A9955') if dark_mode else QtGui.QColor('gray'))
     pattern = '//.*$'
     highlightingRules.append(HighlightingRule(pattern, commentsFormat))
     return highlightingRules
@@ -166,3 +166,7 @@ class CSyntaxHighlighter(CommonSyntaxHighlighter):
         """Initializes the different patterns and their respective formats"""
         super().__init__(parent)
         self.highlightingRules = generateCHighlightingRules()
+
+    def setDarkMode(self, dark: bool) -> None:
+        self.highlightingRules = generateCHighlightingRules(dark)
+        super().setDarkMode(dark)

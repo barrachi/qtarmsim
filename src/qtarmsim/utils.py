@@ -19,8 +19,11 @@
 from PySide6 import QtGui
 
 
-def getMonoSpacedFont() -> QtGui.QFont:
-    """Tries to get a monospaced font in Linux, Windows and macOS"""
+def getMonoSpacedFont(point_size: int = 0) -> QtGui.QFont:
+    """Tries to get a monospaced font in Linux, Windows and macOS.
+
+    :param point_size: If > 0, override the font's point size.
+    """
     font = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.SystemFont.FixedFont)
     # If the previous line does not work...
     if not QtGui.QFontInfo(font).fixedPitch():
@@ -29,5 +32,6 @@ def getMonoSpacedFont() -> QtGui.QFont:
         # If we are not there yet...
         if not QtGui.QFontInfo(font).fixedPitch():
             font.setStyleHint(QtGui.QFont.StyleHint.TypeWriter)
-    font.setPointSize(QtGui.QFont().pointSize())  # Using the system default font point size
+    if point_size > 0:
+        font.setPointSize(point_size)
     return font

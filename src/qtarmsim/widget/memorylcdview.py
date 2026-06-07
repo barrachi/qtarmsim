@@ -33,6 +33,25 @@ from ..model.memorylcdproxymodel import MemoryLCDProxyModel
 from ..model.memorymodel import MemoryModel
 
 
+_LCD_STYLE_LIGHT = """
+    QTableView { background: transparent;
+                 border-width: 8 8 8 8;
+                 padding: 16 -6 -6 16;
+                 border-image: url(:/images/lcd.png) 8 8 8 8;}
+    QTableView::item { background: transparent; }
+    QTableView::item:hover { background: none; }
+"""
+
+_LCD_STYLE_DARK = """
+    QTableView { background: transparent;
+                 border-width: 8 8 8 8;
+                 padding: 16 -6 -6 16;
+                 border-image: url(:/images/lcd_dark.png) 8 8 8 8;}
+    QTableView::item { background: transparent; color: white; }
+    QTableView::item:hover { background: none; }
+"""
+
+
 class MemoryLCDView(QtWidgets.QTableView):
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
@@ -43,16 +62,7 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.verticalHeader().hide()
         self.verticalHeader().setMinimumSectionSize(1)  # Minimum height
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        # #78AE4D
-        #                 padding: 8 -8 -8 8;
-        #                 padding: 4 -3 -3 4;
-        self.setStyleSheet("""
-            QTableView { background: transparent;
-                         border-width: 8 8 8 8;
-                         padding: 16 -6 -6 16;
-                         border-image: url(:/images/lcd.png) 8 8 8 8;}
-            QTableView::item:hover {background: none;}
-        """)
+        self.setStyleSheet(_LCD_STYLE_LIGHT)
         self.verticalScrollBar().setDisabled(True)
         self.horizontalScrollBar().setDisabled(True)
         self.setFrameStyle(QtWidgets.QFrame.Shape.NoFrame)
@@ -69,6 +79,11 @@ class MemoryLCDView(QtWidgets.QTableView):
         self.LCDColumns = LCDColumns
         self.LCDRows = LCDRows
         self._resizeToContents()
+
+    def setDarkMode(self, dark: bool) -> None:
+        self.setStyleSheet(_LCD_STYLE_DARK if dark else _LCD_STYLE_LIGHT)
+        if self.memoryLCDProxyModel is not None:
+            self.memoryLCDProxyModel.setDarkMode(dark)
 
     def _resizeToContents(self) -> None:
         """Resize the columns and rows of the LCD to the size of its content and then fixes the total width and height of

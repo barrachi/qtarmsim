@@ -26,7 +26,7 @@ from PySide6 import QtGui
 from .commonsyntaxhighlighter import HighlightingRule, CommonSyntaxHighlighter
 
 
-def generateARMHighlightingRules() -> list[HighlightingRule]:
+def generateARMHighlightingRules(dark_mode: bool = False) -> list[HighlightingRule]:
     """
     Most of the ARM keywords and directives were obtained from the listings ARM definition for LaTeX
     (c) 2013 by Jacques Supcik
@@ -462,7 +462,7 @@ def generateARMHighlightingRules() -> list[HighlightingRule]:
     highlightingRules = []
     # Add highlighting rules and format for ARM assembler keywords
     keywordFormat = QtGui.QTextCharFormat()
-    keywordFormat.setForeground(QtGui.QColor('darkBlue'))
+    keywordFormat.setForeground(QtGui.QColor('#569CD6') if dark_mode else QtGui.QColor('darkBlue'))
     keywordFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     keywordsList = keywords.replace('\n', '').replace(' ', '').split(',')
     keywordsDict = {}
@@ -482,24 +482,24 @@ def generateARMHighlightingRules() -> list[HighlightingRule]:
     highlightingRules.append(HighlightingRule(pattern, keywordFormat))
     # Add highlighting rules and format for ARM assembler directives
     directiveFormat = QtGui.QTextCharFormat()
-    directiveFormat.setForeground(QtGui.QColor('green'))
+    directiveFormat.setForeground(QtGui.QColor('#4EC9B0') if dark_mode else QtGui.QColor('green'))
     directiveFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     pattern = '[.](?:{})\\b'.format('|'.join(directives.replace('\n', '').replace(' ', '').replace('.', '').split(',')))
     highlightingRules.append(HighlightingRule(pattern, directiveFormat))
     # Add highlighting rules and format for ARM registers
     registerFormat = QtGui.QTextCharFormat()
-    registerFormat.setForeground(QtGui.QColor('green'))
+    registerFormat.setForeground(QtGui.QColor('#9CDCFE') if dark_mode else QtGui.QColor('green'))
     pattern = '\\b(?:{})\\b'.format('|'.join(['r\\d', 'r1[0-5]{0,1}', '[sS][pP]', '[lL][rR]', '[pP][cC]']))
     highlightingRules.append(HighlightingRule(pattern, registerFormat))
     # Add highlighting rules and format for ARM labels
     labelFormat = QtGui.QTextCharFormat()
-    labelFormat.setForeground(QtGui.QColor('black'))
+    labelFormat.setForeground(QtGui.QColor('#DCDCAA') if dark_mode else QtGui.QColor('black'))
     labelFormat.setFontWeight(QtGui.QFont.Weight.Bold)
     for pattern in ['^\\s*[^\\d\\s][\\w]*:', ]:
         highlightingRules.append(HighlightingRule(pattern, labelFormat))
     # Add highlighting rules and format for ARM comments
     commentFormat = QtGui.QTextCharFormat()
-    commentFormat.setForeground(QtGui.QColor('gray'))
+    commentFormat.setForeground(QtGui.QColor('#6A9955') if dark_mode else QtGui.QColor('gray'))
     pattern = '(@.*$|^\\s*#.*$)'
     highlightingRules.append(HighlightingRule(pattern, commentFormat))
     return highlightingRules
@@ -512,3 +512,7 @@ class ARMSyntaxHighlighter(CommonSyntaxHighlighter):
         """Initializes the different patterns and their respective formats"""
         super().__init__(parent)
         self.highlightingRules = generateARMHighlightingRules()
+
+    def setDarkMode(self, dark: bool) -> None:
+        self.highlightingRules = generateARMHighlightingRules(dark)
+        super().setDarkMode(dark)

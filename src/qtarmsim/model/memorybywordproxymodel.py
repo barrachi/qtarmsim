@@ -64,6 +64,11 @@ class MemoryByWordProxyModel(QtCore.QAbstractProxyModel):
         self.qBrushPrevious: QtGui.QBrush = QtGui.QBrush(QtGui.QColor(192, 192, 255, 60), Qt.BrushStyle.SolidPattern)
         self.qBrushLast: QtGui.QBrush = QtGui.QBrush(QtGui.QColor(192, 192, 255, 100), Qt.BrushStyle.SolidPattern)
 
+    def applyFontSize(self, size: int) -> None:
+        self.qFont.setPointSize(size)
+        self.qFontLast.setPointSize(size)
+        self.layoutChanged.emit()
+
     @override
     def sourceModel(self) -> MemoryModel:
         model = super().sourceModel()

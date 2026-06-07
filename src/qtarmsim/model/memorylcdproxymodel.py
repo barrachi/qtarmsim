@@ -58,8 +58,9 @@ class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
         QtGui.QFontDatabase.addApplicationFont(":/fonts/AlphaSmart3000.ttf")
         self.qFont = QtGui.QFont("AlphaSmart 3000")
         self.qFont.setPointSize(14)
-        # Set brush
+        # Set brushes
         self.qBrush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 30), Qt.BrushStyle.SolidPattern)
+        self.qForeground: QtGui.QBrush | None = None
         #  Instance attributes that will be populated later
         self.LCDRows: int = 0
         self.LCDColumns: int = 0
@@ -153,6 +154,8 @@ class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
                 return " "
         elif role == Qt.ItemDataRole.BackgroundRole:
             return self.qBrush
+        elif role == Qt.ItemDataRole.ForegroundRole:
+            return self.qForeground
         elif role == Qt.ItemDataRole.FontRole:
             return self.qFont
         elif role == Qt.ItemDataRole.TextAlignmentRole:
@@ -170,6 +173,15 @@ class MemoryLCDProxyModel(QtCore.QAbstractProxyModel):
         if not index.isValid():
             return Qt.ItemFlag.NoItemFlags
         return Qt.ItemFlag.ItemIsEnabled
+
+    def setDarkMode(self, dark: bool) -> None:
+        if dark:
+            self.qBrush = QtGui.QBrush(Qt.BrushStyle.NoBrush)
+            self.qForeground = QtGui.QBrush(QtGui.QColor('#ffffff'))
+        else:
+            self.qBrush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 30), Qt.BrushStyle.SolidPattern)
+            self.qForeground = None
+        self.layoutChanged.emit()
 
     def changeFontSize(self, increment: int) -> None:
         myFontPointSize = self.qFont.pointSize()

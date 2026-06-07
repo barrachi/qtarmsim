@@ -76,6 +76,11 @@ class RegistersModel(TreeModel):
         # highlighted register
         self.highlighted_register: int | None = None
 
+    def applyFontSize(self, size: int) -> None:
+        self.qFont.setPointSize(size)
+        self.qFontLast.setPointSize(size)
+        self.layoutChanged.emit()
+
     @override
     def data(self, index: QModelIndex, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> object:
         if not index.isValid():

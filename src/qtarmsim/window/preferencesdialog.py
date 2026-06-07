@@ -23,6 +23,7 @@ from typing import Any, Protocol
 
 from PySide6 import QtCore, QtWidgets
 
+from ..theme import DARK, LIGHT, SYSTEM
 from ..ui.ui_preferences import Ui_PreferencesDialog
 
 
@@ -39,6 +40,9 @@ class PreferencesDialog(QtWidgets.QDialog):
         self.defaultSettings = defaultSettings
         self.ui = Ui_PreferencesDialog()
         self.ui.setupUi(self)
+        self.ui.comboBoxFontSize.addItem("Auto")
+        for pt in range(8, 25):
+            self.ui.comboBoxFontSize.addItem(str(pt))
         self.setFromSettings(self.settings)  # pyright: ignore[reportArgumentType]
         _ = self.ui.pushButtonARMSimRestoreDefaults.clicked.connect(self.restoreARMSimDefaults)
         _ = self.ui.toolButtonARMSimDirectory.clicked.connect(self.ARMSimDirectoryClicked)
@@ -53,6 +57,14 @@ class PreferencesDialog(QtWidgets.QDialog):
         self.ui.useLabelsCheckBox.setChecked(settings.value("ARMSimUseLabels") != "0")
         self.ui.lineEditARMGccCommand.setText(str(settings.value("ARMGccCommand") or ""))
         self.ui.lineEditARMGccOptions.setText(str(settings.value("ARMGccOptions") or ""))
+        # Appearance tab
+        theme = str(settings.value("ColorTheme") or SYSTEM)
+        self.ui.radioButtonLightTheme.setChecked(theme == LIGHT)
+        self.ui.radioButtonDarkTheme.setChecked(theme == DARK)
+        self.ui.radioButtonSystemTheme.setChecked(theme not in (LIGHT, DARK))
+        stored = str(settings.value("FontSize") or "0")
+        idx = self.ui.comboBoxFontSize.findText(stored if stored != "0" else "Auto")
+        self.ui.comboBoxFontSize.setCurrentIndex(max(0, idx))
 
     def restoreARMSimDefaults(self) -> None:
         if self.defaultSettings is not None:
@@ -80,4 +92,13 @@ class PreferencesDialog(QtWidgets.QDialog):
         s.setValue("ARMSimUseLabels", "1" if self.ui.useLabelsCheckBox.isChecked() else "0")
         s.setValue("ARMGccCommand", self.ui.lineEditARMGccCommand.text().strip())
         s.setValue("ARMGccOptions", self.ui.lineEditARMGccOptions.text().strip())
+        # Appearance tab
+        if self.ui.radioButtonLightTheme.isChecked():
+            s.setValue("ColorTheme", LIGHT)
+        elif self.ui.radioButtonDarkTheme.isChecked():
+            s.setValue("ColorTheme", DARK)
+        else:
+            s.setValue("ColorTheme", SYSTEM)
+        text = self.ui.comboBoxFontSize.currentText()
+        s.setValue("FontSize", "0" if text == "Auto" else text)
         return super(PreferencesDialog, self).accept()

@@ -67,6 +67,11 @@ class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
         self.memoryBank: MemoryBank | None = None
         self.memoryBankIndex: QModelIndex | None = None
 
+    def applyFontSize(self, size: int) -> None:
+        self.qFont.setPointSize(size)
+        self.qFontLast.setPointSize(size)
+        self.layoutChanged.emit()
+
     @override
     def sourceModel(self) -> MemoryModel:
         model = super().sourceModel()

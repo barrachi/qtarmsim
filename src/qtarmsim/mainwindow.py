@@ -42,6 +42,8 @@ from .model.memorydumpproxymodel import MemoryDumpProxyModel
 from .model.memorymodel import MemoryModel
 from .model.registersmodel import RegistersModel
 from .modulepath import module_path
+from .theme import DARK, SYSTEM, apply_theme, get_original_font_size, make_icon, save_default_style
+from .utils import getMonoSpacedFont
 from .res import breeze_icons_rc, main_rc
 from .ui.ui_mainwindow import Ui_MainWindow
 from .widget.armcodeeditor import ARMCodeEditor
@@ -137,6 +139,8 @@ class DefaultSettings:
         self._ARMGccCommand: str = fname
         self._ARMGccOptions: str = "-mcpu=cortex-m1 -mthumb -c"
         self._TerminalHistory: str = "SHOW VERSION"
+        self._ColorTheme: str = SYSTEM
+        self._FontSize: str = "0"
 
     # noinspection PyArgumentList
     def _setDirectoryDefaults(self) -> None:
@@ -271,7 +275,6 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         font.setStyleHint(QtGui.QFont.StyleHint.TypeWriter)
         if not QtGui.QFontInfo(font).fixedPitch():
             font.setStyleHint(QtGui.QFont.StyleHint.Monospace)
-        font.setPointSize(QtGui.QFont().pointSize())  # Using the system default font point size
         self.flagsText.setFont(font)
         self.flagsText.setToolTip("""
             <p><strong>Condition flag bits in the Application Processor Status Register</strong></p>
@@ -381,9 +384,16 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         for setting in (
                 "ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMSimUseLabels",
                 "ARMGccCommand", "ARMGccOptions",
-                "LastUsedDirectory", "TerminalHistory"):
+                "LastUsedDirectory", "TerminalHistory", "ColorTheme", "FontSize"):
             if self.settings.value(setting) is None:
                 self.settings.setValue(setting, self.defaultSettings.value(setting))
+        save_default_style()
+        theme = str(self.settings.value("ColorTheme") or SYSTEM)
+        apply_theme(theme)
+        dark = theme == DARK
+        self._applyEditorTheme(dark)
+        self._applyIconTheme(dark)
+        self._applyFontSize()
         # If server.py is not in the ARMSimDirectory, change the ARMSimDirectory by the default one
         ARMSimDirectorySetting: str = "ARMSimDirectory"
         if not os.path.exists(os.path.join(cast(str, self.settings.value(ARMSimDirectorySetting)), "server.py")):
@@ -1073,9 +1083,93 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         else:
             self.showFullScreen()
 
+    _BREEZE_ICON_ACTIONS: list[tuple[str, str]] = [
+        ('actionWhats_This',   'help-whatsthis'),
+        ('actionAbout_Qt_ARMSim', 'help-about'),
+        ('actionHelp',         'help-contents'),
+        ('actionAbout_ARMSim', 'help-about'),
+        ('actionNew',          'document-new'),
+        ('actionOpen',         'document-open'),
+        ('actionSave',         'document-save'),
+        ('actionSave_As',      'document-save-as'),
+        ('actionPrint',        'document-print'),
+        ('actionQuit',         'application-exit'),
+        ('actionRun',          'system-run'),
+        ('actionStepInto',     'debug-step-into'),
+        ('action_Undo',        'edit-undo'),
+        ('actionRedo',         'edit-redo'),
+        ('actionCut',          'edit-cut'),
+        ('actionCopy',         'edit-copy'),
+        ('actionPaste',        'edit-paste'),
+        ('actionSelect_All',   'edit-select-all'),
+        ('actionStepOver',     'debug-step-over'),
+        ('actionRestart',      'view-refresh'),
+    ]
+
+    def _applyIconTheme(self, dark: bool) -> None:
+        """Recolor all Breeze toolbar/menu icons for the current theme."""
+        prefix = ':themes/breeze_icons/22/'
+        for action_name, icon_name in self._BREEZE_ICON_ACTIONS:
+            action = getattr(self.ui, action_name, None)
+            if action is not None:
+                action.setIcon(make_icon(f'{prefix}{icon_name}.svg', dark))
+
+    def _applyEditorTheme(self, dark: bool) -> None:
+        """Propagate dark/light mode to all open code editors and the LCD view."""
+        self.ui.sourceCodeEditor.setDarkMode(dark)
+        for simCodeEditor in self.ui.simCodeEditors:
+            simCodeEditor.setDarkMode(dark)
+        self.ui.memoryLCDView.setDarkMode(dark)
+
+    def _effective_font_size(self) -> int:
+        """Return the configured font size, resolving Auto (0) to system default + 1."""
+        size = int(self.settings.value("FontSize") or 0)
+        if size < 8:
+            orig = get_original_font_size()
+            size = max(8, orig + 1)
+        return size
+
+    def _applyFontSize(self) -> None:
+        """Apply the configured font size to all application fonts, code editors, and data models."""
+        size = self._effective_font_size()
+        # Set app-wide font (propagates to all widgets)
+        app = QtWidgets.QApplication.instance()
+        if isinstance(app, QtWidgets.QApplication):
+            app_font = app.font()
+            app_font.setPointSize(size)
+            app.setFont(app_font)
+        # Code editors use a monospace font at the same size
+        mono_font = getMonoSpacedFont(size)
+        self.ui.sourceCodeEditor.applyFont(mono_font)
+        for simCodeEditor in self.ui.simCodeEditors:
+            simCodeEditor.applyFont(mono_font)
+        self.flagsText.setFont(mono_font)
+        # Registers model
+        if self.registersModel is not None:
+            self.registersModel.applyFontSize(size)
+        # Memory by-word proxy model
+        memory_proxy = self.ui.treeViewMemory.model()
+        if isinstance(memory_proxy, MemoryByWordProxyModel):
+            memory_proxy.applyFontSize(size)
+        # Memory dump proxy models (one per tab)
+        for i in range(self.ui.tabWidgetMemoryDump.count()):
+            view = self.ui.tabWidgetMemoryDump.widget(i)
+            if isinstance(view, QtWidgets.QTableView):
+                dump_model = view.model()
+                if isinstance(dump_model, MemoryDumpProxyModel):
+                    dump_model.applyFontSize(size)
+                    view.resizeColumnsToContents()
+                    view.resizeRowsToContents()
+
     def doPreferences(self) -> None:
         preferences = PreferencesDialog(self, self.settings, self.defaultSettings)
         if preferences.exec():
+            theme = str(self.settings.value("ColorTheme") or SYSTEM)
+            apply_theme(theme)
+            dark = theme == DARK
+            self._applyEditorTheme(dark)
+            self._applyIconTheme(dark)
+            self._applyFontSize()
             if self.simulator and self.simulator.connected:
                 _ = self.sendSettingsToARMSim()
 
@@ -1244,9 +1338,13 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             simCodeEditor.hide()
         self.ui.tabTabARMSim.clear()
         self.ui.simCodeEditors.clear()
+        dark = str(self.settings.value("ColorTheme") or SYSTEM) == DARK
+        mono_font = getMonoSpacedFont(self._effective_font_size())
         for mb in memory_banks:
             if mb['armsimLines']:
                 simCodeEditor = ARMCodeEditor(self.ui.tabTabARMSim)
+                simCodeEditor.applyFont(mono_font)
+                simCodeEditor.setDarkMode(dark)
                 simCodeEditor.setReadOnly(True)
                 simCodeEditor.setCenterOnScroll(False)
                 simCodeEditor.scrollLock = True
@@ -1260,8 +1358,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                     simCodeEditor.appendPlainText(
                         '\n'.join(mb['armsimLines'][j * 30: min((j + 1) * 30, n_lines)]))
                     QtWidgets.QApplication.processEvents()
-        for simCodeEditor in self.ui.simCodeEditors:
-            simCodeEditor.scrollLock = False
+                simCodeEditor.scrollLock = False
         self.highlight_pc_line()
         # Stop spinner now
         self.stopSpinner()
@@ -1278,12 +1375,14 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         memoryModel.reset()
         self.ui.tabWidgetMemoryDump.clear()
         memoryBank = 0
+        dump_font_size = self._effective_font_size()
         for mb in memory_banks:
             # Append the memory bank
             memoryModel.appendMemoryBank(mb['memType'], mb['hexStart'], mb['memBytes'])
             # Add a page to the tabWidgetMemoryDump
             memoryDumpProxyModel = MemoryDumpProxyModel()
             memoryDumpProxyModel.setSourceModel(memoryModel, memoryBank)
+            memoryDumpProxyModel.applyFontSize(dump_font_size)
             memoryBank += 1
             memoryDumpView = QtWidgets.QTableView()
             memoryDumpView.setModel(memoryDumpProxyModel)
@@ -1301,6 +1400,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Set the LCD model now that memory banks are populated
         try:
             self.ui.memoryLCDView.setMemoryModel(memoryModel, '0x20080000', 40, 6)
+            self.ui.memoryLCDView.setDarkMode(dark)
         except IndexError:
             pass  # LCD bank is not present in this program
         # Synchronously rebuild the view from the fully populated model
