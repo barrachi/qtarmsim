@@ -68,10 +68,12 @@ class TestRowAndColumnCount(unittest.TestCase):
         bankIndex = self.proxy.index(0, 0, QModelIndex())
         self.assertEqual(self.proxy.rowCount(bankIndex), 2)
 
-    def test_row_count_word_is_one(self) -> None:
+    def test_row_count_word_is_zero(self) -> None:
+        # Word rows are leaf nodes: rowCount must be 0 so QTreeView treats
+        # double-click as "start editor" rather than "expand row".
         bankIndex = self.proxy.index(0, 0, QModelIndex())
         wordIndex = self.proxy.index(0, 0, bankIndex)
-        self.assertEqual(self.proxy.rowCount(wordIndex), 1)
+        self.assertEqual(self.proxy.rowCount(wordIndex), 0)
 
     def test_column_count_is_always_two(self) -> None:
         bankIndex = self.proxy.index(0, 0, QModelIndex())

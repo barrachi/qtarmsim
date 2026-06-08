@@ -17,12 +17,28 @@
 ###########################################################################
 
 from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtCore import Qt
+
+
+class _FontSyncDelegate(QtWidgets.QStyledItemDelegate):
+    """Item delegate that applies the model's FontRole to the cell editor."""
+
+    def createEditor(self, parent: QtWidgets.QWidget,  # pyright: ignore[reportIncompatibleMethodOverride]
+                     option: QtWidgets.QStyleOptionViewItem,
+                     index: QtCore.QModelIndex) -> QtWidgets.QWidget | None:
+        editor = super().createEditor(parent, option, index)
+        if editor is not None:
+            font = index.data(Qt.ItemDataRole.FontRole)
+            if isinstance(font, QtGui.QFont):
+                editor.setFont(font)
+        return editor
 
 
 class MyQTreeView(QtWidgets.QTreeView):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self.setItemDelegate(_FontSyncDelegate(self))
         self.geometry_updated = False
         self.header().setStretchLastSection(False)
         self.setUniformRowHeights(True)

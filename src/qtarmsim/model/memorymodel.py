@@ -239,6 +239,11 @@ class MemoryModel(QAbstractItemModel):
     def flags(self, index: QModelIndex) -> Qt.ItemFlag:  # pyright: ignore[reportIncompatibleMethodOverride]
         if not index.isValid():
             return Qt.ItemFlag.NoItemFlags
+        item: object = cast(object, index.internalPointer())
+        if isinstance(item, MemoryItem):
+            bank = cast(MemoryBank, item.parent)
+            if bank.memType == 'RAM':
+                return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable
         return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
 
     # OPTIONAL: headerData

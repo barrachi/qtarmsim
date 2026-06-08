@@ -47,6 +47,7 @@ from .utils import getMonoSpacedFont
 from .res import breeze_icons_rc, main_rc
 from .ui.ui_mainwindow import Ui_MainWindow
 from .widget.armcodeeditor import ARMCodeEditor
+from .widget.memorydumpview import MemoryDumpView
 from .window.connectprogressbardialog import ConnectProgressBarDialog
 from .window.help import HelpWindow
 from .window.preferencesdialog import PreferencesDialog
@@ -1384,7 +1385,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             memoryDumpProxyModel.setSourceModel(memoryModel, memoryBank)
             memoryDumpProxyModel.applyFontSize(dump_font_size)
             memoryBank += 1
-            memoryDumpView = QtWidgets.QTableView()
+            memoryDumpView = MemoryDumpView()
             memoryDumpView.setModel(memoryDumpProxyModel)
             memoryDumpView.horizontalHeader().setMinimumSectionSize(1)
             memoryDumpView.verticalHeader().setMinimumSectionSize(1)

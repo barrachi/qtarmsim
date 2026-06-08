@@ -116,9 +116,24 @@ class MemoryByWordProxyModel(QtCore.QAbstractProxyModel):
         if isinstance(item, MemoryBankItem):
             return self.sourceModel().getMemoryBankInSlot(cast(int, item.slot)).length // 4
         elif isinstance(item, MemoryItem):
-            return 1
+            return 0
         raise RuntimeError(
             'MemoryByWordProxyModel rowCount() only supports MemoryBankItem and MemoryItem items')
+
+    @override
+    def hasChildren(self, parent: QModelIndex = QModelIndex()) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not parent.isValid():
+            return True
+        item: object = cast(object, parent.internalPointer())
+        return isinstance(item, MemoryBankItem)
+
+    @override
+    def buddy(self, index: QModelIndex) -> QModelIndex:  # pyright: ignore[reportIncompatibleMethodOverride]
+        # QAbstractProxyModel.buddy() calls mapFromSource(source.buddy(mapToSource(index))).
+        # Since mapToSource() always returns col=0, this normalises any column to 0 and
+        # causes QAbstractItemView to open the editor on col 0 regardless of which column
+        # was clicked.  Return the index unchanged so each column is its own buddy.
+        return index
 
     @override
     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:  # pyright: ignore[reportIncompatibleMethodOverride]
@@ -173,7 +188,7 @@ class MemoryByWordProxyModel(QtCore.QAbstractProxyModel):
         # Memory item
         byteMemoryBank: MemoryBank = cast(MemoryBank, sourceModelIndex.parent().internalPointer())
         byteRow = sourceModelIndex.row()
-        if role == Qt.ItemDataRole.DisplayRole:
+        if role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole):
             if index.column() == 0:
                 return item.hexAddress
             else:
@@ -290,21 +305,23 @@ class MemoryByWordProxyModel(QtCore.QAbstractProxyModel):
         else:
             return None
 
-    # def flags(self, index):
-    #     if not index.isValid():
-    #         return False
-    #     sourceModelIndex = self.mapToSource(index)
-    #     item = sourceModelIndex.internalPointer()
-    #     if isinstance(item, MemoryBankItem):
-    #         return Qt.ItemFlag.ItemIsEnabled
-    #     # Raise error if not memory item
-    #     if not isinstance(item, MemoryItem):
-    #         raise RuntimeError('MemoryByWordProxyModel pdata() only supports MemoryBank and MemoryItem items')
-    #     if index.column() == 0:
-    #         return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
-    #     if item.parent().memType == 'ROM':
-    #         return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
-    #     return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable
+    @override
+    def flags(self, index: QModelIndex) -> Qt.ItemFlag:  # pyright: ignore[reportIncompatibleMethodOverride]
+        if not index.isValid():
+            return Qt.ItemFlag.NoItemFlags
+        # Use the proxy index's internalPointer directly — avoids mapToSource chain
+        item: object = cast(object, index.internalPointer())
+        if item is None or isinstance(item, MemoryBankItem):
+            return Qt.ItemFlag.ItemIsEnabled
+        if not isinstance(item, MemoryItem):
+            return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
+        leaf = Qt.ItemFlag.ItemNeverHasChildren
+        if index.column() == 0:
+            return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | leaf
+        bank = cast(MemoryBank, item.parent)
+        if bank.memType == 'ROM':
+            return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | leaf
+        return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable | leaf
 
     @override
     def headerData(self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> str | None:  # pyright: ignore[reportIncompatibleMethodOverride]
@@ -315,6 +332,8 @@ class MemoryByWordProxyModel(QtCore.QAbstractProxyModel):
     @override
     def setData(self, index: QModelIndex, value: str, role: Qt.ItemDataRole = Qt.ItemDataRole.EditRole) -> bool:  # pyright: ignore[reportIncompatibleMethodOverride]
         _ = role
+        if index.column() != 1:
+            return False
         (hexValue, err_msg) = self.input2hex.convert(value)
         if not hexValue:
             if err_msg:

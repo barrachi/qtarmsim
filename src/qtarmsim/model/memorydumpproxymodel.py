@@ -50,6 +50,12 @@ class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
         mdBottomRight = self.mapFromSource(bottomRight)
         if mdTopLeft.isValid() and mdBottomRight.isValid():
             self.dataChanged.emit(mdTopLeft, mdBottomRight)
+            # The ASCII column (16) aggregates all 16 bytes of a row; it is not
+            # covered by the byte-cell range above, so notify it separately.
+            asciiTop = self.index(mdTopLeft.row(), 16)
+            asciiBottom = self.index(mdBottomRight.row(), 16)
+            if asciiTop.isValid() and asciiBottom.isValid():
+                self.dataChanged.emit(asciiTop, asciiBottom)
 
     # InputToHex helper object
     input2hex = InputToHex()
@@ -71,6 +77,10 @@ class MemoryDumpProxyModel(QtCore.QAbstractProxyModel):
         self.qFont.setPointSize(size)
         self.qFontLast.setPointSize(size)
         self.layoutChanged.emit()
+
+    def changeFontSize(self, increment: int) -> None:
+        size = max(8, self.qFont.pointSize() + increment)
+        self.applyFontSize(size)
 
     @override
     def sourceModel(self) -> MemoryModel:
