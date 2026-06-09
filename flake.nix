@@ -26,68 +26,61 @@
         # ── System libraries required by PySide6's bundled Qt (devShell) ──
         # Derived from nix-env/qtarmsim-fhs.nix.
         pyside6SystemLibs = with pkgs; [
-          stdenv.cc.cc.lib
-          alsa-lib
-          at-spi2-atk
-          brotli              # PySide6 >= 6.10.0
-          bzip2
-          cacert
-          cairo
-          cups
-          dbus
-          expat
-          fontconfig
-          freetype
-          gdk-pixbuf
-          glib
-          gtk3
-          harfbuzz
-          libcap
-          libdrm
-          libGL
-          libglvnd
-          libkrb5
-          libpulseaudio
-          libpng
-          libtiff5            # PySide6 >= 6.10.0 (from pinned nixpkgs)
-          libxau
-          libxcb-cursor
-          libxcb-util
-          libxdmcp
-          libxkbcommon
-          nspr
-          nss
-          pango
-          pcre2
-          pcsclite
-          udev
-          vulkan-loader       # PySide6 >= 6.10.0
-          wayland
-          xz
-          zlib
-          zstd
-          inetutils           # telnet – handy for armsim connection debugging
-        ] ++ (with pkgs.xorg; [
-          libX11
-          libxcb
-          libXcomposite
-          libXcursor
-          libXdamage
-          libXext
-          libXfixes
-          libXi
-          libxkbfile
-          libXrandr
-          libXrender
-          libxshmfence
-          libXtst
-          setxkbmap
-          xcbutilimage
-          xcbutilkeysyms
-          xcbutilrenderutil
-          xcbutilwm
-          xf86inputevdev
-        ]);
+            alsa-lib
+            at-spi2-atk
+            brotli              # PySide6 >= 6.10.0
+            bzip2
+            cairo
+            dbus
+            expat
+            fontconfig
+            freetype
+            gdk-pixbuf
+            glib
+            gtk3
+            harfbuzz
+            libx11
+            libcap
+            libdrm
+            libGL
+            libglvnd
+            libpng
+            libpulseaudio
+            libtiff5            # PySide6 >= 6.10.0 (from pinned nixpkgs)
+            libxau
+            libxcb
+            libxcb-cursor
+            libxcb-image
+            libxcb-keysyms
+            libxcb-render-util
+            libxcb-util
+            libxcb-wm
+            libxcomposite
+            libxcursor
+            libxdamage
+            libxdmcp
+            libxext
+            libxfixes
+            libxi
+            libxkbcommon
+            libxkbfile
+            libxrandr
+            libxrender
+            libxshmfence
+            libxtst
+            nspr
+            nss
+            pango
+            pcre2
+            setxkbmap
+            stdenv.cc.cc.lib
+            udev
+            vulkan-loader       # PySide6 >= 6.10.0
+            wayland
+            xz
+            zlib
+            zstd
+        ];
 
         # Qt environment tweaks needed when running PySide6's bundled Qt
         bundledQtProfile = ''
@@ -151,6 +144,10 @@
             done
           '';
 
+          # pyproject.toml pins pyside6==6.10.2; nixpkgs ships a newer version.
+          # Relax the pin so the runtime dependency check passes.
+          pythonRelaxDeps = [ "pyside6" ];
+
           dependencies = with pkgs.python3Packages; [
             pyside6
             typing-extensions
@@ -197,6 +194,8 @@
             ruff
             rstfmt
             boxes
+            any-nix-shell  # shows 'qtarmsim-dev' in the shell prompt
+            inetutils      # telnet – handy for armsim connection debugging
 
             # Build toolchain (needed when uv compiles native wheels)
             gcc
@@ -206,6 +205,9 @@
           ]);
 
           profile = bundledQtProfile + ''
+            # Override the compound name that buildFHSEnv generates so that
+            # any-nix-shell displays a clean label in the shell prompt.
+            name=qtarmsim-dev
             # Project's .venv takes priority over system Python
             export PATH=".venv/bin:$PATH"
             # Tell uv to prefer the Python provided by this FHS env
@@ -213,6 +215,10 @@
             # SSL certificates for uv downloads
             export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             export NIX_SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+            # PySide6's bundled Qt looks up libraries at runtime; the FHS /usr/lib
+            # mount is sometimes not picked up by the wheel's rpath, so set
+            # LD_LIBRARY_PATH explicitly from the full system-libs list.
+            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath pyside6SystemLibs}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           '';
 
           runScript = "bash";
