@@ -53,7 +53,11 @@ def enqueue_file(file: FileIO, queue: Queue[bytes]) -> None:
     :param queue:  The queue where the lines are to be written to.
     """
     while True:
-        line_bytes = file.readline()
+        try:
+            line_bytes = file.readline()
+        except ValueError:
+            # File was closed (process terminated); exit the thread cleanly.
+            break
         if line_bytes == b"":
             time.sleep(0.5)
             continue
