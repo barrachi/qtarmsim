@@ -3,8 +3,9 @@
 # Translated from read_ELF.rb and the read_ELF() function in server.rb.
 
 import struct
-from .memory_block import MemoryBlock
-from . import memory_defs
+
+import memory_defs  # pyright: ignore[reportMissingImports]
+from memory_block import MemoryBlock  # pyright: ignore[reportMissingImports]
 
 ACESSES = memory_defs.RAM_LE_NA
 

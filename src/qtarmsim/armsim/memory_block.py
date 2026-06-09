@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+
 import random
-from . import memory_defs
+
+import memory_defs  # pyright: ignore[reportMissingImports]
 
 
 class MemoryBlock:

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from .memory_block import MemoryBlock
+
+from memory_block import MemoryBlock  # pyright: ignore[reportMissingImports]
 
 
 class Memory:

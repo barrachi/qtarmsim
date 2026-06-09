@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from . import thumb2_defs as T
-from .instruction import Instruction
-from .memory import Memory
-from .memory_block import MemoryBlock
+
+import thumb2_defs as T  # pyright: ignore[reportMissingImports]
+
+from instruction import Instruction  # pyright: ignore[reportMissingImports]
+from memory import Memory  # pyright: ignore[reportMissingImports]
+from memory_block import MemoryBlock  # pyright: ignore[reportMissingImports]
 
 
 class Core:

@@ -5,25 +5,17 @@
 import os
 import sys
 
-if __name__ == '__main__' and not __package__:
-    # Re-execute via runpy so relative imports resolve when run directly.
-    import runpy
-    _src = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..'))
-    if _src not in sys.path:
-        sys.path.insert(0, _src)
-    runpy.run_module('qtarmsim.armsim.server', run_name='__main__', alter_sys=True)
-    sys.exit()
-
 import socket
 import subprocess
 
-from . import thumb2_defs as T
-from .coder import Coder
-from .core import Core
-from .instruction import Instruction
-from .memory_block import MemoryBlock
-from .read_elf import read_elf, ORIG_CODE, END_DATA
-from . import read_elf as _elf_mod
+import read_elf as _elf_mod  # pyright: ignore[reportMissingImports]
+import thumb2_defs as T  # pyright: ignore[reportMissingImports]
+
+from coder import Coder  # pyright: ignore[reportMissingImports]
+from core import Core  # pyright: ignore[reportMissingImports]
+from instruction import Instruction  # pyright: ignore[reportMissingImports]
+from memory_block import MemoryBlock  # pyright: ignore[reportMissingImports]
+from read_elf import read_elf, ORIG_CODE, END_DATA  # pyright: ignore[reportMissingImports]
 
 ORIG_DISP = 0x20080000
 SIZE_DISP = 0x400

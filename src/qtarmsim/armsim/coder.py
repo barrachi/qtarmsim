@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from . import thumb2_defs as T
-from .instruction import Instruction
+
+import thumb2_defs as T  # pyright: ignore[reportMissingImports]
+
+from instruction import Instruction  # pyright: ignore[reportMissingImports]
 
 
 class Coder:

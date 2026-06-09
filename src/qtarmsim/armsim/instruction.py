@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from . import thumb2_defs as T
+
+import thumb2_defs as T  # pyright: ignore[reportMissingImports]
 
 
 class Instruction:
