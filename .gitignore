@@ -28,9 +28,9 @@ docs/grammar/*.rai
 docs/grammar/*.rao
 src/qtarmsim/lang/qtarmsim_es.ts
 src/qtarmsim/res/desktop/qtarmsim.appdata.xml
-src/qtarmsim/res/*_rc.py
+# src/qtarmsim/res/*_rc.py
 src/qtarmsim/test/add.o
-src/qtarmsim/ui/*.py
+# src/qtarmsim/ui/*.py
 src/qtarmsim/_version.py
 tmp/qtarmsim-*
 zzz/
