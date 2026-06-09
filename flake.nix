@@ -144,8 +144,7 @@
             done
           '';
 
-          # pyproject.toml pins pyside6==6.10.2; nixpkgs ships a newer version.
-          # Relax the pin so the runtime dependency check passes.
+          # pyproject.toml uses pyside6>=6.10; relax to allow the nixpkgs version.
           pythonRelaxDeps = [ "pyside6" ];
 
           dependencies = with pkgs.python3Packages; [
