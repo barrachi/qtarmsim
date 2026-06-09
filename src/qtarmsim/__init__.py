@@ -3,7 +3,7 @@
 ###########################################################################
 #  QtARMSim -- A graphical ARM simulator                                  #
 #                                                                         #
-#  Copyright 2014-23 Sergio Barrachina Mir <barrachi@uji.es>              #
+#  Copyright 2014-2026 Sergio Barrachina Mir <barrachi@uji.es>            #
 #                                                                         #
 #  This program is free software: you can redistribute it and/or modify   #
 #  it under the terms of the GNU General Public License as published by   #

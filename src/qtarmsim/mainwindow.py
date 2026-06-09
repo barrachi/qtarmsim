@@ -1212,13 +1212,13 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
 
     def welcome_message(self) -> str:
         return "<b>QtARMSim " + self.tr("version") + " " + __version__ + "</b><br></br>\n" + \
-            "(c) 2014-25 Sergio Barrachina Mir<br></br>\n" + \
+            "(c) 2014-2026 Sergio Barrachina Mir<br></br>\n" + \
             self.tr("Developed at the Jaume I University, Castellón, Spain.<br></br>\n")
 
     def about_message(self) -> str:
         return "<html>" + \
             "<p><b>" + self.tr("Version") + " " + __version__ + "</b></p>" + \
-            "<p>" + "(c) 2014-26 Sergio Barrachina Mir" + "</p>" + \
+            "<p>" + "(c) 2014-2026 Sergio Barrachina Mir" + "</p>" + \
             "<p>" + \
             "<a href='https://lorca.act.uji.es/project/qtarmsim/'>https://lorca.act.uji.es/project/qtarmsim/</a>" + \
             "</p>" + \
