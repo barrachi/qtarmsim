@@ -8,7 +8,7 @@ import sys
 if __name__ == '__main__' and not __package__:
     # Re-execute via runpy so relative imports resolve when run directly.
     import runpy
-    _src = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../..'))
+    _src = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../..'))
     if _src not in sys.path:
         sys.path.insert(0, _src)
     runpy.run_module('qtarmsim.armsim.server', run_name='__main__', alter_sys=True)
