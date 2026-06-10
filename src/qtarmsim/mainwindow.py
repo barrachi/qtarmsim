@@ -36,6 +36,7 @@ from PySide6.QtWidgets import QDialog, QLabel, QWidget
 from typing_extensions import override
 
 from .comm.armsimconnector import ARMSimConnector
+from .comm.armsimmoduleconnector import ARMSimModuleConnector
 from .comm.responses import ExecuteResponse
 from .model.memorybywordproxymodel import MemoryByWordProxyModel
 from .model.memorydumpproxymodel import MemoryDumpProxyModel
@@ -85,18 +86,23 @@ class DefaultSettings:
         return cast(str, getattr(self, "_" + name))
 
     def _setARMSimDefaults(self) -> None:
-        fname = os.path.join(module_path, "armsim", "server.py")
-        if os.path.isfile(fname):
-            fname = os.path.abspath(fname)
+        self._ARMSimBackend: str = "module"
+        # Python external server defaults
+        python_server = os.path.join(module_path, "armsim", "armsim_python", "server.py")
+        if os.path.isfile(python_server):
+            python_server = os.path.abspath(python_server)
+            self._ARMSimCommandPython: str = "{} {}".format(sys.executable, os.path.basename(python_server))
+            self._ARMSimDirectoryPython: str = os.path.dirname(python_server)
         else:
-            # If not found, search its executable in the path
-            fname = which("server.py")
-        if fname:
-            self._ARMSimCommand: str = "{} {}".format(sys.executable, os.path.basename(fname))
-            self._ARMSimDirectory: str = os.path.dirname(fname)
+            self._ARMSimCommandPython = ""
+            self._ARMSimDirectoryPython = ""
+        # Ruby external server defaults
+        ruby_dir = os.path.join(module_path, "armsim", "armsim_ruby")
+        self._ARMSimDirectoryRuby: str = ruby_dir if os.path.isdir(ruby_dir) else ""
+        if platform.system() == "Windows":
+            self._ARMSimCommandRuby: str = "rubyw server.rb"
         else:
-            self._ARMSimCommand = ""
-            self._ARMSimDirectory = ""
+            self._ARMSimCommandRuby = "ruby server.rb"
         self._ARMSimServer: str = "localhost"
         self._ARMSimPort: str = "8010"
         self._ARMSimUseLabels: str = "0"
@@ -168,7 +174,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         # Setup ui
         self.ui.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
         # Attributes that will be initialized by extendUi()
-        self.simulator: ARMSimConnector | None = None
+        self.simulator: ARMSimConnector | ARMSimModuleConnector | None = None
         self.registersModel: RegistersModel | None = None
         self.flagsLabel: QtWidgets.QLabel = QtWidgets.QLabel()
         self.flagsText: QtWidgets.QLabel = QtWidgets.QLabel()
@@ -363,7 +369,7 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             # Version 2 -> ARMSimCommand has the full command, e.g. 'rubyw server.rb',
             #              and ARMSimDirectory has the working directory of the simulator.
             #              ARMSimPortMinimum and ARMSimPortMaximum are no longer used.
-            ruby_cmd: str = self.defaultSettings.value("ARMSimCommand").split(" ")[0]
+            ruby_cmd: str = self.defaultSettings.value("ARMSimCommandRuby").split(" ")[0]
             self.settings.setValue("ARMSimCommand", "{} {}".format(ruby_cmd, os.path.basename(ARMSimCommand)))
             self.settings.setValue("ARMSimDirectory", os.path.dirname(ARMSimCommand))
             conf_version = 2
@@ -374,16 +380,34 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             # @warning: Reread setting as it could have been changed
             ARMSimCommand = cast(str, self.settings.value("ARMSimCommand") or "")
             if ARMSimCommand.count("ruby") != 0:
-                self.settings.setValue("ARMSimCommand", self.defaultSettings.value("ARMSimCommand"))
-                self.settings.setValue("ARMSimDirectory", self.defaultSettings.value("ARMSimDirectory"))
+                self.settings.setValue("ARMSimCommand", self.defaultSettings.value("ARMSimCommandPython"))
+                self.settings.setValue("ARMSimDirectory", self.defaultSettings.value("ARMSimDirectoryPython"))
             conf_version = 4
+        if conf_version < 5:
+            # Version 4 -> external Python server was the only option
+            # Version 5 -> in-process module backend added; set as default
+            self.settings.setValue("ARMSimBackend", "module")
+            conf_version = 5
+        if conf_version < 6:
+            # Version 5 -> single ARMSimCommand / ARMSimDirectory shared by python and ruby
+            # Version 6 -> per-backend keys: ARMSimCommandPython/Ruby, ARMSimDirectoryPython/Ruby
+            old_cmd = cast(str, self.settings.value("ARMSimCommand") or "")
+            old_dir = cast(str, self.settings.value("ARMSimDirectory") or "")
+            self.settings.setValue("ARMSimCommandPython", old_cmd or self.defaultSettings.value("ARMSimCommandPython"))
+            self.settings.setValue("ARMSimDirectoryPython", old_dir or self.defaultSettings.value("ARMSimDirectoryPython"))
+            self.settings.setValue("ARMSimCommandRuby", self.defaultSettings.value("ARMSimCommandRuby"))
+            self.settings.setValue("ARMSimDirectoryRuby", self.defaultSettings.value("ARMSimDirectoryRuby"))
+            conf_version = 6
         # -----------------------------------------------------------------------------
         # End migration of settings versions
         # -----------------------------------------------------------------------------
-        self.settings.setValue("ConfVersion", 4)
+        self.settings.setValue("ConfVersion", 6)
         # If some of the next settings is empty, populate it with its default value
         for setting in (
-                "ARMSimCommand", "ARMSimDirectory", "ARMSimServer", "ARMSimPort", "ARMSimUseLabels",
+                "ARMSimBackend",
+                "ARMSimCommandPython", "ARMSimDirectoryPython",
+                "ARMSimCommandRuby", "ARMSimDirectoryRuby",
+                "ARMSimServer", "ARMSimPort", "ARMSimUseLabels",
                 "ARMGccCommand", "ARMGccOptions",
                 "LastUsedDirectory", "TerminalHistory", "ColorTheme", "FontSize"):
             if self.settings.value(setting) is None:
@@ -395,10 +419,15 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self._applyEditorTheme(dark)
         self._applyIconTheme(dark)
         self._applyFontSize()
-        # If server.py is not in the ARMSimDirectory, change the ARMSimDirectory by the default one
-        ARMSimDirectorySetting: str = "ARMSimDirectory"
-        if not os.path.exists(os.path.join(cast(str, self.settings.value(ARMSimDirectorySetting)), "server.py")):
-            self.settings.setValue(ARMSimDirectorySetting, self.defaultSettings.value(ARMSimDirectorySetting))
+        # Validate per-backend command/directory; reset to defaults if invalid
+        if not os.path.exists(
+                os.path.join(cast(str, self.settings.value("ARMSimDirectoryPython")), "server.py")):
+            self.settings.setValue("ARMSimCommandPython", self.defaultSettings.value("ARMSimCommandPython"))
+            self.settings.setValue("ARMSimDirectoryPython", self.defaultSettings.value("ARMSimDirectoryPython"))
+        if not os.path.exists(
+                os.path.join(cast(str, self.settings.value("ARMSimDirectoryRuby")), "server.rb")):
+            self.settings.setValue("ARMSimCommandRuby", self.defaultSettings.value("ARMSimCommandRuby"))
+            self.settings.setValue("ARMSimDirectoryRuby", self.defaultSettings.value("ARMSimDirectoryRuby"))
         # If the gcc command is not a regular file, change the ARMGccCommand by the default one
         ARMGccCommandSetting: str = "ARMGccCommand"
         if not os.path.isfile(cast(str, self.settings.value(ARMGccCommandSetting))):
@@ -1440,8 +1469,21 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
         self.getMemoryThread.start()
 
     def connectToARMSim(self) -> bool:
-        if self.settings.value("ARMSimServer") in ('localhost', '127.0.0.1') \
-                and not self.settings.value("ARMSimCommand"):
+        backend = cast(str, self.settings.value("ARMSimBackend") or "module")
+        # Resolve backend-specific command/directory (empty strings for module backend)
+        if backend == "python":
+            armsim_command   = cast(str, self.settings.value("ARMSimCommandPython") or "")
+            armsim_directory = cast(str, self.settings.value("ARMSimDirectoryPython") or "")
+        elif backend == "ruby":
+            armsim_command   = cast(str, self.settings.value("ARMSimCommandRuby") or "")
+            armsim_directory = cast(str, self.settings.value("ARMSimDirectoryRuby") or "")
+        else:
+            armsim_command   = ""
+            armsim_directory = ""
+        # For external server backends, check that the command is configured
+        if backend != "module" \
+                and self.settings.value("ARMSimServer") in ('localhost', '127.0.0.1') \
+                and not armsim_command:
             _ = QtWidgets.QMessageBox.warning(self, self.tr("ARMSim command empty"),
                                               self.tr("ARMSim command is empty.\n\n" +
                                                       "Please go to 'Edit, Preferences...' and set it.\n"))
@@ -1451,16 +1493,20 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
                                               self.tr("ARM gcc command not found.\n\n" +
                                                       "Please go to 'Edit, Preferences...' and set it.\n"))
             return False
-        self.simulator = ARMSimConnector(verbose=self.verbose)
+        if backend == "module":
+            self.simulator = ARMSimModuleConnector(verbose=self.verbose)
+        else:
+            self.simulator = ARMSimConnector(verbose=self.verbose)
         simulator = self.simulator
+        assert simulator is not None
         if self.debug:
             _ = simulator.mySocket.sentLine.connect(self.sentLineToSimulator)
             _ = simulator.mySocket.receivedLine.connect(self.receivedLineFromSimulator)
             _ = simulator.stdoutLine.connect(self.stdoutLineFromSimulator)
         self.statusBar().showMessage(self.tr("Connecting to ARMSim..."), 2000)
         connectProgressBarDialog = ConnectProgressBarDialog(simulator,
-                                                            cast(str, self.settings.value("ARMSimCommand")),
-                                                            cast(str, self.settings.value("ARMSimDirectory")),
+                                                            armsim_command,
+                                                            armsim_directory,
                                                             cast(str, self.settings.value("ARMSimServer")),
                                                             int(cast(str, self.settings.value("ARMSimPort"))),
                                                             self
@@ -1472,10 +1518,11 @@ class QtARMSimMainWindow(QtWidgets.QMainWindow):
             _ = QtWidgets.QMessageBox.warning(self, self.tr("Connection to ARMSim failed"), "{}".format(errmsg))
             return False
         self.ui.textEditMessages.append(u"<b>Connected to ARMSim (ARMSim version info follows).</b><br/>")
-        self.ui.textEditMessages.append(self.simulator.getVersion())
+        self.ui.textEditMessages.append(simulator.getVersion())
         self.ui.textEditMessages.append("<br/>")
-        self.statusBar().showMessage(self.tr("Connected to ARMSim at port {}").format(simulator.currentPort),
-                                     2000)
+        port = simulator.currentPort
+        port_info = self.tr("port {}").format(port) if port is not None else self.tr("built-in module")
+        self.statusBar().showMessage(self.tr("Connected to ARMSim ({})").format(port_info), 2000)
         return self.sendSettingsToARMSim()
 
     def sendSettingsToARMSim(self) -> bool:

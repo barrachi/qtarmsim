@@ -38,6 +38,16 @@
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::ExpandingFieldsGrow</enum>
             </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelARMSimBackend">
+              <property name="text">
+               <string>Backend</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxARMSimBackend"/>
+            </item>
             <item row="4" column="0">
              <widget class="QLabel" name="labelARMSimCommand">
               <property name="text">
@@ -324,6 +334,7 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>comboBoxARMSimBackend</tabstop>
   <tabstop>lineEditARMSimServer</tabstop>
   <tabstop>spinBoxARMSimPort</tabstop>
   <tabstop>lineEditARMSimCommand</tabstop>

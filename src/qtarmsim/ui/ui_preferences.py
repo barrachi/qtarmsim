@@ -44,6 +44,16 @@ class Ui_PreferencesDialog(object):
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        self.labelARMSimBackend = QLabel(self.groupBox)
+        self.labelARMSimBackend.setObjectName(u"labelARMSimBackend")
+
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.LabelRole, self.labelARMSimBackend)
+
+        self.comboBoxARMSimBackend = QComboBox(self.groupBox)
+        self.comboBoxARMSimBackend.setObjectName(u"comboBoxARMSimBackend")
+
+        self.formLayout.setWidget(0, QFormLayout.ItemRole.FieldRole, self.comboBoxARMSimBackend)
+
         self.labelARMSimCommand = QLabel(self.groupBox)
         self.labelARMSimCommand.setObjectName(u"labelARMSimCommand")
 
@@ -243,6 +253,7 @@ class Ui_PreferencesDialog(object):
 
         self.verticalLayout.addWidget(self.buttonBox)
 
+        QWidget.setTabOrder(self.comboBoxARMSimBackend, self.lineEditARMSimServer)
         QWidget.setTabOrder(self.lineEditARMSimServer, self.spinBoxARMSimPort)
         QWidget.setTabOrder(self.spinBoxARMSimPort, self.lineEditARMSimCommand)
         QWidget.setTabOrder(self.lineEditARMSimCommand, self.lineEditARMSimDirectory)
@@ -267,6 +278,7 @@ class Ui_PreferencesDialog(object):
 
     def retranslateUi(self, PreferencesDialog):
         PreferencesDialog.setWindowTitle(QCoreApplication.translate("PreferencesDialog", u"QtARMSim Preferences", None))
+        self.labelARMSimBackend.setText(QCoreApplication.translate("PreferencesDialog", u"Backend", None))
         self.labelARMSimCommand.setText(QCoreApplication.translate("PreferencesDialog", u"ARMSim directory", None))
         self.toolButtonARMSimDirectory.setText(QCoreApplication.translate("PreferencesDialog", u"...", None))
         self.label.setText(QCoreApplication.translate("PreferencesDialog", u"Command line", None))
