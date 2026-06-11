@@ -105,7 +105,7 @@
         #     adding pyside6 to nativeBuildInputs puts those tools on PATH.
         qtarmsim = pkgs.python3Packages.buildPythonApplication {
           pname   = "qtarmsim";
-          version = "2.0.0rc4";
+          version = "2.0.0rc5";
           src     = self;
           pyproject = true;
 
@@ -157,7 +157,7 @@
             "--prefix" "PATH" ":" "${pkgs.gcc-arm-embedded}/bin"
           ];
 
-          env.SETUPTOOLS_SCM_PRETEND_VERSION = "2.0.0rc4";
+          env.SETUPTOOLS_SCM_PRETEND_VERSION = "2.0.0rc5";
 
           meta = with pkgs.lib; {
             description = "Easy to use graphical ARM simulator";
