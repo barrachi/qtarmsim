@@ -152,6 +152,11 @@
             typing-extensions
           ];
 
+          # Make the ARM cross-compiler available on PATH at runtime
+          makeWrapperArgs = [
+            "--prefix" "PATH" ":" "${pkgs.gcc-arm-embedded}/bin"
+          ];
+
           env.SETUPTOOLS_SCM_PRETEND_VERSION = "2.0.0rc4";
 
           meta = with pkgs.lib; {
