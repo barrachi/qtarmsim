@@ -18,8 +18,9 @@ jobs:
           python-version: '3.12'
       - run: pip install pyinstaller pyside6 typing-extensions
       - run: pip install -e .
-      - run: pyinstaller --onefile --windowed --name qtarmsim src/qtarmsim/__init__.py
+      - run: pyinstaller qtarmsim.spec
       - uses: actions/upload-artifact@v4
         with:
+          name: qtarmsim-${{ matrix.os }}
           path: dist/
             
