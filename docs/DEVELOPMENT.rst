@@ -9,6 +9,10 @@ To run the current development version::
 
     $ uv run qtarmsim
 
+To run the unit tests::
+
+    python -m unittest discover -s src -p "test_*.py" -v
+
 Commit and push all the changes, after that, to test that everything is fine::
 
     $ nix run --refresh github:barrachi/qtarmsim
@@ -18,7 +22,7 @@ Once everything is fine, bump version::
     $ git tag {VERSION}[rcN]
     $ git push --tags
 
-To build and publish the current tagged version::
+To build and publish the current tagged version to PyPI::
 
     $ uv build
     $ uv publish
