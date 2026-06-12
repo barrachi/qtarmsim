@@ -1,6 +1,27 @@
 Changelog
 ---------
 
+2.0.0 (2026-06-12)
+^^^^^^^^^^^^^^^^^^
+- Ported the entire GUI layer to the PySide6 API >= 6.10 (Qt6).
+- Added light, dark, and system colour theme support with a configurable font size.
+- Bundled a new in-process ARM simulator (``armsim_module``) written in Python,
+  so QtARMSim no longer requires an external Ruby or Python server to run.
+- Added a backend selector in the Preferences dialog to choose between the new
+  built-in module, the Python server, or the Ruby server; each backend stores its
+  own command and working-directory settings independently.
+- Reorganised the three simulator backends under a common ``armsim/`` directory
+  (``armsim_module/``, ``armsim_python/``, ``armsim_ruby/``).
+- Fixed RAM word editing in the memory view and ASCII column refresh in the dump view.
+- Fixed Ctrl+C not working while the simulator is connected.
+- Fixed resource leaks and robustness issues in ``ARMSimConnector`` and ``MySocket``.
+- Fixed bundled GCC selection and path handling.
+- Fixed a thread crash in ``ARMSimConnector`` when the armsim process terminates.
+- Added a CI workflow to build standalone executables for Linux, Windows, and macOS
+  on every version tag.
+- Added ``flake.nix`` for ``nix run`` / ``nix develop`` support (NixOS / nix-darwin).
+- Proofread and updated the built-in help and documentation.
+
 1.0.7 (2025-10-12)
 ^^^^^^^^^^^^^^^^^^
 - Updated PySide6 dependencies and python requirements.

@@ -77,7 +77,8 @@ class CustomBuildHook(BuildHookInterface):
 
 
 if __name__ == "__main__":
-    # Only for debugging purposes, 'uv build' should be used to properly execute this file
+    # 'uv build' should be used to properly execute this file
+    # This should only be used if something goes wrong with the build process
     ag = AssetsGenerator()
     ag.compile_ui_files()
     ag.compile_qrc_files()
