@@ -19,8 +19,7 @@ Commit and push all the changes, after that, to test that everything is fine::
 
 Once everything is fine, bump version::
 
-    $ git tag {VERSION}[rcN]
-    $ git push --tags
+    $ ./release.sh {VERSION}[rcN]
 
 To build and publish the current tagged version to PyPI::
 
