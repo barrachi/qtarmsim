@@ -15,7 +15,7 @@ Finally, if you have installed the `UV python package manager <https://docs.astr
 2. Installing QtARMSim from PyPI
 --------------------------------
 
-Although it is more convenient to just install the standalone executables provided in the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, or any of the aforementioned methods, <code>nix</code> or <code>uv</code>, it is also possible to install QtARMSim from the `Python Package Index (PyPI) <https://pypi.org/>`_
+Although it is more convenient to just install the standalone executables provided in the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, or any of the aforementioned methods, ``nix`` or ``uv``, it is also possible to install QtARMSim from the `Python Package Index (PyPI) <https://pypi.org/>`_
 
 To install QtARMSim from PyPI, you will need to also install its dependencies. QtARMSim depends on: `Python 3 <https://www.python.org/>`_; and `Qt for Python (PySide6) <https://wiki.qt.io/Qt_for_Python>`_. The ARM simulator (ARMSim) is bundled with QtARMSim, as is the `GNU GCC Arm toolchain <http://gcc.gnu.org/>`_.
 
