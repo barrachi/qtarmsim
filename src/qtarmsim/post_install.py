@@ -113,10 +113,12 @@ def windowsDesktopEntries() -> list[tuple[str, str, str]]:
     scriptsDir = sysconfig.get_path("scripts")
     if not scriptsDir:
         return []
+    from .modulepath import module_path
+    iconPath = os.path.join(module_path, "res", "images", "qtarmsim.ico")
     return [
         ("QtARMSim.lnk",
          os.path.join(scriptsDir, "qtarmsim.exe"),
-         os.path.join(scriptsDir, "qtarmsim.ico")
+         iconPath,
          ),
     ]
 
@@ -174,11 +176,12 @@ def linuxAppendPath() -> None:
     If installed as a regular user, make sure that ~/.local/bin/ is in the path
     """
     if os.geteuid() != 0:
-        if "/.local/bin" not in os.getenv("PATH", ""):
+        home = Path.home()
+        local_bin_path = os.path.join(home, ".local", "bin")
+        path_entries = os.getenv("PATH", "").split(os.pathsep)
+        if local_bin_path not in path_entries:
             appended = False
-            home = Path.home()
-            local_bin_path = str(home / ".local/bin")
-            bashrc_path = str(home / ".bashrc")
+            bashrc_path = os.path.join(home, ".bashrc")
             logger.warning("QtARMSim has been installed in '{0}' which is not on PATH.".format(local_bin_path))
             if os.path.exists(bashrc_path):
                 logger.warning("Trying to prepend '{0}' to PATH...".format(local_bin_path))
