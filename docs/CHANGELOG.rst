@@ -1,7 +1,7 @@
 Changelog
 ---------
 
-2.0.0 (2026-06-12)
+2.0.4 (2026-06-12)
 ^^^^^^^^^^^^^^^^^^
 - Ported the entire GUI layer to the PySide6 API >= 6.10 (Qt6).
 - Added light, dark, and system colour theme support with a configurable font size.

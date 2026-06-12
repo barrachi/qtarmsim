@@ -1,13 +1,13 @@
-1. Running (and installing) QtARMSim
-------------------------------------
+1. Running and installing QtARMSim
+----------------------------------
 
-Starting with version 2.0.0, it is not necessary to install QtARMSim from PyPI, as QtARMSim stand-alone executables are provided for Windows, Ubuntu, and macOS. These executables can be downloaded from the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_.
+Starting with version 2.0.0, it is not necessary to install QtARMSim from PyPI, as QtARMSim standalone executables are provided for GNU/Linux (Ubuntu), Windows, and macOS. These executables can be downloaded from the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_.
 
-In addition to this, if you have the `Nix package manager <https://nixos.org/download/>`_ configured to allow the experimental CLI features, then you can also execute the latest version of QtARMSim on GitHub with::
+Also, if you have installed the `Nix package manager <https://nixos.org/download/>`_ and configured it to allow its experimental CLI features, then you can execute the latest version of QtARMSim on GitHub simply with::
 
     $ nix run github:barrachi/qtarmsim
 
-If you have installed the `UV python package manager <https://docs.astral.sh/uv/>`_, then you can also execute the latest version of QtARMSim on PyPI with::
+Finally, if you have installed the `UV python package manager <https://docs.astral.sh/uv/>`_, then you can execute the latest version of QtARMSim on PyPI simply with::
 
     $ uvx qtarmsim
 
@@ -15,25 +15,19 @@ If you have installed the `UV python package manager <https://docs.astral.sh/uv/
 2. Installing QtARMSim from PyPI
 --------------------------------
 
-Although it is more convenient to directly install the stand-alone executables provided in `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, it is also possible to install QtARMSim from the `Python Package Index (PyPI) <https://pypi.org/>`_
+Although it is more convenient to just install the standalone executables provided in the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, or any of the aforementioned methods, <code>nix</code> or <code>uv</code>, it is also possible to install QtARMSim from the `Python Package Index (PyPI) <https://pypi.org/>`_
 
 To install QtARMSim from PyPI, you will need to also install its dependencies. QtARMSim depends on: `Python 3 <https://www.python.org/>`_; and `Qt for Python (PySide6) <https://wiki.qt.io/Qt_for_Python>`_. The ARM simulator (ARMSim) is bundled with QtARMSim, as is the `GNU GCC Arm toolchain <http://gcc.gnu.org/>`_.
 
-Therefore, the required dependencies are:
-
-- `Python 3 <https://www.python.org/>`_, and
-- `Qt for Python (PySide6) <https://wiki.qt.io/Qt_for_Python>`_
-
-The following sections explain how to install QtARMSim and its
-dependencies on **GNU/Linux**, **Windows**, and **macOS**.
+The following sections explain how to install QtARMSim and its dependencies on **GNU/Linux**, **Windows**, and **macOS**.
 
 
 2.1 Installing QtARMSim on GNU/Linux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to install QtARMSim on GNU/Linux instead of using the GNU/Linux stand-alone executable from `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, follow the next instructions.
+If instead of just installing the GNU/Linux (Ubuntu) standalone executable provided in the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, you prefer to install QtARMSim from PyPI, then follow the next instructions.
 
-As most GNU/Linux distributions provide packages for ``Python3``, this can be installed via the system’s package manager. ``QtARMSim`` (and ``PySide6``), on the other hand, can be installed using different ``pip`` variants.
+As most GNU/Linux distributions provide packages for ``Python3``, this can be installed via the system’s package manager. ``QtARMSim`` (and ``PySide6``), on the other hand, can be installed using the appropriate ``pip`` variants.
 
 **Example: Installation on Ubuntu**
 
@@ -57,7 +51,7 @@ Or for a system-wide installation:
     $ sudo pipx ensurepath --global
     $ sudo pipx install --global qtarmsim
 
-*Note:* If the ``--global`` option is not recognized, read the ``pipx`` documentation or search for a workaround. This drawback should be solved with something similar to:
+*Note:* If the ``--global`` option is not recognised, read the ``pipx`` documentation or search for a workaround. This drawback should be solved with something similar to:
 
 .. code-block:: shell-session
 
@@ -73,7 +67,7 @@ Or for a system-wide installation:
 2.2 Installing QtARMSim on Windows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to install QtARMSim on Windows instead of using the Windows stand-alone executable from `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, follow the next steps:
+If instead of just installing the Windows standalone executable provided in the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, you prefer to install QtARMSim from PyPI, then follow the next steps:
 
 1. Download a 64-bit Python installer from the `Windows official Python website <https://www.python.org/downloads/windows/>`_ (or from the MS Windows store). Make sure to select **"Add python.exe to PATH"** during installation. **Select Python 3.10 or newer** (check the `Qt for Python compatibility matrix <https://wiki.qt.io/Qt_for_Python>`_ for the latest supported versions).
 
@@ -88,7 +82,7 @@ If you want to install QtARMSim on Windows instead of using the Windows stand-al
 2.3 Installing QtARMSim on macOS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to install QtARMSim on macOS instead of using the macOS stand-alone executable from `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, follow the next steps:
+If instead of just installing the macOS standalone executable provided in the `QtARMSim home page <https://lorca.act.uji.es/project/qtarmsim>`_, you prefer to install QtARMSim from PyPI, then follow the next steps:
 
 1. Install Python 3 from the `official Python website <https://www.python.org/downloads/>`_. Make sure you install a Python version supported by PySide6 (check the *Python compatibility matrix* in `Qt for Python <https://wiki.qt.io/Qt_for_Python>`_).
 
